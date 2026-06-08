@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-backprop-opencl",
+  "target_spec": "rodinia-backprop-omp",
+  "kernel": "backprop",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1242967437,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T02:20:30Z",
+  "prompt_tokens": 11243,
+  "completion_tokens": 2102,
+  "llm_response_time_seconds": 18.162,
+  "build_status": "fail",
+  "build_time_seconds": 0.023,
+  "build_error_snippet": "backprop.c: In function \u2018main\u2019:\nbackprop.c:38:5: warning: implicit declaration of function \u2018setup\u2019; did you mean \u2018setbuf\u2019? [-Wimplicit-function-declaration]\n   38 |     setup(argc, argv);\n      |     ^~~~~\n      |     setbuf\nbackprop.c: In function \u2018bpnn_train_kernel\u2019:\nbackprop.c:66:27: error: \u2018BLOCK_SIZE\u2019 undeclared (first use in this function)\n   66 |     int num_blocks = in / BLOCK_SIZE;\n      |                           ^~~~~~~~~~\nbackprop.c:66:27: note: each undeclared identifier is reported only once for each function it appears in\nbackprop.c:70:49: error: \u2018WIDTH\u2019 undeclared (first use in this function)\n   70 |     partial_sum = (float *) malloc(num_blocks * WIDTH * sizeof(float));\n      |                                              \n...[truncated]...\n hid, net->output_delta, out, net->hidden_weights, net->hidden_units, &hid_err);\n      |     ^~~~~~~~~~~~~~~~~\nbackprop.c:118:40: error: expected \u2018)\u2019 before \u2018->\u2019 token\n  118 |     #pragma omp parallel for shared(net->hidden_weights, net->hidden_prev_weights, net->output_delta, net->hidden_units) private(k, j)\n      |                                    ~   ^~\n      |                                        )\nbackprop.c:127:40: error: expected \u2018)\u2019 before \u2018->\u2019 token\n  127 |     #pragma omp parallel for shared(net->input_weights, net->input_prev_weights, net->hidden_delta, net->input_units) private(k, j)\n      |                                    ~   ^~\n      |                                        )\nmake: *** [Makefile:16: backprop.o] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: ghts, net->hidden_delta, net->input_units) private(k, j)\n      |                                    ~   ^~\n      |                                        )\nmake: *** [Makefile:16: backprop.o] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.016,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "backprop.c": "#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <sys/time.h>\n#include \"backprop.h\"\n#include <omp.h>\n\n#ifdef TIMING\n    #include \"timing.h\"\n#endif\n\n#ifdef TIMING\nstruct timeval tv;\nstruct timeval tv_total_start, tv_total_end;\nstruct timeval tv_init_end;\nstruct timeval tv_h2d_start, tv_h2d_end;\nstruct timeval tv_d2h_start, tv_d2h_end;\nstruct timeval tv_kernel_start, tv_kernel_end;\nstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\nstruct timeval tv_close_start, tv_close_end;\nfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n      d2h_time = 0, close_time = 0, total_time = 0;\n#endif\n\ndouble gettime() {\n  struct timeval t;\n  gettimeofday(&t,NULL);\n  return t.tv_sec+t.tv_usec*1e-6;\n}\n\nunsigned int num_threads = 0;\nunsigned int num_blocks = 0;\n\nint\nmain( int argc, char** argv)\n{\n    setup(argc, argv);\n}\n\nint bpnn_train_kernel(BPNN *net, float *eo, float *eh)\n{\n    int in, hid, out;\n    float out_err, hid_err;\n\n    in = net->input_n;\n    hid = net->hidden_n;\n    out = net->output_n;\n\n#ifdef TIMING\n    gettimeofday(&tv_total_start, NULL);\n#endif\n\n    printf(\"Performing CPU computation\\n\");\n\n#ifdef TIMING\n    gettimeofday(&tv_init_end, NULL);\n    tvsub(&tv_init_end, &tv_total_start, &tv);\n    init_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n    float *input_weights_one_dim;\n    float *input_weights_prev_one_dim;\n    float *partial_sum;\n    float sum;\n    int num_blocks = in / BLOCK_SIZE;\n\n    input_weights_one_dim = (float *) malloc((in + 1) * (hid + 1) * sizeof(float));\n    input_weights_prev_one_dim = (float *) malloc((in + 1) * (hid + 1) * sizeof(float));\n    partial_sum = (float *) malloc(num_blocks * WIDTH * sizeof(float));\n\n#ifdef TIMING\n    gettimeofday(&tv_mem_alloc_start, NULL);\n#endif\n\n    int m = 0;\n    for (int k = 0; k <= in; k++) {\n        for (int j = 0; j <= hid; j++) {\n            input_weights_one_dim[m] = net->input_weights[k][j];\n            input_weights_prev_one_dim[m] = net->input_prev_weights[k][j];\n            m++;\n        }\n    }\n\n#ifdef TIMING\n    gettimeofday(&tv_mem_alloc_end, NULL);\n    tvsub(&tv_mem_alloc_end, &tv_mem_alloc_start, &tv);\n    mem_alloc_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n#ifdef TIMING\n    gettimeofday(&tv_kernel_start, NULL);\n#endif\n\n    omp_set_num_threads(NUM_THREAD);\n    #pragma omp parallel for shared(input_weights_one_dim, net->input_units, partial_sum) private(sum, m, k, j) reduction(+:sum)\n    for (int j = 1; j <= hid; j++) {\n        sum = 0.0;\n        for (int k = 0; k <= in; k++) {\n            sum += input_weights_one_dim[k * (hid + 1) + j] * net->input_units[k];\n        }\n        net->hidden_units[j] = squash(sum);\n    }\n\n    for (int j = 1; j <= hid; j++) {\n        sum = 0.0;\n        for (int k = 0; k < num_blocks; k++) {\n            sum += partial_sum[k * hid + j - 1];\n        }\n        sum += net->input_weights[0][j];\n        net->hidden_units[j] = squash(sum);\n    }\n\n    bpnn_layerforward(net->hidden_units, net->output_units, net->hidden_weights, hid, out);\n    bpnn_output_error(net->output_delta, net->target, net->output_units, out, &out_err);\n    bpnn_hidden_error(net->hidden_delta, hid, net->output_delta, out, net->hidden_weights, net->hidden_units, &hid_err);\n\n    #pragma omp parallel for shared(net->hidden_weights, net->hidden_prev_weights, net->output_delta, net->hidden_units) private(k, j)\n    for (int j = 1; j <= out; j++) {\n        for (int k = 0; k <= hid; k++) {\n            float new_dw = ((ETA * net->output_delta[j] * net->hidden_units[k]) + (MOMENTUM * net->hidden_prev_weights[k][j]));\n            net->hidden_weights[k][j] += new_dw;\n            net->hidden_prev_weights[k][j] = new_dw;\n        }\n    }\n\n    #pragma omp parallel for shared(net->input_weights, net->input_prev_weights, net->hidden_delta, net->input_units) private(k, j)\n    for (int j = 1; j <= hid; j++) {\n        for (int k = 0; k <= in; k++) {\n            float new_dw = ((ETA * net->hidden_delta[j] * net->input_units[k]) + (MOMENTUM * net->input_prev_weights[k][j]));\n            net->input_weights[k][j] += new_dw;\n            net->input_prev_weights[k][j] = new_dw;\n        }\n    }\n\n#ifdef TIMING\n    gettimeofday(&tv_kernel_end, NULL);\n    tvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n    kernel_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n#ifdef TIMING\n    gettimeofday(&tv_close_start, NULL);\n#endif\n\n    free(input_weights_prev_one_dim);\n    free(partial_sum);\n    free(input_weights_one_dim);\n\n#ifdef TIMING\n    gettimeofday(&tv_close_end, NULL);\n    tvsub(&tv_close_end, &tv_close_start, &tv);\n    close_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n    tvsub(&tv_close_end, &tv_total_start, &tv);\n    total_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n\n    printf(\"Init: %f\\n\", init_time);\n    printf(\"MemAlloc: %f\\n\", mem_alloc_time);\n    printf(\"HtoD: %f\\n\", h2d_time);\n    printf(\"Exec: %f\\n\", kernel_time);\n    printf(\"DtoH: %f\\n\", d2h_time);\n    printf(\"Close: %f\\n\", close_time);\n    printf(\"Total: %f\\n\", total_time);\n#endif\n\n    *eo = out_err;\n    *eh = hid_err;\n\n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "backprop.c"
+  ],
+  "target_files_extracted": [
+    "backprop.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 18.162,
+      "prompt_tokens": 11243,
+      "completion_tokens": 2102,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "backprop.c: In function \u2018main\u2019:\nbackprop.c:38:5: warning: implicit declaration of function \u2018setup\u2019; did you mean \u2018setbuf\u2019? [-Wimplicit-function-declaration]\n   38 |     setup(argc, argv);\n      |     ^~~~~\n      |     setbuf\nbackprop.c: In function \u2018bpnn_train_kernel\u2019:\nbackprop.c:66:27: error: \u2018BLOCK_SIZE\u2019 undeclared (first use in this function)\n   66 |     int num_blocks = in / BLOCK_SIZE;\n      |                           ^~~~~~~~~~\nbackprop.c:66:27: note: each undeclared identifier is reported only once for each function it appears in\nbackprop.c:70:49: error: \u2018WIDTH\u2019 undeclared (first use in this function)\n   70 |     partial_sum = (float *) malloc(num_blocks * WIDTH * sizeof(float));\n      |                                              \n...[truncated]...\n hid, net->output_delta, out, net->hidden_weights, net->hidden_units, &hid_err);\n      |     ^~~~~~~~~~~~~~~~~\nbackprop.c:118:40: error: expected \u2018)\u2019 before \u2018->\u2019 token\n  118 |     #pragma omp parallel for shared(net->hidden_weights, net->hidden_prev_weights, net->output_delta, net->hidden_units) private(k, j)\n      |                                    ~   ^~\n      |                                        )\nbackprop.c:127:40: error: expected \u2018)\u2019 before \u2018->\u2019 token\n  127 |     #pragma omp parallel for shared(net->input_weights, net->input_prev_weights, net->hidden_delta, net->input_units) private(k, j)\n      |                                    ~   ^~\n      |                                        )\nmake: *** [Makefile:16: backprop.o] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

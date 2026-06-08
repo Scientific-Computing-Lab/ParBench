@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-srad-cuda",
+  "target_spec": "rodinia-srad-opencl",
+  "kernel": "srad",
+  "model": "azure-gpt-5.4",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 262673342,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "502",
+    "458",
+    "-n",
+    "2",
+    "-l",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-27T01:46:32Z",
+  "prompt_tokens": 13188,
+  "completion_tokens": 3727,
+  "llm_response_time_seconds": 67.668,
+  "build_status": "pass",
+  "build_time_seconds": 0.255,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.24,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 256 \nPlatform: NVIDIA Corporation\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n--------------------------------\nmax # of workgroups = 899, # of threads/workgroup = 256 (ensure that device can handle)\nIterations Progress: hidden\nTime spent in different stages of the application:\nInit: 166.358994\nMemAlloc: 0.006000\nHtoD: 0.038592\nExec: 0.117344\nDtoH: 0.036576\nClose: 48.924000\nTotal: 216.108002\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.085,
+  "translated_wall_time_seconds": 0.24,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.3542,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#ifdef RD_WG_SIZE_0_0\n#define BLOCK_SIZE RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n#define BLOCK_SIZE RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n#define BLOCK_SIZE RD_WG_SIZE\n#else\n#define BLOCK_SIZE 16\n#endif\n\n__kernel void extract_kernel(long d_Ne,\n                             __global float *d_I)\n{\n    long ei = (long)get_global_id(0);\n    if (ei < d_Ne) {\n        d_I[ei] = exp(d_I[ei] / 255.0f);\n    }\n}\n\n__kernel void prepare_kernel(long d_Ne,\n                             __global float *d_I,\n                             __global float *d_sums,\n                             __global float *d_sums2)\n{\n    long ei = (long)get_global_id(0);\n    if (ei < d_Ne) {\n        float v = d_I[ei];\n        d_sums[ei] = v;\n        d_sums2[ei] = v * v;\n    }\n}\n\n__kernel void reduce_kernel(long d_Ne,\n                            long d_no,\n                            int d_mul,\n                            __global float *d_sums,\n                            __global float *d_sums2,\n                            int blocks2_work_size)\n{\n    size_t tx = get_local_id(0);\n    size_t bx = get_group_id(0);\n    size_t lsize = get_local_size(0);\n\n    if (tx == 0) {\n        long start = (long)bx * (long)lsize;\n        if (start < d_no) {\n            long end = start + (long)lsize;\n            if (end > d_no) end = d_no;\n\n            float sum = 0.0f;\n            float sum2 = 0.0f;\n            for (long idx = start; idx < end; ++idx) {\n                long pos = idx * (long)d_mul;\n                sum += d_sums[pos];\n                sum2 += d_sums2[pos];\n            }\n\n            long out = (long)bx * (long)d_mul * (long)lsize;\n            d_sums[out] = sum;\n            d_sums2[out] = sum2;\n        }\n    }\n}\n\n__kernel void srad_kernel(float lambda,\n                          int Nr,\n                          int Nc,\n                          long Ne,\n                          __global int *iN,\n                          __global int *iS,\n                          __global int *jE,\n                          __global int *jW,\n                          __global float *d_dN,\n                          __global float *d_dS,\n                          __global float *d_dW,\n                          __global float *d_dE,\n                          float q0sqr,\n                          __global float *d_c,\n                          __global float *d_I)\n{\n    long ei = (long)get_global_id(0);\n    if (ei < Ne) {\n        int i = (int)(ei / (long)Nc);\n        int j = (int)(ei - (long)i * (long)Nc);\n\n        float Jc = d_I[ei];\n\n        float dN = d_I[(long)iN[i] * (long)Nc + (long)j] - Jc;\n        float dS = d_I[(long)iS[i] * (long)Nc + (long)j] - Jc;\n        float dW = d_I[(long)i * (long)Nc + (long)jW[j]] - Jc;\n        float dE = d_I[(long)i * (long)Nc + (long)jE[j]] - Jc;\n\n        d_dN[ei] = dN;\n        d_dS[ei] = dS;\n        d_dW[ei] = dW;\n        d_dE[ei] = dE;\n\n        float G2 = (dN * dN + dS * dS + dW * dW + dE * dE) / (Jc * Jc);\n        float L = (dN + dS + dW + dE) / Jc;\n\n        float num = 0.5f * G2 - 0.0625f * (L * L);\n        float den = 1.0f + 0.25f * L;\n        float qsqr = num / (den * den);\n\n        den = (qsqr - q0sqr) / (q0sqr * (1.0f + q0sqr));\n        float c = 1.0f / (1.0f + den);\n\n        if (c < 0.0f) c = 0.0f;\n        else if (c > 1.0f) c = 1.0f;\n\n        d_c[ei] = c;\n    }\n}\n\n__kernel void srad2_kernel(float lambda,\n                           int Nr,\n                           int Nc,\n                           long Ne,\n                           __global int *iN,\n                           __global int *iS,\n                           __global int *jE,\n                           __global int *jW,\n                           __global float *d_dN,\n                           __global float *d_dS,\n                           __global float *d_dW,\n                           __global float *d_dE,\n                           __global float *d_c,\n                           __global float *d_I)\n{\n    long ei = (long)get_global_id(0);\n    if (ei < Ne) {\n        int i = (int)(ei / (long)Nc);\n        int j = (int)(ei - (long)i * (long)Nc);\n\n        float cN = d_c[ei];\n        float cS = d_c[(long)iS[i] * (long)Nc + (long)j];\n        float cW = d_c[ei];\n        float cE = d_c[(long)i * (long)Nc + (long)jE[j]];\n\n        float D = cN * d_dN[ei] + cS * d_dS[ei] + cW * d_dW[ei] + cE * d_dE[ei];\n        d_I[ei] = d_I[ei] + 0.25f * lambda * D;\n    }\n}\n\n__kernel void compress_kernel(long d_Ne,\n                              __global float *d_I)\n{\n    long ei = (long)get_global_id(0);\n    if (ei < d_Ne) {\n        d_I[ei] = log(d_I[ei]) * 255.0f;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 67.668,
+      "prompt_tokens": 13188,
+      "completion_tokens": 3727,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

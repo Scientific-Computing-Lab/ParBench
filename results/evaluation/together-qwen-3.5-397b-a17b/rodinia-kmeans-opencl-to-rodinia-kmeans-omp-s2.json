@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-kmeans-opencl",
+  "target_spec": "rodinia-kmeans-omp",
+  "kernel": "kmeans",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1985394194,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T02:43:10Z",
+  "prompt_tokens": 29414,
+  "completion_tokens": 7333,
+  "llm_response_time_seconds": 56.351,
+  "build_status": "fail",
+  "build_time_seconds": 0.156,
+  "build_error_snippet": "kmeans.c: In function \u2018main\u2019:\nkmeans.c:152:9: warning: implicit declaration of function \u2018read\u2019; did you mean \u2018fread\u2019? [-Wimplicit-function-declaration]\n  152 |         read(infile, &numObjects,    sizeof(int));\n      |         ^~~~\n      |         fread\nkmeans.c:165:9: warning: implicit declaration of function \u2018close\u2019; did you mean \u2018pclose\u2019? [-Wimplicit-function-declaration]\n  165 |         close(infile);\n      |         ^~~~~\n      |         pclose\nkmeans_clustering.c: In function \u2018main\u2019:\nkmeans_clustering.c:134:5: warning: implicit declaration of function \u2018setup\u2019; did you mean \u2018setbuf\u2019? [-Wimplicit-function-declaration]\n  134 |     setup(argc, argv);\n      |     ^~~~~\n      |     setbuf\n/usr/bin/ld: kmeans_clustering.o: in function `main'\n...[truncated]...\namyak/./rodinia/openmp/kmeans/kmeans_openmp/kmeans_clustering.c:131: multiple definition of `main'; kmeans.o:./rodinia/openmp/kmeans/kmeans_openmp/kmeans.c:101: first defined here\n/usr/bin/ld: kmeans_clustering.o: in function `main':\n./rodinia/openmp/kmeans/kmeans_openmp/kmeans_clustering.c:134:(.text.startup+0x34): undefined reference to `setup'\n/usr/bin/ld: cluster.o: in function `cluster':\n./rodinia/openmp/kmeans/kmeans_openmp/cluster.c:94:(.text+0x56): undefined reference to `kmeans_clustering'\ncollect2: error: ld returned 1 exit status\nmake[1]: *** [Makefile:6: kmeans] Error 1\nmake: *** [Makefile:4: OPENMP/kmeans] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: luster.c:94:(.text+0x56): undefined reference to `kmeans_clustering'\ncollect2: error: ld returned 1 exit status\nmake[1]: *** [Makefile:6: kmeans] Error 1\nmake: *** [Makefile:4: OPENMP/kmeans] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.859,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kmeans_openmp/kmeans_clustering.c": "#include <stdio.h>\n#include <string.h>\n#include <stdlib.h>\n#include <math.h>\n#include <omp.h>\n#include \"kmeans.h\"\n\n#ifndef FLT_MAX\n#define FLT_MAX 3.40282347e+38\n#endif\n\n#define BLOCK_SIZE 256\n#define BLOCK_SIZE2 256\n\nint *membership_OCL;\n\nint allocate(int n_points, int n_features, int n_clusters, float **feature)\n{\n    membership_OCL = (int*) malloc(n_points * sizeof(int));\n    if (!membership_OCL) {\n        printf(\"ERROR: malloc membership_OCL failed\\n\");\n        return -1;\n    }\n    \n    return 0;\n}\n\nvoid deallocateMemory()\n{\n    if (membership_OCL) free(membership_OCL);\n    membership_OCL = NULL;\n}\n\nvoid kmeans_kernel_omp(float *feature,\n                       float *clusters,\n                       int *membership,\n                       int npoints,\n                       int nclusters,\n                       int nfeatures)\n{\n    #pragma omp parallel for schedule(static)\n    for (int point_id = 0; point_id < npoints; point_id++) {\n        float min_dist = FLT_MAX;\n        int index = 0;\n        \n        for (int i = 0; i < nclusters; i++) {\n            float dist = 0;\n            for (int l = 0; l < nfeatures; l++) {\n                float diff = feature[l * npoints + point_id] - clusters[i * nfeatures + l];\n                dist += diff * diff;\n            }\n            \n            if (dist < min_dist) {\n                min_dist = dist;\n                index = i;\n            }\n        }\n        \n        membership[point_id] = index;\n    }\n}\n\nvoid kmeans_swap_omp(float *feature,\n                     float *feature_swap,\n                     int npoints,\n                     int nfeatures)\n{\n    #pragma omp parallel for schedule(static)\n    for (int tid = 0; tid < npoints; tid++) {\n        for (int i = 0; i < nfeatures; i++) {\n            feature_swap[i * npoints + tid] = feature[tid * nfeatures + i];\n        }\n    }\n}\n\nint kmeansOCL(float **feature,\n              int n_features,\n              int n_points,\n              int n_clusters,\n              int *membership,\n              float **clusters,\n              int *new_centers_len,\n              float **new_centers)\n{\n    int delta = 0;\n    int i, j;\n    \n    float *feature_swap = (float*) malloc(n_points * n_features * sizeof(float));\n    if (!feature_swap) {\n        printf(\"ERROR: malloc feature_swap failed\\n\");\n        return -1;\n    }\n    \n    kmeans_swap_omp(feature[0], feature_swap, n_points, n_features);\n    \n    float *cluster_linear = (float*) malloc(n_clusters * n_features * sizeof(float));\n    if (!cluster_linear) {\n        printf(\"ERROR: malloc cluster_linear failed\\n\");\n        free(feature_swap);\n        return -1;\n    }\n    \n    for (i = 0; i < n_clusters; i++) {\n        for (j = 0; j < n_features; j++) {\n            cluster_linear[i * n_features + j] = clusters[i][j];\n        }\n    }\n    \n    kmeans_kernel_omp(feature_swap, cluster_linear, membership_OCL, n_points, n_clusters, n_features);\n    \n    delta = 0;\n    for (i = 0; i < n_points; i++) {\n        int cluster_id = membership_OCL[i];\n        new_centers_len[cluster_id]++;\n        if (membership_OCL[i] != membership[i]) {\n            delta++;\n            membership[i] = membership_OCL[i];\n        }\n        for (j = 0; j < n_features; j++) {\n            new_centers[cluster_id][j] += feature[i][j];\n        }\n    }\n    \n    free(feature_swap);\n    free(cluster_linear);\n    \n    return delta;\n}\n\nint main(int argc, char** argv)\n{\n    printf(\"WG size of kernel_swap = %d, WG size of kernel_kmeans = %d \\n\", BLOCK_SIZE, BLOCK_SIZE2);\n    \n    setup(argc, argv);\n    deallocateMemory();\n    \n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "kmeans_openmp/kmeans_clustering.c"
+  ],
+  "target_files_extracted": [
+    "kmeans_openmp/kmeans_clustering.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 56.351,
+      "prompt_tokens": 29414,
+      "completion_tokens": 7333,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "kmeans.c: In function \u2018main\u2019:\nkmeans.c:152:9: warning: implicit declaration of function \u2018read\u2019; did you mean \u2018fread\u2019? [-Wimplicit-function-declaration]\n  152 |         read(infile, &numObjects,    sizeof(int));\n      |         ^~~~\n      |         fread\nkmeans.c:165:9: warning: implicit declaration of function \u2018close\u2019; did you mean \u2018pclose\u2019? [-Wimplicit-function-declaration]\n  165 |         close(infile);\n      |         ^~~~~\n      |         pclose\nkmeans_clustering.c: In function \u2018main\u2019:\nkmeans_clustering.c:134:5: warning: implicit declaration of function \u2018setup\u2019; did you mean \u2018setbuf\u2019? [-Wimplicit-function-declaration]\n  134 |     setup(argc, argv);\n      |     ^~~~~\n      |     setbuf\n/usr/bin/ld: kmeans_clustering.o: in function `main'\n...[truncated]...\namyak/./rodinia/openmp/kmeans/kmeans_openmp/kmeans_clustering.c:131: multiple definition of `main'; kmeans.o:./rodinia/openmp/kmeans/kmeans_openmp/kmeans.c:101: first defined here\n/usr/bin/ld: kmeans_clustering.o: in function `main':\n./rodinia/openmp/kmeans/kmeans_openmp/kmeans_clustering.c:134:(.text.startup+0x34): undefined reference to `setup'\n/usr/bin/ld: cluster.o: in function `cluster':\n./rodinia/openmp/kmeans/kmeans_openmp/cluster.c:94:(.text+0x56): undefined reference to `kmeans_clustering'\ncollect2: error: ld returned 1 exit status\nmake[1]: *** [Makefile:6: kmeans] Error 1\nmake: *** [Makefile:4: OPENMP/kmeans] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-gaussian-cuda",
+  "target_spec": "rodinia-gaussian-opencl",
+  "kernel": "gaussian",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 708145169,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "16"
+  ],
+  "timestamp": "2026-04-21T22:48:21Z",
+  "prompt_tokens": 13336,
+  "completion_tokens": 4959,
+  "llm_response_time_seconds": 47.86,
+  "build_status": "pass",
+  "build_time_seconds": 0.724,
+  "build_error_snippet": null,
+  "run_status": "timeout",
+  "run_time_seconds": 300.17,
+  "run_exit_code": -1,
+  "run_stderr_snippet": "Execution timed out after 300s",
+  "run_stdout_snippet": "",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code -1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.073,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "gaussianElim_kernels.cl": "kernel void Fan1(float *m, float *a, int Size, int t)\n{\n    int idx = get_global_id(0);\n    \n    if(idx >= Size-1-t) return;\n    \n    m[Size*(idx+t+1)+t] = a[Size*(idx+t+1)+t] / a[Size*t+t];\n}\n\nkernel void Fan2(float *m, float *a, float *b, int Size, int j1, int t)\n{\n    int xidx = get_global_id(0);\n    int yidx = get_global_id(1);\n    \n    if(xidx >= Size-1-t) return;\n    if(yidx >= Size-t) return;\n    \n    a[Size*(xidx+1+t)+(yidx+t)] -= m[Size*(xidx+1+t)+t] * a[Size*t+(yidx+t)];\n    \n    if(yidx == 0){\n        b[xidx+1+t] -= m[Size*(xidx+1+t)+t] * b[t];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "gaussianElim_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "gaussianElim_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 47.86,
+      "prompt_tokens": 13336,
+      "completion_tokens": 4959,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "timeout",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "Execution timed out after 300s",
+      "run_stdout_snippet": "",
+      "extraction_fail": null
+    }
+  ]
+}

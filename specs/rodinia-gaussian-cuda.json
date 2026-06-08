@@ -1,0 +1,175 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "gaussian",
+        "parallel_api": "cuda",
+        "unique_id": "rodinia-gaussian-cuda",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "cuda/gaussian",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "gaussian.cu"
+        ],
+        "support_files": [
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "gaussian.cu"
+        ]
+    },
+    "implementation": {
+        "api": "cuda",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "cuda-toolkit>=11.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "cuda/gaussian",
+        "commands": {
+            "configure": null,
+            "build": "make CUDA_DIR=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda",
+            "clean": "make clean"
+        },
+        "variables": {
+            "CUDA_DIR": {
+                "description": "Path to CUDA toolkit installation",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda",
+                "detection": "dirname $(dirname $(which nvcc))"
+            }
+        },
+        "outputs": {
+            "executable": "./gaussian"
+        }
+    },
+    "run": {
+        "executable": "./gaussian",
+        "default_arguments": [
+            "-s",
+            "16"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-s",
+                    "16"
+                ],
+                "description": "Small input for correctness verification of gaussian (CUDA)",
+                "input_files": [],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "-f",
+                    "../../data/gaussian/matrix1024.txt"
+                ],
+                "description": "Large input for performance measurement of gaussian (CUDA)",
+                "input_files": [
+                    "../../data/gaussian/matrix1024.txt"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Time total|Time for CUDA",
+                "description": "Gaussian elimination timing reported"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "vendor": "NVIDIA",
+                "min_compute_capability": "sm_60",
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.274076+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "WG size of kernel 1 = 512, WG size of kernel 2= 4 X 4\nTotal Device found: 1\nDevice Name \t\t - NVIDIA GeForce RTX 4070 \n**************************************\nTotal Global Memory\t\t\t - 12267136 KB\nShared memory available per block \t - 48 KB\nNumber of registers per thread block \t - 65536\nWarp size in threads \t\t\t - 32\nMemory Pitch \t\t\t\t - 2147483647 bytes\nMaximum threads per block \t\t - 1024\nMaximum Thread Dimension (block) \t - 1024 1024 64\nMaximum Thread Dimension (grid) \t - 2147483647 65535 65535\nTotal constant memory \t\t\t - 65536 bytes\nCUDA ver \t\t\t\t - 8.9\nClock rate \t\t\t\t - 2520000 KHz\nTexture Alignment \t\t\t - 512 bytes\nDevice Overlap \t\t\t\t - Allowed\nNumber of Multi processors \t\t - 46\n\nCreate matrix internally in parse, size = 16 \n\nTime total (including memory transfers)\t0.048574 sec\nTime for CUDA kernels:\t0.000238 sec\n",
+                "wall_time_seconds": 0.074,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Gaussian elimination with partial pivoting on GPU",
+        "domain": "linear algebra",
+        "complexity": "Gaussian elimination",
+        "tags": [
+            "cuda",
+            "gaussian",
+            "gaussian-elimination",
+            "linear-algebra",
+            "rodinia"
+        ],
+        "multi_file": false,
+        "translation_complexity": null
+    }
+}

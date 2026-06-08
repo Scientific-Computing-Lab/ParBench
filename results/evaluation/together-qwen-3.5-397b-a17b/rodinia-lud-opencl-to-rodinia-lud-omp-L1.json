@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-opencl",
+  "target_spec": "rodinia-lud-omp",
+  "kernel": "lud",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 637290608,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-24T06:07:18Z",
+  "prompt_tokens": 12411,
+  "completion_tokens": 4374,
+  "llm_response_time_seconds": 34.771,
+  "build_status": "pass",
+  "build_time_seconds": 0.293,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.005,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Generate input matrix internally, size =256\nCreating matrix internally size=256\nTime consumed(ms): 4.129000\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.004,
+  "translated_wall_time_seconds": 0.005,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.8,
+  "translated_files": {
+    "omp/lud_omp.c": "#include <stdio.h>\n#include <stdlib.h>\n#include <math.h>\n#include <omp.h>\n\n#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\nvoid lud_diagonal(float *m, float *shadow, int matrix_dim, int offset) {\n    int i, j, tx;\n    int array_offset;\n    \n    // Load diagonal block into shadow\n    for (tx = 0; tx < BLOCK_SIZE; tx++) {\n        array_offset = offset * matrix_dim + offset;\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            shadow[i * BLOCK_SIZE + tx] = m[array_offset + tx];\n            array_offset += matrix_dim;\n        }\n    }\n    \n    // Process diagonal block - LU decomposition within block\n    for (i = 0; i < BLOCK_SIZE - 1; i++) {\n        for (tx = i + 1; tx < BLOCK_SIZE; tx++) {\n            for (j = 0; j < i; j++)\n                shadow[tx * BLOCK_SIZE + i] -= shadow[tx * BLOCK_SIZE + j] * shadow[j * BLOCK_SIZE + i];\n            shadow[tx * BLOCK_SIZE + i] /= shadow[i * BLOCK_SIZE + i];\n        }\n        \n        for (tx = 0; tx < BLOCK_SIZE; tx++) {\n            for (j = 0; j < i + 1; j++)\n                shadow[(i + 1) * BLOCK_SIZE + tx] -= shadow[(i + 1) * BLOCK_SIZE + j] * shadow[j * BLOCK_SIZE + tx];\n        }\n    }\n    \n    // Write back to m\n    for (tx = 0; tx < BLOCK_SIZE; tx++) {\n        array_offset = (offset + 1) * matrix_dim + offset;\n        for (i = 1; i < BLOCK_SIZE; i++) {\n            m[array_offset + tx] = shadow[i * BLOCK_SIZE + tx];\n            array_offset += matrix_dim;\n        }\n    }\n}\n\nvoid lud_perimeter(float *m, float *dia, float *peri_row, float *peri_col, int matrix_dim, int offset, int bx) {\n    int i, j, idx, array_offset;\n    \n    // Load diagonal block\n    array_offset = offset * matrix_dim + offset;\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (idx = 0; idx < BLOCK_SIZE; idx++) {\n            dia[i * BLOCK_SIZE + idx] = m[array_offset + idx];\n        }\n        array_offset += matrix_dim;\n    }\n    \n    // Load perimeter row\n    array_offset = offset * matrix_dim + (bx + 1) * BLOCK_SIZE;\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (idx = 0; idx < BLOCK_SIZE; idx++) {\n            peri_row[i * BLOCK_SIZE + idx] = m[array_offset + idx];\n        }\n        array_offset += matrix_dim;\n    }\n    \n    // Load perimeter column\n    array_offset = (offset + (bx + 1) * BLOCK_SIZE) * matrix_dim + offset;\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (idx = 0; idx < BLOCK_SIZE; idx++) {\n            peri_col[i * BLOCK_SIZE + idx] = m[array_offset + idx];\n        }\n        array_offset += matrix_dim;\n    }\n    \n    // Process perimeter row\n    for (i = 1; i < BLOCK_SIZE; i++) {\n        for (idx = 0; idx < BLOCK_SIZE; idx++) {\n            for (j = 0; j < i; j++)\n                peri_row[i * BLOCK_SIZE + idx] -= dia[i * BLOCK_SIZE + j] * peri_row[j * BLOCK_SIZE + idx];\n        }\n    }\n    \n    // Process perimeter column\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (idx = 0; idx < BLOCK_SIZE; idx++) {\n            for (j = 0; j < i; j++)\n                peri_col[idx * BLOCK_SIZE + i] -= peri_col[idx * BLOCK_SIZE + j] * dia[j * BLOCK_SIZE + i];\n            peri_col[idx * BLOCK_SIZE + i] /= dia[i * BLOCK_SIZE + i];\n        }\n    }\n    \n    // Write back perimeter row\n    array_offset = (offset + 1) * matrix_dim + (bx + 1) * BLOCK_SIZE;\n    for (i = 1; i < BLOCK_SIZE; i++) {\n        for (idx = 0; idx < BLOCK_SIZE; idx++) {\n            m[array_offset + idx] = peri_row[i * BLOCK_SIZE + idx];\n        }\n        array_offset += matrix_dim;\n    }\n    \n    // Write back perimeter column\n    array_offset = (offset + (bx + 1) * BLOCK_SIZE) * matrix_dim + offset;\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (idx = 0; idx < BLOCK_SIZE; idx++) {\n            m[array_offset + idx] = peri_col[i * BLOCK_SIZE + idx];\n        }\n        array_offset += matrix_dim;\n    }\n}\n\nvoid lud_internal(float *m, float *peri_row, float *peri_col, int matrix_dim, int offset, int bx, int by) {\n    int i, tx, ty;\n    float sum;\n    \n    int global_row_id = offset + (by + 1) * BLOCK_SIZE;\n    int global_col_id = offset + (bx + 1) * BLOCK_SIZE;\n    \n    // Load perimeter data\n    for (ty = 0; ty < BLOCK_SIZE; ty++) {\n        for (tx = 0; tx < BLOCK_SIZE; tx++) {\n            peri_row[ty * BLOCK_SIZE + tx] = m[(offset + ty) * matrix_dim + global_col_id + tx];\n            peri_col[ty * BLOCK_SIZE + tx] = m[(global_row_id + ty) * matrix_dim + offset + tx];\n        }\n    }\n    \n    // Compute and update internal block\n    for (ty = 0; ty < BLOCK_SIZE; ty++) {\n        for (tx = 0; tx < BLOCK_SIZE; tx++) {\n            sum = 0;\n            for (i = 0; i < BLOCK_SIZE; i++)\n                sum += peri_col[ty * BLOCK_SIZE + i] * peri_row[i * BLOCK_SIZE + tx];\n            m[(global_row_id + ty) * matrix_dim + global_col_id + tx] -= sum;\n        }\n    }\n}\n\nvoid lud_omp(float *m, int matrix_dim) {\n    float *shadow, *dia, *peri_row, *peri_col;\n    int i, bx, by;\n    int num_blocks;\n    \n    shadow = (float *)malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(float));\n    dia = (float *)malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(float));\n    peri_row = (float *)malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(float));\n    peri_col = (float *)malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(float));\n    \n    if (!shadow || !dia || !peri_row || !peri_col) {\n        if (shadow) free(shadow);\n        if (dia) free(dia);\n        if (peri_row) free(peri_row);\n        if (peri_col) free(peri_col);\n        return;\n    }\n    \n    for (i = 0; i < matrix_dim - BLOCK_SIZE; i += BLOCK_SIZE) {\n        // Process diagonal block\n        lud_diagonal(m, shadow, matrix_dim, i);\n        \n        num_blocks = (matrix_dim - i) / BLOCK_SIZE - 1;\n        \n        // Process perimeter blocks\n        #pragma omp parallel for\n        for (bx = 0; bx < num_blocks; bx++) {\n            lud_perimeter(m, dia, peri_row, peri_col, matrix_dim, i, bx);\n        }\n        \n        // Process internal blocks\n        #pragma omp parallel for collapse(2)\n        for (by = 0; by < num_blocks; by++) {\n            for (bx = 0; bx < num_blocks; bx++) {\n                lud_internal(m, peri_row, peri_col, matrix_dim, i, bx, by);\n            }\n        }\n    }\n    \n    // Process last diagonal block\n    lud_diagonal(m, shadow, matrix_dim, matrix_dim - BLOCK_SIZE);\n    \n    free(shadow);\n    free(dia);\n    free(peri_row);\n    free(peri_col);\n}\n"
+  },
+  "target_files_expected": [
+    "omp/lud_omp.c"
+  ],
+  "target_files_extracted": [
+    "omp/lud_omp.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 34.771,
+      "prompt_tokens": 12411,
+      "completion_tokens": 4374,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

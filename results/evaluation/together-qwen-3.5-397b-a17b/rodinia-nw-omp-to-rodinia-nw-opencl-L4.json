@@ -1,0 +1,73 @@
+{
+  "source_spec": "rodinia-nw-omp",
+  "target_spec": "rodinia-nw-opencl",
+  "kernel": "nw",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 716361242,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "2048",
+    "10",
+    "./nw.cl"
+  ],
+  "timestamp": "2026-04-24T05:49:59Z",
+  "prompt_tokens": 12164,
+  "completion_tokens": 2493,
+  "llm_response_time_seconds": 35.27,
+  "build_status": "pass",
+  "build_time_seconds": 0.358,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.284,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 \nnum_devices = 1\nworksize = 2048\nProcessing upper-left matrix\nProcessing lower-right matrix\nComputation Done\nInit: 201.789993\nMemAlloc: 0.004000\nHtoD: 1.923584\nExec: 4.422760\nDtoH: 5.972640\nClose: 0.845000\nTotal: 216.266998\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.09,
+  "translated_wall_time_seconds": 0.284,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.3169,
+  "translated_files": {
+    "nw.cl": "#define LIMIT -999\n\n#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\nint maximum(int a, int b, int c) {\n    int k;\n    if (a <= b)\n        k = b;\n    else\n        k = a;\n    if (k <= c)\n        return c;\n    else\n        return k;\n}\n\nkernel void nw_kernel1(global int* reference,\n                       global int* input_itemsets,\n                       global int* output_itemsets,\n                       local int* elem_23,\n                       local int* item_16,\n                       int max_cols,\n                       int penalty,\n                       int blk,\n                       int block_width,\n                       int worksize,\n                       int offset_r,\n                       int offset_c) {\n    \n    int elem_19 = get_global_id(0);\n    \n    if (elem_19 >= blk * BLOCK_SIZE)\n        return;\n    \n    if (elem_19 >= blk)\n        return;\n    \n    int item_11 = blk - 1 - elem_19;\n    \n    for (int i = 0; i < BLOCK_SIZE; i++) {\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            item_16[i * BLOCK_SIZE + j] = reference[max_cols * (item_11 * BLOCK_SIZE + i + 1) + elem_19 * BLOCK_SIZE + j + 1];\n        }\n    }\n    \n    for (int i = 0; i < BLOCK_SIZE + 1; i++) {\n        for (int j = 0; j < BLOCK_SIZE + 1; j++) {\n            elem_23[i * (BLOCK_SIZE + 1) + j] = input_itemsets[max_cols * (item_11 * BLOCK_SIZE + i) + elem_19 * BLOCK_SIZE + j];\n        }\n    }\n    \n    for (int i = 1; i < BLOCK_SIZE + 1; i++) {\n        for (int j = 1; j < BLOCK_SIZE + 1; j++) {\n            elem_23[i * (BLOCK_SIZE + 1) + j] = maximum(\n                elem_23[(i - 1) * (BLOCK_SIZE + 1) + j - 1] + item_16[(i - 1) * BLOCK_SIZE + j - 1],\n                elem_23[i * (BLOCK_SIZE + 1) + j - 1] - penalty,\n                elem_23[(i - 1) * (BLOCK_SIZE + 1) + j] - penalty);\n        }\n    }\n    \n    for (int i = 0; i < BLOCK_SIZE; i++) {\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            input_itemsets[max_cols * (item_11 * BLOCK_SIZE + i + 1) + elem_19 * BLOCK_SIZE + j + 1] = elem_23[(i + 1) * (BLOCK_SIZE + 1) + j + 1];\n        }\n    }\n}\n\nkernel void nw_kernel2(global int* reference,\n                       global int* input_itemsets,\n                       global int* output_itemsets,\n                       local int* var_1,\n                       local int* tmp_12,\n                       int max_cols,\n                       int penalty,\n                       int blk,\n                       int block_width,\n                       int worksize,\n                       int offset_r,\n                       int offset_c) {\n    \n    int elem_10 = get_global_id(0);\n    \n    if (elem_10 >= blk * BLOCK_SIZE)\n        return;\n    \n    if (elem_10 < (blk - 1) * BLOCK_SIZE)\n        return;\n    \n    if (elem_10 >= block_width * BLOCK_SIZE)\n        return;\n    \n    int elem_2 = block_width + blk - 2 - (elem_10 / BLOCK_SIZE);\n    \n    if (elem_2 < 0 || elem_2 >= block_width)\n        return;\n    \n    int local_elem_10 = elem_10 - (blk - 1) * BLOCK_SIZE;\n    \n    for (int i = 0; i < BLOCK_SIZE; i++) {\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            tmp_12[i * BLOCK_SIZE + j] = reference[max_cols * (elem_2 * BLOCK_SIZE + i + 1) + local_elem_10 * BLOCK_SIZE + j + 1];\n        }\n    }\n    \n    for (int i = 0; i < BLOCK_SIZE + 1; i++) {\n        for (int j = 0; j < BLOCK_SIZE + 1; j++) {\n            var_1[i * (BLOCK_SIZE + 1) + j] = input_itemsets[max_cols * (elem_2 * BLOCK_SIZE + i) + local_elem_10 * BLOCK_SIZE + j];\n        }\n    }\n    \n    for (int i = 1; i < BLOCK_SIZE + 1; i++) {\n        for (int j = 1; j < BLOCK_SIZE + 1; j++) {\n            var_1[i * (BLOCK_SIZE + 1) + j] = maximum(\n                var_1[(i - 1) * (BLOCK_SIZE + 1) + j - 1] + tmp_12[(i - 1) * BLOCK_SIZE + j - 1],\n                var_1[i * (BLOCK_SIZE + 1) + j - 1] - penalty,\n                var_1[(i - 1) * (BLOCK_SIZE + 1) + j] - penalty);\n        }\n    }\n    \n    for (int i = 0; i < BLOCK_SIZE; i++) {\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            input_itemsets[max_cols * (elem_2 * BLOCK_SIZE + i + 1) + local_elem_10 * BLOCK_SIZE + j + 1] = var_1[(i + 1) * (BLOCK_SIZE + 1) + j + 1];\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "nw.cl"
+  ],
+  "target_files_extracted": [
+    "nw.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 35.27,
+      "prompt_tokens": 12164,
+      "completion_tokens": 2493,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

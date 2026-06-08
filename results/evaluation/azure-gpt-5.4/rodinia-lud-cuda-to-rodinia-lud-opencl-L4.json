@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-cuda",
+  "target_spec": "rodinia-lud-opencl",
+  "kernel": "lud",
+  "model": "azure-gpt-5.4",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1320460482,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-27T01:31:24Z",
+  "prompt_tokens": 11995,
+  "completion_tokens": 3122,
+  "llm_response_time_seconds": 49.519,
+  "build_status": "pass",
+  "build_time_seconds": 0.462,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.247,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nInit: 193.328003\nMemAlloc: 0.002000\nHtoD: 0.011424\nExec: 0.369024\nDtoH: 0.010624\nClose: 0.062000\nTotal: 194.315994\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.07,
+  "translated_wall_time_seconds": 0.247,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.2834,
+  "translated_files": {
+    "lud_kernel.cl": "#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\n#define IDX2(arr, row, col) ((arr)[(row) * BLOCK_SIZE + (col)])\n\n__kernel void\nlud_diagonal(__global float *m,\n             __local float *shadow,\n             int matrix_dim,\n             int offset)\n{\n    int tx = (int)get_local_id(0);\n    int i, j;\n    int array_offset = offset * matrix_dim + offset;\n\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        IDX2(shadow, i, tx) = m[array_offset + tx];\n        array_offset += matrix_dim;\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    for (i = 0; i < BLOCK_SIZE - 1; i++) {\n        if (tx > i) {\n            for (j = 0; j < i; j++)\n                IDX2(shadow, tx, i) -= IDX2(shadow, tx, j) * IDX2(shadow, j, i);\n            IDX2(shadow, tx, i) /= IDX2(shadow, i, i);\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n\n        if (tx > i) {\n            for (j = 0; j < i + 1; j++)\n                IDX2(shadow, i + 1, tx) -= IDX2(shadow, i + 1, j) * IDX2(shadow, j, tx);\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    array_offset = (offset + 1) * matrix_dim + offset;\n    for (i = 1; i < BLOCK_SIZE; i++) {\n        m[array_offset + tx] = IDX2(shadow, i, tx);\n        array_offset += matrix_dim;\n    }\n}\n\n__kernel void\nlud_perimeter(__global float *m,\n              __local float *dia,\n              __local float *peri_row,\n              __local float *peri_col,\n              int matrix_dim,\n              int offset)\n{\n    int tx = (int)get_local_id(0);\n    int bx = (int)get_group_id(0);\n    int i, j, array_offset;\n    int idx;\n\n    if (tx < BLOCK_SIZE) {\n        idx = tx;\n\n        array_offset = offset * matrix_dim + offset;\n        for (i = 0; i < BLOCK_SIZE / 2; i++) {\n            IDX2(dia, i, idx) = m[array_offset + idx];\n            array_offset += matrix_dim;\n        }\n\n        array_offset = offset * matrix_dim + offset;\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            IDX2(peri_row, i, idx) = m[array_offset + (bx + 1) * BLOCK_SIZE + idx];\n            array_offset += matrix_dim;\n        }\n    } else {\n        idx = tx - BLOCK_SIZE;\n\n        array_offset = (offset + BLOCK_SIZE / 2) * matrix_dim + offset;\n        for (i = BLOCK_SIZE / 2; i < BLOCK_SIZE; i++) {\n            IDX2(dia, i, idx) = m[array_offset + idx];\n            array_offset += matrix_dim;\n        }\n\n        array_offset = (offset + (bx + 1) * BLOCK_SIZE) * matrix_dim + offset;\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            IDX2(peri_col, i, idx) = m[array_offset + idx];\n            array_offset += matrix_dim;\n        }\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (tx < BLOCK_SIZE) {\n        idx = tx;\n        for (i = 1; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < i; j++)\n                IDX2(peri_row, i, idx) -= IDX2(dia, i, j) * IDX2(peri_row, j, idx);\n        }\n    } else {\n        idx = tx - BLOCK_SIZE;\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < i; j++)\n                IDX2(peri_col, idx, i) -= IDX2(peri_col, idx, j) * IDX2(dia, j, i);\n            IDX2(peri_col, idx, i) /= IDX2(dia, i, i);\n        }\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (tx < BLOCK_SIZE) {\n        idx = tx;\n        array_offset = (offset + 1) * matrix_dim + offset;\n        for (i = 1; i < BLOCK_SIZE; i++) {\n            m[array_offset + (bx + 1) * BLOCK_SIZE + idx] = IDX2(peri_row, i, idx);\n            array_offset += matrix_dim;\n        }\n    } else {\n        idx = tx - BLOCK_SIZE;\n        array_offset = (offset + (bx + 1) * BLOCK_SIZE) * matrix_dim + offset;\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            m[array_offset + idx] = IDX2(peri_col, i, idx);\n            array_offset += matrix_dim;\n        }\n    }\n}\n\n__kernel void\nlud_internal(__global float *m,\n             __local float *peri_row,\n             __local float *peri_col,\n             int matrix_dim,\n             int offset)\n{\n    int tx = (int)get_local_id(0);\n    int ty = (int)get_local_id(1);\n    int bx = (int)get_group_id(0);\n    int by = (int)get_group_id(1);\n    int i;\n    float sum;\n\n    int global_row_id = offset + (by + 1) * BLOCK_SIZE;\n    int global_col_id = offset + (bx + 1) * BLOCK_SIZE;\n\n    IDX2(peri_row, ty, tx) = m[(offset + ty) * matrix_dim + global_col_id + tx];\n    IDX2(peri_col, ty, tx) = m[(global_row_id + ty) * matrix_dim + offset + tx];\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    sum = 0.0f;\n    for (i = 0; i < BLOCK_SIZE; i++)\n        sum += IDX2(peri_col, ty, i) * IDX2(peri_row, i, tx);\n\n    m[(global_row_id + ty) * matrix_dim + global_col_id + tx] -= sum;\n}\n"
+  },
+  "target_files_expected": [
+    "lud_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "lud_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 49.519,
+      "prompt_tokens": 11995,
+      "completion_tokens": 3122,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

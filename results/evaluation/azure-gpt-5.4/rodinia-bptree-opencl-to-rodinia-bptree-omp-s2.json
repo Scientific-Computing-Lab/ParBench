@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-bptree-opencl",
+  "target_spec": "rodinia-bptree-omp",
+  "kernel": "bptree",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1750387040,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-04-26T08:05:39Z",
+  "prompt_tokens": 26100,
+  "completion_tokens": 5923,
+  "llm_response_time_seconds": 127.082,
+  "build_status": "pass",
+  "build_time_seconds": 0.434,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.509,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Input File: ../../data/b+tree/mil.txt \nCommand File: ../../data/b+tree/command.txt \nCommand Buffer: \nj 6000 3000\nk 10000\n\n\nGetting input from file file...\nTransforming data to a GPU suitable structure...\nTree transformation took 0.021479\nWaiting for command\n> \n******command: j count=6000, rSize=6000 \n> > > > > > > > > > > > \n ******command: k count=10000 \n> > > > > > > > > > \n",
+  "verify_status": "fail",
+  "verify_strategy": "stdout_pattern",
+  "overall_status": "VERIFY_FAIL",
+  "error_message": "Verify failed: Pattern '(?:Total:)' NOT found in stdout. ",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.489,
+  "translated_wall_time_seconds": 0.509,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.9607,
+  "translated_files": {
+    "kernel/kernel_cpu.c": "#include <omp.h>\n\n#if defined(__has_include)\n#  if __has_include(\"../common.h\")\n#    include \"../common.h\"\n#  elif __has_include(\"./common.h\")\n#    include \"./common.h\"\n#  else\n#    include \"common.h\"\n#  endif\n#else\n#  include \"../common.h\"\n#endif\n\nvoid \nkernel_cpu(\tint cores_arg,\n\n\t\t\trecord *records,\n\t\t\tknode *knodes,\n\t\t\tlong knodes_elem,\n\n\t\t\tint order,\n\t\t\tlong maxheight,\n\t\t\tint count,\n\n\t\t\tlong *currKnode,\n\t\t\tlong *offset,\n\t\t\tint *keys,\n\t\t\trecord *ans)\n{\n\tint i, j;\n\tint order_limit = order;\n\n#ifdef DEFAULT_ORDER\n\tif (order_limit > DEFAULT_ORDER)\n\t\torder_limit = DEFAULT_ORDER;\n#endif\n\tif (order_limit < 0)\n\t\torder_limit = 0;\n\n\tif (cores_arg > 0)\n\t\tomp_set_num_threads(cores_arg);\n\n\t#pragma omp parallel for private(i, j) schedule(static)\n\tfor (i = 0; i < count; i++) {\n\t\tfor (j = 0; j < maxheight; j++) {\n\t\t\tlong node = currKnode[i];\n\t\t\tlong next = offset[i];\n\t\t\tint thid;\n\n\t\t\tfor (thid = 0; thid < order_limit; thid++) {\n\t\t\t\tif ((knodes[node].keys[thid] <= keys[i]) &&\n\t\t\t\t    (knodes[node].keys[thid + 1] > keys[i])) {\n\t\t\t\t\tif (knodes[next].indices[thid] < knodes_elem) {\n\t\t\t\t\t\tnext = knodes[next].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\toffset[i] = next;\n\t\t\tcurrKnode[i] = next;\n\t\t}\n\n\t\tfor (j = 0; j < order_limit; j++) {\n\t\t\tif (knodes[currKnode[i]].keys[j] == keys[i]) {\n\t\t\t\tans[i].value = records[knodes[currKnode[i]].indices[j]].value;\n\t\t\t}\n\t\t}\n\t}\n}\n",
+    "kernel/kernel_cpu_2.c": "#include <omp.h>\n\n#if defined(__has_include)\n#  if __has_include(\"../common.h\")\n#    include \"../common.h\"\n#  elif __has_include(\"./common.h\")\n#    include \"./common.h\"\n#  else\n#    include \"common.h\"\n#  endif\n#else\n#  include \"../common.h\"\n#endif\n\nvoid \nkernel_cpu_2(\tint cores_arg,\n\n\t\t\t\tknode *knodes,\n\t\t\t\tlong knodes_elem,\n\n\t\t\t\tint order,\n\t\t\t\tlong maxheight,\n\t\t\t\tint count,\n\n\t\t\t\tlong *currKnode,\n\t\t\t\tlong *offset,\n\t\t\t\tlong *lastKnode,\n\t\t\t\tlong *offset_2,\n\t\t\t\tint *start,\n\t\t\t\tint *end,\n\t\t\t\tint *recstart,\n\t\t\t\tint *reclength)\n{\n\tint i, j;\n\tint order_limit = order;\n\n#ifdef DEFAULT_ORDER\n\tif (order_limit > DEFAULT_ORDER)\n\t\torder_limit = DEFAULT_ORDER;\n#endif\n\tif (order_limit < 0)\n\t\torder_limit = 0;\n\n\tif (cores_arg > 0)\n\t\tomp_set_num_threads(cores_arg);\n\n\t#pragma omp parallel for private(i, j) schedule(static)\n\tfor (i = 0; i < count; i++) {\n\t\tfor (j = 0; j < maxheight; j++) {\n\t\t\tlong node_start = currKnode[i];\n\t\t\tlong node_end = lastKnode[i];\n\t\t\tlong next_start = offset[i];\n\t\t\tlong next_end = offset_2[i];\n\t\t\tint thid;\n\n\t\t\tfor (thid = 0; thid < order_limit; thid++) {\n\t\t\t\tif ((knodes[node_start].keys[thid] <= start[i]) &&\n\t\t\t\t    (knodes[node_start].keys[thid + 1] > start[i])) {\n\t\t\t\t\tif (knodes[node_start].indices[thid] < knodes_elem) {\n\t\t\t\t\t\tnext_start = knodes[node_start].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tif ((knodes[node_end].keys[thid] <= end[i]) &&\n\t\t\t\t    (knodes[node_end].keys[thid + 1] > end[i])) {\n\t\t\t\t\tif (knodes[node_end].indices[thid] < knodes_elem) {\n\t\t\t\t\t\tnext_end = knodes[node_end].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\toffset[i] = next_start;\n\t\t\tcurrKnode[i] = next_start;\n\t\t\toffset_2[i] = next_end;\n\t\t\tlastKnode[i] = next_end;\n\t\t}\n\n\t\tfor (j = 0; j < order_limit; j++) {\n\t\t\tif (knodes[currKnode[i]].keys[j] == start[i]) {\n\t\t\t\trecstart[i] = knodes[currKnode[i]].indices[j];\n\t\t\t}\n\t\t}\n\n\t\tfor (j = 0; j < order_limit; j++) {\n\t\t\tif (knodes[lastKnode[i]].keys[j] == end[i]) {\n\t\t\t\treclength[i] = knodes[lastKnode[i]].indices[j] - recstart[i] + 1;\n\t\t\t}\n\t\t}\n\t}\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_cpu.c",
+    "kernel/kernel_cpu_2.c"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_cpu.c",
+    "kernel/kernel_cpu_2.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 127.082,
+      "prompt_tokens": 26100,
+      "completion_tokens": 5923,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "fail",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

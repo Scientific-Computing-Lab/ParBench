@@ -1,0 +1,104 @@
+[
+  {
+    "spec_id": "xsbench-xsbench-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.cu": [],
+      "io.cu": [],
+      "Simulation.cu": [],
+      "GridInit.cu": [
+        "SwapCondition"
+      ],
+      "XSutils.cu": [],
+      "Materials.cu": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "GridInit.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits with code 0 on valid checksum, 1 on invalid",
+    "wall_time_seconds": 0.453,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [],
+      "io.c": [],
+      "Simulation.c": [],
+      "GridInit.c": [
+        "SwapCondition"
+      ],
+      "XSutils.c": [
+        "ChangeNames"
+      ],
+      "Materials.c": []
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "GridInit.c",
+      "XSutils.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits with code 0 on valid checksum, 1 on invalid",
+    "wall_time_seconds": 0.763,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [],
+      "io.c": [],
+      "Simulation.c": [],
+      "GridInit.c": [
+        "SwapCondition"
+      ],
+      "XSutils.c": [],
+      "CLutils.c": [],
+      "Materials.c": [],
+      "kernel.cl": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "GridInit.c",
+      "kernel.cl"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits with code 0 on valid checksum, 1 on invalid",
+    "wall_time_seconds": 0.375,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  }
+]

@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lavamd-omp",
+  "target_spec": "rodinia-lavamd-opencl",
+  "kernel": "lavamd",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1789834120,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-boxes1d",
+    "10"
+  ],
+  "timestamp": "2026-04-22T01:37:51Z",
+  "prompt_tokens": 9880,
+  "completion_tokens": 5457,
+  "llm_response_time_seconds": 50.417,
+  "build_status": "pass",
+  "build_time_seconds": 0.218,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.162,
+  "run_exit_code": 245,
+  "run_stderr_snippet": "4 errors generated.\n",
+  "run_stdout_snippet": "ments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    FOUR_VECTOR* rv,\n                 ^\n<kernel>:57:9: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    fp* qv,\n        ^\n<kernel>:58:18: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    FOUR_VECTOR* fv)\n                 ^\n\n>>>>\nError at line 238: CL_BUILD_PROGRAM_FAILURE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 245)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#define fp float\n\n#define NUMBER_PAR_PER_BOX 100\n#define NUMBER_THREADS 128\n\n#define DOT(A,B) ((A.x)*(B.x)+(A.y)*(B.y)+(A.z)*(B.z))\n\ntypedef struct\n{\n    fp x, y, z;\n} THREE_VECTOR;\n\ntypedef struct\n{\n    fp v, x, y, z;\n} FOUR_VECTOR;\n\ntypedef struct nei_str\n{\n    int x, y, z;\n    int number;\n    long offset;\n} nei_str;\n\ntypedef struct box_str\n{\n    int x, y, z;\n    int number;\n    long offset;\n    int nn;\n    nei_str nei[26];\n} box_str;\n\ntypedef struct par_str\n{\n    fp alpha;\n} par_str;\n\ntypedef struct dim_str\n{\n    int cur_arg;\n    int arch_arg;\n    int cores_arg;\n    int boxes1d_arg;\n    long number_boxes;\n    long box_mem;\n    long space_elem;\n    long space_mem;\n    long space_mem2;\n} dim_str;\n\n__kernel void kernel_gpu_opencl(\n    par_str par,\n    dim_str dim,\n    box_str* box,\n    FOUR_VECTOR* rv,\n    fp* qv,\n    FOUR_VECTOR* fv)\n{\n    int global_id = get_global_id(0);\n    \n    int box_idx = global_id / NUMBER_THREADS;\n    int particle_idx = global_id % NUMBER_THREADS;\n    \n    if (box_idx >= dim.number_boxes || particle_idx >= NUMBER_PAR_PER_BOX)\n        return;\n    \n    fp alpha = par.alpha;\n    fp a2 = 2.0 * alpha * alpha;\n    \n    long first_i = box[box_idx].offset + particle_idx;\n    FOUR_VECTOR rA = rv[first_i];\n    FOUR_VECTOR fA = fv[first_i];\n    \n    for (int k = 0; k <= box[box_idx].nn; k++) {\n        int pointer;\n        if (k == 0) {\n            pointer = box_idx;\n        } else {\n            pointer = box[box_idx].nei[k-1].number;\n        }\n        \n        long first_j = box[pointer].offset;\n        \n        for (int j = 0; j < NUMBER_PAR_PER_BOX; j++) {\n            long idx_j = first_j + j;\n            FOUR_VECTOR rB = rv[idx_j];\n            fp qB = qv[idx_j];\n            \n            fp r2 = rA.v + rB.v - DOT(rA, rB);\n            fp u2 = a2 * r2;\n            fp vij = exp(-u2);\n            fp fs = 2.0 * vij;\n            \n            THREE_VECTOR d;\n            d.x = rA.x - rB.x;\n            d.y = rA.y - rB.y;\n            d.z = rA.z - rB.z;\n            \n            fp fxij = fs * d.x;\n            fp fyij = fs * d.y;\n            fp fzij = fs * d.z;\n            \n            fA.v += qB * vij;\n            fA.x += qB * fxij;\n            fA.y += qB * fyij;\n            fA.z += qB * fzij;\n        }\n    }\n    \n    fv[first_i] = fA;\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 50.417,
+      "prompt_tokens": 9880,
+      "completion_tokens": 5457,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "4 errors generated.\n",
+      "run_stdout_snippet": "ments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    FOUR_VECTOR* rv,\n                 ^\n<kernel>:57:9: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    fp* qv,\n        ^\n<kernel>:58:18: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    FOUR_VECTOR* fv)\n                 ^\n\n>>>>\nError at line 238: CL_BUILD_PROGRAM_FAILURE\n",
+      "extraction_fail": null
+    }
+  ]
+}

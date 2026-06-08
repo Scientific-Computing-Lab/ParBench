@@ -1,0 +1,69 @@
+{
+  "source_spec": "rsbench-rsbench-opencl",
+  "target_spec": "rsbench-rsbench-omp",
+  "kernel": "rsbench",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1114693935,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-05-01T01:43:42Z",
+  "prompt_tokens": 24319,
+  "completion_tokens": 2357,
+  "llm_response_time_seconds": 28.782,
+  "build_status": "fail",
+  "build_time_seconds": 0.304,
+  "build_error_snippet": "/usr/bin/ld: /tmp/cc0OjE70.ltrans0.ltrans.o: in function `run_event_based_simulation._omp_fn.0':\n<artificial>:(.text+0x382): undefined reference to `fast_forward_LCG'\n/usr/bin/ld: <artificial>:(.text+0x38f): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text+0x39d): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text+0x5d7): undefined reference to `calculate_macro_xs'\n/usr/bin/ld: /tmp/cc0OjE70.ltrans0.ltrans.o: in function `main':\n<artificial>:(.text.startup+0xbac): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0xc88): undefined reference to `LCG_random_int'\n/usr/bin/ld: <artificial>:(.text.startup+0xd58): undefined reference to `LCG_random_int'\n/usr/bin\n...[truncated]...\ndefined references to `LCG_random_double' follow\n/usr/bin/ld: /tmp/cc0OjE70.ltrans0.ltrans.o: in function `main':\n<artificial>:(.text.startup+0xfdb): undefined reference to `LCG_random_int'\n/usr/bin/ld: <artificial>:(.text.startup+0x118c): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x119a): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x11a9): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x13d0): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x165a): undefined reference to `run_history_based_simulation'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:81: rsbench] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: dom_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x165a): undefined reference to `run_history_based_simulation'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:81: rsbench] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.7,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "simulation.c": "#include \"rsbench.h\"\n#include <float.h>\n#include <stdint.h>\n#include <stdlib.h>\n#include <stdio.h>\n\nvoid run_event_based_simulation(Input input, SimulationData data, unsigned long * vhash_result)\n{\n\tdouble start = get_time();\n\n\tint * verification_array = (int *) malloc((size_t)input.lookups * sizeof(int));\n\tif (!verification_array)\n\t{\n\t\tfprintf(stderr, \"Allocation failed for verification array.\\n\");\n\t\texit(1);\n\t}\n\n\tprintf(\"Running event based simulation...\\n\");\n\n\t#pragma omp parallel for schedule(static)\n\tfor (int i = 0; i < input.lookups; i++)\n\t{\n\t\tuint64_t seed = STARTING_SEED;\n\t\tseed = fast_forward_LCG(seed, 2ULL * (uint64_t)i);\n\n\t\tdouble p_energy = LCG_random_double(&seed);\n\t\tint mat = pick_mat(&seed);\n\n\t\tdouble macro_xs_vector[4] = {0.0, 0.0, 0.0, 0.0};\n\t\tcalculate_macro_xs(macro_xs_vector, mat, p_energy, input, data);\n\n\t\tdouble max = -DBL_MAX;\n\t\tint max_idx = 0;\n\t\tfor (int j = 0; j < 4; j++)\n\t\t{\n\t\t\tif (macro_xs_vector[j] > max)\n\t\t\t{\n\t\t\t\tmax = macro_xs_vector[j];\n\t\t\t\tmax_idx = j;\n\t\t\t}\n\t\t}\n\t\tverification_array[i] = max_idx + 1;\n\t}\n\n\tprintf(\"Reducing verification value...\\n\");\n\n\tunsigned long long verification = 0ULL;\n\t#pragma omp parallel for reduction(+:verification) schedule(static)\n\tfor (int l = 0; l < input.lookups; l++)\n\t\tverification += (unsigned long long)verification_array[l];\n\n\tdouble stop = get_time();\n\tprintf(\"Simulation + Verification Reduction Runtime: %.3lf seconds\\n\", stop - start);\n\n\t*vhash_result = (unsigned long)verification;\n\tfree(verification_array);\n}\n\nvoid run_event_based_simulation_optimization_1(Input in, SimulationData SD, unsigned long * vhash_result)\n{\n\trun_event_based_simulation(in, SD, vhash_result);\n}\n"
+  },
+  "target_files_expected": [
+    "simulation.c"
+  ],
+  "target_files_extracted": [
+    "simulation.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 28.782,
+      "prompt_tokens": 24319,
+      "completion_tokens": 2357,
+      "finish_reason": "completed",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "/usr/bin/ld: /tmp/cc0OjE70.ltrans0.ltrans.o: in function `run_event_based_simulation._omp_fn.0':\n<artificial>:(.text+0x382): undefined reference to `fast_forward_LCG'\n/usr/bin/ld: <artificial>:(.text+0x38f): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text+0x39d): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text+0x5d7): undefined reference to `calculate_macro_xs'\n/usr/bin/ld: /tmp/cc0OjE70.ltrans0.ltrans.o: in function `main':\n<artificial>:(.text.startup+0xbac): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0xc88): undefined reference to `LCG_random_int'\n/usr/bin/ld: <artificial>:(.text.startup+0xd58): undefined reference to `LCG_random_int'\n/usr/bin\n...[truncated]...\ndefined references to `LCG_random_double' follow\n/usr/bin/ld: /tmp/cc0OjE70.ltrans0.ltrans.o: in function `main':\n<artificial>:(.text.startup+0xfdb): undefined reference to `LCG_random_int'\n/usr/bin/ld: <artificial>:(.text.startup+0x118c): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x119a): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x11a9): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x13d0): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x165a): undefined reference to `run_history_based_simulation'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:81: rsbench] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-bptree-omp",
+  "target_spec": "rodinia-bptree-opencl",
+  "kernel": "bptree",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 512817157,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-05-01T00:39:52Z",
+  "prompt_tokens": 21119,
+  "completion_tokens": 3295,
+  "llm_response_time_seconds": 38.04,
+  "build_status": "pass",
+  "build_time_seconds": 0.545,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.695,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "_mem=4000000\nknodes_elem=7874, knodes_unit_mem=2068, knodes_mem=16283432\nPlatform: NVIDIA Corporation\nDevice num: 1\nCreating GPU Context\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n--------------------------------\n# of blocks = 10000, # of threads/block = 256 (ensure that device can handle)\nTime spent in different stages of GPU_CUDA KERNEL:\nInit: 98.559998\nMemAlloc: 0.003000\nHtoD: 1.175104\nExec: 0.065760\nDtoH: 0.002432\nClose: 46.701000\nTotal: 146.929001\n> > > > > > > > > > \n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.453,
+  "translated_wall_time_seconds": 0.695,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.6518,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 256\n#endif\n\ntypedef struct record {\n\tint value;\n} record;\n\ntypedef struct knode {\n\tint location;\n\tint indices[DEFAULT_ORDER + 1];\n\tint keys[DEFAULT_ORDER + 1];\n\tchar is_leaf;\n\tint num_keys;\n} knode;\n\n__kernel void findK(const long maxheight,\n                    __global knode *knodes,\n                    const long knodes_elem,\n                    __global record *records,\n                    __global long *currKnode,\n                    __global long *offset,\n                    __global int *keys,\n                    __global record *ans) {\n\tint thid = (int)get_local_id(0);\n\tint bid = (int)get_group_id(0);\n\n\tfor (long i = 0; i < maxheight; i++) {\n\t\tif ((knodes[currKnode[bid]].keys[thid] <= keys[bid]) &&\n\t\t    (knodes[currKnode[bid]].keys[thid + 1] > keys[bid])) {\n\t\t\tif (knodes[offset[bid]].indices[thid] < knodes_elem) {\n\t\t\t\toffset[bid] = knodes[offset[bid]].indices[thid];\n\t\t\t}\n\t\t}\n\n\t\tbarrier(CLK_GLOBAL_MEM_FENCE);\n\t\tif (thid == 0) {\n\t\t\tcurrKnode[bid] = offset[bid];\n\t\t}\n\t\tbarrier(CLK_GLOBAL_MEM_FENCE);\n\t}\n\n\tif (knodes[currKnode[bid]].keys[thid] == keys[bid]) {\n\t\tans[bid].value = records[knodes[currKnode[bid]].indices[thid]].value;\n\t}\n}\n",
+    "kernel/kernel_gpu_opencl_2.cl": "#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 256\n#endif\n\ntypedef struct knode {\n\tint location;\n\tint indices[DEFAULT_ORDER + 1];\n\tint keys[DEFAULT_ORDER + 1];\n\tchar is_leaf;\n\tint num_keys;\n} knode;\n\nstatic inline void findRangeBody(const long maxheight,\n                                 __global knode *knodes,\n                                 const long knodes_elem,\n                                 __global long *currKnode,\n                                 __global long *offset,\n                                 __global long *lastKnode,\n                                 __global long *offset_2,\n                                 __global int *start,\n                                 __global int *end,\n                                 __global int *recstart,\n                                 __global int *reclength) {\n\tint thid = (int)get_local_id(0);\n\tint bid = (int)get_group_id(0);\n\n\tfor (long i = 0; i < maxheight; i++) {\n\t\tif ((knodes[currKnode[bid]].keys[thid] <= start[bid]) &&\n\t\t    (knodes[currKnode[bid]].keys[thid + 1] > start[bid])) {\n\t\t\tif (knodes[currKnode[bid]].indices[thid] < knodes_elem) {\n\t\t\t\toffset[bid] = knodes[currKnode[bid]].indices[thid];\n\t\t\t}\n\t\t}\n\n\t\tif ((knodes[lastKnode[bid]].keys[thid] <= end[bid]) &&\n\t\t    (knodes[lastKnode[bid]].keys[thid + 1] > end[bid])) {\n\t\t\tif (knodes[lastKnode[bid]].indices[thid] < knodes_elem) {\n\t\t\t\toffset_2[bid] = knodes[lastKnode[bid]].indices[thid];\n\t\t\t}\n\t\t}\n\n\t\tbarrier(CLK_GLOBAL_MEM_FENCE);\n\t\tif (thid == 0) {\n\t\t\tcurrKnode[bid] = offset[bid];\n\t\t\tlastKnode[bid] = offset_2[bid];\n\t\t}\n\t\tbarrier(CLK_GLOBAL_MEM_FENCE);\n\t}\n\n\tif (knodes[currKnode[bid]].keys[thid] == start[bid]) {\n\t\trecstart[bid] = knodes[currKnode[bid]].indices[thid];\n\t}\n\n\tbarrier(CLK_GLOBAL_MEM_FENCE);\n\n\tif (knodes[lastKnode[bid]].keys[thid] == end[bid]) {\n\t\treclength[bid] = knodes[lastKnode[bid]].indices[thid] - recstart[bid] + 1;\n\t}\n}\n\n__kernel void findRangeK(const long maxheight,\n                         __global knode *knodes,\n                         const long knodes_elem,\n                         __global long *currKnode,\n                         __global long *offset,\n                         __global long *lastKnode,\n                         __global long *offset_2,\n                         __global int *start,\n                         __global int *end,\n                         __global int *recstart,\n                         __global int *reclength) {\n\tfindRangeBody(maxheight, knodes, knodes_elem, currKnode, offset, lastKnode, offset_2,\n\t              start, end, recstart, reclength);\n}\n\n/* Compatibility alias in case wrapper requests \"findK\" for this range kernel. */\n__kernel void findK(const long maxheight,\n                    __global knode *knodes,\n                    const long knodes_elem,\n                    __global long *currKnode,\n                    __global long *offset,\n                    __global long *lastKnode,\n                    __global long *offset_2,\n                    __global int *start,\n                    __global int *end,\n                    __global int *recstart,\n                    __global int *reclength) {\n\tfindRangeBody(maxheight, knodes, knodes_elem, currKnode, offset, lastKnode, offset_2,\n\t              start, end, recstart, reclength);\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 38.04,
+      "prompt_tokens": 21119,
+      "completion_tokens": 3295,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

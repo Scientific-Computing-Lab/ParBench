@@ -1,0 +1,81 @@
+{
+  "source_spec": "rodinia-streamcluster-cuda",
+  "target_spec": "rodinia-streamcluster-opencl",
+  "kernel": "streamcluster",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1489005842,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "10",
+    "20",
+    "256",
+    "65536",
+    "65536",
+    "1000",
+    "none",
+    "output.txt",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-21T23:44:52Z",
+  "prompt_tokens": 21512,
+  "completion_tokens": 1124,
+  "llm_response_time_seconds": 18.186,
+  "build_status": "pass",
+  "build_time_seconds": 0.74,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.157,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "at *coord_d, float *work_mem_d, const int *center_table_d, char *switch_membership_d)\n                                                                        ^\n<kernel>:22:95: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n                    const float *coord_d, float *work_mem_d, const int *center_table_d, char *switch_membership_d)\n                                                                                              ^\n\n",
+  "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Building Program (clBuildProgram)\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 2.092,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "Kernels.cl": "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n\ntypedef struct {\n    float weight;\n    long assign;\n    float cost;\n} PointCL;\n\nstatic inline float\nd_dist(int p1, int p2, int num, int dim, const float *coord_d)\n{\n    float retval = 0.0f;\n    for(int i = 0; i < dim; i++){\n        float tmp = coord_d[(i*num)+p1] - coord_d[(i*num)+p2];\n        retval += tmp * tmp;\n    }\n    return retval;\n}\n\nkernel void\nkernel_compute_cost(int num, int dim, long x, const PointCL *p, int K, int stride,\n                    const float *coord_d, float *work_mem_d, const int *center_table_d, char *switch_membership_d)\n{\n    const int tid = get_global_id(0);\n\n    if(tid < num)\n    {\n        float *lower = &work_mem_d[tid*stride];\n        \n        float x_cost = d_dist(tid, x, num, dim, coord_d) * p[tid].weight;\n        \n        if ( x_cost < p[tid].cost )\n        {\n            switch_membership_d[tid] = 1;\n            lower[K] += x_cost - p[tid].cost;\n        }\n        else\n        {\n            lower[center_table_d[p[tid].assign]] += p[tid].cost - x_cost;\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 18.186,
+      "prompt_tokens": 21512,
+      "completion_tokens": 1124,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "at *coord_d, float *work_mem_d, const int *center_table_d, char *switch_membership_d)\n                                                                        ^\n<kernel>:22:95: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n                    const float *coord_d, float *work_mem_d, const int *center_table_d, char *switch_membership_d)\n                                                                                              ^\n\n",
+      "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Building Program (clBuildProgram)\n",
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "source_spec": "hecbench-md-cuda",
+  "target_spec": "hecbench-md-omp_target",
+  "kernel": "md",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 2021059969,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T05:51:34Z",
+  "prompt_tokens": 3509,
+  "completion_tokens": 10436,
+  "llm_response_time_seconds": 98.815,
+  "build_status": "fail",
+  "build_time_seconds": 0.335,
+  "build_error_snippet": "NVC++-S-0155-No matching #pragma omp end declare target found for current declare target directive  (main.cpp)\nNVC++/x86-64 Linux 24.3-0: compilation completed with severe errors\nmake: *** [Makefile.nvc:62: main.o] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: g #pragma omp end declare target found for current declare target directive  (main.cpp)\nNVC++/x86-64 Linux 24.3-0: compilation completed with severe errors\nmake: *** [Makefile.nvc:62: main.o] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cpp": "#include <cassert>\n#include <chrono>\n#include <cfloat>\n#include <cmath>\n#include <cstdlib>\n#include <list>\n#include <iostream>\n#include <omp.h>\n#include \"MD.h\"\n#include \"reference.h\"\n#include \"utils.h\"\n\n#pragma omp declare target\nvoid md (\n  const POSVECTYPE* __restrict__ position,\n        FORCEVECTYPE* __restrict__ force,\n  const int* __restrict__ neighborList, \n  const int nAtom,\n  const int maxNeighbors, \n  const FPTYPE lj1_t,\n  const FPTYPE lj2_t,\n  const FPTYPE cutsq_t )\n{\n  #pragma omp target teams distribute parallel for\n  for (uint idx = 0; idx < nAtom; idx++)\n  {\n    POSVECTYPE ipos = position[idx];\n    FORCEVECTYPE f = zero;\n\n    int j = 0;\n    while (j < maxNeighbors)\n    {\n      int jidx = neighborList[j*nAtom + idx];\n\n      POSVECTYPE jpos = position[jidx];\n\n      FPTYPE delx = ipos.x - jpos.x;\n      FPTYPE dely = ipos.y - jpos.y;\n      FPTYPE delz = ipos.z - jpos.z;\n      FPTYPE r2inv = delx*delx + dely*dely + delz*delz;\n\n      if (r2inv > 0 && r2inv < cutsq_t)\n      {\n        r2inv = (FPTYPE)1.0 / r2inv;\n        FPTYPE r6inv = r2inv * r2inv * r2inv;\n        FPTYPE forceC = r2inv * r6inv * (lj1_t * r6inv - lj2_t);\n\n        f.x += delx * forceC;\n        f.y += dely * forceC;\n        f.z += delz * forceC;\n      }\n      j++;\n    }\n    force[idx] = f;\n  }\n}\n\nint main(int argc, char** argv)\n{\n  if (argc != 3) {\n    std::cout << \"Usage: ./\" << argv[0] << \" <class size> <iteration>\\n\";\n    return 1;\n  }\n\n  int sizeClass = atoi(argv[1]);\n  int iteration = atoi(argv[2]);\n  const int probSizes[] = { 12288, 24576, 36864, 73728 };\n  assert(sizeClass >= 0 && sizeClass < 4);\n  assert(iteration >= 0);\n\n  int nAtom = probSizes[sizeClass];\n\n  POSVECTYPE* position = (POSVECTYPE*) malloc(nAtom * sizeof(POSVECTYPE));\n  FORCEVECTYPE* h_force = (FORCEVECTYPE*) malloc(nAtom * sizeof(FORCEVECTYPE));\n  int *neighborList = (int*) malloc(maxNeighbors * nAtom * sizeof(int));\n\n  std::cout << \"Initializing test problem (this can take several minutes for large problems).\\n\";\n\n  srand(123);\n\n  for (int i = 0; i < nAtom; i++)\n  {\n    position[i].x = rand() % domainEdge;\n    position[i].y = rand() % domainEdge;\n    position[i].z = rand() % domainEdge;\n  }\n\n  std::cout << \"Finished.\\n\";\n  int totalPairs = buildNeighborList<FPTYPE, POSVECTYPE>(nAtom, position, neighborList);\n  std::cout << totalPairs << \" of \" << nAtom*maxNeighbors << \" pairs within cutoff distance = \" \n       << 100.0 * ((double)totalPairs / (nAtom*maxNeighbors)) << \" %\\n\";\n\n  POSVECTYPE*   d_position;\n  FORCEVECTYPE* d_force;\n  int* d_neighborList;\n  \n  #pragma omp target data map(alloc: d_position[0:nAtom], d_force[0:nAtom], d_neighborList[0:nAtom*maxNeighbors])\n  {\n    #pragma omp target update map(from: position[0:nAtom], neighborList[0:nAtom*maxNeighbors])\n    \n    #pragma omp target\n    md (d_position, d_force, d_neighborList,\n        nAtom, maxNeighbors, lj1, lj2, cutsq);\n\n    #pragma omp target update map(to: h_force[0:nAtom])\n  }\n\n  std::cout << \"Performing Correctness Check (may take several minutes)\\n\";\n\n  checkResults<FPTYPE, FORCEVECTYPE, POSVECTYPE>(h_force, position, neighborList, nAtom);\n\n  auto start = std::chrono::steady_clock::now();\n\n  #pragma omp target data map(alloc: d_position[0:nAtom], d_force[0:nAtom], d_neighborList[0:nAtom*maxNeighbors])\n  {\n    #pragma omp target update map(from: position[0:nAtom], neighborList[0:nAtom*maxNeighbors])\n    \n    for (int j = 0; j < iteration; j++)\n    {\n      #pragma omp target\n      md (d_position, d_force, d_neighborList,\n        nAtom, maxNeighbors, lj1, lj2, cutsq);\n    }\n  }\n\n  auto end = std::chrono::steady_clock::now();\n  auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n  std::cout << \"Average kernel execution time \" << (time * 1e-9f) / iteration << \" (s)\\n\";\n\n  free(position);\n  free(h_force);\n  free(neighborList);\n\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cpp"
+  ],
+  "target_files_extracted": [
+    "main.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 98.815,
+      "prompt_tokens": 3509,
+      "completion_tokens": 10436,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "NVC++-S-0155-No matching #pragma omp end declare target found for current declare target directive  (main.cpp)\nNVC++/x86-64 Linux 24.3-0: compilation completed with severe errors\nmake: *** [Makefile.nvc:62: main.o] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-bfs-omp",
+  "target_spec": "rodinia-bfs-cuda",
+  "kernel": "bfs",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1686162046,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T19:48:52Z",
+  "prompt_tokens": 1414,
+  "completion_tokens": 13368,
+  "llm_response_time_seconds": 80.997,
+  "build_status": null,
+  "build_time_seconds": null,
+  "build_error_snippet": null,
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "EXTRACTION_FAIL",
+  "error_message": "Partial extraction on attempt 1: missing 2 file(s), 0 empty file(s). Missing: ['kernel.cu', 'kernel2.cu']. Empty: [].",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.546,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "bfs.cu": "#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <stdlib.h>\n#include <cuda_runtime.h>\n\nFILE *fp;\n\nstruct Node\n{\n\tint starting;\n\tint no_of_edges;\n};\n\nvoid BFSGraph(int argc, char** argv);\n\nvoid Usage(int argc, char**argv){\n\tfprintf(stderr,\"Usage: %s <num_threads> <input_file>\\n\", argv[0]);\n}\n\n__global__ void expand_kernel(int no_of_nodes, bool *graph_mask, bool *updating_graph_mask, bool *graph_visited, Node *graph_nodes, int *graph_edges, int *cost) {\n\tint tid = threadIdx.x + blockDim.x * blockIdx.x;\n\tif (tid < no_of_nodes) {\n\t\tif (graph_mask[tid] == true) { \n\t\t\tgraph_mask[tid] = false;\n\t\t\tfor(int i = graph_nodes[tid].starting; i < (graph_nodes[tid].no_of_edges + graph_nodes[tid].starting); i++) {\n\t\t\t\tint id = graph_edges[i];\n\t\t\t\tif(!graph_visited[id]) {\n\t\t\t\t\tcost[id] = cost[tid] + 1;\n\t\t\t\t\tupdating_graph_mask[id] = true;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}\n\n__global__ void commit_kernel(int no_of_nodes, bool *graph_mask, bool *updating_graph_mask, bool *graph_visited, int *stop_flag) {\n\tint tid = threadIdx.x + blockDim.x * blockIdx.x;\n\tif (tid < no_of_nodes) {\n\t\tif (updating_graph_mask[tid] == true) {\n\t\t\tgraph_mask[tid] = true;\n\t\t\tgraph_visited[tid] = true;\n\t\t\t*stop_flag = 1;\n\t\t\tupdating_graph_mask[tid] = false;\n\t\t}\n\t}\n}\n\nint main( int argc, char** argv) \n{\n\tBFSGraph( argc, argv);\n}\n\nvoid BFSGraph( int argc, char** argv) \n{\n\tint no_of_nodes = 0;\n\tint edge_list_size = 0;\n\tchar *input_f;\n\tint num_omp_threads;\n\t\n\tif(argc!=3){\n\t\tUsage(argc, argv);\n\t\texit(0);\n\t}\n\t\n\tnum_omp_threads = atoi(argv[1]);\n\tinput_f = argv[2];\n\t\n\tprintf(\"Reading File\\n\");\n\t\n\tfp = fopen(input_f,\"r\");\n\tif(!fp)\n\t{\n\t\tprintf(\"Error Reading graph file\\n\");\n\t\treturn;\n\t}\n\n\tint source = 0;\n\n\tfscanf(fp,\"%d\",&no_of_nodes);\n\t\n\tNode* h_graph_nodes = (Node*) malloc(sizeof(Node)*no_of_nodes);\n\tbool *h_graph_mask = (bool*) malloc(sizeof(bool)*no_of_nodes);\n\tbool *h_updating_graph_mask = (bool*) malloc(sizeof(bool)*no_of_nodes);\n\tbool *h_graph_visited = (bool*) malloc(sizeof(bool)*no_of_nodes);\n\n\tint start, edgeno;   \n\t\n\tfor( unsigned int i = 0; i < no_of_nodes; i++) \n\t{\n\t\tfscanf(fp,\"%d %d\",&start,&edgeno);\n\t\th_graph_nodes[i].starting = start;\n\t\th_graph_nodes[i].no_of_edges = edgeno;\n\t\th_graph_mask[i]=false;\n\t\th_updating_graph_mask[i]=false;\n\t\th_graph_visited[i]=false;\n\t}\n\n\t\n\tfscanf(fp,\"%d\",&source);\n\t\n\th_graph_mask[source]=true;\n\th_graph_visited[source]=true;\n\n\tfscanf(fp,\"%d\",&edge_list_size);\n\n\tint id,cost;\n\tint* h_graph_edges = (int*) malloc(sizeof(int)*edge_list_size);\n\tfor(int i=0; i < edge_list_size ; i++)\n\t{\n\t\tfscanf(fp,\"%d\",&id);\n\t\tfscanf(fp,\"%d\",&cost);\n\t\th_graph_edges[i] = id;\n\t}\n\n\tif(fp)\n\t\tfclose(fp);    \n\n\t\n\tint* h_cost = (int*) malloc( sizeof(int)*no_of_nodes);\n\tfor(int i=0;i<no_of_nodes;i++)\n\t\th_cost[i]=-1;\n\th_cost[source]=0;\n\t\n\tprintf(\"Start traversing the tree\\n\");\n\t\n\t// CUDA Device pointers\n\tNode* d_graph_nodes;\n\tbool *d_graph_mask;\n\tbool *d_updating_graph_mask;\n\tbool *d_graph_visited;\n\tint* d_graph_edges;\n\tint* d_cost;\n\tint* d_stop;\n\n\tcudaMalloc(&d_graph_nodes, sizeof(Node)*no_of_nodes);\n\tcudaMalloc(&d_graph_mask, sizeof(bool)*no_of_nodes);\n\tcudaMalloc(&d_updating_graph_mask, sizeof(bool)*no_of_nodes);\n\tcudaMalloc(&d_graph_visited, sizeof(bool)*no_of_nodes);\n\tcudaMalloc(&d_graph_edges, sizeof(int)*edge_list_size);\n\tcudaMalloc(&d_cost, sizeof(int)*no_of_nodes);\n\tcudaMalloc(&d_stop, sizeof(int));\n\n\tcudaMemcpy(d_graph_nodes, h_graph_nodes, sizeof(Node)*no_of_nodes, cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_graph_mask, h_graph_mask, sizeof(bool)*no_of_nodes, cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_updating_graph_mask, h_updating_graph_mask, sizeof(bool)*no_of_nodes, cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_graph_visited, h_graph_visited, sizeof(bool)*no_of_nodes, cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_graph_edges, h_graph_edges, sizeof(int)*edge_list_size, cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_cost, h_cost, sizeof(int)*no_of_nodes, cudaMemcpyHostToDevice);\n\n\tcudaEvent_t start, stop;\n\tcudaEventCreate(&start);\n\tcudaEventCreate(&stop);\n\tcudaEventRecord(start);\n\n\tint k=0;\n\tbool stop_flag;\n\tdo\n\t{\n\t\tstop_flag = false;\n\t\tcudaMemset(d_stop, 0, sizeof(int));\n\n\t\tint threads_per_block = 256;\n\t\tint blocks = (no_of_nodes + threads_per_block - 1) / threads_per_block;\n\n\t\texpand_kernel<<<blocks, threads_per_block>>>(no_of_nodes, d_graph_mask, d_updating_graph_mask, d_graph_visited, d_graph_nodes, d_graph_edges, d_cost);\n\t\tcommit_kernel<<<blocks, threads_per_block>>>(no_of_nodes, d_graph_mask, d_updating_graph_mask, d_graph_visited, d_stop);\n\n\t\tcudaMemcpy(&stop_flag, d_stop, sizeof(int), cudaMemcpyDeviceToHost);\n\t\tk++;\n\t}\n\twhile(stop_flag);\n\n\tcudaEventRecord(stop);\n\tcudaEventSynchronize(stop);\n\tfloat elapsed_time = 0;\n\tcudaEventElapsedTime(&elapsed_time, start, stop);\n\tprintf(\"Compute time: %lf\\n\", (elapsed_time / 1000.0));\n\tcudaEventDestroy(start);\n\tcudaEventDestroy(stop);\n\t\n\tFILE *fpo = fopen(\"result.txt\",\"w\");\n\tfor(int i=0;i<no_of_nodes;i++)\n\t\tfprintf(fpo,\"%d) cost:%d\\n\",i,h_cost[i]);\n\tfclose(fpo);\n\tprintf(\"Result stored in result.txt\\n\");\n\n\tcudaMemcpy(h_cost, d_cost, sizeof(int)*no_of_nodes, cudaMemcpyDeviceToHost);\n\n\tfree( h_graph_nodes);\n\tfree( h_graph_edges);\n\tfree( h_graph_mask);\n\tfree( h_updating_graph_mask);\n\tfree( h_graph_visited);\n\tfree( h_cost);\n\n\tcudaFree(d_graph_nodes);\n\tcudaFree(d_graph_edges);\n\tcudaFree(d_graph_mask);\n\tcudaFree(d_updating_graph_mask);\n\tcudaFree(d_graph_visited);\n\tcudaFree(d_cost);\n\tcudaFree(d_stop);\n}\n"
+  },
+  "target_files_expected": [
+    "bfs.cu",
+    "kernel.cu",
+    "kernel2.cu"
+  ],
+  "target_files_extracted": [
+    "bfs.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 80.997,
+      "prompt_tokens": 1414,
+      "completion_tokens": 13368,
+      "finish_reason": "stop",
+      "build_status": null,
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": true,
+      "partial_extraction": true
+    }
+  ]
+}

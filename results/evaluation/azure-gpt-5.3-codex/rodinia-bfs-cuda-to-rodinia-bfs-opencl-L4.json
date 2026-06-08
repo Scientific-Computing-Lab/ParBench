@@ -1,0 +1,71 @@
+{
+  "source_spec": "rodinia-bfs-cuda",
+  "target_spec": "rodinia-bfs-opencl",
+  "kernel": "bfs",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 702725938,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "../../data/bfs/graph1MW_6.txt"
+  ],
+  "timestamp": "2026-04-30T23:47:52Z",
+  "prompt_tokens": 13011,
+  "completion_tokens": 606,
+  "llm_response_time_seconds": 9.416,
+  "build_status": "pass",
+  "build_time_seconds": 0.789,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.652,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Reading File\nnumber of platforms:1\nvendor is NVIDIA Corporation\ndevice number: 1\nCreating GPU Context\nInit: 124.433998\nMemAlloc: 0.004000\nHtoD: 2.171264\nExec: 0.528512\nDtoH: 0.219520\nClose: 0.909000\nTotal: 129.434006\n--cambine:passed:-)\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.519,
+  "translated_wall_time_seconds": 0.652,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.796,
+  "translated_files": {
+    "Kernels.cl": "typedef struct {\n    int starting;\n    int no_of_edges;\n} Node;\n\n__kernel void BFS_1(__global Node *x_4,\n                    __global int *tmp_1,\n                    __global char *val_8,\n                    __global char *item_3,\n                    __global char *elem_7,\n                    __global int *item_2,\n                    int data_0)\n{\n    int x_6 = (int)get_global_id(0);\n    if (x_6 < data_0 && val_8[x_6]) {\n        val_8[x_6] = 0;\n        for (int i = x_4[x_6].starting; i < (x_4[x_6].starting + x_4[x_6].no_of_edges); i++) {\n            int item_5 = tmp_1[i];\n            if (!elem_7[item_5]) {\n                item_2[item_5] = item_2[x_6] + 1;\n                item_3[item_5] = 1;\n            }\n        }\n    }\n}\n\n__kernel void BFS_2(__global char *var_4,\n                    __global char *data_5,\n                    __global char *elem_3,\n                    __global char *item_0,\n                    int tmp_2)\n{\n    int elem_1 = (int)get_global_id(0);\n    if (elem_1 < tmp_2 && data_5[elem_1]) {\n        var_4[elem_1] = 1;\n        elem_3[elem_1] = 1;\n        *item_0 = 1;\n        data_5[elem_1] = 0;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 9.416,
+      "prompt_tokens": 13011,
+      "completion_tokens": 606,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

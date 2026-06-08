@@ -1,0 +1,164 @@
+diff --git a/common/make.config b/common/make.config
+index 38c3157..01ccdf9 100755
+--- a/common/make.config
++++ b/common/make.config
+@@ -1,23 +1,23 @@
+ # CUDA toolkit installation path
+-CUDA_DIR = /usr/local/cuda
++CUDA_DIR = /opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/12.3
+ 
+ # CUDA toolkit libraries
+-CUDA_LIB_DIR := $(CUDA_DIR)/lib
++CUDA_LIB_DIR := $(CUDA_DIR)/targets/x86_64-linux/lib
+ ifeq ($(shell uname -m), x86_64)
+-     ifeq ($(shell if test -d $(CUDA_DIR)/lib64; then echo T; else echo F; fi), T)
+-     	CUDA_LIB_DIR := $(CUDA_DIR)/lib64
++     ifeq ($(shell if test -d $(CUDA_DIR)/targets/x86_64-linux/lib; then echo T; else echo F; fi), T)
++     	CUDA_LIB_DIR := $(CUDA_DIR)/targets/x86_64-linux/lib
+      endif
+ endif
+ 
+ # CUDA SDK installation path
+-SDK_DIR = /usr/local/cuda/samples/
++SDK_DIR = $(CUDA_DIR)/samples/
+ 
+ # OPENCL
+ 
+ # NVIDIA_DIR
+-NV_OPENCL_DIR =/usr/local/cuda
+-NV_OPENCL_INC = $(NV_OPENCL_DIR)/include
+-NV_OPENCL_LIB = $(NV_OPENCL_DIR)/lib64
++NV_OPENCL_DIR = /opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/12.3
++NV_OPENCL_INC = $(NV_OPENCL_DIR)/targets/x86_64-linux/include
++NV_OPENCL_LIB = $(NV_OPENCL_DIR)/targets/x86_64-linux/lib
+ 
+ # INTEL_DIR
+ INTEL_OPENCL_DIR = /opt/intel/opencl
+diff --git a/cuda/cfd/Makefile b/cuda/cfd/Makefile
+index 76df25d..e115e40 100755
+--- a/cuda/cfd/Makefile
++++ b/cuda/cfd/Makefile
+@@ -14,17 +14,17 @@ endif
+ all: euler3d euler3d_double  pre_euler3d  pre_euler3d_double 
+ 
+ euler3d: euler3d.cu
+-	nvcc $(KERNEL_DIM) -O2 -Xptxas -v --gpu-architecture=compute_20 --gpu-code=compute_20 euler3d.cu -o euler3d -I$(CUDA_SDK_PATH)/common/inc  -L$(CUDA_SDK_PATH)/lib $(CUTIL_LIB)
++	nvcc $(KERNEL_DIM) -O2 -Xptxas -v --gpu-architecture=compute_89 --gpu-code=sm_89 euler3d.cu -o euler3d -I$(CUDA_SDK_PATH)/common/inc  -L$(CUDA_SDK_PATH)/lib $(CUTIL_LIB)
+ 
+ euler3d_double: euler3d_double.cu
+-	nvcc -Xptxas -v -O3 --gpu-architecture=compute_20 --gpu-code=compute_20 euler3d_double.cu -o euler3d_double -I$(CUDA_SDK_PATH)/common/inc  -L$(CUDA_SDK_PATH)/lib $(CUTIL_LIB)
++	nvcc -Xptxas -v -O3 --gpu-architecture=compute_89 --gpu-code=sm_89 euler3d_double.cu -o euler3d_double -I$(CUDA_SDK_PATH)/common/inc  -L$(CUDA_SDK_PATH)/lib $(CUTIL_LIB)
+ 
+ 
+ pre_euler3d: pre_euler3d.cu
+-	nvcc -Xptxas -v -O3 --gpu-architecture=compute_20 --gpu-code=compute_20 pre_euler3d.cu -o pre_euler3d -I$(CUDA_SDK_PATH)/common/inc  -L$(CUDA_SDK_PATH)/lib $(CUTIL_LIB)
++	nvcc -Xptxas -v -O3 --gpu-architecture=compute_89 --gpu-code=sm_89 pre_euler3d.cu -o pre_euler3d -I$(CUDA_SDK_PATH)/common/inc  -L$(CUDA_SDK_PATH)/lib $(CUTIL_LIB)
+ 
+ pre_euler3d_double: pre_euler3d_double.cu
+-	nvcc -Xptxas -v -O3 --gpu-architecture=compute_20 --gpu-code=compute_20 pre_euler3d_double.cu -o pre_euler3d_double -I$(CUDA_SDK_PATH)/common/inc  -L$(CUDA_SDK_PATH)/lib $(CUTIL_LIB)
++	nvcc -Xptxas -v -O3 --gpu-architecture=compute_89 --gpu-code=sm_89 pre_euler3d_double.cu -o pre_euler3d_double -I$(CUDA_SDK_PATH)/common/inc  -L$(CUDA_SDK_PATH)/lib $(CUTIL_LIB)
+ 
+ 
+ clean:
+diff --git a/cuda/lavaMD/makefile b/cuda/lavaMD/makefile
+index 3944253..95c7080 100755
+--- a/cuda/lavaMD/makefile
++++ b/cuda/lavaMD/makefile
+@@ -32,7 +32,7 @@ a.out:		main.o \
+ 			./util/timer/timer.o \
+ 			./util/device/device.o \
+ 			-lm \
+-			-L/usr/local/cuda/lib64 \
++			-L/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64 \
+ 			-lcuda -lcudart \
+ 			$(OMP_LIB) \
+ 			-o lavaMD
+diff --git a/cuda/lud/cuda/Makefile b/cuda/lud/cuda/Makefile
+index 492edd2..89c3e73 100644
+--- a/cuda/lud/cuda/Makefile
++++ b/cuda/lud/cuda/Makefile
+@@ -8,7 +8,7 @@ DEFS += \
+ NVCCFLAGS += -I../common \
+ 			 -O3 \
+ 			 -use_fast_math \
+-			 -arch=sm_20 \
++			 -arch=sm_89 \
+ 			 -lm \
+ 			 $(SPACE)
+ 
+diff --git a/cuda/particlefilter/Makefile b/cuda/particlefilter/Makefile
+index a7db5ca..49118d0 100755
+--- a/cuda/particlefilter/Makefile
++++ b/cuda/particlefilter/Makefile
+@@ -9,10 +9,10 @@ INCLUDE := $(CUDA_DIR)/include
+ all: naive float
+ 
+ naive: ex_particle_CUDA_naive_seq.cu
+-	$(CC) -I$(INCLUDE) -L$(CUDA_LIB_DIR) -lcuda -g -lm -O3 -use_fast_math -arch sm_13 ex_particle_CUDA_naive_seq.cu -o particlefilter_naive
++	$(CC) -I$(INCLUDE) -L$(CUDA_LIB_DIR) -lcuda -g -lm -O3 -use_fast_math -arch sm_89 ex_particle_CUDA_naive_seq.cu -o particlefilter_naive
+ 	
+ float: ex_particle_CUDA_float_seq.cu
+-	$(CC) -I$(INCLUDE) -L$(CUDA_LIB_DIR) -lcuda -g -lm -O3 -use_fast_math -arch sm_13 ex_particle_CUDA_float_seq.cu -o particlefilter_float
++	$(CC) -I$(INCLUDE) -L$(CUDA_LIB_DIR) -lcuda -g -lm -O3 -use_fast_math -arch sm_89 ex_particle_CUDA_float_seq.cu -o particlefilter_float
+ 
+ clean:
+ 	rm particlefilter_naive particlefilter_float
+diff --git a/opencl/heartwall/Makefile b/opencl/heartwall/Makefile
+index 23c6e9b..3c46bc1 100644
+--- a/opencl/heartwall/Makefile
++++ b/opencl/heartwall/Makefile
+@@ -42,6 +42,7 @@ $(EXE):	./main.o \
+ 			./util/opencl/opencl.o \
+ 			../util/timing.c \
+ 			-lm \
++			$(OCL_INC_DIR) \
+ 			$(OCL_LIB_DIR) \
+ 			$(OCL_LIB) -o $(EXE)
+ 
+@@ -57,6 +58,7 @@ run: $(EXE)
+ 	$(C_C)	$(OUTPUT) $(KERNEL_DIM) ./main.c \
+ 			-c \
+ 			-o ./main.o \
++			$(OCL_INC_DIR) \
+ 			-O3
+ 
+ # ======================================================================================================================================================150
+diff --git a/opencl/hybridsort/Makefile b/opencl/hybridsort/Makefile
+index b6b5abd..b86deb0 100644
+--- a/opencl/hybridsort/Makefile
++++ b/opencl/hybridsort/Makefile
+@@ -13,7 +13,7 @@ else
+ endif
+ 
+ CC = gcc
+-CC_FLAGS = -std=c99
++CC_FLAGS = -std=c99 -fcommon
+ 
+ ifdef VERIFY
+ override VERIFY = -DVERIFY
+diff --git a/opencl/lavaMD/Makefile b/opencl/lavaMD/Makefile
+index 8be4670..0b1ad84 100644
+--- a/opencl/lavaMD/Makefile
++++ b/opencl/lavaMD/Makefile
+@@ -74,7 +74,7 @@ main.o:		main.h \
+ 										-O3
+ 
+ ./timing.o: ../util/timing.c
+-	$(C_C)	$(OUTPUT) $(KERNEL_DIM) -I../util ../util/timing.c \
++	$(C_C)	$(OUTPUT) $(KERNEL_DIM) -I../util $(OCL_INC) ../util/timing.c \
+ 			-c \
+ 			-o timing.o \
+ 			-O3
+diff --git a/opencl/myocyte/Makefile b/opencl/myocyte/Makefile
+index 9434b83..d5f06d4 100644
+--- a/opencl/myocyte/Makefile
++++ b/opencl/myocyte/Makefile
+@@ -84,7 +84,7 @@ OCL_LIB = -lOpenCL
+ # ======================================================================================================================================================150
+ 
+ ./timing.o: ../util/timing.c
+-	$(C_C)  ../util/timing.c -I../util -c -o ./timing.o -O3
++	$(C_C)  ../util/timing.c -I../util -I$(OPENCL_INC) -c -o ./timing.o -O3
+ 
+ ./util/file/file.o:	./common.h \
+ 					./util/file/file.h \

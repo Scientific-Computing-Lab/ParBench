@@ -1,0 +1,74 @@
+{
+  "source_spec": "mixbench-mixbench-omp",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "azure-gpt-5.4",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1825021715,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-27T03:13:30Z",
+  "prompt_tokens": 10184,
+  "completion_tokens": 5334,
+  "llm_response_time_seconds": 149.792,
+  "build_status": "pass",
+  "build_time_seconds": 0.472,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 3.554,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "6.77\n          192,     96.250,    0.59,21751.17, 225.99,     48.125,    4.29, 3013.78,  62.62,    192.500,    0.00,     inf,    inf,    96.250,    0.59,21864.26, 227.16\n          256,    128.250,    0.59,29054.74, 226.55,     64.125,    5.34, 3220.92,  50.23,    256.500,    0.00,     inf,    inf,   128.250,    0.60,28883.13, 225.21\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "single_precision_gflops": {
+      "value": 56.01,
+      "unit": "GFLOPS"
+    }
+  },
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": 3.554,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 8.4412,
+  "translated_files": {
+    "mix_kernels.cl": "#ifdef ENABLE_DP\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n\n#ifdef ENABLE_HP\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n\ninline class_T bench_value(class_T x, class_T f) {\n  class_T t0 = x;\n  class_T t1 = x;\n  class_T t2 = x;\n  class_T t3 = x;\n  class_T t4 = x;\n  class_T t5 = x;\n  class_T t6 = x;\n  class_T t7 = x;\n\n  for (int j = 0; j < (COMPUTE_ITERATIONS / 8); ++j) {\n    t0 = t0 * t0 + f;\n    t1 = t1 * t1 + f;\n    t2 = t2 * t2 + f;\n    t3 = t3 * t3 + f;\n    t4 = t4 * t4 + f;\n    t5 = t5 * t5 + f;\n    t6 = t6 * t6 + f;\n    t7 = t7 * t7 + f;\n  }\n\n#if (COMPUTE_ITERATIONS % 8) > 0\n  t0 = t0 * t0 + f;\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 1\n  t1 = t1 * t1 + f;\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 2\n  t2 = t2 * t2 + f;\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 3\n  t3 = t3 * t3 + f;\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 4\n  t4 = t4 * t4 + f;\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 5\n  t5 = t5 * t5 + f;\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 6\n  t6 = t6 * t6 + f;\n#endif\n\n  return t0 + t1 + t2 + t3 + t4 + t5 + t6 + t7;\n}\n\n__kernel void benchmark_func(const class_T seed, __global class_T* data) {\n  (void)seed;\n\n  const size_t gid = get_global_id(0);\n  const size_t lid = get_local_id(0);\n  const size_t gsize = get_global_size(0);\n  const size_t group = get_group_id(0);\n\n#ifdef BLOCK_STRIDED\n  const size_t base = group * ((size_t)blockdim * ELEMENTS_PER_THREAD * FUSION_DEGREE) + lid;\n  const size_t stride = (size_t)blockdim;\n#else\n  const size_t base = gid;\n  const size_t stride = gsize;\n#endif\n\n  for (size_t fusion = 0; fusion < (size_t)FUSION_DEGREE; ++fusion) {\n    const size_t chunk_base = base + fusion * (size_t)ELEMENTS_PER_THREAD * stride;\n    const class_T f = data[chunk_base];\n\n    for (size_t e = 0; e < (size_t)ELEMENTS_PER_THREAD; ++e) {\n      const size_t idx = chunk_base + e * stride;\n      const class_T x = data[idx];\n      data[idx] = bench_value(x, f);\n    }\n  }\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 149.792,
+      "prompt_tokens": 10184,
+      "completion_tokens": 5334,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+    "inspection_date": "2026-03-02",
+    "hecbench_path": "/home/samyak/Downloads/HeCBench-master/src",
+    "note": "Deep inspection of 25+ kernels for Phase 2 kernel selection. All OMP variants use icpx.",
+    "proposed_20": [
+        "floydwarshall",
+        "page-rank",
+        "nw",
+        "softmax",
+        "attention",
+        "maxpool3d",
+        "iso2dfd",
+        "stencil1d",
+        "jacobi",
+        "jenkins-hash",
+        "crc64",
+        "gaussian",
+        "popcount",
+        "sobol",
+        "convolution3D",
+        "histogram",
+        "mandelbrot",
+        "pnpoly",
+        "present",
+        "nqueen"
+    ],
+    "backups_5": [
+        "knn",
+        "md5hash",
+        "randomAccess",
+        "hwt1d",
+        "tsp"
+    ]
+}

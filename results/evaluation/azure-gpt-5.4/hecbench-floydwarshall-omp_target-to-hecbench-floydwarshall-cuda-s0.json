@@ -1,0 +1,78 @@
+{
+  "source_spec": "hecbench-floydwarshall-omp_target",
+  "target_spec": "hecbench-floydwarshall-cuda",
+  "kernel": "floydwarshall",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1647419528,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "1024",
+    "10",
+    "16"
+  ],
+  "timestamp": "2026-04-26T14:03:37Z",
+  "prompt_tokens": 1659,
+  "completion_tokens": 3057,
+  "llm_response_time_seconds": 44.945,
+  "build_status": "pass",
+  "build_time_seconds": 0.7,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.686,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Average kernel execution time 0.006626 (s)\nPASS\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 0.006626,
+      "unit": "s"
+    }
+  },
+  "baseline_wall_time_seconds": 0.74,
+  "translated_wall_time_seconds": 0.686,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 1.0787,
+  "translated_files": {
+    "main.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <assert.h>\n#include <string.h>\n#include <chrono>\n#include <cuda_runtime.h>\n\n#define MAXDISTANCE (200)\n\nstatic inline void checkCuda(cudaError_t err, const char *file, int line) {\n  if (err != cudaSuccess) {\n    fprintf(stderr, \"CUDA error at %s:%d: %s\\n\", file, line, cudaGetErrorString(err));\n    exit(1);\n  }\n}\n\n#define CHECK_CUDA(call) checkCuda((call), __FILE__, __LINE__)\n\nunsigned int minimum(unsigned int a, unsigned int b) {\n  return (b < a) ? b : a;\n}\n\nvoid floydWarshallCPUReference(unsigned int *pathDistanceMatrix,\n                               unsigned int *pathMatrix,\n                               unsigned int numNodes) {\n  unsigned int distanceYtoX, distanceYtoK, distanceKtoX, indirectDistance;\n  unsigned int width = numNodes;\n  unsigned int yXwidth;\n\n  for (unsigned int k = 0; k < numNodes; ++k) {\n    for (unsigned int y = 0; y < numNodes; ++y) {\n      yXwidth = y * numNodes;\n      for (unsigned int x = 0; x < numNodes; ++x) {\n        distanceYtoX = pathDistanceMatrix[yXwidth + x];\n        distanceYtoK = pathDistanceMatrix[yXwidth + k];\n        distanceKtoX = pathDistanceMatrix[k * width + x];\n\n        indirectDistance = distanceYtoK + distanceKtoX;\n\n        if (indirectDistance < distanceYtoX) {\n          pathDistanceMatrix[yXwidth + x] = indirectDistance;\n          pathMatrix[yXwidth + x] = k;\n        }\n      }\n    }\n  }\n}\n\n__global__ void floydWarshallKernel(unsigned int *pathDistanceMatrix,\n                                    unsigned int *pathMatrix,\n                                    unsigned int numNodes,\n                                    unsigned int k) {\n  unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;\n  unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;\n\n  if (x < numNodes && y < numNodes) {\n    unsigned int idx = y * numNodes + x;\n    unsigned int distanceYtoX = pathDistanceMatrix[idx];\n    unsigned int distanceYtoK = pathDistanceMatrix[y * numNodes + k];\n    unsigned int distanceKtoX = pathDistanceMatrix[k * numNodes + x];\n    unsigned int indirectDistance = distanceYtoK + distanceKtoX;\n\n    if (indirectDistance < distanceYtoX) {\n      pathDistanceMatrix[idx] = indirectDistance;\n      pathMatrix[idx] = k;\n    }\n  }\n}\n\nint main(int argc, char **argv) {\n  if (argc != 4) {\n    printf(\"Usage: %s <number of nodes> <iterations> <block size>\\n\", argv[0]);\n    return 1;\n  }\n\n  unsigned int numNodes = (unsigned int)atoi(argv[1]);\n  unsigned int numIterations = (unsigned int)atoi(argv[2]);\n  unsigned int blockSize = (unsigned int)atoi(argv[3]);\n\n  if (numNodes % blockSize != 0) {\n    numNodes = (numNodes / blockSize + 1) * blockSize;\n  }\n\n  unsigned int *pathMatrix = NULL;\n  unsigned int *pathDistanceMatrix = NULL;\n  unsigned int *verificationPathDistanceMatrix = NULL;\n  unsigned int *verificationPathMatrix = NULL;\n  size_t matrixSize;\n  size_t matrixSizeBytes;\n\n  matrixSize = (size_t)numNodes * (size_t)numNodes;\n  matrixSizeBytes = matrixSize * sizeof(unsigned int);\n\n  pathDistanceMatrix = (unsigned int *)malloc(matrixSizeBytes);\n  assert(pathDistanceMatrix != NULL);\n\n  pathMatrix = (unsigned int *)malloc(matrixSizeBytes);\n  assert(pathMatrix != NULL);\n\n  srand(2);\n  for (unsigned int i = 0; i < numNodes; i++) {\n    for (unsigned int j = 0; j < numNodes; j++) {\n      size_t index = (size_t)i * numNodes + j;\n      pathDistanceMatrix[index] = rand() % (MAXDISTANCE + 1);\n    }\n  }\n\n  for (unsigned int i = 0; i < numNodes; ++i) {\n    unsigned int iXWidth = i * numNodes;\n    pathDistanceMatrix[iXWidth + i] = 0;\n  }\n\n  for (unsigned int i = 0; i < numNodes; ++i) {\n    for (unsigned int j = 0; j < i; ++j) {\n      pathMatrix[(size_t)i * numNodes + j] = i;\n      pathMatrix[(size_t)j * numNodes + i] = j;\n    }\n    pathMatrix[(size_t)i * numNodes + i] = i;\n  }\n\n  verificationPathDistanceMatrix = (unsigned int *)malloc(matrixSizeBytes);\n  assert(verificationPathDistanceMatrix != NULL);\n\n  verificationPathMatrix = (unsigned int *)malloc(matrixSizeBytes);\n  assert(verificationPathMatrix != NULL);\n\n  memcpy(verificationPathDistanceMatrix, pathDistanceMatrix, matrixSizeBytes);\n  memcpy(verificationPathMatrix, pathMatrix, matrixSizeBytes);\n\n  unsigned int numPasses = numNodes;\n\n  unsigned int *d_pathDistanceMatrix = NULL;\n  unsigned int *d_pathMatrix = NULL;\n  CHECK_CUDA(cudaMalloc((void **)&d_pathDistanceMatrix, matrixSizeBytes));\n  CHECK_CUDA(cudaMalloc((void **)&d_pathMatrix, matrixSizeBytes));\n\n  float total_time = 0.f;\n\n  dim3 block(blockSize, blockSize);\n  dim3 grid((numNodes + block.x - 1) / block.x, (numNodes + block.y - 1) / block.y);\n\n  for (unsigned int n = 0; n < numIterations; n++) {\n    CHECK_CUDA(cudaMemcpy(d_pathDistanceMatrix, pathDistanceMatrix, matrixSizeBytes, cudaMemcpyHostToDevice));\n\n    auto start = std::chrono::steady_clock::now();\n\n    for (unsigned int k = 0; k < numPasses; k++) {\n      floydWarshallKernel<<<grid, block>>>(d_pathDistanceMatrix, d_pathMatrix, numNodes, k);\n    }\n\n    CHECK_CUDA(cudaGetLastError());\n    CHECK_CUDA(cudaDeviceSynchronize());\n\n    auto end = std::chrono::steady_clock::now();\n    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n    total_time += (float)time;\n  }\n\n  printf(\"Average kernel execution time %f (s)\\n\", (total_time * 1e-9f) / numIterations);\n\n  CHECK_CUDA(cudaMemcpy(pathDistanceMatrix, d_pathDistanceMatrix, matrixSizeBytes, cudaMemcpyDeviceToHost));\n\n  floydWarshallCPUReference(verificationPathDistanceMatrix, verificationPathMatrix, numNodes);\n\n  if (memcmp(pathDistanceMatrix, verificationPathDistanceMatrix,\n             numNodes * numNodes * sizeof(unsigned int)) == 0) {\n    printf(\"PASS\\n\");\n  } else {\n    printf(\"FAIL\\n\");\n    if (numNodes <= 8) {\n      for (unsigned int i = 0; i < numNodes; i++) {\n        for (unsigned int j = 0; j < numNodes; j++)\n          printf(\"host: %u \", verificationPathDistanceMatrix[(size_t)i * numNodes + j]);\n        printf(\"\\n\");\n      }\n      for (unsigned int i = 0; i < numNodes; i++) {\n        for (unsigned int j = 0; j < numNodes; j++)\n          printf(\"device: %u \", pathDistanceMatrix[(size_t)i * numNodes + j]);\n        printf(\"\\n\");\n      }\n    }\n  }\n\n  CHECK_CUDA(cudaFree(d_pathDistanceMatrix));\n  CHECK_CUDA(cudaFree(d_pathMatrix));\n  free(pathDistanceMatrix);\n  free(pathMatrix);\n  free(verificationPathDistanceMatrix);\n  free(verificationPathMatrix);\n\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cu"
+  ],
+  "target_files_extracted": [
+    "main.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 44.945,
+      "prompt_tokens": 1659,
+      "completion_tokens": 3057,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

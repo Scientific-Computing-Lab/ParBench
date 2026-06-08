@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-kmeans-omp",
+  "target_spec": "rodinia-kmeans-opencl",
+  "kernel": "kmeans",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 2016910496,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-i",
+    "../../data/kmeans/kdd_cup"
+  ],
+  "timestamp": "2026-04-22T01:35:08Z",
+  "prompt_tokens": 40390,
+  "completion_tokens": 1357,
+  "llm_response_time_seconds": 15.186,
+  "build_status": "pass",
+  "build_time_seconds": 0.833,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.534,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel_swap = 256, WG size of kernel_kmeans = 256 \n\nI/O completed\n\nNumber of objects: 494020\nNumber of features: 34\nnum_devices = 1\nERROR: clCreateKernel() 0 => -46\nERROR: clEnqueueWriteBuffer d_cluster (size:494020) => -38\niterated 1 times\nNumber of Iteration: 1\nInit: 0.000000\nMemAlloc: 0.000000\nHtoD: 0.000000\nExec: 0.000000\nDtoH: 0.000000\nClose: 0.016000\nTotal: 483.845001\n",
+  "verify_status": "fail",
+  "verify_strategy": "stdout_pattern",
+  "overall_status": "VERIFY_FAIL",
+  "error_message": "Verify failed: Pattern '(?i)(PASS|passed|SUCCESS|correct)' NOT found in stdout. Output indicates correctness",
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.498,
+  "translated_wall_time_seconds": 0.534,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 2.8052,
+  "translated_files": {
+    "kmeans.cl": "#ifndef FLT_MAX\n#define FLT_MAX 3.40282347e+38\n#endif\n\n// Euclidean distance squared between two points\nfloat euclid_dist_2(float *pt1, float *pt2, int numdims) {\n    float ans = 0.0f;\n    for (int i = 0; i < numdims; i++) {\n        float diff = pt1[i] - pt2[i];\n        ans += diff * diff;\n    }\n    return ans;\n}\n\n// Find nearest cluster for a point\nint find_nearest_point(float *pt, int nfeatures, float *clusters, int nclusters) {\n    int index = 0;\n    float min_dist = FLT_MAX;\n    \n    for (int i = 0; i < nclusters; i++) {\n        float dist = euclid_dist_2(pt, clusters + i * nfeatures, nfeatures);\n        if (dist < min_dist) {\n            min_dist = dist;\n            index = i;\n        }\n    }\n    return index;\n}\n\n// Kernel to assign points to nearest clusters and accumulate sums\nvoid kmeans_assign_kernel(\n    const float *features,\n    float *clusters,\n    int *membership,\n    int *cluster_counts,\n    float *cluster_sums,\n    int npoints,\n    int nfeatures,\n    int nclusters)\n{\n    int i = get_global_id(0);\n    if (i >= npoints) return;\n    \n    // Find nearest cluster for this point\n    int index = find_nearest_point(features + i * nfeatures, nfeatures, clusters, nclusters);\n    \n    // Update membership\n    membership[i] = index;\n    \n    // Accumulate counts and sums for cluster center update\n    cluster_counts[index]++;\n    for (int j = 0; j < nfeatures; j++) {\n        cluster_sums[index * nfeatures + j] += features[i * nfeatures + j];\n    }\n}\n\n// Kernel to compute new cluster centers from accumulated sums\nvoid kmeans_update_centers_kernel(\n    float *clusters,\n    int *cluster_counts,\n    float *cluster_sums,\n    int nclusters,\n    int nfeatures)\n{\n    int i = get_global_id(0);\n    if (i >= nclusters) return;\n    \n    if (cluster_counts[i] > 0) {\n        for (int j = 0; j < nfeatures; j++) {\n            clusters[i * nfeatures + j] = cluster_sums[i * nfeatures + j] / cluster_counts[i];\n        }\n    }\n    // Reset for next iteration\n    cluster_counts[i] = 0;\n    for (int j = 0; j < nfeatures; j++) {\n        cluster_sums[i * nfeatures + j] = 0.0f;\n    }\n}\n\n// Kernel to compute delta (number of points that changed membership)\nvoid kmeans_compute_delta_kernel(\n    const int *old_membership,\n    const int *new_membership,\n    int *delta,\n    int npoints)\n{\n    int i = get_global_id(0);\n    if (i >= npoints) return;\n    \n    if (old_membership[i] != new_membership[i]) {\n        (*delta)++;\n    }\n}\n\n// Kernel to initialize cluster centers from random points\nvoid kmeans_init_centers_kernel(\n    float *clusters,\n    const float *features,\n    int *cluster_indices,\n    int nclusters,\n    int nfeatures)\n{\n    int i = get_global_id(0);\n    if (i >= nclusters) return;\n    \n    int idx = cluster_indices[i];\n    for (int j = 0; j < nfeatures; j++) {\n        clusters[i * nfeatures + j] = features[idx * nfeatures + j];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kmeans.cl"
+  ],
+  "target_files_extracted": [
+    "kmeans.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 15.186,
+      "prompt_tokens": 40390,
+      "completion_tokens": 1357,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "fail",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "spec_version": "1.0.0",
+  "identity": {
+    "kernel_name": "scan",
+    "parallel_api": "omp_target",
+    "unique_id": "hecbench-scan-omp_target",
+    "source_suite": "hecbench"
+  },
+  "provenance": {
+    "repository": {
+      "url": "https://github.com/zjin-lcf/HeCBench",
+      "commit": "22785cdd708de5dca56525a277b31fe119171fd1",
+      "branch": "master"
+    },
+    "repo_root": "HeCBench-master/",
+    "source_path": "src/scan-omp",
+    "license": "MIT"
+  },
+  "files": {
+    "prompt_payload": [
+      "main.cpp"
+    ],
+    "support_files": [
+      "Makefile",
+      "Makefile.nvc",
+      "Makefile.aomp",
+      "CMakeLists.txt"
+    ],
+    "verification_only": [],
+    "translation_targets": [
+      "main.cpp"
+    ]
+  },
+  "implementation": {
+    "api": "omp_target",
+    "api_version": null,
+    "language": "C++",
+    "language_standard": "C++14"
+  },
+  "build": {
+    "environment": {
+      "preferred": "system",
+      "conda": null,
+      "system": {
+        "dependencies": [
+          "nvidia-hpc-sdk (nvc++ with OpenMP target offload)"
+        ]
+      }
+    },
+    "build_system": "make",
+    "working_directory": "src/scan-omp",
+    "commands": {
+      "configure": null,
+      "build": "make -f Makefile.nvc SM=cc89 CC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/compilers/bin/nvc++",
+      "clean": "make -f Makefile.nvc clean"
+    },
+    "variables": null,
+    "outputs": {
+      "executable": "main"
+    }
+  },
+  "run": {
+    "executable": "./main",
+    "default_arguments": [
+      "268435456",
+      "100"
+    ],
+    "timeout_seconds": 300,
+    "environment_variables": null,
+    "input_configurations": {
+      "correctness": {
+        "arguments": [
+          "1024",
+          "10"
+        ],
+        "description": "Parallel prefix sum with small input for correctness validation (OMP target offload). Note: block size 2048 fails on OMP target.",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      },
+      "performance": {
+        "arguments": [
+          "268435456",
+          "100"
+        ],
+        "description": "Parallel prefix sum with 256M elements, 100 iterations for performance measurement",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      }
+    }
+  },
+  "verification": {
+    "method": "self_checking",
+    "strategies": [
+      {
+        "type": "stdout_pattern",
+        "pattern": "PASS",
+        "description": "Prefix sum results compared against sequential reference for block sizes 128-2048"
+      },
+      {
+        "type": "exit_code",
+        "expected": 0,
+        "description": "Process exits cleanly"
+      }
+    ],
+    "floating_point": null
+  },
+  "performance": {
+    "metrics": [
+      {
+        "name": "kernel_time",
+        "extraction": {
+          "type": "regex",
+          "pattern": "Average execution time of scan \\(w/  bank conflicts\\):\\s+([\\d.]+)\\s+\\(us\\)",
+          "capture_group": 1
+        },
+        "unit": "us"
+      }
+    ],
+    "warmup_runs": 1,
+    "measurement_runs": 5
+  },
+  "hardware": {
+    "target": "gpu",
+    "requirements": {
+      "gpu": {
+        "vendor": "NVIDIA",
+        "min_compute_capability": "sm_60",
+        "min_memory_gb": 2
+      }
+    },
+    "reference_platform": {
+      "platform_id": "rtx4070-r9-7900x",
+      "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+      },
+      "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+      },
+      "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+      }
+    }
+  },
+  "baseline_results": {
+    "reference_platform": "rtx4070-r9-7900x",
+    "timestamp": "2026-03-28T23:15:00Z",
+    "configurations": {
+      "correctness": {
+        "status": "fail",
+        "exit_code": 0,
+        "stdout_snippet": "Block sizes 128-1024: all PASS. Block size 2048: FAIL (8/8 tests fail with wrong output). OMP target offload produces incorrect results at thread_limit(1024) with 2048-element shared arrays. stdout contains both PASS and FAIL lines.",
+        "wall_time_seconds": null
+      }
+    }
+  },
+  "metadata": {
+    "description": "Parallel prefix sum (scan) using OpenMP target offload with and without bank-conflict-aware optimization. Tests block sizes 128-2048 with char/short/int/long types. KNOWN_FAIL: block size 2048 produces incorrect results on OMP target.",
+    "domain": "reduction",
+    "complexity": "O(n)",
+    "tags": [
+      "scan",
+      "prefix-sum",
+      "omp-target",
+      "bank-conflict",
+      "known-fail"
+    ],
+    "multi_file": false,
+    "translation_complexity": null
+  }
+}

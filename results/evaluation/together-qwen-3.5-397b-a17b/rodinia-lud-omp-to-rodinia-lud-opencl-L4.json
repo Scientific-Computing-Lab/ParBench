@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-omp",
+  "target_spec": "rodinia-lud-opencl",
+  "kernel": "lud",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 55408477,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-24T05:44:42Z",
+  "prompt_tokens": 12578,
+  "completion_tokens": 2228,
+  "llm_response_time_seconds": 43.535,
+  "build_status": "pass",
+  "build_time_seconds": 0.463,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.159,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "3 errors generated.\n",
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nERROR: clBuildProgram() => -11\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.07,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "lud_kernel.cl": "#define BLOCK_SIZE 16\n\n#define AA(_i,_j) a[offset*size+_i*size+_j+offset]\n#define BB(_i,_j) a[_i*size+_j]\n\n__attribute__((reqd_work_group_size(BLOCK_SIZE, 1, 1)))\nvoid lud_diagonal(float* a, \n                  __local float* local_buf,\n                  int size, \n                  int offset)\n{\n    int i, j, k;\n    int local_i = get_local_id(0);\n    \n    // Load diagonal block into local memory\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (j = 0; j < BLOCK_SIZE; j++) {\n            local_buf[i*BLOCK_SIZE + j] = a[size*(offset + i) + offset + j];\n        }\n    }\n    \n    // Process diagonal block using LU decomposition\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        if (local_i == i) {\n            for (j = i; j < BLOCK_SIZE; j++) {\n                float sum = local_buf[i*BLOCK_SIZE + j];\n                for (k = 0; k < i; k++) {\n                    sum -= local_buf[i*BLOCK_SIZE + k] * local_buf[k*BLOCK_SIZE + j];\n                }\n                local_buf[i*BLOCK_SIZE + j] = sum;\n            }\n            \n            float elem = 1.0f / local_buf[i*BLOCK_SIZE + i];\n            for (j = i + 1; j < BLOCK_SIZE; j++) {\n                float sum = local_buf[j*BLOCK_SIZE + i];\n                for (k = 0; k < i; k++) {\n                    sum -= local_buf[j*BLOCK_SIZE + k] * local_buf[k*BLOCK_SIZE + i];\n                }\n                local_buf[j*BLOCK_SIZE + i] = sum * elem;\n            }\n        }\n    }\n    \n    // Write back to global memory\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (j = 0; j < BLOCK_SIZE; j++) {\n            a[size*(offset + i) + offset + j] = local_buf[i*BLOCK_SIZE + j];\n        }\n    }\n}\n\n__attribute__((reqd_work_group_size(BLOCK_SIZE * 2, 1, 1)))\nvoid lud_perimeter(float* a,\n                   __local float* local_buf1,\n                   __local float* local_buf2,\n                   __local float* local_buf3,\n                   int size,\n                   int offset)\n{\n    int local_id = get_local_id(0);\n    int num_blocks = (size - offset - BLOCK_SIZE) / BLOCK_SIZE;\n    int block_idx = local_id / BLOCK_SIZE;\n    int elem_idx = local_id % BLOCK_SIZE;\n    \n    if (block_idx == 0 && elem_idx < BLOCK_SIZE && local_id < BLOCK_SIZE * num_blocks) {\n        // Process right perimeter (upper part)\n        int i = elem_idx;\n        int j_block = local_id / BLOCK_SIZE;\n        \n        // Load diagonal block\n        for (int di = 0; di < BLOCK_SIZE; di++) {\n            for (int dj = 0; dj < BLOCK_SIZE; dj++) {\n                local_buf1[di*BLOCK_SIZE + dj] = a[size*(offset + di) + offset + dj];\n            }\n        }\n        \n        // Load current block row\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            local_buf2[i*BLOCK_SIZE + j] = a[size*(offset + i) + offset + BLOCK_SIZE + j_block*BLOCK_SIZE + j];\n        }\n        \n        // Update\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            float sum = local_buf2[i*BLOCK_SIZE + j];\n            for (int k = 0; k < i; k++) {\n                sum -= local_buf2[i*BLOCK_SIZE + k] * local_buf1[k*BLOCK_SIZE + j];\n            }\n            local_buf2[i*BLOCK_SIZE + j] = sum;\n        }\n        \n        // Write back\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            a[size*(offset + i) + offset + BLOCK_SIZE + j_block*BLOCK_SIZE + j] = local_buf2[i*BLOCK_SIZE + j];\n        }\n    }\n    \n    if (block_idx == 1 && elem_idx < BLOCK_SIZE && local_id < BLOCK_SIZE * num_blocks + BLOCK_SIZE * num_blocks) {\n        // Process lower perimeter (left part)\n        int i_block = (local_id - BLOCK_SIZE * num_blocks) / BLOCK_SIZE;\n        int j = elem_idx;\n        \n        // Load diagonal block\n        for (int di = 0; di < BLOCK_SIZE; di++) {\n            for (int dj = 0; dj < BLOCK_SIZE; dj++) {\n                local_buf3[di*BLOCK_SIZE + dj] = a[size*(offset + di) + offset + dj];\n            }\n        }\n        \n        // Load current block column\n        for (int ii = 0; ii < BLOCK_SIZE; ii++) {\n            local_buf1[ii*BLOCK_SIZE + j] = a[size*(offset + BLOCK_SIZE + i_block*BLOCK_SIZE + ii) + offset + j];\n        }\n        \n        // Update\n        for (int ii = 0; ii < BLOCK_SIZE; ii++) {\n            float sum = local_buf1[ii*BLOCK_SIZE + j];\n            for (int k = 0; k < j; k++) {\n                sum -= local_buf1[ii*BLOCK_SIZE + k] * local_buf3[k*BLOCK_SIZE + j];\n            }\n            float denom = local_buf3[j*BLOCK_SIZE + j];\n            local_buf1[ii*BLOCK_SIZE + j] = sum / denom;\n        }\n        \n        // Write back\n        for (int ii = 0; ii < BLOCK_SIZE; ii++) {\n            a[size*(offset + BLOCK_SIZE + i_block*BLOCK_SIZE + ii) + offset + j] = local_buf1[ii*BLOCK_SIZE + j];\n        }\n    }\n}\n\n__attribute__((reqd_work_group_size(BLOCK_SIZE, BLOCK_SIZE, 1)))\nvoid lud_internal(float* a,\n                  __local float* local_buf1,\n                  __local float* local_buf2,\n                  int size,\n                  int offset)\n{\n    int local_i = get_local_id(0);\n    int local_j = get_local_id(1);\n    int num_blocks = (size - offset - BLOCK_SIZE) / BLOCK_SIZE;\n    \n    // Load diagonal block column\n    for (int k = 0; k < BLOCK_SIZE; k++) {\n        local_buf1[local_i*BLOCK_SIZE + k] = a[size*(offset + local_i) + offset + k];\n    }\n    \n    // Load diagonal block row\n    for (int k = 0; k < BLOCK_SIZE; k++) {\n        local_buf2[k*BLOCK_SIZE + local_j] = a[size*(offset + k) + offset + local_j];\n    }\n    \n    // Process internal blocks\n    for (int i_block = 0; i_block < num_blocks; i_block++) {\n        for (int j_block = 0; j_block < num_blocks; j_block++) {\n            int global_i = offset + BLOCK_SIZE + i_block*BLOCK_SIZE + local_i;\n            int global_j = offset + BLOCK_SIZE + j_block*BLOCK_SIZE + local_j;\n            \n            float sum = a[size*global_i + global_j];\n            for (int k = 0; k < BLOCK_SIZE; k++) {\n                sum -= local_buf1[local_i*BLOCK_SIZE + k] * local_buf2[k*BLOCK_SIZE + local_j];\n            }\n            a[size*global_i + global_j] = sum;\n        }\n    }\n}\n\n"
+  },
+  "target_files_expected": [
+    "lud_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "lud_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 43.535,
+      "prompt_tokens": 12578,
+      "completion_tokens": 2228,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "3 errors generated.\n",
+      "run_stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nERROR: clBuildProgram() => -11\n",
+      "extraction_fail": null
+    }
+  ]
+}

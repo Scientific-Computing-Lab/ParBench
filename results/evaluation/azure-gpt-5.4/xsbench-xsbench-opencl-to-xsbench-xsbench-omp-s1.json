@@ -1,0 +1,84 @@
+{
+  "source_spec": "xsbench-xsbench-opencl",
+  "target_spec": "xsbench-xsbench-omp",
+  "kernel": "xsbench",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 44778323,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "-m",
+    "event",
+    "-s",
+    "small",
+    "-G",
+    "nuclide"
+  ],
+  "timestamp": "2026-04-26T10:47:10Z",
+  "prompt_tokens": 24082,
+  "completion_tokens": 9379,
+  "llm_response_time_seconds": 185.936,
+  "build_status": "pass",
+  "build_time_seconds": 0.355,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.446,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "ing event based simulation...\nReducing verification value...\n\nSimulation complete.\n================================================================================\n                                     RESULTS\n================================================================================\nThreads:     24\nRuntime:     1.368 seconds\nLookups:     17,000,000\nLookups/s:   12,430,860\nVerification checksum: 945990 (Valid)\n================================================================================\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "runtime": {
+      "value": 1.368,
+      "unit": "seconds"
+    }
+  },
+  "baseline_wall_time_seconds": 0.787,
+  "translated_wall_time_seconds": 1.446,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.5443,
+  "translated_files": {
+    "Simulation.c": "#include \"XSbench_header.h\"\n\nuint64_t fast_forward_LCG(uint64_t seed, uint64_t n)\n{\n\tconst uint64_t m = 9223372036854775808ULL;\n\tuint64_t a = 2806196910506780709ULL;\n\tuint64_t c = 1ULL;\n\n\tn = n % m;\n\n\tuint64_t a_new = 1ULL;\n\tuint64_t c_new = 0ULL;\n\n\twhile(n > 0)\n\t{\n\t\tif(n & 1ULL)\n\t\t{\n\t\t\ta_new *= a;\n\t\t\tc_new = c_new * a + c;\n\t\t}\n\t\tc *= (a + 1ULL);\n\t\ta *= a;\n\t\tn >>= 1ULL;\n\t}\n\n\treturn (a_new * seed + c_new) % m;\n}\n\ndouble LCG_random_double(uint64_t * seed)\n{\n\tconst uint64_t m = 9223372036854775808ULL;\n\tconst uint64_t a = 2806196910506780709ULL;\n\tconst uint64_t c = 1ULL;\n\t*seed = (a * (*seed) + c) % m;\n\treturn (double) (*seed) / (double) m;\n}\n\nint pick_mat(uint64_t * seed)\n{\n\tdouble dist[12];\n\tdist[0]  = 0.140;\n\tdist[1]  = 0.052;\n\tdist[2]  = 0.275;\n\tdist[3]  = 0.134;\n\tdist[4]  = 0.154;\n\tdist[5]  = 0.064;\n\tdist[6]  = 0.066;\n\tdist[7]  = 0.055;\n\tdist[8]  = 0.008;\n\tdist[9]  = 0.015;\n\tdist[10] = 0.025;\n\tdist[11] = 0.013;\n\n\tdouble roll = LCG_random_double(seed);\n\n\tfor( int i = 0; i < 12; i++ )\n\t{\n\t\tdouble running = 0.0;\n\t\tfor( int j = i; j > 0; j-- )\n\t\t\trunning += dist[j];\n\t\tif( roll < running )\n\t\t\treturn i;\n\t}\n\n\treturn 0;\n}\n\nlong grid_search( long n, double quarry, double * restrict A )\n{\n\tlong lowerLimit = 0;\n\tlong upperLimit = n - 1;\n\tlong examinationPoint;\n\tlong length = upperLimit - lowerLimit;\n\n\twhile( length > 1 )\n\t{\n\t\texaminationPoint = lowerLimit + ( length / 2 );\n\n\t\tif( A[examinationPoint] > quarry )\n\t\t\tupperLimit = examinationPoint;\n\t\telse\n\t\t\tlowerLimit = examinationPoint;\n\n\t\tlength = upperLimit - lowerLimit;\n\t}\n\n\treturn lowerLimit;\n}\n\nlong grid_search_nuclide( long n, double quarry, NuclideGridPoint * A, long low, long high )\n{\n\tlong lowerLimit = low;\n\tlong upperLimit = high;\n\tlong examinationPoint;\n\tlong length = upperLimit - lowerLimit;\n\n\twhile( length > 1 )\n\t{\n\t\texaminationPoint = lowerLimit + ( length / 2 );\n\n\t\tif( A[examinationPoint].energy > quarry )\n\t\t\tupperLimit = examinationPoint;\n\t\telse\n\t\t\tlowerLimit = examinationPoint;\n\n\t\tlength = upperLimit - lowerLimit;\n\t}\n\n\treturn lowerLimit;\n}\n\nvoid calculate_micro_xs( double p_energy, int nuc, long n_isotopes,\n                         long n_gridpoints,\n                         double * restrict egrid, int * restrict index_data,\n                         NuclideGridPoint * restrict nuclide_grids,\n                         long idx, double * restrict xs_vector, int grid_type, int hash_bins )\n{\n\tdouble f;\n\tNuclideGridPoint * low, * high;\n\n\tif( grid_type == NUCLIDE )\n\t{\n\t\tidx = grid_search_nuclide( n_gridpoints, p_energy,\n\t\t                           &nuclide_grids[nuc * n_gridpoints], 0, n_gridpoints - 1 );\n\n\t\tif( idx == n_gridpoints - 1 )\n\t\t\tlow = &nuclide_grids[nuc * n_gridpoints + idx - 1];\n\t\telse\n\t\t\tlow = &nuclide_grids[nuc * n_gridpoints + idx];\n\t}\n\telse if( grid_type == UNIONIZED )\n\t{\n\t\tif( index_data[idx * n_isotopes + nuc] == n_gridpoints - 1 )\n\t\t\tlow = &nuclide_grids[nuc * n_gridpoints + index_data[idx * n_isotopes + nuc] - 1];\n\t\telse\n\t\t\tlow = &nuclide_grids[nuc * n_gridpoints + index_data[idx * n_isotopes + nuc]];\n\t}\n\telse\n\t{\n\t\tint u_low = index_data[idx * n_isotopes + nuc];\n\n\t\tint u_high;\n\t\tif( idx == hash_bins - 1 )\n\t\t\tu_high = n_gridpoints - 1;\n\t\telse\n\t\t\tu_high = index_data[(idx + 1) * n_isotopes + nuc] + 1;\n\n\t\tdouble e_low  = nuclide_grids[nuc * n_gridpoints + u_low].energy;\n\t\tdouble e_high = nuclide_grids[nuc * n_gridpoints + u_high].energy;\n\t\tint lower;\n\t\tif( p_energy <= e_low )\n\t\t\tlower = 0;\n\t\telse if( p_energy >= e_high )\n\t\t\tlower = n_gridpoints - 1;\n\t\telse\n\t\t\tlower = grid_search_nuclide( n_gridpoints, p_energy,\n\t\t\t                             &nuclide_grids[nuc * n_gridpoints], u_low, u_high );\n\n\t\tif( lower == n_gridpoints - 1 )\n\t\t\tlow = &nuclide_grids[nuc * n_gridpoints + lower - 1];\n\t\telse\n\t\t\tlow = &nuclide_grids[nuc * n_gridpoints + lower];\n\t}\n\n\thigh = low + 1;\n\n\tf = (high->energy - p_energy) / (high->energy - low->energy);\n\n\txs_vector[0] = high->total_xs      - f * (high->total_xs      - low->total_xs);\n\txs_vector[1] = high->elastic_xs    - f * (high->elastic_xs    - low->elastic_xs);\n\txs_vector[2] = high->absorbtion_xs - f * (high->absorbtion_xs - low->absorbtion_xs);\n\txs_vector[3] = high->fission_xs    - f * (high->fission_xs    - low->fission_xs);\n\txs_vector[4] = high->nu_fission_xs - f * (high->nu_fission_xs - low->nu_fission_xs);\n}\n\nvoid calculate_macro_xs( double p_energy, int mat, long n_isotopes,\n                         long n_gridpoints, int * restrict num_nucs,\n                         double * restrict concs,\n                         double * restrict egrid, int * restrict index_data,\n                         NuclideGridPoint * restrict nuclide_grids,\n                         int * restrict mats,\n                         double * restrict macro_xs_vector, int grid_type, int hash_bins, int max_num_nucs )\n{\n\tint p_nuc;\n\tlong idx = -1;\n\tdouble conc;\n\n\tfor( int k = 0; k < 5; k++ )\n\t\tmacro_xs_vector[k] = 0.0;\n\n\tif( grid_type == UNIONIZED )\n\t\tidx = grid_search( n_isotopes * n_gridpoints, p_energy, egrid );\n\telse if( grid_type == HASH )\n\t{\n\t\tdouble du = 1.0 / hash_bins;\n\t\tidx = p_energy / du;\n\t}\n\n\tfor( int j = 0; j < num_nucs[mat]; j++ )\n\t{\n\t\tdouble xs_vector[5];\n\t\tp_nuc = mats[mat * max_num_nucs + j];\n\t\tconc = concs[mat * max_num_nucs + j];\n\t\tcalculate_micro_xs( p_energy, p_nuc, n_isotopes,\n\t\t                    n_gridpoints, egrid, index_data,\n\t\t                    nuclide_grids, idx, xs_vector, grid_type, hash_bins );\n\t\tfor( int k = 0; k < 5; k++ )\n\t\t\tmacro_xs_vector[k] += xs_vector[k] * conc;\n\t}\n}\n\nunsigned long long run_event_based_simulation( Inputs in, SimulationData SD, int mype )\n{\n\tint * verification_array_host = (int *) malloc((size_t) in.lookups * sizeof(int));\n\tassert(verification_array_host != NULL);\n\n\tif( mype == 0 )\n\t\tprintf(\"Running event based simulation...\\n\");\n\n\t#pragma omp parallel for schedule(static)\n\tfor( int i = 0; i < in.lookups; i++ )\n\t{\n\t\tuint64_t seed = STARTING_SEED;\n\t\tseed = fast_forward_LCG(seed, (uint64_t) 2 * (uint64_t) i);\n\n\t\tdouble p_energy = LCG_random_double(&seed);\n\t\tint mat = pick_mat(&seed);\n\n\t\tdouble macro_xs_vector[5] = {0.0, 0.0, 0.0, 0.0, 0.0};\n\n\t\tcalculate_macro_xs(\n\t\t\tp_energy,\n\t\t\tmat,\n\t\t\tin.n_isotopes,\n\t\t\tin.n_gridpoints,\n\t\t\tSD.num_nucs,\n\t\t\tSD.concs,\n\t\t\tSD.unionized_energy_array,\n\t\t\tSD.index_grid,\n\t\t\tSD.nuclide_grid,\n\t\t\tSD.mats,\n\t\t\tmacro_xs_vector,\n\t\t\tin.grid_type,\n\t\t\tin.hash_bins,\n\t\t\tSD.max_num_nucs\n\t\t);\n\n\t\tdouble max = -1.0;\n\t\tint max_idx = 0;\n\t\tfor( int j = 0; j < 5; j++ )\n\t\t{\n\t\t\tif( macro_xs_vector[j] > max )\n\t\t\t{\n\t\t\t\tmax = macro_xs_vector[j];\n\t\t\t\tmax_idx = j;\n\t\t\t}\n\t\t}\n\t\tverification_array_host[i] = max_idx + 1;\n\t}\n\n\tif( mype == 0 )\n\t\tprintf(\"Reducing verification value...\\n\");\n\n\tunsigned long long verification = 0;\n\tfor( int l = 0; l < in.lookups; l++ )\n\t\tverification += verification_array_host[l];\n\n\tfree(verification_array_host);\n\treturn verification;\n}\n\nunsigned long long run_event_based_simulation_optimization_1( Inputs in, SimulationData SD, int mype )\n{\n\tprintf(\"Error: No kernel ID %d found!\\n\", 1);\n\texit(1);\n\treturn 0;\n}\n\nunsigned long long run_history_based_simulation( Inputs in, SimulationData SD, int mype )\n{\n\t(void) in;\n\t(void) SD;\n\t(void) mype;\n\tprintf(\"History-based simulation not implemented in OpenMP offload code. Instead,\\nuse the event-based method with \\\"-m event\\\" argument.\\n\");\n\texit(1);\n\treturn 0;\n}\n",
+    "GridInit.c": "#include \"XSbench_header.h\"\n\nSimulationData grid_init_do_not_profile( Inputs in, int mype )\n{\n\tSimulationData SD;\n\tmemset(&SD, 0, sizeof(SimulationData));\n\n\tsize_t nbytes = 0;\n\tuint64_t seed = 42;\n\n\tif( mype == 0 ) printf(\"Intializing nuclide grids...\\n\");\n\n\tSD.length_nuclide_grid = in.n_isotopes * in.n_gridpoints;\n\tSD.nuclide_grid = (NuclideGridPoint *) malloc((size_t) SD.length_nuclide_grid * sizeof(NuclideGridPoint));\n\tassert(SD.nuclide_grid != NULL);\n\tnbytes += (size_t) SD.length_nuclide_grid * sizeof(NuclideGridPoint);\n\n\tfor( int i = 0; i < SD.length_nuclide_grid; i++ )\n\t{\n\t\tSD.nuclide_grid[i].energy        = LCG_random_double(&seed);\n\t\tSD.nuclide_grid[i].total_xs      = LCG_random_double(&seed);\n\t\tSD.nuclide_grid[i].elastic_xs    = LCG_random_double(&seed);\n\t\tSD.nuclide_grid[i].absorbtion_xs = LCG_random_double(&seed);\n\t\tSD.nuclide_grid[i].fission_xs    = LCG_random_double(&seed);\n\t\tSD.nuclide_grid[i].nu_fission_xs = LCG_random_double(&seed);\n\t}\n\n\tfor( int i = 0; i < in.n_isotopes; i++ )\n\t\tqsort(&SD.nuclide_grid[i * in.n_gridpoints], in.n_gridpoints,\n\t\t      sizeof(NuclideGridPoint), NGP_compare);\n\n\tif( in.grid_type == NUCLIDE )\n\t{\n\t\tSD.length_unionized_energy_array = 0;\n\t\tSD.length_index_grid = 0;\n\t\tSD.unionized_energy_array = NULL;\n\t\tSD.index_grid = NULL;\n\t}\n\n\tif( in.grid_type == UNIONIZED )\n\t{\n\t\tif( mype == 0 ) printf(\"Intializing unionized grid...\\n\");\n\n\t\tSD.length_unionized_energy_array = in.n_isotopes * in.n_gridpoints;\n\t\tSD.unionized_energy_array = (double *) malloc((size_t) SD.length_unionized_energy_array * sizeof(double));\n\t\tassert(SD.unionized_energy_array != NULL);\n\t\tnbytes += (size_t) SD.length_unionized_energy_array * sizeof(double);\n\n\t\tfor( int i = 0; i < SD.length_unionized_energy_array; i++ )\n\t\t\tSD.unionized_energy_array[i] = SD.nuclide_grid[i].energy;\n\n\t\tqsort(SD.unionized_energy_array, SD.length_unionized_energy_array,\n\t\t      sizeof(double), double_compare);\n\n\t\tSD.length_index_grid = (long) SD.length_unionized_energy_array * in.n_isotopes;\n\t\tSD.index_grid = (int *) malloc((size_t) SD.length_index_grid * sizeof(int));\n\t\tassert(SD.index_grid != NULL);\n\t\tnbytes += (size_t) SD.length_index_grid * sizeof(int);\n\n\t\tint * idx_low = (int *) calloc((size_t) in.n_isotopes, sizeof(int));\n\t\tassert(idx_low != NULL);\n\t\tdouble * energy_high = (double *) malloc((size_t) in.n_isotopes * sizeof(double));\n\t\tassert(energy_high != NULL);\n\n\t\tfor( int i = 0; i < in.n_isotopes; i++ )\n\t\t\tenergy_high[i] = SD.nuclide_grid[i * in.n_gridpoints + 1].energy;\n\n\t\tfor( long e = 0; e < SD.length_unionized_energy_array; e++ )\n\t\t{\n\t\t\tdouble unionized_energy = SD.unionized_energy_array[e];\n\t\t\tfor( long i = 0; i < in.n_isotopes; i++ )\n\t\t\t{\n\t\t\t\tif( unionized_energy < energy_high[i] )\n\t\t\t\t\tSD.index_grid[e * in.n_isotopes + i] = idx_low[i];\n\t\t\t\telse if( idx_low[i] == in.n_gridpoints - 2 )\n\t\t\t\t\tSD.index_grid[e * in.n_isotopes + i] = idx_low[i];\n\t\t\t\telse\n\t\t\t\t{\n\t\t\t\t\tidx_low[i]++;\n\t\t\t\t\tSD.index_grid[e * in.n_isotopes + i] = idx_low[i];\n\t\t\t\t\tenergy_high[i] = SD.nuclide_grid[i * in.n_gridpoints + idx_low[i] + 1].energy;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\tfree(idx_low);\n\t\tfree(energy_high);\n\t}\n\n\tif( in.grid_type == HASH )\n\t{\n\t\tif( mype == 0 ) printf(\"Intializing hash grid...\\n\");\n\t\tSD.length_unionized_energy_array = 0;\n\t\tSD.unionized_energy_array = NULL;\n\t\tSD.length_index_grid = (long) in.hash_bins * in.n_isotopes;\n\t\tSD.index_grid = (int *) malloc((size_t) SD.length_index_grid * sizeof(int));\n\t\tassert(SD.index_grid != NULL);\n\t\tnbytes += (size_t) SD.length_index_grid * sizeof(int);\n\n\t\tdouble du = 1.0 / in.hash_bins;\n\n\t\tfor( long e = 0; e < in.hash_bins; e++ )\n\t\t{\n\t\t\tdouble energy = e * du;\n\t\t\tfor( long i = 0; i < in.n_isotopes; i++ )\n\t\t\t{\n\t\t\t\tSD.index_grid[e * in.n_isotopes + i] =\n\t\t\t\t\tgrid_search_nuclide(in.n_gridpoints, energy,\n\t\t\t\t\t                    SD.nuclide_grid + i * in.n_gridpoints,\n\t\t\t\t\t                    0, in.n_gridpoints - 1);\n\t\t\t}\n\t\t}\n\t}\n\n\tif( mype == 0 ) printf(\"Intializing material data...\\n\");\n\n\tSD.num_nucs = load_num_nucs(in.n_isotopes);\n\tSD.length_num_nucs = 12;\n\n\tSD.mats = load_mats(SD.num_nucs, in.n_isotopes, &SD.max_num_nucs);\n\tSD.length_mats = SD.length_num_nucs * SD.max_num_nucs;\n\n\tSD.concs = load_concs(SD.num_nucs, SD.max_num_nucs);\n\tSD.length_concs = SD.length_mats;\n\n\tif( mype == 0 )\n\t\tprintf(\"Intialization complete. Allocated %.0lf MB of data.\\n\",\n\t\t       nbytes / 1024.0 / 1024.0);\n\n\treturn SD;\n}\n"
+  },
+  "target_files_expected": [
+    "Simulation.c",
+    "GridInit.c"
+  ],
+  "target_files_extracted": [
+    "Simulation.c",
+    "GridInit.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 185.936,
+      "prompt_tokens": 24082,
+      "completion_tokens": 9379,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

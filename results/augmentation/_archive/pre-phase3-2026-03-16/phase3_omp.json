@@ -1,0 +1,86 @@
+[
+  {
+    "spec_id": "rodinia-hotspot-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot_openmp.cpp": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "hotspot_openmp.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.069,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot_openmp.cpp": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "hotspot_openmp.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.07,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot_openmp.cpp": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "hotspot_openmp.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "nmp.cpp:296:23: warning: ISO C++ forbids converting a string constant to \u2018char*\u2019 [-Wwrite-strings]\n  296 |                 fatal(\"unable to allocate memory\");\n      |                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~\nhotspot_openmp.cpp: In function \u2018void read_input(float*, int, int, char*)\u2019:\nhotspot_openmp.cpp:251:22: warning: ignoring return value of \u2018char* fgets(char*, int, FILE*)\u2019 declared with attribute \u2018warn_unused_result\u2019 [-Wunused-result]\n  251 |                 fgets(x_52, STR_SIZE, val_51);\n      |                 ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~\nmake: *** [Makefile:11: hotspot] Error 1\n"
+  }
+]

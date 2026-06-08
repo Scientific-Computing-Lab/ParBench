@@ -1,0 +1,73 @@
+{
+  "source_spec": "rodinia-nw-omp",
+  "target_spec": "rodinia-nw-opencl",
+  "kernel": "nw",
+  "model": "azure-gpt-5.4",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 716361242,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "2048",
+    "10",
+    "./nw.cl"
+  ],
+  "timestamp": "2026-04-27T04:24:45Z",
+  "prompt_tokens": 11350,
+  "completion_tokens": 3093,
+  "llm_response_time_seconds": 76.177,
+  "build_status": "pass",
+  "build_time_seconds": 0.352,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.283,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 \nnum_devices = 1\nworksize = 2048\nProcessing upper-left matrix\nProcessing lower-right matrix\nComputation Done\nInit: 201.662003\nMemAlloc: 0.003000\nHtoD: 1.930816\nExec: 4.430969\nDtoH: 5.893952\nClose: 0.840000\nTotal: 216.070007\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.09,
+  "translated_wall_time_seconds": 0.283,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.318,
+  "translated_files": {
+    "nw.cl": "#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\ninline int maximum(int a, int b, int c) {\n    int k = (a <= b) ? b : a;\n    return (k <= c) ? c : k;\n}\n\n__kernel void nw_kernel1(__global int *reference,\n                         __global int *input_itemsets,\n                         __global int *output_itemsets,\n                         __local int *input_itemsets_l,\n                         __local int *reference_l,\n                         int max_cols,\n                         int penalty,\n                         int blk,\n                         int block_width,\n                         int worksize,\n                         int offset_r,\n                         int offset_c)\n{\n    int lid = get_local_id(0);\n    int b_index_x = get_group_id(0);\n    int b_index_y = blk - 1 - b_index_x;\n\n    if (lid != 0)\n        return;\n\n    for (int i = 0; i < BLOCK_SIZE; ++i) {\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            reference_l[i * BLOCK_SIZE + j] =\n                reference[max_cols * (b_index_y * BLOCK_SIZE + i + 1 + offset_r) +\n                          (b_index_x * BLOCK_SIZE + j + 1 + offset_c)];\n        }\n    }\n\n    for (int i = 0; i < BLOCK_SIZE + 1; ++i) {\n        for (int j = 0; j < BLOCK_SIZE + 1; ++j) {\n            input_itemsets_l[i * (BLOCK_SIZE + 1) + j] =\n                input_itemsets[max_cols * (b_index_y * BLOCK_SIZE + i + offset_r) +\n                               (b_index_x * BLOCK_SIZE + j + offset_c)];\n        }\n    }\n\n    for (int i = 1; i < BLOCK_SIZE + 1; ++i) {\n        for (int j = 1; j < BLOCK_SIZE + 1; ++j) {\n            input_itemsets_l[i * (BLOCK_SIZE + 1) + j] =\n                maximum(input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + (j - 1)] +\n                            reference_l[(i - 1) * BLOCK_SIZE + (j - 1)],\n                        input_itemsets_l[i * (BLOCK_SIZE + 1) + (j - 1)] - penalty,\n                        input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + j] - penalty);\n        }\n    }\n\n    for (int i = 0; i < BLOCK_SIZE; ++i) {\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            int val = input_itemsets_l[(i + 1) * (BLOCK_SIZE + 1) + (j + 1)];\n            int idx = max_cols * (b_index_y * BLOCK_SIZE + i + 1 + offset_r) +\n                      (b_index_x * BLOCK_SIZE + j + 1 + offset_c);\n            input_itemsets[idx] = val;\n            output_itemsets[idx] = val;\n        }\n    }\n}\n\n__kernel void nw_kernel2(__global int *reference,\n                         __global int *input_itemsets,\n                         __global int *output_itemsets,\n                         __local int *input_itemsets_l,\n                         __local int *reference_l,\n                         int max_cols,\n                         int penalty,\n                         int blk,\n                         int block_width,\n                         int worksize,\n                         int offset_r,\n                         int offset_c)\n{\n    int lid = get_local_id(0);\n    int g = get_group_id(0);\n    int b_index_x = block_width - blk + g;\n    int b_index_y = block_width - 1 - g;\n\n    if (lid != 0)\n        return;\n\n    for (int i = 0; i < BLOCK_SIZE; ++i) {\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            reference_l[i * BLOCK_SIZE + j] =\n                reference[max_cols * (b_index_y * BLOCK_SIZE + i + 1 + offset_r) +\n                          (b_index_x * BLOCK_SIZE + j + 1 + offset_c)];\n        }\n    }\n\n    for (int i = 0; i < BLOCK_SIZE + 1; ++i) {\n        for (int j = 0; j < BLOCK_SIZE + 1; ++j) {\n            input_itemsets_l[i * (BLOCK_SIZE + 1) + j] =\n                input_itemsets[max_cols * (b_index_y * BLOCK_SIZE + i + offset_r) +\n                               (b_index_x * BLOCK_SIZE + j + offset_c)];\n        }\n    }\n\n    for (int i = 1; i < BLOCK_SIZE + 1; ++i) {\n        for (int j = 1; j < BLOCK_SIZE + 1; ++j) {\n            input_itemsets_l[i * (BLOCK_SIZE + 1) + j] =\n                maximum(input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + (j - 1)] +\n                            reference_l[(i - 1) * BLOCK_SIZE + (j - 1)],\n                        input_itemsets_l[i * (BLOCK_SIZE + 1) + (j - 1)] - penalty,\n                        input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + j] - penalty);\n        }\n    }\n\n    for (int i = 0; i < BLOCK_SIZE; ++i) {\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            int val = input_itemsets_l[(i + 1) * (BLOCK_SIZE + 1) + (j + 1)];\n            int idx = max_cols * (b_index_y * BLOCK_SIZE + i + 1 + offset_r) +\n                      (b_index_x * BLOCK_SIZE + j + 1 + offset_c);\n            input_itemsets[idx] = val;\n            output_itemsets[idx] = val;\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "nw.cl"
+  ],
+  "target_files_extracted": [
+    "nw.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 76.177,
+      "prompt_tokens": 11350,
+      "completion_tokens": 3093,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

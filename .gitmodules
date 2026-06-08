@@ -1,0 +1,4 @@
+[submodule "rodinia"]
+	path = rodinia
+	url = https://github.com/yuhc/gpu-rodinia
+	ignore = dirty

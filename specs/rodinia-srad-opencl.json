@@ -1,0 +1,220 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "srad",
+        "parallel_api": "opencl",
+        "unique_id": "rodinia-srad-opencl",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "opencl/srad",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "kernel/kernel_gpu_opencl.cl",
+            "kernel/compress_kernel.c",
+            "kernel/extract_kernel.c",
+            "kernel/kernel_gpu_opencl_wrapper.c",
+            "kernel/prepare_kernel.c",
+            "kernel/reduce_kernel.c",
+            "kernel/srad2_kernel.c",
+            "kernel/srad_kernel.c",
+            "main.c"
+        ],
+        "support_files": [
+            "util/graphics/graphics.c",
+            "util/graphics/resize.c",
+            "util/opencl/opencl.c",
+            "util/timer/timer.c",
+            "kernel/kernel_gpu_opencl_wrapper.h",
+            "main.h",
+            "util/graphics/graphics.h",
+            "util/graphics/resize.h",
+            "util/opencl/opencl.h",
+            "util/timer/timer.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "kernel/kernel_gpu_opencl.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C",
+        "language_standard": null
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl>=2.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl/srad",
+        "commands": {
+            "configure": null,
+            "build": "make OPENCL_INC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include OPENCL_LIB=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+            "clean": "make clean"
+        },
+        "variables": {
+            "OPENCL_INC": {
+                "description": "Path to OpenCL headers",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include",
+                "detection": "find /usr -name 'cl.h' -path '*/CL/cl.h' | head -1 | xargs dirname | xargs dirname"
+            },
+            "OPENCL_LIB": {
+                "description": "Path to OpenCL libraries",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+                "detection": "find /usr -name 'libOpenCL.so' | head -1 | xargs dirname"
+            }
+        },
+        "outputs": {
+            "executable": "./srad.out"
+        }
+    },
+    "run": {
+        "executable": "./srad.out",
+        "default_arguments": [
+            "-s",
+            "502",
+            "458",
+            "-n",
+            "2",
+            "-l",
+            "1",
+            "-p",
+            "0"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-s",
+                    "502",
+                    "458",
+                    "-n",
+                    "2",
+                    "-l",
+                    "1",
+                    "-p",
+                    "0"
+                ],
+                "description": "Small input for correctness verification of srad (OPENCL)",
+                "input_files": [
+                    "../../data/srad/image.pgm"
+                ],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "-s",
+                    "502",
+                    "458",
+                    "-n",
+                    "2",
+                    "-l",
+                    "1",
+                    "-p",
+                    "0"
+                ],
+                "description": "Large input for performance measurement of srad (OPENCL)",
+                "input_files": [
+                    "../../data/srad/image.pgm"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Iterations Progress",
+                "description": "SRAD iterations completed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.282099+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "WG size of kernel = 256 \nPlatform: NVIDIA Corporation\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n--------------------------------\nmax # of workgroups = 899, # of threads/workgroup = 256 (ensure that device can handle)\nIterations Progress: hidden\nTime spent in different stages of the application:\nInit: 46.780998\nMemAlloc: 0.003000\nHtoD: 0.039424\nExec: 0.126336\nDtoH: 0.036576\nClose: 19.917999\nTotal: 67.402000\n",
+                "wall_time_seconds": 0.085,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Speckle reducing anisotropic diffusion (SRAD) image filter on GPU",
+        "domain": "image processing",
+        "complexity": "speckle reducing anisotropic diffusion",
+        "tags": [
+            "anisotropic-diffusion",
+            "denoising",
+            "image-processing",
+            "opencl",
+            "rodinia",
+            "srad"
+        ],
+        "multi_file": true,
+        "translation_complexity": "single_file"
+    }
+}

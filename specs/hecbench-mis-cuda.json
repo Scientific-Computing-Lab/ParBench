@@ -1,0 +1,203 @@
+{
+  "spec_version": "1.0.0",
+  "identity": {
+    "kernel_name": "mis",
+    "parallel_api": "cuda",
+    "unique_id": "hecbench-mis-cuda",
+    "source_suite": "hecbench"
+  },
+  "provenance": {
+    "repository": {
+      "url": "https://github.com/zjin-lcf/HeCBench",
+      "commit": "archive-download",
+      "branch": "master"
+    },
+    "repo_root": "HeCBench-master/",
+    "source_path": "src/mis-cuda",
+    "license": "MIT"
+  },
+  "files": {
+    "prompt_payload": [
+      "main.cu"
+    ],
+    "support_files": [
+      "Makefile",
+      "CMakeLists.txt",
+      "graph.h",
+      "internet.egr"
+    ],
+    "verification_only": [],
+    "translation_targets": [
+      "main.cu"
+    ]
+  },
+  "implementation": {
+    "api": "cuda",
+    "api_version": null,
+    "language": "C++",
+    "language_standard": "C++17"
+  },
+  "build": {
+    "environment": {
+      "preferred": "system",
+      "conda": null,
+      "system": {
+        "dependencies": [
+          "CUDA Toolkit >= 11.0",
+          "GCC >= 9.0"
+        ]
+      }
+    },
+    "build_system": "make",
+    "working_directory": "src/mis-cuda",
+    "commands": {
+      "configure": null,
+      "build": "make ARCH=sm_89",
+      "clean": "make clean"
+    },
+    "variables": null,
+    "outputs": {
+      "executable": "main"
+    }
+  },
+  "run": {
+    "executable": "./main",
+    "default_arguments": [
+      "internet.egr",
+      "100"
+    ],
+    "timeout_seconds": 300,
+    "environment_variables": null,
+    "input_configurations": {
+      "correctness": {
+        "arguments": [
+          "internet.egr",
+          "1"
+        ],
+        "description": "Single iteration for correctness; validates MIS properties on graph",
+        "input_files": [
+          "internet.egr"
+        ],
+        "expected_results": null
+      },
+      "performance": {
+        "arguments": [
+          "internet.egr",
+          "100"
+        ],
+        "description": "100 iterations for performance measurement",
+        "input_files": [
+          "internet.egr"
+        ],
+        "expected_results": null
+      }
+    }
+  },
+  "verification": {
+    "method": "self_checking",
+    "strategies": [
+      {
+        "type": "exit_code",
+        "expected": 0,
+        "description": "Exit code 0 indicates valid MIS computed without errors"
+      },
+      {
+        "type": "stdout_pattern",
+        "pattern": "compute time",
+        "description": "Presence of timing output indicates successful MIS computation"
+      }
+    ],
+    "floating_point": null
+  },
+  "performance": {
+    "metrics": [
+      {
+        "name": "compute_time",
+        "extraction": {
+          "type": "regex",
+          "pattern": "compute time:\\s+([\\d.eE+-]+)\\s+s",
+          "capture_group": 1
+        },
+        "unit": "s"
+      },
+      {
+        "name": "node_throughput",
+        "extraction": {
+          "type": "regex",
+          "pattern": "throughput:\\s+([\\d.eE+-]+)\\s+Mnodes/s",
+          "capture_group": 1
+        },
+        "unit": "Mnodes/s"
+      }
+    ],
+    "warmup_runs": 1,
+    "measurement_runs": 5
+  },
+  "hardware": {
+    "target": "gpu",
+    "requirements": {
+      "gpu": {
+        "vendor": "NVIDIA",
+        "min_compute_capability": "sm_60",
+        "min_memory_gb": 2
+      }
+    },
+    "reference_platform": {
+      "platform_id": "rtx4070-r9-7900x",
+      "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+      },
+      "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+      },
+      "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+      }
+    }
+  },
+  "baseline_results": {
+    "reference_platform": "rtx4070-r9-7900x",
+    "timestamp": "2026-03-03T18:52:35Z",
+    "configurations": {
+      "correctness": {
+        "status": "pass",
+        "exit_code": 0,
+        "stdout_snippet": "ECL-MIS v1.3 (main.cu)\nCopyright 2017-2020 Texas State University\nconfiguration: 124651 nodes and 387240 edges (internet.egr)\naverage degree: 3.11 edges per node\ncompute time: 0.000154 s\nthroughput: 807.487247 Mnodes/s\nthroughput: 2508.534722 Medges/s\n",
+        "wall_time_seconds": 0.066
+      },
+      "performance": {
+        "status": "pass",
+        "wall_time_seconds": 0.066,
+        "metrics": {
+          "compute_time_s": 0.000154,
+          "node_throughput_Mnodes/s": 807.487247
+        }
+      }
+    }
+  },
+  "metadata": {
+    "description": "Maximal Independent Set computation on GPU using Luby's parallel algorithm. Iteratively selects vertices into independent set, verified via graph structure validation on stderr.",
+    "domain": "graph algorithms",
+    "complexity": "O(V + E)",
+    "tags": [
+      "mis",
+      "maximal-independent-set",
+      "luby",
+      "graph",
+      "combinatorial"
+    ],
+    "multi_file": true,
+    "translation_complexity": null
+  }
+}

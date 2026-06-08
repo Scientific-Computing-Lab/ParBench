@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-cuda",
+  "target_spec": "rodinia-lud-opencl",
+  "kernel": "lud",
+  "model": "azure-gpt-5.4",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1320460482,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-27T01:30:37Z",
+  "prompt_tokens": 11964,
+  "completion_tokens": 2883,
+  "llm_response_time_seconds": 46.369,
+  "build_status": "pass",
+  "build_time_seconds": 0.463,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.245,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nInit: 191.425995\nMemAlloc: 0.003000\nHtoD: 0.011424\nExec: 0.367264\nDtoH: 0.010624\nClose: 0.059000\nTotal: 192.408005\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.07,
+  "translated_wall_time_seconds": 0.245,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.2857,
+  "translated_files": {
+    "lud_kernel.cl": "#ifdef RD_WG_SIZE_0_0\n#define BLOCK_SIZE RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n#define BLOCK_SIZE RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n#define BLOCK_SIZE RD_WG_SIZE\n#else\n#define BLOCK_SIZE 16\n#endif\n\n__kernel void\nlud_diagonal(__global float *m,\n             __local float *shadow,\n             int matrix_dim,\n             int offset)\n{\n    int tx = (int)get_local_id(0);\n    int i, j;\n    int array_offset;\n\n#define SHADOW(r, c) shadow[(r) * BLOCK_SIZE + (c)]\n\n    array_offset = offset * matrix_dim + offset;\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        SHADOW(i, tx) = m[array_offset + tx];\n        array_offset += matrix_dim;\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    for (i = 0; i < BLOCK_SIZE - 1; i++) {\n        if (tx > i) {\n            for (j = 0; j < i; j++)\n                SHADOW(tx, i) -= SHADOW(tx, j) * SHADOW(j, i);\n            SHADOW(tx, i) /= SHADOW(i, i);\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n\n        if (tx > i) {\n            for (j = 0; j < i + 1; j++)\n                SHADOW(i + 1, tx) -= SHADOW(i + 1, j) * SHADOW(j, tx);\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    array_offset = (offset + 1) * matrix_dim + offset;\n    for (i = 1; i < BLOCK_SIZE; i++) {\n        m[array_offset + tx] = SHADOW(i, tx);\n        array_offset += matrix_dim;\n    }\n\n#undef SHADOW\n}\n\n__kernel void\nlud_perimeter(__global float *m,\n              __local float *dia,\n              __local float *peri_row,\n              __local float *peri_col,\n              int matrix_dim,\n              int offset)\n{\n    int tx = (int)get_local_id(0);\n    int i, j, array_offset;\n    int idx;\n    int bx = (int)get_group_id(0);\n\n#define DIA(r, c)      dia[(r) * BLOCK_SIZE + (c)]\n#define PERI_ROW(r, c) peri_row[(r) * BLOCK_SIZE + (c)]\n#define PERI_COL(r, c) peri_col[(r) * BLOCK_SIZE + (c)]\n\n    if (tx < BLOCK_SIZE) {\n        idx = tx;\n\n        array_offset = offset * matrix_dim + offset;\n        for (i = 0; i < BLOCK_SIZE / 2; i++) {\n            DIA(i, idx) = m[array_offset + idx];\n            array_offset += matrix_dim;\n        }\n\n        array_offset = offset * matrix_dim + offset;\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            PERI_ROW(i, idx) = m[array_offset + (bx + 1) * BLOCK_SIZE + idx];\n            array_offset += matrix_dim;\n        }\n    } else {\n        idx = tx - BLOCK_SIZE;\n\n        array_offset = (offset + BLOCK_SIZE / 2) * matrix_dim + offset;\n        for (i = BLOCK_SIZE / 2; i < BLOCK_SIZE; i++) {\n            DIA(i, idx) = m[array_offset + idx];\n            array_offset += matrix_dim;\n        }\n\n        array_offset = (offset + (bx + 1) * BLOCK_SIZE) * matrix_dim + offset;\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            PERI_COL(i, idx) = m[array_offset + idx];\n            array_offset += matrix_dim;\n        }\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (tx < BLOCK_SIZE) {\n        idx = tx;\n        for (i = 1; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < i; j++)\n                PERI_ROW(i, idx) -= DIA(i, j) * PERI_ROW(j, idx);\n        }\n    } else {\n        idx = tx - BLOCK_SIZE;\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < i; j++)\n                PERI_COL(idx, i) -= PERI_COL(idx, j) * DIA(j, i);\n            PERI_COL(idx, i) /= DIA(i, i);\n        }\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (tx < BLOCK_SIZE) {\n        idx = tx;\n        array_offset = (offset + 1) * matrix_dim + offset;\n        for (i = 1; i < BLOCK_SIZE; i++) {\n            m[array_offset + (bx + 1) * BLOCK_SIZE + idx] = PERI_ROW(i, idx);\n            array_offset += matrix_dim;\n        }\n    } else {\n        idx = tx - BLOCK_SIZE;\n        array_offset = (offset + (bx + 1) * BLOCK_SIZE) * matrix_dim + offset;\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            m[array_offset + idx] = PERI_COL(i, idx);\n            array_offset += matrix_dim;\n        }\n    }\n\n#undef DIA\n#undef PERI_ROW\n#undef PERI_COL\n}\n\n__kernel void\nlud_internal(__global float *m,\n             __local float *peri_row,\n             __local float *peri_col,\n             int matrix_dim,\n             int offset)\n{\n    int tx = (int)get_local_id(0);\n    int ty = (int)get_local_id(1);\n    int bx = (int)get_group_id(0);\n    int by = (int)get_group_id(1);\n    int i;\n    float sum;\n\n    int global_row_id = offset + (by + 1) * BLOCK_SIZE;\n    int global_col_id = offset + (bx + 1) * BLOCK_SIZE;\n\n#define PERI_ROW(r, c) peri_row[(r) * BLOCK_SIZE + (c)]\n#define PERI_COL(r, c) peri_col[(r) * BLOCK_SIZE + (c)]\n\n    PERI_ROW(ty, tx) = m[(offset + ty) * matrix_dim + global_col_id + tx];\n    PERI_COL(ty, tx) = m[(global_row_id + ty) * matrix_dim + offset + tx];\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    sum = 0.0f;\n    for (i = 0; i < BLOCK_SIZE; i++)\n        sum += PERI_COL(ty, i) * PERI_ROW(i, tx);\n\n    m[(global_row_id + ty) * matrix_dim + global_col_id + tx] -= sum;\n\n#undef PERI_ROW\n#undef PERI_COL\n}\n"
+  },
+  "target_files_expected": [
+    "lud_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "lud_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 46.369,
+      "prompt_tokens": 11964,
+      "completion_tokens": 2883,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

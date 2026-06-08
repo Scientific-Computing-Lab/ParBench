@@ -1,0 +1,181 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "heartwall",
+        "parallel_api": "omp",
+        "unique_id": "rodinia-heartwall-omp",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "openmp/heartwall",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "define.c",
+            "kernel.c",
+            "main.c"
+        ],
+        "support_files": [
+            "AVI/avilib.c",
+            "AVI/avimod.c",
+            "AVI/avilib.h",
+            "AVI/avimod.h",
+            "AVI/makefile",
+            "makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "main.c"
+        ]
+    },
+    "implementation": {
+        "api": "omp",
+        "api_version": null,
+        "language": "C",
+        "language_standard": null
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "gcc>=9.0 (with OpenMP support)"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "openmp/heartwall",
+        "commands": {
+            "configure": null,
+            "build": "make",
+            "clean": "make clean"
+        },
+        "variables": null,
+        "outputs": {
+            "executable": "./heartwall"
+        }
+    },
+    "run": {
+        "executable": "./heartwall",
+        "default_arguments": [
+            "../../data/heartwall/test.avi",
+            "20",
+            "4"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "../../data/heartwall/test.avi",
+                    "20",
+                    "4"
+                ],
+                "description": "Small input for correctness verification of heartwall (OMP)",
+                "input_files": [
+                    "../../data/heartwall/test.avi"
+                ],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "../../data/heartwall/test.avi",
+                    "20",
+                    "4"
+                ],
+                "description": "Large input for performance measurement of heartwall (OMP)",
+                "input_files": [
+                    "../../data/heartwall/test.avi"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "frame progress:",
+                "description": "Heart wall tracking frames processed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "cpu",
+        "requirements": {
+            "cpu": {
+                "min_cores": 4,
+                "min_memory_gb": 8
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.274696+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "num of threads: 4\nframe progress: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 \n",
+                "wall_time_seconds": 2.5,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Heart wall tracking in ultrasound video frames on GPU",
+        "domain": "image processing",
+        "complexity": "heart wall tracking (image processing)",
+        "tags": [
+            "heart-wall",
+            "heartwall",
+            "image-processing",
+            "omp",
+            "rodinia",
+            "tracking",
+            "ultrasound"
+        ],
+        "multi_file": true,
+        "translation_complexity": "multi_to_multi"
+    }
+}

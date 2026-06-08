@@ -1,0 +1,167 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "backprop",
+        "parallel_api": "omp",
+        "unique_id": "rodinia-backprop-omp",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "openmp/backprop",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "backprop.c",
+            "backprop_kernel.c",
+            "facetrain.c",
+            "imagenet.c"
+        ],
+        "support_files": [
+            "backprop.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "backprop.c"
+        ]
+    },
+    "implementation": {
+        "api": "omp",
+        "api_version": null,
+        "language": "C",
+        "language_standard": null
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "gcc>=9.0 (with OpenMP support)"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "openmp/backprop",
+        "commands": {
+            "configure": null,
+            "build": "make",
+            "clean": "make clean"
+        },
+        "variables": null,
+        "outputs": {
+            "executable": "./backprop"
+        }
+    },
+    "run": {
+        "executable": "./backprop",
+        "default_arguments": [
+            "65536"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "65536"
+                ],
+                "description": "Small input for correctness verification of backprop (OMP)",
+                "input_files": [],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "1048576"
+                ],
+                "description": "Large input for performance measurement of backprop (OMP)",
+                "input_files": [],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Training done",
+                "description": "Computation completed successfully"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "cpu",
+        "requirements": {
+            "cpu": {
+                "min_cores": 4,
+                "min_memory_gb": 8
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.271390+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "Random number generator seed: 7\nInput layer size : 65536\nStarting training kernel\nPerforming CPU computation\nTraining done\n",
+                "wall_time_seconds": 0.016,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Backpropagation neural network training on GPU",
+        "domain": "machine learning",
+        "complexity": "neural network training (backpropagation)",
+        "tags": [
+            "backprop",
+            "backpropagation",
+            "machine-learning",
+            "neural-network",
+            "omp",
+            "rodinia"
+        ],
+        "multi_file": true,
+        "translation_complexity": "multi_to_single"
+    }
+}

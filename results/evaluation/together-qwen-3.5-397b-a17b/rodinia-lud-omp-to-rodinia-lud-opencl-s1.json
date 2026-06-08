@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-omp",
+  "target_spec": "rodinia-lud-opencl",
+  "kernel": "lud",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 2008627441,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-22T01:39:37Z",
+  "prompt_tokens": 12436,
+  "completion_tokens": 10434,
+  "llm_response_time_seconds": 90.826,
+  "build_status": "pass",
+  "build_time_seconds": 0.464,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.274,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nInit: 217.322006\nMemAlloc: 0.003000\nHtoD: 0.011456\nExec: 3.256928\nDtoH: 0.010624\nClose: 0.060000\nTotal: 221.225998\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.07,
+  "translated_wall_time_seconds": 0.274,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.2555,
+  "translated_files": {
+    "lud_kernel.cl": "#define BLOCK_SIZE 16\n\nkernel void lud_diagonal(global float* a, local float* temp, const int size, const int offset)\n{\n    int i = get_local_id(0);\n    int j, k;\n    \n    if (i >= BLOCK_SIZE) return;\n    \n    // Process upper triangle of diagonal block\n    for (j = i; j < BLOCK_SIZE; j++) {\n        float sum = 0.0f;\n        for (k = 0; k < i; k++) {\n            sum += a[(offset + i) * size + offset + k] * a[(offset + k) * size + offset + j];\n        }\n        a[(offset + i) * size + offset + j] -= sum;\n    }\n    \n    // Compute reciprocal of diagonal element\n    float diag_inv = 1.0f / a[(offset + i) * size + offset + i];\n    \n    // Process lower triangle of diagonal block\n    for (j = i + 1; j < BLOCK_SIZE; j++) {\n        float sum = 0.0f;\n        for (k = 0; k < i; k++) {\n            sum += a[(offset + j) * size + offset + k] * a[(offset + k) * size + offset + i];\n        }\n        a[(offset + j) * size + offset + i] = (a[(offset + j) * size + offset + i] - sum) * diag_inv;\n    }\n}\n\nkernel void lud_perimeter(global float* a, local float* temp_top, local float* temp_left, local float* temp_bottom,\n                          const int size, const int offset)\n{\n    int idx = get_local_id(0);\n    int i, j, k, i_global, j_global;\n    float sum;\n    \n    int chunks_in_inter_row = (size - offset - BLOCK_SIZE) / BLOCK_SIZE;\n    int chunk_idx = idx / BLOCK_SIZE;\n    int part = idx >= BLOCK_SIZE * chunks_in_inter_row ? 1 : 0;\n    \n    if (part == 0) {\n        // Right perimeter blocks\n        if (chunk_idx >= chunks_in_inter_row) return;\n        \n        i_global = offset;\n        j_global = offset + BLOCK_SIZE * (chunk_idx + 1);\n        \n        // Load temp from diagonal block\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < BLOCK_SIZE; j++) {\n                temp_top[i * BLOCK_SIZE + j] = a[(i + offset) * size + offset + j];\n            }\n        }\n        \n        // Update right perimeter\n        for (j = 0; j < BLOCK_SIZE; j++) {\n            for (i = 0; i < BLOCK_SIZE; i++) {\n                sum = 0.0f;\n                for (k = 0; k < i; k++) {\n                    sum += temp_top[BLOCK_SIZE * i + k] * a[(i_global + k) * size + j_global + j];\n                }\n                a[(i_global + i) * size + j_global + j] -= sum;\n            }\n        }\n    } else {\n        // Bottom perimeter blocks\n        chunk_idx = idx - BLOCK_SIZE * chunks_in_inter_row;\n        if (chunk_idx >= chunks_in_inter_row) return;\n        \n        j_global = offset;\n        i_global = offset + BLOCK_SIZE * (chunk_idx + 1);\n        \n        // Load temp from diagonal block\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < BLOCK_SIZE; j++) {\n                temp_top[i * BLOCK_SIZE + j] = a[(i + offset) * size + offset + j];\n            }\n        }\n        \n        // Update bottom perimeter\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < BLOCK_SIZE; j++) {\n                sum = 0.0f;\n                for (k = 0; k < j; k++) {\n                    sum += a[(i_global + i) * size + j_global + k] * temp_top[BLOCK_SIZE * k + j];\n                }\n                a[(i_global + i) * size + j_global + j] = (a[(i_global + i) * size + j_global + j] - sum) / a[(offset + j) * size + offset + j];\n            }\n        }\n    }\n}\n\nkernel void lud_internal(global float* a, local float* temp_top, local float* temp_left,\n                         const int size, const int offset)\n{\n    int idx_x = get_local_id(0);\n    int idx_y = get_local_id(1);\n    int i, j, k, i_global, j_global;\n    float sum[BLOCK_SIZE];\n    \n    int chunks_in_inter_row = (size - offset - BLOCK_SIZE) / BLOCK_SIZE;\n    \n    if (idx_x >= chunks_in_inter_row || idx_y >= chunks_in_inter_row) return;\n    \n    i_global = offset + BLOCK_SIZE * (1 + idx_y);\n    j_global = offset + BLOCK_SIZE * (1 + idx_x);\n    \n    // Initialize sum array\n    for (j = 0; j < BLOCK_SIZE; j++) {\n        sum[j] = 0.0f;\n    }\n    \n    // Load temp arrays\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (j = 0; j < BLOCK_SIZE; j++) {\n            temp_top[i * BLOCK_SIZE + j] = a[(i + offset) * size + j_global + j];\n            temp_left[i * BLOCK_SIZE + j] = a[(i + i_global) * size + offset + j];\n        }\n    }\n    \n    // Compute sum accumulation\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (k = 0; k < BLOCK_SIZE; k++) {\n            for (j = 0; j < BLOCK_SIZE; j++) {\n                sum[j] += temp_left[BLOCK_SIZE * i + k] * temp_top[BLOCK_SIZE * k + j];\n            }\n        }\n    }\n    \n    // Update internal block\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (j = 0; j < BLOCK_SIZE; j++) {\n            a[(i_global + i) * size + j_global + j] -= sum[j];\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "lud_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "lud_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 90.826,
+      "prompt_tokens": 12436,
+      "completion_tokens": 10434,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

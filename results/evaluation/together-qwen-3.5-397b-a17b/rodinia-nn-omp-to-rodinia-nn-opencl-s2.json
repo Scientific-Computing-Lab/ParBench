@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-nn-omp",
+  "target_spec": "rodinia-nn-opencl",
+  "kernel": "nn",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1943880436,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "../../data/nn/filelist.txt",
+    "-r",
+    "5",
+    "-lat",
+    "30",
+    "-lng",
+    "90",
+    "-f",
+    "../../data/nn"
+  ],
+  "timestamp": "2026-04-22T02:04:29Z",
+  "prompt_tokens": 10694,
+  "completion_tokens": 1034,
+  "llm_response_time_seconds": 12.086,
+  "build_status": "pass",
+  "build_time_seconds": 0.666,
+  "build_error_snippet": null,
+  "run_status": "timeout",
+  "run_time_seconds": 300.107,
+  "run_exit_code": -1,
+  "run_stderr_snippet": "Execution timed out after 300s",
+  "run_stdout_snippet": "",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code -1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 300.039,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "nearestNeighbor_kernel.cl": "#define REC_LENGTH 49\n#define LATITUDE_POS 28\n#define OPEN 10000\n\n__kernel void calc_distances(__global const char* sandbox,\n                             __global float* z,\n                             float target_lat,\n                             float target_long,\n                             int rec_count) {\n    int i = get_global_id(0);\n    if(i < rec_count) {\n        const char* rec_iter = sandbox + (i * REC_LENGTH + LATITUDE_POS - 1);\n        float tmp_lat = 0.0f;\n        float tmp_long = 0.0f;\n        \n        // Parse latitude and longitude from record string\n        char lat_str[10], long_str[10];\n        int pos = 0;\n        for(int j = 0; j < 5 && (LATITUDE_POS - 1 + j) < (i * REC_LENGTH + REC_LENGTH); j++) {\n            lat_str[j] = rec_iter[j];\n        }\n        lat_str[5] = '\\0';\n        \n        for(int j = 0; j < 5; j++) {\n            long_str[j] = rec_iter[5 + j];\n        }\n        long_str[5] = '\\0';\n        \n        tmp_lat = atof(lat_str);\n        tmp_long = atof(long_str);\n        \n        z[i] = sqrt((tmp_lat - target_lat) * (tmp_lat - target_lat) +\n                    (tmp_long - target_long) * (tmp_long - target_long));\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "nearestNeighbor_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "nearestNeighbor_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 12.086,
+      "prompt_tokens": 10694,
+      "completion_tokens": 1034,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "timeout",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "Execution timed out after 300s",
+      "run_stdout_snippet": "",
+      "extraction_fail": null
+    }
+  ]
+}

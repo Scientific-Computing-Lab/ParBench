@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-pathfinder-opencl",
+  "target_spec": "rodinia-pathfinder-cuda",
+  "kernel": "pathfinder",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1748787783,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-30T18:48:31Z",
+  "prompt_tokens": 5907,
+  "completion_tokens": 3881,
+  "llm_response_time_seconds": 43.546,
+  "build_status": "fail",
+  "build_time_seconds": 0.273,
+  "build_error_snippet": "pathfinder.cu(174): error: \"data\" is ambiguous\n      data = new int[rows * cols];\n      ^\n\npathfinder.cu(177): error: \"data\" is ambiguous\n          wall[n] = data + cols * n;\n                    ^\n\npathfinder.cu(228): error: \"data\" is ambiguous\n      do { cudaError_t _e = (cudaMemcpy(d_gpuWall, (data + cols), sizeof(int) * (size - cols), cudaMemcpyHostToDevice)); if (_e != cudaSuccess) { fprintf(\n                                                    ^\n\npathfinder.cu(229): error: \"data\" is ambiguous\n      do { cudaError_t _e = (cudaMemcpy(d_gpuResult[0], data, sizeof(int) * cols, cudaMemcpyHostToDevice)); if (_e != cudaSuccess) { fprintf(\n                                                        ^\n\npathfinder.cu(300): error: \"data\" is ambiguous\n      delete[] data;\n               ^\n\n5 errors detected in the compilation of \"pathfinder.cu\".\nmake: *** [Makefile:11: release] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: ^\n\npathfinder.cu(300): error: \"data\" is ambiguous\n      delete[] data;\n               ^\n\n5 errors detected in the compilation of \"pathfinder.cu\".\nmake: *** [Makefile:11: release] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.128,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "pathfinder.cu": "#include <cuda_runtime.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <assert.h>\n#include <iostream>\n#include <cstring>\n#include <sys/time.h>\n\nusing namespace std;\n\n#define HALO     1\n#define STR_SIZE 256\n#define DEVICE   0\n#define M_SEED   9\n\n#define IN_RANGE(x, min, max) ((x) >= (min) && (x) <= (max))\n#define CLAMP_RANGE(x, min, max) x = (x < (min)) ? (min) : ((x > (max)) ? (max) : (x))\n#define MIN(a, b) ((a) <= (b) ? (a) : (b))\n\nint   rows = -1, cols = -1;\nint   Ne = rows * cols;\nint*  data;\nint** wall;\nint*  result;\nint   pyramid_height = -1;\nint   verbose = 0;\n\nint platform_id_inuse = 0;\nint device_id_inuse = 0;\n\nstatic inline void tvsub(const struct timeval* end, const struct timeval* start, struct timeval* result) {\n    result->tv_sec = end->tv_sec - start->tv_sec;\n    result->tv_usec = end->tv_usec - start->tv_usec;\n    if (result->tv_usec < 0) {\n        --result->tv_sec;\n        result->tv_usec += 1000000;\n    }\n}\n\n#define CUDA_CHECK(call) do { \\\n    cudaError_t _e = (call); \\\n    if (_e != cudaSuccess) { \\\n        fprintf(stderr, \"CUDA error: %s\\n\", cudaGetErrorString(_e)); \\\n        exit(1); \\\n    } \\\n} while (0)\n\n__global__ void dynproc_kernel(int iteration,\n                               const int* gpuWall,\n                               const int* gpuSrc,\n                               int* gpuResults,\n                               int cols,\n                               int rows_,\n                               int startStep,\n                               int border,\n                               int HALO_,\n                               int* outputBuffer)\n{\n    extern __shared__ int shmem[];\n    int* prev = shmem;\n    int* result_s = shmem + blockDim.x;\n\n    int BLOCK_SIZE = (int)blockDim.x;\n    int bx = (int)blockIdx.x;\n    int tx = (int)threadIdx.x;\n\n    int small_block_cols = BLOCK_SIZE - (iteration * HALO_ * 2);\n\n    int blkX = (small_block_cols * bx) - border;\n    int blkXmax = blkX + BLOCK_SIZE - 1;\n\n    int xidx = blkX + tx;\n\n    int validXmin = (blkX < 0) ? -blkX : 0;\n    int validXmax = (blkXmax > cols - 1) ? BLOCK_SIZE - 1 - (blkXmax - cols + 1) : BLOCK_SIZE - 1;\n\n    int W = tx - 1;\n    int E = tx + 1;\n\n    W = (W < validXmin) ? validXmin : W;\n    E = (E > validXmax) ? validXmax : E;\n\n    bool isValid = IN_RANGE(tx, validXmin, validXmax);\n\n    if (IN_RANGE(xidx, 0, cols - 1)) {\n        prev[tx] = gpuSrc[xidx];\n    }\n\n    __syncthreads();\n\n    bool computed = false;\n    for (int i = 0; i < iteration; i++) {\n        computed = false;\n\n        if (IN_RANGE(tx, i + 1, BLOCK_SIZE - i - 2) && isValid) {\n            computed = true;\n            int left = prev[W];\n            int up = prev[tx];\n            int right = prev[E];\n            int shortest = MIN(left, up);\n            shortest = MIN(shortest, right);\n\n            int index = cols * (startStep + i) + xidx;\n            result_s[tx] = shortest + gpuWall[index];\n\n            if (tx == 11 && i == 0) {\n                int bufIndex = gpuSrc[xidx];\n                outputBuffer[bufIndex] = 1;\n            }\n        }\n\n        __syncthreads();\n\n        if (i == iteration - 1) {\n            break;\n        }\n\n        if (computed) {\n            prev[tx] = result_s[tx];\n        }\n        __syncthreads();\n    }\n\n    if (computed) {\n        gpuResults[xidx] = result_s[tx];\n    }\n}\n\nvoid init(int argc, char** argv)\n{\n    int cur_arg;\n    for (cur_arg = 1; cur_arg < argc; cur_arg++) {\n        if (strcmp(argv[cur_arg], \"-c\") == 0) {\n            if (argc >= cur_arg + 1) {\n                cols = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        }\n        else if (strcmp(argv[cur_arg], \"-r\") == 0) {\n            if (argc >= cur_arg + 1) {\n                rows = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        }\n        else if (strcmp(argv[cur_arg], \"-h\") == 0) {\n            if (argc >= cur_arg + 1) {\n                pyramid_height = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        }\n        if (strcmp(argv[cur_arg], \"-v\") == 0) {\n            verbose = 1;\n        }\n        else if (strcmp(argv[cur_arg], \"-p\") == 0) {\n            if (argc >= cur_arg + 1) {\n                platform_id_inuse = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        }\n        else if (strcmp(argv[cur_arg], \"-d\") == 0) {\n            if (argc >= cur_arg + 1) {\n                device_id_inuse = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        }\n    }\n\n    if (cols < 0 || rows < 0 || pyramid_height < 0) {\n        fprintf(stderr, \"usage: %s <-r rows> <-c cols> <-h pyramid_height> [-v] [-p platform_id] [-d device_id] [-t device_type]\\n\", argv[0]);\n        exit(0);\n    }\n\n    data = new int[rows * cols];\n    wall = new int*[rows];\n    for (int n = 0; n < rows; n++) {\n        wall[n] = data + cols * n;\n    }\n    result = new int[cols];\n\n    int seed = M_SEED;\n    srand(seed);\n\n    for (int i = 0; i < rows; i++) {\n        for (int j = 0; j < cols; j++) {\n            wall[i][j] = rand() % 10;\n        }\n    }\n\n#ifdef BENCH_PRINT\n    for (int i = 0; i < rows; i++) {\n        for (int j = 0; j < cols; j++) {\n            printf(\"%d \", wall[i][j]);\n        }\n        printf(\"\\n\");\n    }\n#endif\n}\n\nvoid fatal(char *s)\n{\n    fprintf(stderr, \"error: %s\\n\", s);\n}\n\nint main(int argc, char** argv)\n{\n    init(argc, argv);\n\n    int borderCols = (pyramid_height) * HALO;\n    int size = rows * cols;\n\n    CUDA_CHECK(cudaSetDevice(device_id_inuse));\n\n    int* h_outputBuffer = (int*)malloc(16384 * sizeof(int));\n    for (int i = 0; i < 16384; i++) {\n        h_outputBuffer[i] = 0;\n    }\n\n    int* d_gpuWall = nullptr;\n    int* d_gpuResult[2] = {nullptr, nullptr};\n    int* d_outputBuffer = nullptr;\n\n    CUDA_CHECK(cudaMalloc((void**)&d_gpuWall, sizeof(int) * (size - cols)));\n    CUDA_CHECK(cudaMalloc((void**)&d_gpuResult[0], sizeof(int) * cols));\n    CUDA_CHECK(cudaMalloc((void**)&d_gpuResult[1], sizeof(int) * cols));\n    CUDA_CHECK(cudaMalloc((void**)&d_outputBuffer, sizeof(int) * 16384));\n\n    CUDA_CHECK(cudaMemcpy(d_gpuWall, (data + cols), sizeof(int) * (size - cols), cudaMemcpyHostToDevice));\n    CUDA_CHECK(cudaMemcpy(d_gpuResult[0], data, sizeof(int) * cols, cudaMemcpyHostToDevice));\n    CUDA_CHECK(cudaMemcpy(d_outputBuffer, h_outputBuffer, sizeof(int) * 16384, cudaMemcpyHostToDevice));\n\n    size_t gwsize = (size_t)(rows * cols);\n\n    cudaFuncAttributes attr;\n    CUDA_CHECK(cudaFuncGetAttributes(&attr, dynproc_kernel));\n    size_t lwsize = (size_t)attr.maxThreadsPerBlock;\n    if (lwsize == 0) {\n        fprintf(stderr, \"Error: maxThreadsPerBlock returned zero!\\n\");\n        exit(1);\n    }\n\n    if (lwsize > gwsize) {\n        lwsize = gwsize;\n    } else {\n        size_t howManyThreads = lwsize;\n        while (gwsize % howManyThreads != 0) {\n            howManyThreads--;\n        }\n        lwsize = howManyThreads;\n    }\n\n    int src = 1, final_ret = 0;\n    for (int t = 0; t < rows - 1; t += pyramid_height) {\n        int temp = src;\n        src = final_ret;\n        final_ret = temp;\n\n        int arg0 = MIN(pyramid_height, rows - t - 1);\n        int theHalo = HALO;\n\n        int grid_x = (int)(gwsize / lwsize);\n        size_t shmem = sizeof(int) * (size_t)lwsize * 2;\n\n        dynproc_kernel<<<grid_x, (int)lwsize, shmem>>>(\n            arg0,\n            d_gpuWall,\n            d_gpuResult[src],\n            d_gpuResult[final_ret],\n            cols,\n            rows,\n            t,\n            borderCols,\n            theHalo,\n            d_outputBuffer\n        );\n        CUDA_CHECK(cudaGetLastError());\n    }\n\n    CUDA_CHECK(cudaMemcpy(result, d_gpuResult[final_ret], sizeof(int) * cols, cudaMemcpyDeviceToHost));\n\n    CUDA_CHECK(cudaMemcpy(h_outputBuffer, d_outputBuffer, sizeof(char) * 16384, cudaMemcpyDeviceToHost));\n\n    h_outputBuffer[16383] = '\\0';\n\n#ifdef BENCH_PRINT\n    for (int i = 0; i < cols; i++)\n        printf(\"%d \", data[i]);\n    printf(\"\\n\");\n    for (int i = 0; i < cols; i++)\n        printf(\"%d \", result[i]);\n    printf(\"\\n\");\n#endif\n\n    CUDA_CHECK(cudaFree(d_gpuWall));\n    CUDA_CHECK(cudaFree(d_gpuResult[0]));\n    CUDA_CHECK(cudaFree(d_gpuResult[1]));\n    CUDA_CHECK(cudaFree(d_outputBuffer));\n\n    free(h_outputBuffer);\n    delete[] data;\n    delete[] wall;\n    delete[] result;\n\n    return EXIT_SUCCESS;\n}\n"
+  },
+  "target_files_expected": [
+    "pathfinder.cu"
+  ],
+  "target_files_extracted": [
+    "pathfinder.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 43.546,
+      "prompt_tokens": 5907,
+      "completion_tokens": 3881,
+      "finish_reason": "completed",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "pathfinder.cu(174): error: \"data\" is ambiguous\n      data = new int[rows * cols];\n      ^\n\npathfinder.cu(177): error: \"data\" is ambiguous\n          wall[n] = data + cols * n;\n                    ^\n\npathfinder.cu(228): error: \"data\" is ambiguous\n      do { cudaError_t _e = (cudaMemcpy(d_gpuWall, (data + cols), sizeof(int) * (size - cols), cudaMemcpyHostToDevice)); if (_e != cudaSuccess) { fprintf(\n                                                    ^\n\npathfinder.cu(229): error: \"data\" is ambiguous\n      do { cudaError_t _e = (cudaMemcpy(d_gpuResult[0], data, sizeof(int) * cols, cudaMemcpyHostToDevice)); if (_e != cudaSuccess) { fprintf(\n                                                        ^\n\npathfinder.cu(300): error: \"data\" is ambiguous\n      delete[] data;\n               ^\n\n5 errors detected in the compilation of \"pathfinder.cu\".\nmake: *** [Makefile:11: release] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

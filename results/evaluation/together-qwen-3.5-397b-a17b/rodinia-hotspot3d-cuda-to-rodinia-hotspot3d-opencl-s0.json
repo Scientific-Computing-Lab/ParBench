@@ -1,0 +1,82 @@
+{
+  "source_spec": "rodinia-hotspot3d-cuda",
+  "target_spec": "rodinia-hotspot3d-opencl",
+  "kernel": "hotspot3d",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1604894664,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-n",
+    "512",
+    "-l",
+    "8",
+    "-i",
+    "100",
+    "-f",
+    "../../data/hotspot3D/power_512x8",
+    "../../data/hotspot3D/temp_512x8",
+    "output.out",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-21T23:08:24Z",
+  "prompt_tokens": 7581,
+  "completion_tokens": 1818,
+  "llm_response_time_seconds": 22.855,
+  "build_status": "pass",
+  "build_time_seconds": 0.194,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.29,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "num_devices = 1\n \n Device is  NVIDIA GeForce RTX 4070 \n NVIDIA Corporation \nInit: 134.138000\nMemAlloc: 0.002000\nHtoD: 2.185536\nExec: 1.838081\nDtoH: 2.513344\nClose: 49.314999\nTotal: 192.078995\nAccuracy: 5.547907e-05\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+numeric_comparison+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.156,
+  "translated_wall_time_seconds": 1.29,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.8961,
+  "translated_files": {
+    "hotspotKernel.cl": "kernel void hotspotOpt1(global float *p, global float* tIn, global float *tOut, float sdc,\n        int nx, int ny, int nz,\n        float ce, float cw, \n        float cn, float cs,\n        float ct, float cb, \n        float cc) \n{\n    float amb_temp = 80.0;\n\n    int i = get_global_id(0);\n    int j = get_global_id(1);\n\n    int c = i + j * nx;\n    int xy = nx * ny;\n\n    int W = (i == 0)        ? c : c - 1;\n    int E = (i == nx-1)     ? c : c + 1;\n    int N = (j == 0)        ? c : c - nx;\n    int S = (j == ny-1)     ? c : c + nx;\n\n    float temp1, temp2, temp3;\n    temp1 = temp2 = tIn[c];\n    temp3 = tIn[c+xy];\n    tOut[c] = cc * temp2 + cw * tIn[W] + ce * tIn[E] + cs * tIn[S]\n        + cn * tIn[N] + cb * temp1 + ct * temp3 + sdc * p[c] + ct * amb_temp;\n    c += xy;\n    W += xy;\n    E += xy;\n    N += xy;\n    S += xy;\n\n    for (int k = 1; k < nz-1; ++k) {\n        temp1 = temp2;\n        temp2 = temp3;\n        temp3 = tIn[c+xy];\n        tOut[c] = cc * temp2 + cw * tIn[W] + ce * tIn[E] + cs * tIn[S]\n            + cn * tIn[N] + cb * temp1 + ct * temp3 + sdc * p[c] + ct * amb_temp;\n        c += xy;\n        W += xy;\n        E += xy;\n        N += xy;\n        S += xy;\n    }\n    temp1 = temp2;\n    temp2 = temp3;\n    tOut[c] = cc * temp2 + cw * tIn[W] + ce * tIn[E] + cs * tIn[S]\n        + cn * tIn[N] + cb * temp1 + ct * temp3 + sdc * p[c] + ct * amb_temp;\n    return;\n}\n"
+  },
+  "target_files_expected": [
+    "hotspotKernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspotKernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 22.855,
+      "prompt_tokens": 7581,
+      "completion_tokens": 1818,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

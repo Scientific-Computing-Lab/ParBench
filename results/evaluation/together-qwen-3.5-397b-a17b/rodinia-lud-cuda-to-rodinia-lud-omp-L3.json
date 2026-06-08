@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-cuda",
+  "target_spec": "rodinia-lud-omp",
+  "kernel": "lud",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 54614963,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-24T02:50:39Z",
+  "prompt_tokens": 9725,
+  "completion_tokens": 2968,
+  "llm_response_time_seconds": 134.972,
+  "build_status": "pass",
+  "build_time_seconds": 0.306,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 1.071,
+  "run_exit_code": -11,
+  "run_stderr_snippet": "",
+  "run_stdout_snippet": "",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code -11)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.004,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "omp/lud_omp.c": "#include <stdio.h>\n#include <stdlib.h>\n#include <omp.h>\n\n#ifdef RD_WG_SIZE_0_0\n        #define BLOCK_SIZE RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n        #define BLOCK_SIZE RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n        #define BLOCK_SIZE RD_WG_SIZE\n#else\n        #define BLOCK_SIZE 16\n#endif\n\nvoid lud_omp(float *m, int matrix_dim)\n{\n    int i, j, k, offset;\n    float sum;\n    float shadow[BLOCK_SIZE][BLOCK_SIZE];\n    float dia[BLOCK_SIZE][BLOCK_SIZE];\n    float peri_row[BLOCK_SIZE][BLOCK_SIZE];\n    float peri_col[BLOCK_SIZE][BLOCK_SIZE];\n    int array_offset, idx, global_row_id, global_col_id;\n\n    for (offset = 0; offset < matrix_dim - BLOCK_SIZE; offset += BLOCK_SIZE) {\n        // lud_diagonal equivalent\n        #pragma omp parallel for private(i, j, array_offset, idx) shared(m, shadow, offset, matrix_dim)\n        for (idx = 0; idx < BLOCK_SIZE; idx++) {\n            array_offset = offset * matrix_dim + offset;\n            for (i = 0; i < BLOCK_SIZE; i++) {\n                shadow[i][idx] = m[array_offset + idx];\n                array_offset += matrix_dim;\n            }\n            \n            for (i = 0; i < BLOCK_SIZE - 1; i++) {\n                if (idx > i) {\n                    for (j = 0; j < i; j++)\n                        shadow[idx][i] -= shadow[idx][j] * shadow[j][i];\n                    shadow[idx][i] /= shadow[i][i];\n                }\n\n                if (idx > i) {\n                    for (j = 0; j < i + 1; j++)\n                        shadow[i + 1][idx] -= shadow[i + 1][j] * shadow[j][idx];\n                }\n            }\n\n            array_offset = (offset + 1) * matrix_dim + offset;\n            for (i = 1; BLOCK_SIZE > i; i++) {\n                m[array_offset + idx] = shadow[i][idx];\n                array_offset += matrix_dim;\n            }\n        }\n\n        // lud_perimeter equivalent\n        #pragma omp parallel for private(i, j, array_offset, idx) shared(m, dia, peri_row, peri_col, offset, matrix_dim)\n        for (idx = 0; idx < BLOCK_SIZE * 2; idx++) {\n            if (idx < BLOCK_SIZE) {\n                array_offset = offset * matrix_dim + offset;\n                for (i = 0; BLOCK_SIZE / 2 > i; i++) {\n                    dia[i][idx] = m[array_offset + idx];\n                    array_offset += matrix_dim;\n                }\n\n                array_offset = offset * matrix_dim + offset;\n                for (i = 0; i < BLOCK_SIZE; i++) {\n                    peri_row[i][idx] = m[array_offset + (offset / BLOCK_SIZE + 1) * BLOCK_SIZE + idx];\n                    array_offset += matrix_dim;\n                }\n\n                for (i = 1; BLOCK_SIZE > i; i++) {\n                    for (j = 0; i > j; j++)\n                        peri_row[i][idx] -= dia[i][j] * peri_row[j][idx];\n                }\n\n                array_offset = (offset + 1) * matrix_dim + offset;\n                for (i = 1; BLOCK_SIZE > i; i++) {\n                    m[array_offset + (offset / BLOCK_SIZE + 1) * BLOCK_SIZE + idx] = peri_row[i][idx];\n                    array_offset += matrix_dim;\n                }\n            } else {\n                int local_idx = idx - BLOCK_SIZE;\n                array_offset = (offset + BLOCK_SIZE / 2) * matrix_dim + offset;\n                for (i = BLOCK_SIZE / 2; BLOCK_SIZE > i; i++) {\n                    dia[i][local_idx] = m[array_offset + local_idx];\n                    array_offset += matrix_dim;\n                }\n\n                array_offset = (offset + (offset / BLOCK_SIZE + 1) * BLOCK_SIZE) * matrix_dim + offset;\n                for (i = 0; BLOCK_SIZE > i; i++) {\n                    peri_col[local_idx][i] = m[array_offset + local_idx];\n                    array_offset += matrix_dim;\n                }\n\n                for (i = 0; BLOCK_SIZE > i; i++) {\n                    for (j = 0; i > j; j++)\n                        peri_col[local_idx][i] -= peri_col[local_idx][j] * dia[j][i];\n                    peri_col[local_idx][i] /= dia[i][i];\n                }\n\n                array_offset = (offset + (offset / BLOCK_SIZE + 1) * BLOCK_SIZE) * matrix_dim + offset;\n                for (i = 0; i < BLOCK_SIZE; i++) {\n                    m[array_offset + local_idx] = peri_col[i][local_idx];\n                    array_offset += matrix_dim;\n                }\n            }\n        }\n\n        // lud_internal equivalent\n        #pragma omp parallel for private(i, sum, global_row_id, global_col_id) shared(m, peri_row, peri_col, offset, matrix_dim)\n        for (global_row_id = offset + BLOCK_SIZE; global_row_id < matrix_dim; global_row_id += BLOCK_SIZE) {\n            for (global_col_id = offset + BLOCK_SIZE; global_col_id < matrix_dim; global_col_id += BLOCK_SIZE) {\n                for (i = 0; i < BLOCK_SIZE; i++) {\n                    for (j = 0; j < BLOCK_SIZE; j++) {\n                        peri_row[i][j] = m[(offset + i) * matrix_dim + global_col_id + j];\n                        peri_col[i][j] = m[(global_row_id + i) * matrix_dim + offset + j];\n                    }\n                }\n\n                for (i = 0; i < BLOCK_SIZE; i++) {\n                    for (j = 0; j < BLOCK_SIZE; j++) {\n                        sum = 0;\n                        for (k = 0; k < BLOCK_SIZE; k++)\n                            sum += peri_col[i][k] * peri_row[k][j];\n                        m[(global_row_id + i) * matrix_dim + global_col_id + j] -= sum;\n                    }\n                }\n            }\n        }\n    }\n\n    // Final diagonal block\n    offset = matrix_dim - BLOCK_SIZE;\n    #pragma omp parallel for private(i, j, array_offset, idx) shared(m, shadow, offset, matrix_dim)\n    for (idx = 0; idx < BLOCK_SIZE; idx++) {\n        array_offset = offset * matrix_dim + offset;\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            shadow[i][idx] = m[array_offset + idx];\n            array_offset += matrix_dim;\n        }\n\n        for (i = 0; i < BLOCK_SIZE - 1; i++) {\n            if (idx > i) {\n                for (j = 0; j < i; j++)\n                    shadow[idx][i] -= shadow[idx][j] * shadow[j][i];\n                shadow[idx][i] /= shadow[i][i];\n            }\n\n            if (idx > i) {\n                for (j = 0; j < i + 1; j++)\n                    shadow[i + 1][idx] -= shadow[i + 1][j] * shadow[j][idx];\n            }\n        }\n\n        array_offset = (offset + 1) * matrix_dim + offset;\n        for (i = 1; BLOCK_SIZE > i; i++) {\n            m[array_offset + idx] = shadow[i][idx];\n            array_offset += matrix_dim;\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "omp/lud_omp.c"
+  ],
+  "target_files_extracted": [
+    "omp/lud_omp.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 134.972,
+      "prompt_tokens": 9725,
+      "completion_tokens": 2968,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "",
+      "run_stdout_snippet": "",
+      "extraction_fail": null
+    }
+  ]
+}

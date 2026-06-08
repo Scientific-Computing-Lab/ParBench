@@ -1,0 +1,74 @@
+{
+  "source_spec": "mixbench-mixbench-cuda",
+  "target_spec": "mixbench-mixbench-omp",
+  "kernel": "mixbench",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 2112962740,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-26T11:40:54Z",
+  "prompt_tokens": 4953,
+  "completion_tokens": 7178,
+  "llm_response_time_seconds": 110.504,
+  "build_status": "pass",
+  "build_time_seconds": 3.549,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 23.478,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "0.50\n          512,    256.250, 1528.16,   67.52,   0.26,    128.125, 1535.35,   67.20,   0.52,    512.500,    0.00,     inf,    inf,   256.250, 1617.30,   63.80,   0.25\n         1024,    512.250, 3165.71,   65.15,   0.13,    256.125, 3175.07,   64.96,   0.25,   1024.500,    0.00,     inf,    inf,   512.250, 3275.86,   62.96,   0.12\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "single_precision_gflops": {
+      "value": 11.17,
+      "unit": "GFLOPS"
+    }
+  },
+  "baseline_wall_time_seconds": 120.0,
+  "translated_wall_time_seconds": 23.478,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 5.1112,
+  "translated_files": {
+    "mix_kernels_cpu.cpp": "#include <omp.h>\n\n#include <chrono>\n#include <cstddef>\n#include <cstdint>\n#include <cstdio>\n#include <cstring>\n\n#include \"mix_kernels_cpu.h\"\n\n#define ELEMENTS_PER_THREAD (8)\n#define FUSION_DEGREE (4)\n\nstruct half2 {\n  uint16_t x;\n  uint16_t y;\n};\n\nstatic inline float half_to_float_scalar(uint16_t h) {\n  uint32_t sign = (static_cast<uint32_t>(h & 0x8000u)) << 16;\n  uint32_t exp = (h & 0x7C00u) >> 10;\n  uint32_t mant = h & 0x03FFu;\n  uint32_t fbits = 0;\n\n  if (exp == 0x1Fu) {\n    fbits = sign | 0x7F800000u | (mant << 13);\n  } else if (exp != 0) {\n    fbits = sign | ((exp + 112u) << 23) | (mant << 13);\n  } else if (mant != 0) {\n    exp = 113u;\n    while ((mant & 0x0400u) == 0) {\n      mant <<= 1;\n      --exp;\n    }\n    mant &= 0x03FFu;\n    fbits = sign | (exp << 23) | (mant << 13);\n  } else {\n    fbits = sign;\n  }\n\n  float out;\n  std::memcpy(&out, &fbits, sizeof(out));\n  return out;\n}\n\nstatic inline uint16_t float_to_half_scalar(float f) {\n  uint32_t bits;\n  std::memcpy(&bits, &f, sizeof(bits));\n\n  uint32_t sign = (bits >> 16) & 0x8000u;\n  uint32_t exp = (bits >> 23) & 0xFFu;\n  uint32_t mant = bits & 0x7FFFFFu;\n\n  if (exp == 0xFFu) {\n    if (mant != 0) {\n      uint16_t nan_mant = static_cast<uint16_t>(mant >> 13);\n      if (nan_mant == 0) nan_mant = 1;\n      return static_cast<uint16_t>(sign | 0x7C00u | nan_mant);\n    }\n    return static_cast<uint16_t>(sign | 0x7C00u);\n  }\n\n  int32_t half_exp = static_cast<int32_t>(exp) - 127 + 15;\n\n  if (half_exp >= 31) {\n    return static_cast<uint16_t>(sign | 0x7C00u);\n  }\n\n  if (half_exp <= 0) {\n    if (half_exp < -10) {\n      return static_cast<uint16_t>(sign);\n    }\n    mant |= 0x800000u;\n    uint32_t shifted = mant >> (1 - half_exp);\n    return static_cast<uint16_t>(sign | ((shifted + 0x1000u) >> 13));\n  }\n\n  uint32_t rounded_mant = mant + 0x1000u;\n  if (rounded_mant & 0x00800000u) {\n    rounded_mant = 0;\n    ++half_exp;\n    if (half_exp >= 31) {\n      return static_cast<uint16_t>(sign | 0x7C00u);\n    }\n  }\n\n  return static_cast<uint16_t>(sign | (static_cast<uint32_t>(half_exp) << 10) |\n                               (rounded_mant >> 13));\n}\n\ntemplate <class T>\ninline T conv_int(const int i) {\n  return static_cast<T>(i);\n}\n\ntemplate <class T>\ninline T mad(const T a, const T b, const T c) {\n  return a * b + c;\n}\n\ntemplate <class T>\ninline bool equal(const T a, const T b) {\n  return a == b;\n}\n\ntemplate <>\ninline half2 conv_int<half2>(const int i) {\n  uint16_t h = float_to_half_scalar(static_cast<float>(i));\n  return half2{h, h};\n}\n\ntemplate <>\ninline half2 mad<half2>(const half2 a, const half2 b, const half2 c) {\n  float ax = half_to_float_scalar(a.x);\n  float ay = half_to_float_scalar(a.y);\n  float bx = half_to_float_scalar(b.x);\n  float by = half_to_float_scalar(b.y);\n  float cx = half_to_float_scalar(c.x);\n  float cy = half_to_float_scalar(c.y);\n  return half2{float_to_half_scalar(ax * bx + cx),\n               float_to_half_scalar(ay * by + cy)};\n}\n\ntemplate <>\ninline bool equal<half2>(const half2 a, const half2 b) {\n  return a.x == b.x && a.y == b.y;\n}\n\ntemplate <class T, int blockdim, unsigned int granularity,\n          unsigned int fusion_degree, unsigned int compute_iterations,\n          bool TemperateUnroll>\nstatic void benchmark_func(T seed, T* g_data, long total_blocks) {\n  (void)TemperateUnroll;\n  if (total_blocks <= 0) return;\n\n  const unsigned int blockSize = blockdim;\n  const long big_stride =\n      static_cast<long>(total_blocks) * blockSize * granularity;\n  const long total_threads = static_cast<long>(total_blocks) * blockSize;\n\n#pragma omp parallel for schedule(static)\n  for (long tid = 0; tid < total_threads; ++tid) {\n    const long blockIdx = tid / blockSize;\n    const long threadIdx = tid % blockSize;\n    const long idx = blockIdx * blockSize * granularity + threadIdx;\n\n    T tmps[granularity];\n    for (unsigned int k = 0; k < fusion_degree; ++k) {\n      for (unsigned int j = 0; j < granularity; ++j) {\n        tmps[j] = g_data[idx + static_cast<long>(j) * blockSize +\n                         static_cast<long>(k) * big_stride];\n        for (unsigned int i = 0; i < compute_iterations; ++i) {\n          tmps[j] = mad(tmps[j], tmps[j], seed);\n        }\n      }\n\n      T sum = conv_int<T>(0);\n      for (unsigned int j = 0; j < granularity; j += 2) {\n        sum = mad(tmps[j], tmps[j + 1], sum);\n      }\n\n      if (equal(sum, conv_int<T>(-1))) {\n        g_data[idx + static_cast<long>(k) * big_stride] = sum;\n      }\n    }\n  }\n}\n\ntemplate <class F>\nstatic float measure_ms(F&& fn) {\n  auto start = std::chrono::high_resolution_clock::now();\n  fn();\n  auto stop = std::chrono::high_resolution_clock::now();\n  std::chrono::duration<double, std::milli> elapsed = stop - start;\n  return static_cast<float>(elapsed.count());\n}\n\nstatic void runbench_warmup(double* cd, long size) {\n  const long reduced_grid_size = size / (ELEMENTS_PER_THREAD) / 128;\n  const int BLOCK_SIZE = 256;\n  const int TOTAL_REDUCED_BLOCKS =\n      static_cast<int>(reduced_grid_size / BLOCK_SIZE);\n\n  benchmark_func<short, BLOCK_SIZE, ELEMENTS_PER_THREAD, FUSION_DEGREE, 0, true>(\n      static_cast<short>(1), reinterpret_cast<short*>(cd), TOTAL_REDUCED_BLOCKS);\n}\n\ntemplate <unsigned int compute_iterations>\nstatic void runbench(double* cd, long size, bool doHalfs) {\n  const long compute_grid_size = size / ELEMENTS_PER_THREAD / FUSION_DEGREE;\n  const int BLOCK_SIZE = 256;\n  const int TOTAL_BLOCKS = static_cast<int>(compute_grid_size / BLOCK_SIZE);\n  const long long computations =\n      (ELEMENTS_PER_THREAD * static_cast<long long>(compute_grid_size) +\n       (2LL * ELEMENTS_PER_THREAD * compute_iterations) *\n           static_cast<long long>(compute_grid_size)) *\n      FUSION_DEGREE;\n  const long long memoryoperations = size;\n\n  float kernel_time_mad_sp = measure_ms([&]() {\n    benchmark_func<float, BLOCK_SIZE, ELEMENTS_PER_THREAD, FUSION_DEGREE,\n                   compute_iterations, false>(1.0f, reinterpret_cast<float*>(cd),\n                                              TOTAL_BLOCKS);\n  });\n\n  float kernel_time_mad_dp = measure_ms([&]() {\n    benchmark_func<double, BLOCK_SIZE, ELEMENTS_PER_THREAD, FUSION_DEGREE,\n                   compute_iterations, false>(1.0, cd, TOTAL_BLOCKS);\n  });\n\n  float kernel_time_mad_hp = 0.f;\n  if (doHalfs) {\n    kernel_time_mad_hp = measure_ms([&]() {\n      half2 h_ones = conv_int<half2>(1);\n      benchmark_func<half2, BLOCK_SIZE, ELEMENTS_PER_THREAD, FUSION_DEGREE,\n                     compute_iterations, false>(h_ones,\n                                                reinterpret_cast<half2*>(cd),\n                                                TOTAL_BLOCKS);\n    });\n  }\n\n  float kernel_time_mad_int = measure_ms([&]() {\n    benchmark_func<int, BLOCK_SIZE, ELEMENTS_PER_THREAD, FUSION_DEGREE,\n                   compute_iterations, true>(1, reinterpret_cast<int*>(cd),\n                                             TOTAL_BLOCKS);\n  });\n\n  std::printf(\n      \"         %4d,   %8.3f,%8.2f,%8.2f,%7.2f,   %8.3f,%8.2f,%8.2f,%7.2f,   \"\n      \"%8.3f,%8.2f,%8.2f,%7.2f,  %8.3f,%8.2f,%8.2f,%7.2f\\n\",\n      compute_iterations,\n      ((double)computations) / ((double)memoryoperations * sizeof(float)),\n      kernel_time_mad_sp,\n      ((double)computations) / kernel_time_mad_sp * 1000. /\n          (double)(1000 * 1000 * 1000),\n      ((double)memoryoperations * sizeof(float)) / kernel_time_mad_sp * 1000. /\n          (1000. * 1000. * 1000.),\n      ((double)computations) / ((double)memoryoperations * sizeof(double)),\n      kernel_time_mad_dp,\n      ((double)computations) / kernel_time_mad_dp * 1000. /\n          (double)(1000 * 1000 * 1000),\n      ((double)memoryoperations * sizeof(double)) / kernel_time_mad_dp * 1000. /\n          (1000. * 1000. * 1000.),\n      ((double)2 * computations) / ((double)memoryoperations * sizeof(half2)),\n      kernel_time_mad_hp,\n      ((double)2 * computations) / kernel_time_mad_hp * 1000. /\n          (double)(1000 * 1000 * 1000),\n      ((double)memoryoperations * sizeof(half2)) / kernel_time_mad_hp * 1000. /\n          (1000. * 1000. * 1000.),\n      ((double)computations) / ((double)memoryoperations * sizeof(int)),\n      kernel_time_mad_int,\n      ((double)computations) / kernel_time_mad_int * 1000. /\n          (double)(1000 * 1000 * 1000),\n      ((double)memoryoperations * sizeof(int)) / kernel_time_mad_int * 1000. /\n          (1000. * 1000. * 1000.));\n}\n\nvoid mixbenchCPU(void* c, size_t size_bytes) {\n  const char* benchtype = \"compute with global memory (block strided)\";\n  const long size = static_cast<long>(size_bytes / sizeof(double));\n  double* cd = reinterpret_cast<double*>(c);\n  const bool doHalfs = false;\n\n  std::printf(\"Trade-off type:       %s\\n\", benchtype);\n  std::printf(\"Elements per thread:  %d\\n\", ELEMENTS_PER_THREAD);\n  std::printf(\"Thread fusion degree: %d\\n\", FUSION_DEGREE);\n  if (!doHalfs) {\n    std::printf(\n        \"Warning:              Half precision computations are not supported\\n\");\n  }\n\n  std::memset(cd, 0, size * sizeof(double));\n\n  std::printf(\n      \"----------------------------------------------------------------------------- \"\n      \"CSV data \"\n      \"-----------------------------------------------------------------------------\\n\");\n  std::printf(\n      \"Experiment ID, Single Precision ops,,,,              Double precision \"\n      \"ops,,,,              Half precision ops,,,,                Integer \"\n      \"operations,,, \\n\");\n  std::printf(\n      \"Compute iters, Flops/byte, ex.time,  GFLOPS, GB/sec, Flops/byte, ex.time,  \"\n      \"GFLOPS, GB/sec, Flops/byte, ex.time,  GFLOPS, GB/sec, Iops/byte, ex.time,   \"\n      \"GIOPS, GB/sec\\n\");\n\n  runbench_warmup(cd, size);\n\n  runbench<0>(cd, size, doHalfs);\n  runbench<1>(cd, size, doHalfs);\n  runbench<2>(cd, size, doHalfs);\n  runbench<3>(cd, size, doHalfs);\n  runbench<4>(cd, size, doHalfs);\n  runbench<5>(cd, size, doHalfs);\n  runbench<6>(cd, size, doHalfs);\n  runbench<7>(cd, size, doHalfs);\n  runbench<8>(cd, size, doHalfs);\n  runbench<9>(cd, size, doHalfs);\n  runbench<10>(cd, size, doHalfs);\n  runbench<11>(cd, size, doHalfs);\n  runbench<12>(cd, size, doHalfs);\n  runbench<13>(cd, size, doHalfs);\n  runbench<14>(cd, size, doHalfs);\n  runbench<15>(cd, size, doHalfs);\n  runbench<16>(cd, size, doHalfs);\n  runbench<17>(cd, size, doHalfs);\n  runbench<18>(cd, size, doHalfs);\n  runbench<20>(cd, size, doHalfs);\n  runbench<22>(cd, size, doHalfs);\n  runbench<24>(cd, size, doHalfs);\n  runbench<28>(cd, size, doHalfs);\n  runbench<32>(cd, size, doHalfs);\n  runbench<40>(cd, size, doHalfs);\n  runbench<48>(cd, size, doHalfs);\n  runbench<56>(cd, size, doHalfs);\n  runbench<64>(cd, size, doHalfs);\n  runbench<80>(cd, size, doHalfs);\n  runbench<96>(cd, size, doHalfs);\n  runbench<128>(cd, size, doHalfs);\n  runbench<192>(cd, size, doHalfs);\n  runbench<256>(cd, size, doHalfs);\n  runbench<512>(cd, size, doHalfs);\n  runbench<1024>(cd, size, doHalfs);\n\n  std::printf(\n      \"--------------------------------------------------------------------------------------------------------------\"\n      \"------------------------------------------------------\\n\");\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels_cpu.cpp"
+  ],
+  "target_files_extracted": [
+    "mix_kernels_cpu.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 110.504,
+      "prompt_tokens": 4953,
+      "completion_tokens": 7178,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

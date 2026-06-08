@@ -1,0 +1,194 @@
+{
+  "spec_version": "1.0.0",
+  "identity": {
+    "kernel_name": "page-rank",
+    "parallel_api": "cuda",
+    "unique_id": "hecbench-page-rank-cuda",
+    "source_suite": "hecbench"
+  },
+  "provenance": {
+    "repository": {
+      "url": "https://github.com/zjin-lcf/HeCBench",
+      "commit": "22785cdd708de5dca56525a277b31fe119171fd1",
+      "branch": "master"
+    },
+    "repo_root": "HeCBench-master/",
+    "source_path": "src/page-rank-cuda",
+    "license": "MIT"
+  },
+  "files": {
+    "prompt_payload": [
+      "main.cu",
+      "reference.h"
+    ],
+    "support_files": [
+      "Makefile",
+      "CMakeLists.txt"
+    ],
+    "verification_only": [],
+    "translation_targets": [
+      "main.cu"
+    ]
+  },
+  "implementation": {
+    "api": "cuda",
+    "api_version": null,
+    "language": "C++",
+    "language_standard": "C++17"
+  },
+  "build": {
+    "environment": {
+      "preferred": "system",
+      "conda": null,
+      "system": {
+        "dependencies": [
+          "CUDA Toolkit >= 11.0",
+          "GCC >= 9.0"
+        ]
+      }
+    },
+    "build_system": "make",
+    "working_directory": "src/page-rank-cuda",
+    "commands": {
+      "configure": null,
+      "build": "make ARCH=sm_89",
+      "clean": "make clean"
+    },
+    "variables": null,
+    "outputs": {
+      "executable": "main"
+    }
+  },
+  "run": {
+    "executable": "./main",
+    "default_arguments": [
+      "-n",
+      "20000",
+      "-i",
+      "100"
+    ],
+    "timeout_seconds": 300,
+    "environment_variables": null,
+    "input_configurations": {
+      "correctness": {
+        "arguments": [
+          "-n",
+          "10000",
+          "-i",
+          "50"
+        ],
+        "description": "PageRank with 10000 nodes, 50 iterations for correctness validation",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      },
+      "performance": {
+        "arguments": [
+          "-n",
+          "20000",
+          "-i",
+          "100"
+        ],
+        "description": "PageRank with 20000 nodes, 100 iterations for performance measurement",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      }
+    }
+  },
+  "verification": {
+    "method": "self_checking",
+    "strategies": [
+      {
+        "type": "stdout_pattern",
+        "pattern": "PASS",
+        "description": "GPU PageRank results compared against CPU reference implementation"
+      },
+      {
+        "type": "exit_code",
+        "expected": 0,
+        "description": "Process exits cleanly"
+      }
+    ],
+    "floating_point": {
+      "tolerance": 1e-06,
+      "tolerance_type": "absolute",
+      "note": "PageRank convergence comparison with tolerance threshold"
+    }
+  },
+  "performance": {
+    "metrics": [
+      {
+        "name": "kernel_time",
+        "extraction": {
+          "type": "regex",
+          "pattern": "Total kernel execution time:\\s+([\\d.]+)\\s+\\(s\\)",
+          "capture_group": 1
+        },
+        "unit": "seconds"
+      }
+    ],
+    "warmup_runs": 1,
+    "measurement_runs": 5
+  },
+  "hardware": {
+    "target": "gpu",
+    "requirements": {
+      "gpu": {
+        "vendor": "NVIDIA",
+        "min_compute_capability": "sm_60",
+        "min_memory_gb": 2
+      }
+    },
+    "reference_platform": {
+      "platform_id": "rtx4070-r9-7900x",
+      "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+      },
+      "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+      },
+      "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+      }
+    }
+  },
+  "baseline_results": {
+    "reference_platform": "rtx4070-r9-7900x",
+    "timestamp": "2026-03-28T23:10:00Z",
+    "configurations": {
+      "correctness": {
+        "status": "pass",
+        "exit_code": 0,
+        "stdout_snippet": "Max difference 0.000001 is reached at iteration 101\nThreshold: 0.000000\n\"Options\": \"-n 20000 -i 100 -t 0.000000\". Total kernel execution time: 2.788646 (s)\nPASS",
+        "wall_time_seconds": null
+      }
+    }
+  },
+  "metadata": {
+    "description": "PageRank algorithm with map and reduce kernels on GPU. Iteratively computes page rank scores with convergence checking, verified against CPU reference implementation.",
+    "domain": "graph",
+    "complexity": "O(V * E * iterations)",
+    "tags": [
+      "pagerank",
+      "graph",
+      "iterative",
+      "map-reduce"
+    ],
+    "multi_file": false,
+    "translation_complexity": null
+  }
+}

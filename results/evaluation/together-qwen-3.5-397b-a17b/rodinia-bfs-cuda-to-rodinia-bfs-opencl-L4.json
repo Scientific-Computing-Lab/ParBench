@@ -1,0 +1,71 @@
+{
+  "source_spec": "rodinia-bfs-cuda",
+  "target_spec": "rodinia-bfs-opencl",
+  "kernel": "bfs",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 702725938,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "../../data/bfs/graph1MW_6.txt"
+  ],
+  "timestamp": "2026-04-24T05:08:03Z",
+  "prompt_tokens": 14184,
+  "completion_tokens": 1216,
+  "llm_response_time_seconds": 15.637,
+  "build_status": "pass",
+  "build_time_seconds": 0.794,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 1.624,
+  "run_exit_code": -11,
+  "run_stderr_snippet": "el>:7:65: error: subscript of pointer to incomplete type '__global struct Node'\n        for(int i=x_4[x_6].starting; (x_4[x_6].no_of_edges + x_4[x_6].starting) > i; i++)\n                                                             ~~~^\n<kernel>:1:35: note: forward declaration of 'struct Node'\nkernel void BFS_1(__global struct Node* x_4, __global int* tmp_1, __global char* val_8, __global char* item_3, __global char *elem_7, __global int* item_2, int data_0) \n                                  ^\n\n",
+  "run_stdout_snippet": "Reading File\nnumber of platforms:1\nvendor is NVIDIA Corporation\ndevice number: 1\nCreating GPU Context\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code -11)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.519,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "Kernels.cl": "kernel void BFS_1(__global struct Node* x_4, __global int* tmp_1, __global char* val_8, __global char* item_3, __global char *elem_7, __global int* item_2, int data_0) \n{\n    int x_6 = get_global_id(0);\n    if( data_0 > x_6 && val_8[x_6])\n    {\n        val_8[x_6]=0;\n        for(int i=x_4[x_6].starting; (x_4[x_6].no_of_edges + x_4[x_6].starting) > i; i++)\n        {\n            int item_5 = tmp_1[i];\n            if(!elem_7[item_5])\n            {\n                item_2[item_5]=item_2[x_6]+1;\n                item_3[item_5]=1;\n            }\n        }\n    }\n}\n\nkernel void BFS_2(__global char* var_4, __global char *data_5, __global char* elem_3, __global char *item_0, int tmp_2)\n{\n    int elem_1 = get_global_id(0);\n    if( tmp_2 > elem_1 && data_5[elem_1])\n    {\n        var_4[elem_1]=1;\n        elem_3[elem_1]=1;\n        *item_0=1;\n        data_5[elem_1]=0;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 15.637,
+      "prompt_tokens": 14184,
+      "completion_tokens": 1216,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "el>:7:65: error: subscript of pointer to incomplete type '__global struct Node'\n        for(int i=x_4[x_6].starting; (x_4[x_6].no_of_edges + x_4[x_6].starting) > i; i++)\n                                                             ~~~^\n<kernel>:1:35: note: forward declaration of 'struct Node'\nkernel void BFS_1(__global struct Node* x_4, __global int* tmp_1, __global char* val_8, __global char* item_3, __global char *elem_7, __global int* item_2, int data_0) \n                                  ^\n\n",
+      "run_stdout_snippet": "Reading File\nnumber of platforms:1\nvendor is NVIDIA Corporation\ndevice number: 1\nCreating GPU Context\n",
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-pathfinder-omp",
+  "target_spec": "rodinia-pathfinder-opencl",
+  "kernel": "pathfinder",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 793451816,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-c",
+    "100000",
+    "-r",
+    "100",
+    "-h",
+    "20"
+  ],
+  "timestamp": "2026-04-24T05:52:27Z",
+  "prompt_tokens": 4330,
+  "completion_tokens": 1260,
+  "llm_response_time_seconds": 10.859,
+  "build_status": "pass",
+  "build_time_seconds": 0.483,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.243,
+  "run_exit_code": 1,
+  "run_stderr_snippet": "1 warning generated.\n",
+  "run_stdout_snippet": "**********************************\n<kernel>:21:5: warning: implicit declaration of function '__local_barrier' is invalid in OpenCL\n    __local_barrier();\n    ^\n(): Warning: Function dynproc_kernel is a kernel, so overriding noinline attribute. The function may be inlined when called.\nptxas fatal   : Unresolved extern function '__local_barrier'\n\n\n*************************************************\n*** END OUTPUT FROM COMPILING THE KERNEL FILE ***\n*************************************************\n\n\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernels.cl": "__kernel void dynproc_kernel(\n    int height,\n    __global const int* wall,\n    __global const int* src,\n    __global int* dst,\n    int cols,\n    int rows,\n    int t,\n    int borderCols,\n    int halo,\n    __local int* local_mem1,\n    __local int* local_mem2,\n    __global int* outputBuffer)\n{\n    int n = get_global_id(0);\n    \n    if (n >= cols) return;\n    \n    // Copy src to local memory for faster access\n    local_mem1[n] = src[n];\n    __local_barrier();\n    \n    int current_val = local_mem1[n];\n    \n    // Process multiple rows (pyramid_height iterations)\n    for (int h = 0; h < height; h++) {\n        int row_idx = t + h;\n        \n        if (row_idx >= rows - 1) break;\n        \n        int min = current_val;\n        if (n > 0) {\n            int left = (n - 1 >= cols) ? current_val : local_mem1[n - 1];\n            if (left < min) min = left;\n        }\n        if (n < cols - 1) {\n            int right = (n + 1 >= cols) ? current_val : local_mem1[n + 1];\n            if (right < min) min = right;\n        }\n        \n        current_val = wall[(row_idx + 1) * cols + n] + min;\n        \n        // Store result for next iteration\n        if (h < height - 1) {\n            local_mem1[n] = current_val;\n            __local_barrier();\n        }\n    }\n    \n    // Write final result\n    dst[n] = current_val;\n    \n    // Store timing info in output buffer\n    if (n == 0) {\n        outputBuffer[0] = rows;\n        outputBuffer[1] = cols;\n        outputBuffer[2] = height;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernels.cl"
+  ],
+  "target_files_extracted": [
+    "kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 10.859,
+      "prompt_tokens": 4330,
+      "completion_tokens": 1260,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "1 warning generated.\n",
+      "run_stdout_snippet": "**********************************\n<kernel>:21:5: warning: implicit declaration of function '__local_barrier' is invalid in OpenCL\n    __local_barrier();\n    ^\n(): Warning: Function dynproc_kernel is a kernel, so overriding noinline attribute. The function may be inlined when called.\nptxas fatal   : Unresolved extern function '__local_barrier'\n\n\n*************************************************\n*** END OUTPUT FROM COMPILING THE KERNEL FILE ***\n*************************************************\n\n\n",
+      "extraction_fail": null
+    }
+  ]
+}

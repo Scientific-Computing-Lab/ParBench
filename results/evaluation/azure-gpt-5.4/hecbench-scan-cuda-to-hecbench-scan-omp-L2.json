@@ -1,0 +1,81 @@
+{
+  "source_spec": "hecbench-scan-cuda",
+  "target_spec": "hecbench-scan-omp",
+  "kernel": "scan",
+  "model": "azure-gpt-5.4",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1565757884,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "1048576",
+    "1"
+  ],
+  "timestamp": "2026-04-26T21:10:23Z",
+  "prompt_tokens": 2236,
+  "completion_tokens": 4056,
+  "llm_response_time_seconds": 62.604,
+  "build_status": "pass",
+  "build_time_seconds": 1.018,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.517,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": " conflicts): 1396.348022 (us). Reduce the time by 4.8%\nElement size in bytes is 4. Average execution time of scan (w/  bank conflicts): 958.357056 (us)\nElement size in bytes is 4. Average execution time of scan (w/o bank conflicts): 1341.966064 (us). Reduce the time by -40.0%\nElement size in bytes is 8. Average execution time of scan (w/  bank conflicts): 1227.532104 (us)\nElement size in bytes is 8. Average execution time of scan (w/o bank conflicts): 1677.395020 (us). Reduce the time by -36.6%\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "scan_with_bank_conflicts": {
+      "value": 1810.004028,
+      "unit": "us"
+    },
+    "scan_without_bank_conflicts": {
+      "value": 1461.611084,
+      "unit": "us"
+    }
+  },
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.517,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cpp": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <stdint.h>\n#include <chrono>\n\ntemplate<typename T>\nvoid verify(const T* cpu_out, const T* gpu_out, int64_t n)\n{\n  int error = memcmp(cpu_out, gpu_out, n * sizeof(T));\n  if (error) {\n    for (int64_t i = 0; i < n; i++) {\n      if (cpu_out[i] != gpu_out[i]) {\n        printf(\"@%zu: %lf != %lf\\n\", (size_t)i, (double)cpu_out[i], (double)gpu_out[i]);\n        break;\n      }\n    }\n  }\n  printf(\"%s\\n\", error ? \"FAIL\" : \"PASS\");\n}\n\n#define LOG_MEM_BANKS 5\n#define OFFSET(n) ((n) >> LOG_MEM_BANKS)\n\ntemplate<typename T, int N>\nvoid scan_bcao(\n  const int64_t nblocks,\n        T *__restrict__ g_odata,\n  const T *__restrict__ g_idata)\n{\n  #pragma omp parallel for schedule(static)\n  for (int64_t bid = 0; bid < nblocks; bid++)\n  {\n    T temp[2 * N];\n\n    auto gi = g_idata + bid * N;\n    auto go = g_odata + bid * N;\n\n    for (int thid = 0; thid < N / 2; thid++) {\n      int a = thid;\n      int b = a + (N / 2);\n      int oa = OFFSET(a);\n      int ob = OFFSET(b);\n\n      temp[a + oa] = gi[a];\n      temp[b + ob] = gi[b];\n    }\n\n    int offset = 1;\n    for (int d = N >> 1; d > 0; d >>= 1)\n    {\n      for (int thid = 0; thid < d; thid++)\n      {\n        int ai = offset * (2 * thid + 1) - 1;\n        int bi = offset * (2 * thid + 2) - 1;\n        ai += OFFSET(ai);\n        bi += OFFSET(bi);\n        temp[bi] += temp[ai];\n      }\n      offset *= 2;\n    }\n\n    temp[N - 1 + OFFSET(N - 1)] = 0;\n    for (int d = 1; d < N; d *= 2)\n    {\n      offset >>= 1;\n      for (int thid = 0; thid < d; thid++)\n      {\n        int ai = offset * (2 * thid + 1) - 1;\n        int bi = offset * (2 * thid + 2) - 1;\n        ai += OFFSET(ai);\n        bi += OFFSET(bi);\n        T t = temp[ai];\n        temp[ai] = temp[bi];\n        temp[bi] += t;\n      }\n    }\n\n    for (int thid = 0; thid < N / 2; thid++) {\n      int a = thid;\n      int b = a + (N / 2);\n      int oa = OFFSET(a);\n      int ob = OFFSET(b);\n\n      go[a] = temp[a + oa];\n      go[b] = temp[b + ob];\n    }\n  }\n}\n\ntemplate<typename T, int N>\nvoid scan(\n  const int64_t nblocks,\n        T *__restrict__ g_odata,\n  const T *__restrict__ g_idata)\n{\n  #pragma omp parallel for schedule(static)\n  for (int64_t bid = 0; bid < nblocks; bid++)\n  {\n    T temp[N];\n\n    auto gi = g_idata + bid * N;\n    auto go = g_odata + bid * N;\n\n    int offset = 1;\n    for (int thid = 0; thid < N / 2; thid++) {\n      temp[2 * thid]     = gi[2 * thid];\n      temp[2 * thid + 1] = gi[2 * thid + 1];\n    }\n\n    for (int d = N >> 1; d > 0; d >>= 1)\n    {\n      for (int thid = 0; thid < d; thid++)\n      {\n        int ai = offset * (2 * thid + 1) - 1;\n        int bi = offset * (2 * thid + 2) - 1;\n        temp[bi] += temp[ai];\n      }\n      offset *= 2;\n    }\n\n    temp[N - 1] = 0;\n    for (int d = 1; d < N; d *= 2)\n    {\n      offset >>= 1;\n      for (int thid = 0; thid < d; thid++)\n      {\n        int ai = offset * (2 * thid + 1) - 1;\n        int bi = offset * (2 * thid + 2) - 1;\n        T t = temp[ai];\n        temp[ai] = temp[bi];\n        temp[bi] += t;\n      }\n    }\n\n    for (int thid = 0; thid < N / 2; thid++) {\n      go[2 * thid]     = temp[2 * thid];\n      go[2 * thid + 1] = temp[2 * thid + 1];\n    }\n  }\n}\n\ntemplate <typename T, int N>\nvoid runTest(const int64_t n, const int repeat, bool timing = false)\n{\n  int64_t num_blocks = (n + N - 1) / N;\n  int64_t nelems = num_blocks * N;\n  int64_t bytes = nelems * (int64_t)sizeof(T);\n\n  T *in = (T*) malloc((size_t)bytes);\n  T *cpu_out = (T*) malloc((size_t)bytes);\n  T *gpu_out = (T*) malloc((size_t)bytes);\n\n  srand(123);\n  for (int64_t i = 0; i < nelems; i++) in[i] = (T)(rand() % 5 + 1);\n\n  T *t_in = in;\n  T *t_out = cpu_out;\n  for (int64_t blk = 0; blk < num_blocks; blk++) {\n    t_out[0] = 0;\n    for (int i = 1; i < N; i++)\n      t_out[i] = t_out[i - 1] + t_in[i - 1];\n    t_out += N;\n    t_in += N;\n  }\n\n  T *d_in = (T*) malloc((size_t)bytes);\n  T *d_out = (T*) malloc((size_t)bytes);\n  memcpy(d_in, in, (size_t)bytes);\n\n  auto start = std::chrono::steady_clock::now();\n  for (int i = 0; i < repeat; i++) {\n    scan<T, N>(num_blocks, d_out, d_in);\n  }\n  auto end = std::chrono::steady_clock::now();\n  auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n  if (timing) {\n    printf(\"Element size in bytes is %zu. Average execution time of scan (w/  bank conflicts): %f (us)\\n\",\n           sizeof(T), (time * 1e-3f) / repeat);\n  }\n  memcpy(gpu_out, d_out, (size_t)bytes);\n  if (!timing) verify(cpu_out, gpu_out, nelems);\n\n  start = std::chrono::steady_clock::now();\n  for (int i = 0; i < repeat; i++) {\n    scan_bcao<T, N>(num_blocks, d_out, d_in);\n  }\n  end = std::chrono::steady_clock::now();\n  auto bcao_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n  if (timing) {\n    printf(\"Element size in bytes is %zu. Average execution time of scan (w/o bank conflicts): %f (us). \",\n           sizeof(T), (bcao_time * 1e-3f) / repeat);\n    printf(\"Reduce the time by %.1f%%\\n\", (time - bcao_time) * 1.0 / time * 100);\n  }\n  memcpy(gpu_out, d_out, (size_t)bytes);\n  if (!timing) verify(cpu_out, gpu_out, nelems);\n\n  free(d_in);\n  free(d_out);\n  free(in);\n  free(cpu_out);\n  free(gpu_out);\n}\n\ntemplate<int N>\nvoid run(const int64_t n, const int repeat) {\n  for (int i = 0; i < 2; i++) {\n    bool report_timing = i > 0;\n    printf(\"\\nThe number of elements to scan in a thread block: %d\\n\", N);\n    runTest< char, N>(n, repeat, report_timing);\n    runTest<short, N>(n, repeat, report_timing);\n    runTest<  int, N>(n, repeat, report_timing);\n    runTest< long, N>(n, repeat, report_timing);\n  }\n}\n\nint main(int argc, char* argv[])\n{\n  if (argc != 3) {\n    printf(\"Usage: %s <number of elements> <repeat>\\n\", argv[0]);\n    return 1;\n  }\n  const int64_t n = atol(argv[1]);\n  const int repeat = atoi(argv[2]);\n\n  run< 128>(n, repeat);\n  run< 256>(n, repeat);\n  run< 512>(n, repeat);\n  run<1024>(n, repeat);\n  run<2048>(n, repeat);\n\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cpp"
+  ],
+  "target_files_extracted": [
+    "main.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 62.604,
+      "prompt_tokens": 2236,
+      "completion_tokens": 4056,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

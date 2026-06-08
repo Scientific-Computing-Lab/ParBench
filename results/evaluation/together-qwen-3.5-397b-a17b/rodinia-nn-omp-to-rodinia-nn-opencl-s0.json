@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-nn-omp",
+  "target_spec": "rodinia-nn-opencl",
+  "kernel": "nn",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 336857645,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "../../data/nn/filelist.txt",
+    "-r",
+    "5",
+    "-lat",
+    "30",
+    "-lng",
+    "90",
+    "-f",
+    "../../data/nn"
+  ],
+  "timestamp": "2026-04-22T01:51:45Z",
+  "prompt_tokens": 10694,
+  "completion_tokens": 11295,
+  "llm_response_time_seconds": 126.043,
+  "build_status": "pass",
+  "build_time_seconds": 0.661,
+  "build_error_snippet": null,
+  "run_status": "timeout",
+  "run_time_seconds": 300.106,
+  "run_exit_code": -1,
+  "run_stderr_snippet": "Execution timed out after 300s",
+  "run_stdout_snippet": "",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code -1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 300.039,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "nearestNeighbor_kernel.cl": "#define REC_LENGTH 49\n#define LATITUDE_POS 28\n#define OPEN 10000\n\n__kernel void calculate_distances(\n    __global const char* sandbox,\n    __global float* z,\n    float target_lat,\n    float target_long,\n    int rec_count)\n{\n    int i = get_global_id(0);\n    if (i < rec_count) {\n        const char* rec_iter = sandbox + (i * REC_LENGTH + LATITUDE_POS - 1);\n        \n        float tmp_lat = 0.0f;\n        float tmp_long = 0.0f;\n        \n        // Parse latitude from string\n        int pos = 0;\n        float sign = 1.0f;\n        float int_val = 0.0f;\n        float frac_val = 0.0f;\n        float frac_div = 1.0f;\n        \n        while (rec_iter[pos] == ' ' && pos < 5) pos++;\n        if (rec_iter[pos] == '-') { sign = -1.0f; pos++; }\n        \n        while (rec_iter[pos] >= '0' && rec_iter[pos] <= '9' && pos < 5) {\n            int_val = int_val * 10.0f + (rec_iter[pos] - '0');\n            pos++;\n        }\n        \n        if (rec_iter[pos] == '.') {\n            pos++;\n            while (rec_iter[pos] >= '0' && rec_iter[pos] <= '9' && pos < 5) {\n                frac_div *= 10.0f;\n                frac_val += (rec_iter[pos] - '0') / frac_div;\n                pos++;\n            }\n        }\n        tmp_lat = sign * (int_val + frac_val);\n        \n        // Parse longitude (5 characters after latitude position)\n        rec_iter += 5;\n        pos = 0;\n        sign = 1.0f;\n        int_val = 0.0f;\n        frac_val = 0.0f;\n        frac_div = 1.0f;\n        \n        while (rec_iter[pos] == ' ' && pos < 5) pos++;\n        if (rec_iter[pos] == '-') { sign = -1.0f; pos++; }\n        \n        while (rec_iter[pos] >= '0' && rec_iter[pos] <= '9' && pos < 5) {\n            int_val = int_val * 10.0f + (rec_iter[pos] - '0');\n            pos++;\n        }\n        \n        if (rec_iter[pos] == '.') {\n            pos++;\n            while (rec_iter[pos] >= '0' && rec_iter[pos] <= '9' && pos < 5) {\n                frac_div *= 10.0f;\n                frac_val += (rec_iter[pos] - '0') / frac_div;\n                pos++;\n            }\n        }\n        tmp_long = sign * (int_val + frac_val);\n        \n        float diff_lat = tmp_lat - target_lat;\n        float diff_long = tmp_long - target_long;\n        z[i] = sqrt(diff_lat * diff_lat + diff_long * diff_long);\n    }\n}\n\n__kernel void update_neighbors(\n    __global const float* z,\n    __global const char* sandbox,\n    __global char* neighbor_entries,\n    __global float* neighbor_distances,\n    int rec_count,\n    int k,\n    float open_dist)\n{\n    int i = get_global_id(0);\n    if (i < rec_count) {\n        float max_dist = -1.0f;\n        int max_idx = 0;\n        \n        for (int j = 0; j < k; j++) {\n            if (neighbor_distances[j] > max_dist) {\n                max_dist = neighbor_distances[j];\n                max_idx = j;\n            }\n        }\n        \n        if (z[i] < neighbor_distances[max_idx]) {\n            for (int c = 0; c < REC_LENGTH - 1; c++) {\n                neighbor_entries[max_idx * REC_LENGTH + c] = sandbox[i * REC_LENGTH + c];\n            }\n            neighbor_entries[max_idx * REC_LENGTH + REC_LENGTH - 1] = '\\0';\n            neighbor_distances[max_idx] = z[i];\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "nearestNeighbor_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "nearestNeighbor_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 126.043,
+      "prompt_tokens": 10694,
+      "completion_tokens": 11295,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "timeout",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "Execution timed out after 300s",
+      "run_stdout_snippet": "",
+      "extraction_fail": null
+    }
+  ]
+}

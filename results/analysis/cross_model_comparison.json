@@ -1,0 +1,198 @@
+{
+  "generated_at": "2026-04-28T00:28:56.404037+00:00",
+  "models": [
+    "together-qwen-3.5-397b-a17b",
+    "azure-gpt-5.4"
+  ],
+  "common_directions": [
+    "cuda-to-omp",
+    "cuda-to-omp_target",
+    "cuda-to-opencl",
+    "omp-to-cuda",
+    "omp-to-omp_target",
+    "omp-to-opencl",
+    "omp_target-to-cuda",
+    "omp_target-to-omp",
+    "opencl-to-cuda",
+    "opencl-to-omp"
+  ],
+  "missing_directions": {},
+  "overall": {
+    "mcnemar": {
+      "both_pass": 49,
+      "both_fail": 42,
+      "qwen_only": 1,
+      "gpt_only": 50,
+      "total": 142,
+      "mcnemar_chi2": 45.1765,
+      "p_value": 0.0
+    },
+    "qwen": {
+      "pass": 102,
+      "total": 426,
+      "rate": 0.2394
+    },
+    "gpt": {
+      "pass": 267,
+      "total": 426,
+      "rate": 0.6268
+    },
+    "cohens_h": -0.8047,
+    "effect_size": "large"
+  },
+  "per_direction": {
+    "cuda-to-omp": {
+      "qwen": {
+        "pass": 29,
+        "total": 72,
+        "rate": 0.4028
+      },
+      "gpt": {
+        "pass": 60,
+        "total": 72,
+        "rate": 0.8333
+      },
+      "cohens_h": -0.9253,
+      "effect_size": "large"
+    },
+    "cuda-to-omp_target": {
+      "qwen": {
+        "pass": 0,
+        "total": 24,
+        "rate": 0.0
+      },
+      "gpt": {
+        "pass": 23,
+        "total": 24,
+        "rate": 0.9583
+      },
+      "cohens_h": -2.7303,
+      "effect_size": "large"
+    },
+    "cuda-to-opencl": {
+      "qwen": {
+        "pass": 4,
+        "total": 57,
+        "rate": 0.0702
+      },
+      "gpt": {
+        "pass": 34,
+        "total": 57,
+        "rate": 0.5965
+      },
+      "cohens_h": -1.2287,
+      "effect_size": "large"
+    },
+    "omp-to-cuda": {
+      "qwen": {
+        "pass": 18,
+        "total": 72,
+        "rate": 0.25
+      },
+      "gpt": {
+        "pass": 40,
+        "total": 72,
+        "rate": 0.5556
+      },
+      "cohens_h": -0.635,
+      "effect_size": "medium"
+    },
+    "omp-to-omp_target": {
+      "qwen": {
+        "pass": 4,
+        "total": 9,
+        "rate": 0.4444
+      },
+      "gpt": {
+        "pass": 9,
+        "total": 9,
+        "rate": 1.0
+      },
+      "cohens_h": -1.6822,
+      "effect_size": "large"
+    },
+    "omp-to-opencl": {
+      "qwen": {
+        "pass": 17,
+        "total": 51,
+        "rate": 0.3333
+      },
+      "gpt": {
+        "pass": 37,
+        "total": 51,
+        "rate": 0.7255
+      },
+      "cohens_h": -0.8078,
+      "effect_size": "large"
+    },
+    "omp_target-to-cuda": {
+      "qwen": {
+        "pass": 16,
+        "total": 24,
+        "rate": 0.6667
+      },
+      "gpt": {
+        "pass": 23,
+        "total": 24,
+        "rate": 0.9583
+      },
+      "cohens_h": -0.8196,
+      "effect_size": "large"
+    },
+    "omp_target-to-omp": {
+      "qwen": {
+        "pass": 9,
+        "total": 9,
+        "rate": 1.0
+      },
+      "gpt": {
+        "pass": 9,
+        "total": 9,
+        "rate": 1.0
+      },
+      "cohens_h": 0.0,
+      "effect_size": "negligible"
+    },
+    "opencl-to-cuda": {
+      "qwen": {
+        "pass": 0,
+        "total": 57,
+        "rate": 0.0
+      },
+      "gpt": {
+        "pass": 11,
+        "total": 57,
+        "rate": 0.193
+      },
+      "cohens_h": -0.9097,
+      "effect_size": "large"
+    },
+    "opencl-to-omp": {
+      "qwen": {
+        "pass": 5,
+        "total": 51,
+        "rate": 0.098
+      },
+      "gpt": {
+        "pass": 21,
+        "total": 51,
+        "rate": 0.4118
+      },
+      "cohens_h": -0.7567,
+      "effect_size": "medium"
+    }
+  },
+  "per_kernel_matrix": {
+    "total_common_kernels": 0,
+    "both_pass": [],
+    "both_fail": [],
+    "qwen_only_pass": [],
+    "gpt_only_pass": [],
+    "counts": {
+      "both_pass": 0,
+      "both_fail": 0,
+      "qwen_only_pass": 0,
+      "gpt_only_pass": 0
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "source_spec": "mixbench-mixbench-opencl",
+  "target_spec": "mixbench-mixbench-omp",
+  "kernel": "mixbench",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 625404107,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-05-01T01:17:21Z",
+  "prompt_tokens": 7874,
+  "completion_tokens": 5848,
+  "llm_response_time_seconds": 54.424,
+  "build_status": "pass",
+  "build_time_seconds": 0.788,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 37.85,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "1.00\n          192,     96.250,  505.09,   76.73,   0.80,     48.125,  520.04,   74.52,   1.55,    192.500,  517.83,  149.68,   0.78,    96.250,  610.12,   63.52,   0.66\n          256,    128.250,  711.13,   72.62,   0.57,     64.125,  717.36,   71.99,   1.12,    256.500,  713.18,  144.82,   0.56,   128.250,  814.50,   63.40,   0.49\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "single_precision_gflops": {
+      "value": 8.84,
+      "unit": "GFLOPS"
+    }
+  },
+  "baseline_wall_time_seconds": 120.0,
+  "translated_wall_time_seconds": 37.85,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 3.1704,
+  "translated_files": {
+    "mix_kernels_cpu.cpp": "#include <omp.h>\n\n#include <chrono>\n#include <cstddef>\n#include <cstdint>\n#include <cstdio>\n#include <cstring>\n#include <vector>\n\n#include \"mix_kernels_cpu.h\"\n\nnamespace {\n\nenum KrnDataType { kdt_int, kdt_float, kdt_double, kdt_half };\n\nconst int compute_iterations[] = {\n    0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,  14,  15, 16,\n    17, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256};\nconst int compute_iterations_len =\n    sizeof(compute_iterations) / sizeof(*compute_iterations);\n\nstruct Half2 {\n  float x;\n  float y;\n};\n\ninline Half2 operator+(const Half2& a, const Half2& b) {\n  return Half2{a.x + b.x, a.y + b.y};\n}\n\ninline Half2 operator*(const Half2& a, const Half2& b) {\n  return Half2{a.x * b.x, a.y * b.y};\n}\n\ntemplate <typename T>\ninline T value_zero();\ntemplate <>\ninline float value_zero<float>() {\n  return 0.0f;\n}\ntemplate <>\ninline double value_zero<double>() {\n  return 0.0;\n}\ntemplate <>\ninline int value_zero<int>() {\n  return 0;\n}\ntemplate <>\ninline Half2 value_zero<Half2>() {\n  return Half2{0.0f, 0.0f};\n}\n\ntemplate <typename T>\ninline T value_minus_one();\ntemplate <>\ninline float value_minus_one<float>() {\n  return -1.0f;\n}\ntemplate <>\ninline double value_minus_one<double>() {\n  return -1.0;\n}\ntemplate <>\ninline int value_minus_one<int>() {\n  return -1;\n}\ntemplate <>\ninline Half2 value_minus_one<Half2>() {\n  return Half2{-1.0f, -1.0f};\n}\n\ntemplate <typename T>\ninline bool is_equal_value(const T& a, const T& b) {\n  return a == b;\n}\ntemplate <>\ninline bool is_equal_value<Half2>(const Half2& a, const Half2& b) {\n  return a.x == b.x && a.y == b.y;\n}\n\ntemplate <typename T>\nvoid benchmark_func(T seed,\n                    T* g_data,\n                    long size,\n                    bool block_strided,\n                    size_t workgroupsize,\n                    int compute_iters,\n                    unsigned int elements_per_wi,\n                    unsigned int fusion_degree) {\n  const long compute_grid_size = size / elements_per_wi / fusion_degree;\n  if (compute_grid_size <= 0) return;\n\n  const long stride =\n      block_strided ? static_cast<long>(workgroupsize) : compute_grid_size;\n  const long big_stride = compute_grid_size * static_cast<long>(elements_per_wi);\n\n#pragma omp parallel for schedule(static)\n  for (long gid = 0; gid < compute_grid_size; gid++) {\n    const long idx = block_strided\n                         ? ((gid / static_cast<long>(workgroupsize)) *\n                                static_cast<long>(workgroupsize) *\n                                static_cast<long>(elements_per_wi) +\n                            (gid % static_cast<long>(workgroupsize)))\n                         : gid;\n\n    T tmps[64];\n    for (unsigned int k = 0; k < fusion_degree; k++) {\n      for (unsigned int j = 0; j < elements_per_wi; j++) {\n        T v = g_data[idx + static_cast<long>(j) * stride +\n                     static_cast<long>(k) * big_stride];\n        for (int i = 0; i < compute_iters; i++) {\n          v = v * v + seed;\n        }\n        tmps[j] = v;\n      }\n\n      T sum = value_zero<T>();\n      for (unsigned int j = 0; j < elements_per_wi; j += 2) {\n        sum = sum + tmps[j] * tmps[j + 1];\n      }\n\n      if (is_equal_value(sum, value_minus_one<T>())) {\n        g_data[idx + static_cast<long>(k) * big_stride] = sum;\n      }\n    }\n  }\n}\n\ntemplate <int N, class F>\ndouble benchmark(F&& fn) {\n  double total = 0.0;\n  for (int i = 0; i < N; i++) total += fn();\n  return total / static_cast<double>(N);\n}\n\nvoid runbench_warmup(std::vector<int>& buffer,\n                     long size,\n                     size_t workgroupsize,\n                     bool block_strided) {\n  const long reduced_grid_size = size / 256;\n  if (reduced_grid_size <= 0) return;\n\n#pragma omp parallel for schedule(static)\n  for (long i = 0; i < size; i++) buffer[i] = 0;\n\n  benchmark_func<int>(1, buffer.data(), reduced_grid_size, block_strided,\n                      workgroupsize, 0, 1, 1);\n}\n\nvoid runbench(const int compute_iterations[],\n              unsigned int krn_idx,\n              std::vector<float>& fbuf,\n              std::vector<double>& dbuf,\n              std::vector<Half2>& hbuf,\n              std::vector<int>& ibuf,\n              long size,\n              bool block_strided,\n              size_t workgroupsize,\n              unsigned int elements_per_wi,\n              unsigned int fusion_degree) {\n  const long compute_grid_size = size / elements_per_wi / fusion_degree;\n  const int current_compute_iterations = compute_iterations[krn_idx];\n  const long long computations =\n      (elements_per_wi * (long long)compute_grid_size +\n       (2LL * elements_per_wi * current_compute_iterations) *\n           (long long)compute_grid_size) *\n      fusion_degree;\n  const long long memoryoperations = size;\n\n  constexpr int total_bench_iterations = 3;\n\n  double kernel_time_mad_sp = benchmark<total_bench_iterations>([&]() {\n    auto ts_start = std::chrono::high_resolution_clock::now();\n    benchmark_func<float>(1.0f, fbuf.data(), size, block_strided, workgroupsize,\n                          current_compute_iterations, elements_per_wi,\n                          fusion_degree);\n    auto ts_end = std::chrono::high_resolution_clock::now();\n    return std::chrono::duration<double, std::milli>(ts_end - ts_start).count();\n  });\n\n  double kernel_time_mad_dp = benchmark<total_bench_iterations>([&]() {\n    auto ts_start = std::chrono::high_resolution_clock::now();\n    benchmark_func<double>(1.0, dbuf.data(), size, block_strided, workgroupsize,\n                           current_compute_iterations, elements_per_wi,\n                           fusion_degree);\n    auto ts_end = std::chrono::high_resolution_clock::now();\n    return std::chrono::duration<double, std::milli>(ts_end - ts_start).count();\n  });\n\n  double kernel_time_mad_hp = benchmark<total_bench_iterations>([&]() {\n    auto ts_start = std::chrono::high_resolution_clock::now();\n    benchmark_func<Half2>(Half2{1.0f, 1.0f}, hbuf.data(), size, block_strided,\n                          workgroupsize, current_compute_iterations,\n                          elements_per_wi, fusion_degree);\n    auto ts_end = std::chrono::high_resolution_clock::now();\n    return std::chrono::duration<double, std::milli>(ts_end - ts_start).count();\n  });\n\n  double kernel_time_mad_int = benchmark<total_bench_iterations>([&]() {\n    auto ts_start = std::chrono::high_resolution_clock::now();\n    benchmark_func<int>(1, ibuf.data(), size, block_strided, workgroupsize,\n                        current_compute_iterations, elements_per_wi,\n                        fusion_degree);\n    auto ts_end = std::chrono::high_resolution_clock::now();\n    return std::chrono::duration<double, std::milli>(ts_end - ts_start).count();\n  });\n\n  const double half2_bytes = 4.0;  // OpenCL cl_half2 is 2x16-bit\n\n  printf(\n      \"         %4d,   %8.3f,%8.2f,%8.2f,%7.2f,   %8.3f,%8.2f,%8.2f,%7.2f,   \"\n      \"%8.3f,%8.2f,%8.2f,%7.2f,  %8.3f,%8.2f,%8.2f,%7.2f\\n\",\n      current_compute_iterations,\n      ((double)computations) / ((double)memoryoperations * sizeof(float)),\n      kernel_time_mad_sp,\n      ((double)computations) / kernel_time_mad_sp * 1000. /\n          (double)(1000 * 1000 * 1000),\n      ((double)memoryoperations * sizeof(float)) / kernel_time_mad_sp * 1000. /\n          (1000. * 1000. * 1000.),\n      ((double)computations) / ((double)memoryoperations * sizeof(double)),\n      kernel_time_mad_dp,\n      ((double)computations) / kernel_time_mad_dp * 1000. /\n          (double)(1000 * 1000 * 1000),\n      ((double)memoryoperations * sizeof(double)) / kernel_time_mad_dp * 1000. /\n          (1000. * 1000. * 1000.),\n      ((double)2 * computations) / ((double)memoryoperations * half2_bytes),\n      kernel_time_mad_hp,\n      ((double)2 * computations) / kernel_time_mad_hp * 1000. /\n          (double)(1000 * 1000 * 1000),\n      ((double)memoryoperations * half2_bytes) / kernel_time_mad_hp * 1000. /\n          (1000. * 1000. * 1000.),\n      ((double)computations) / ((double)memoryoperations * sizeof(int)),\n      kernel_time_mad_int,\n      ((double)computations) / kernel_time_mad_int * 1000. /\n          (double)(1000 * 1000 * 1000),\n      ((double)memoryoperations * sizeof(int)) / kernel_time_mad_int * 1000. /\n          (1000. * 1000. * 1000.));\n}\n\n}  // namespace\n\nvoid mixbenchCPU(void* c, size_t size_bytes) {\n  const long size = static_cast<long>(size_bytes / sizeof(double));\n\n  const bool block_strided = false;\n  const bool host_allocated = false;\n  const bool use_os_timer = true;\n  const size_t workgroupsize = 256;\n  const unsigned int elements_per_wi = 8;\n  const unsigned int fusion_degree = 4;\n\n  const char* benchtype = block_strided ? \"Workgroup\" : \"NDRange\";\n  printf(\"Workitem stride:        %s\\n\", benchtype);\n  const char* buffer_allocation =\n      host_allocated ? \"Host allocated\" : \"Device allocated\";\n  printf(\"Buffer allocation:      %s\\n\", buffer_allocation);\n  printf(\"Timer:                  %s\\n\", use_os_timer ? \"OS based\"\n                                                   : \"CL event based\");\n\n  std::vector<float> fbuf(size, 0.0f);\n  std::vector<double> dbuf(size, 0.0);\n  std::vector<Half2> hbuf(size, Half2{0.0f, 0.0f});\n  std::vector<int> ibuf(size, 0);\n\n  runbench_warmup(ibuf, size, workgroupsize, block_strided);\n\n  printf(\n      \"------------------------------------------------------------------------\"\n      \"----- CSV data \"\n      \"------------------------------------------------------------------------\"\n      \"-----\\n\");\n  printf(\n      \"Experiment ID, Single Precision ops,,,,              Double precision \"\n      \"ops,,,,              Half precision ops,,,,                Integer \"\n      \"operations,,, \\n\");\n  printf(\n      \"Compute iters, Flops/byte, ex.time,  GFLOPS, GB/sec, Flops/byte, \"\n      \"ex.time,  GFLOPS, GB/sec, Flops/byte, ex.time,  GFLOPS, GB/sec, \"\n      \"Iops/byte, ex.time,   GIOPS, GB/sec\\n\");\n\n  for (int i = 0; i < compute_iterations_len; i++) {\n    runbench(compute_iterations, i, fbuf, dbuf, hbuf, ibuf, size, block_strided,\n             workgroupsize, elements_per_wi, fusion_degree);\n  }\n\n  printf(\n      \"------------------------------------------------------------------------\"\n      \"------------------------------------------------------------------------\"\n      \"--------------------\\n\");\n\n  std::memcpy(c, dbuf.data(), size * sizeof(double));\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels_cpu.cpp"
+  ],
+  "target_files_extracted": [
+    "mix_kernels_cpu.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 54.424,
+      "prompt_tokens": 7874,
+      "completion_tokens": 5848,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

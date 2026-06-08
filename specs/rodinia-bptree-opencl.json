@@ -1,0 +1,190 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "bptree",
+        "parallel_api": "opencl",
+        "unique_id": "rodinia-bptree-opencl",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "opencl/b+tree",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "kernel/kernel_gpu_opencl.cl",
+            "kernel/kernel_gpu_opencl_2.cl",
+            "kernel/kernel_gpu_opencl_wrapper.c",
+            "kernel/kernel_gpu_opencl_wrapper_2.c",
+            "main.c"
+        ],
+        "support_files": [
+            "util/num/num.c",
+            "util/opencl/opencl.c",
+            "util/timer/timer.c",
+            "common.h",
+            "kernel/kernel_gpu_opencl_wrapper.h",
+            "kernel/kernel_gpu_opencl_wrapper_2.h",
+            "main.h",
+            "util/num/num.h",
+            "util/opencl/opencl.h",
+            "util/timer/timer.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "kernel/kernel_gpu_opencl.cl",
+            "kernel/kernel_gpu_opencl_2.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C",
+        "language_standard": null
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl>=2.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl/b+tree",
+        "commands": {
+            "configure": null,
+            "build": "make OPENCL_INC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include OPENCL_LIB=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+            "clean": "make clean"
+        },
+        "variables": {
+            "OPENCL_INC": {
+                "description": "Path to OpenCL headers",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include",
+                "detection": "find /usr -name 'cl.h' -path '*/CL/cl.h' | head -1 | xargs dirname | xargs dirname"
+            },
+            "OPENCL_LIB": {
+                "description": "Path to OpenCL libraries",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+                "detection": "find /usr -name 'libOpenCL.so' | head -1 | xargs dirname"
+            }
+        },
+        "outputs": {
+            "executable": "./b+tree.out"
+        }
+    },
+    "run": {
+        "executable": "./b+tree.out",
+        "default_arguments": [
+            "file",
+            "../../data/b+tree/mil.txt",
+            "command",
+            "../../data/b+tree/command.txt"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "file",
+                    "../../data/b+tree/mil.txt",
+                    "command",
+                    "../../data/b+tree/command.txt"
+                ],
+                "description": "Small input for correctness verification of b+tree (OPENCL)",
+                "input_files": [
+                    "../../data/b+tree/mil.txt",
+                    "../../data/b+tree/command.txt"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Total:",
+                "description": "B+tree computation completed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.272889+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "WG size of kernel 1 = 256 WG size of kernel 2 = 256 \nInput File: ../../data/b+tree/mil.txt \nCommand File: ../../data/b+tree/command.txt \nCommand Buffer: \nj 6000 3000\nk 10000\n\n\nGetting input from file file...\nTransforming data to a GPU suitable structure...\nTree transformation took 0.067077\nWaiting for command\n> \n******command: j count=6000, rSize=6000 \nknodes_elem=7874, knodes_unit_mem=2068, knodes_mem=16283432\nPlatform: NVIDIA Corporation\nDevice num: 1\nCreating GPU Context\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n--------------------------------\n# of blocks = 6000, # of threads/block = 256 (ensure that device can handle)\nTime spent in different stages of GPU_CUDA KERNEL:\nInit: 57.527000\nMemAlloc: 0.005000\nHtoD: 1.004896\nExec: 0.045824\nDtoH: 0.003680\nClose: 18.997000\nTotal: 77.927002\n> > > > > > > > > > > > \n ******command: k count=10000 \nrecords_elem=1000000, records_unit_mem=4, records_mem=4000000\nknodes_elem=7874, knodes_unit_mem=2068, knodes_mem=16283432\nPla",
+                "wall_time_seconds": 0.453,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "B+ tree search and range queries on GPU",
+        "domain": "data structures",
+        "complexity": "B+ tree search and range queries",
+        "tags": [
+            "b+tree",
+            "b-plus-tree",
+            "data-structures",
+            "opencl",
+            "rodinia",
+            "search"
+        ],
+        "multi_file": true,
+        "translation_complexity": "multi_to_multi"
+    }
+}

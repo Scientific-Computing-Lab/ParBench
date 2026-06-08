@@ -1,0 +1,1592 @@
+[
+  {
+    "kernel": "pathfinder",
+    "domain": "graph",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 288,
+        "size_bytes": 7694
+      }
+    },
+    "cuda_file_count": 1,
+    "prompt_payload_files": [
+      "main.cu"
+    ],
+    "support_files": [],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "error"
+      ],
+      "verification_strings": [
+        "fprintf(stderr, \"error: %s\\n\", s);"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 100000 1000 5",
+      "run_args": "100000 1000 5",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "b+tree",
+    "domain": "graph",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "common.h": {
+        "role": "support_files",
+        "lines": 465,
+        "size_bytes": 12632
+      },
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 2403,
+        "size_bytes": 64162
+      },
+      "main.h": {
+        "role": "support_files",
+        "lines": 4,
+        "size_bytes": 40
+      }
+    },
+    "cuda_file_count": 3,
+    "prompt_payload_files": [
+      "main.cu"
+    ],
+    "support_files": [
+      "common.h",
+      "main.h"
+    ],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "correct",
+        "error",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "printf(\"Initial malloc error\\n\");",
+        "puts (\"Command File error\",stderr); exit (1);}",
+        "puts (\"Command Buffer memory error\",stderr); exit (2);}",
+        "puts (\"Command file reading error\",stderr); exit (3);}"
+      ]
+    },
+    "makefile_info": {
+      "executable": "b+tree.out",
+      "run_command": "$(LAUNCHER) ./b+tree.out file ../data/b+tree/mil.txt command ../data/b+tree/command.txt",
+      "run_args": "file ../data/b+tree/mil.txt command ../data/b+tree/command.txt",
+      "data_dependencies": [
+        "../data/b+tree/mil.txt",
+        "../data/b+tree/command.txt"
+      ],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": true,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "heartwall",
+    "domain": "bio/medical",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 299,
+        "size_bytes": 14097
+      },
+      "main.h": {
+        "role": "support_files",
+        "lines": 270,
+        "size_bytes": 11956
+      }
+    },
+    "cuda_file_count": 2,
+    "prompt_payload_files": [
+      "main.cu"
+    ],
+    "support_files": [
+      "main.h"
+    ],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "error"
+      ],
+      "verification_strings": []
+    },
+    "makefile_info": {
+      "executable": "heartwall",
+      "run_command": "$(LAUNCHER) ./heartwall 104",
+      "run_args": "104",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "myocyte",
+    "domain": "bio/medical",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "define.h": {
+        "role": "support_files",
+        "lines": 9,
+        "size_bytes": 109
+      },
+      "embedded_fehlberg_7_8.cu": {
+        "role": "support_files",
+        "lines": 471,
+        "size_bytes": 19279
+      },
+      "file.c": {
+        "role": "support_files",
+        "lines": 124,
+        "size_bytes": 3929
+      },
+      "kernel.cu": {
+        "role": "prompt_payload",
+        "lines": 113,
+        "size_bytes": 3932
+      },
+      "kernel_cam.cu": {
+        "role": "prompt_payload",
+        "lines": 353,
+        "size_bytes": 12231
+      },
+      "kernel_ecc.cu": {
+        "role": "prompt_payload",
+        "lines": 931,
+        "size_bytes": 39815
+      },
+      "kernel_fin.cu": {
+        "role": "support_files",
+        "lines": 109,
+        "size_bytes": 5868
+      },
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 98,
+        "size_bytes": 7618
+      },
+      "master.cu": {
+        "role": "support_files",
+        "lines": 124,
+        "size_bytes": 3367
+      },
+      "solver.cu": {
+        "role": "support_files",
+        "lines": 288,
+        "size_bytes": 11860
+      },
+      "work.cu": {
+        "role": "support_files",
+        "lines": 229,
+        "size_bytes": 6211
+      }
+    },
+    "cuda_file_count": 11,
+    "prompt_payload_files": [
+      "kernel.cu",
+      "kernel_cam.cu",
+      "kernel_ecc.cu",
+      "main.cu"
+    ],
+    "support_files": [
+      "define.h",
+      "embedded_fehlberg_7_8.cu",
+      "file.c",
+      "kernel_fin.cu",
+      "master.cu",
+      "solver.cu",
+      "work.cu"
+    ],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "error",
+        "FAIL"
+      ],
+      "verification_strings": []
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 100",
+      "run_args": "100",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "file_io_patterns": [
+      "output.txt"
+    ],
+    "needs_external_data": true,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "geglu",
+    "domain": "ML",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 184,
+        "size_bytes": 7668
+      },
+      "reference.h": {
+        "role": "verification_only",
+        "lines": 17,
+        "size_bytes": 548
+      }
+    },
+    "cuda_file_count": 2,
+    "prompt_payload_files": [
+      "main.cu"
+    ],
+    "support_files": [],
+    "verification_only_files": [
+      "reference.h"
+    ],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "error",
+        "PASS",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");",
+        "fprintf(stderr, \"CUDA error at %s:%d code=%d(%s) \\\"%s\\\" \\n\",        \\"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 100",
+      "run_args": "100",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "perplexity",
+    "domain": "ML",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 168,
+        "size_bytes": 4882
+      },
+      "reference.cpp": {
+        "role": "verification_only",
+        "lines": 58,
+        "size_bytes": 1463
+      }
+    },
+    "cuda_file_count": 2,
+    "prompt_payload_files": [
+      "main.cu"
+    ],
+    "support_files": [],
+    "verification_only_files": [
+      "reference.cpp"
+    ],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "PASS",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 10000 50 100",
+      "run_args": "10000 50 100",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "iso2dfd",
+    "domain": "stencil",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "iso2dfd.cu": {
+        "role": "prompt_payload",
+        "lines": 319,
+        "size_bytes": 11098
+      },
+      "iso2dfd.h": {
+        "role": "support_files",
+        "lines": 23,
+        "size_bytes": 558
+      }
+    },
+    "cuda_file_count": 2,
+    "prompt_payload_files": [
+      "iso2dfd.cu"
+    ],
+    "support_files": [
+      "iso2dfd.h"
+    ],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "error",
+        "PASS",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "cout << (error ? \"FAIL\" : \"PASS\") << std::endl;",
+        "printf(\"error (Euclidean norm): %.9e\\n\", norm2);"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 2048 2048 1000",
+      "run_args": "2048 2048 1000",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "file_io_patterns": [
+      "./error_diff.txt",
+      "wavefield_snapshot.bin",
+      "wavefield_snapshot_cpu.bin"
+    ],
+    "needs_external_data": true,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "heat2d",
+    "domain": "stencil",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 162,
+        "size_bytes": 4477
+      }
+    },
+    "cuda_file_count": 1,
+    "prompt_payload_files": [
+      "main.cu"
+    ],
+    "support_files": [],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "error",
+        "PASS",
+        "mismatch",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 4096 4096 1000",
+      "run_args": "4096 4096 1000",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "srad",
+    "domain": "medical_imaging",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "compress_kernel.cu": {
+        "role": "prompt_payload",
+        "lines": 15,
+        "size_bytes": 614
+      },
+      "extract_kernel.cu": {
+        "role": "prompt_payload",
+        "lines": 18,
+        "size_bytes": 631
+      },
+      "graphics.c": {
+        "role": "support_files",
+        "lines": 141,
+        "size_bytes": 4435
+      },
+      "include.h": {
+        "role": "support_files",
+        "lines": 18,
+        "size_bytes": 340
+      },
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 483,
+        "size_bytes": 16945
+      },
+      "main.h": {
+        "role": "support_files",
+        "lines": 10,
+        "size_bytes": 489
+      },
+      "prepare_kernel.cu": {
+        "role": "prompt_payload",
+        "lines": 22,
+        "size_bytes": 801
+      },
+      "reduce_kernel.cu": {
+        "role": "prompt_payload",
+        "lines": 105,
+        "size_bytes": 4220
+      },
+      "resize.c": {
+        "role": "support_files",
+        "lines": 67,
+        "size_bytes": 1981
+      },
+      "srad2_kernel.cu": {
+        "role": "prompt_payload",
+        "lines": 54,
+        "size_bytes": 1947
+      },
+      "srad_kernel.cu": {
+        "role": "prompt_payload",
+        "lines": 84,
+        "size_bytes": 3524
+      },
+      "timer.c": {
+        "role": "support_files",
+        "lines": 10,
+        "size_bytes": 210
+      }
+    },
+    "cuda_file_count": 12,
+    "prompt_payload_files": [
+      "compress_kernel.cu",
+      "extract_kernel.cu",
+      "main.cu",
+      "prepare_kernel.cu",
+      "reduce_kernel.cu",
+      "srad2_kernel.cu",
+      "srad_kernel.cu"
+    ],
+    "support_files": [
+      "graphics.c",
+      "include.h",
+      "main.h",
+      "resize.c",
+      "timer.c"
+    ],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "error",
+        "FAIL"
+      ],
+      "verification_strings": []
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 1000 0.5 502 458",
+      "run_args": "1000 0.5 502 458",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "cfd",
+    "domain": "iterative_solver",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "euler3d.cu": {
+        "role": "prompt_payload",
+        "lines": 576,
+        "size_bytes": 22366
+      },
+      "util.h": {
+        "role": "support_files",
+        "lines": 132,
+        "size_bytes": 3125
+      }
+    },
+    "cuda_file_count": 2,
+    "prompt_payload_files": [
+      "euler3d.cu"
+    ],
+    "support_files": [
+      "util.h"
+    ],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "PASS",
+        "FAIL"
+      ],
+      "verification_strings": []
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) ../data/cfd/fvcorr.domn.097K",
+      "run_args": "../data/cfd/fvcorr.domn.097K",
+      "data_dependencies": [
+        "../data/cfd/fvcorr.domn.097K"
+      ],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": true,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "crc64",
+    "domain": "hashing",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "CRC64.cu": {
+        "role": "prompt_payload",
+        "lines": 1659,
+        "size_bytes": 85361
+      },
+      "CRC64.h": {
+        "role": "support_files",
+        "lines": 91,
+        "size_bytes": 3480
+      },
+      "CRC64Test.cu": {
+        "role": "prompt_payload",
+        "lines": 115,
+        "size_bytes": 4026
+      }
+    },
+    "cuda_file_count": 3,
+    "prompt_payload_files": [
+      "CRC64.cu",
+      "CRC64Test.cu"
+    ],
+    "support_files": [
+      "CRC64.h"
+    ],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "PASS",
+        "FAIL"
+      ],
+      "verification_strings": []
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 10 5 33554432",
+      "run_args": "10 5 33554432",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "jenkins-hash",
+    "domain": "hashing",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 317,
+        "size_bytes": 10580
+      }
+    },
+    "cuda_file_count": 1,
+    "prompt_payload_files": [
+      "main.cu"
+    ],
+    "support_files": [],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "error",
+        "PASS",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "printf(\"%s\\n\", error ? \"FAIL\" : \"PASS\");"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 256 16777216 100",
+      "run_args": "256 16777216 100",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "gaussian",
+    "domain": "linear_algebra",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "gaussianElim.cu": {
+        "role": "prompt_payload",
+        "lines": 389,
+        "size_bytes": 10718
+      },
+      "gaussianElim.h": {
+        "role": "support_files",
+        "lines": 28,
+        "size_bytes": 887
+      },
+      "utils.cu": {
+        "role": "support_files",
+        "lines": 205,
+        "size_bytes": 7690
+      },
+      "utils.h": {
+        "role": "support_files",
+        "lines": 85,
+        "size_bytes": 4817
+      }
+    },
+    "cuda_file_count": 4,
+    "prompt_payload_files": [
+      "gaussianElim.cu"
+    ],
+    "support_files": [
+      "gaussianElim.h",
+      "utils.cu",
+      "utils.h"
+    ],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "error",
+        "PASS",
+        "mismatch",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");",
+        "printf(\"Result mismatch at index %d: %f(device)  %f(host)\\n\","
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) -q -t -s 4096",
+      "run_args": "-q -t -s 4096",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "triad",
+    "domain": "memory_bandwidth",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "Option.cpp": {
+        "role": "support_files",
+        "lines": 15,
+        "size_bytes": 367
+      },
+      "Option.h": {
+        "role": "support_files",
+        "lines": 36,
+        "size_bytes": 706
+      },
+      "OptionParser.cpp": {
+        "role": "support_files",
+        "lines": 389,
+        "size_bytes": 10891
+      },
+      "OptionParser.h": {
+        "role": "support_files",
+        "lines": 66,
+        "size_bytes": 1786
+      },
+      "Timer.cpp": {
+        "role": "support_files",
+        "lines": 305,
+        "size_bytes": 7901
+      },
+      "Timer.h": {
+        "role": "support_files",
+        "lines": 76,
+        "size_bytes": 1875
+      },
+      "Utility.h": {
+        "role": "support_files",
+        "lines": 99,
+        "size_bytes": 2266
+      },
+      "config.h": {
+        "role": "support_files",
+        "lines": 164,
+        "size_bytes": 5073
+      },
+      "main.cpp": {
+        "role": "prompt_payload",
+        "lines": 68,
+        "size_bytes": 1552
+      },
+      "triad.cu": {
+        "role": "prompt_payload",
+        "lines": 275,
+        "size_bytes": 8472
+      }
+    },
+    "cuda_file_count": 10,
+    "prompt_payload_files": [
+      "main.cpp",
+      "triad.cu"
+    ],
+    "support_files": [
+      "Option.cpp",
+      "Option.h",
+      "OptionParser.cpp",
+      "OptionParser.h",
+      "Timer.cpp",
+      "Timer.h",
+      "Utility.h",
+      "config.h"
+    ],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "PASS",
+        "error",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "cout << \"Internal error: used option long name '\"<<longName<<\"' twice.\\n\";",
+        "cout << \"Internal error: used option short letter '\"",
+        "cout << \"PASS\\n\";",
+        "cout << \"FAIL\\n\";"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) --passes 100 -v",
+      "run_args": "--passes 100 -v",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "popcount",
+    "domain": "bit_manipulation",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 237,
+        "size_bytes": 8574
+      }
+    },
+    "cuda_file_count": 1,
+    "prompt_payload_files": [
+      "main.cu"
+    ],
+    "support_files": [],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "error",
+        "FAIL"
+      ],
+      "verification_strings": []
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 16777216 1000",
+      "run_args": "16777216 1000",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "sobol",
+    "domain": "quasi_random",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "sobol.cu": {
+        "role": "prompt_payload",
+        "lines": 190,
+        "size_bytes": 6187
+      },
+      "sobol.h": {
+        "role": "support_files",
+        "lines": 42,
+        "size_bytes": 1448
+      },
+      "sobol_gold.cu": {
+        "role": "verification_only",
+        "lines": 171,
+        "size_bytes": 5122
+      },
+      "sobol_gold.h": {
+        "role": "verification_only",
+        "lines": 44,
+        "size_bytes": 1556
+      },
+      "sobol_gpu.cu": {
+        "role": "prompt_payload",
+        "lines": 197,
+        "size_bytes": 7113
+      },
+      "sobol_gpu.h": {
+        "role": "support_files",
+        "lines": 46,
+        "size_bytes": 1570
+      },
+      "sobol_primitives.cu": {
+        "role": "support_files",
+        "lines": 10252,
+        "size_bytes": 997893
+      },
+      "sobol_primitives.h": {
+        "role": "support_files",
+        "lines": 56,
+        "size_bytes": 1830
+      }
+    },
+    "cuda_file_count": 8,
+    "prompt_payload_files": [
+      "sobol.cu",
+      "sobol_gpu.cu"
+    ],
+    "support_files": [
+      "sobol.h",
+      "sobol_gpu.h",
+      "sobol_primitives.cu",
+      "sobol_primitives.h"
+    ],
+    "verification_only_files": [
+      "sobol_gold.cu",
+      "sobol_gold.h"
+    ],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "correct",
+        "error",
+        "PASS",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "cout << \"PASS\" << std::endl;",
+        "cout << \"FAIL\" << std::endl;"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 1000000 1000 100",
+      "run_args": "1000000 1000 100",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "convolution3D",
+    "domain": "3D_processing",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "conv3d_s4.cu": {
+        "role": "support_files",
+        "lines": 130,
+        "size_bytes": 6415
+      },
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 300,
+        "size_bytes": 8711
+      }
+    },
+    "cuda_file_count": 2,
+    "prompt_payload_files": [
+      "main.cu"
+    ],
+    "support_files": [
+      "conv3d_s4.cu"
+    ],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "error",
+        "PASS",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 32 1 6 32 32 5 100\n\t$(LAUNCHER) ./$(program) 32 6 16 14 14 5 100\n\t$(LAUNCHER) ./$(program) 32 96 256 26 26 5 100",
+      "run_args": "32 1 6 32 32 5 100",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "mandelbrot",
+    "domain": "fractal_math",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "common.hpp": {
+        "role": "support_files",
+        "lines": 34,
+        "size_bytes": 664
+      },
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 73,
+        "size_bytes": 1768
+      },
+      "mandel.hpp": {
+        "role": "prompt_payload",
+        "lines": 215,
+        "size_bytes": 6206
+      }
+    },
+    "cuda_file_count": 3,
+    "prompt_payload_files": [
+      "main.cu",
+      "mandel.hpp"
+    ],
+    "support_files": [
+      "common.hpp"
+    ],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "PASS",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "cout << \"Fail verification - matrix size is different\" << std::endl;",
+        "cout << \"Fail verification - diff larger than tolerance\"<< std::endl;",
+        "cout << \"Pass verification\" << std::endl;"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 1000",
+      "run_args": "1000",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "mis",
+    "domain": "graph_combinatorial",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "graph.h": {
+        "role": "support_files",
+        "lines": 103,
+        "size_bytes": 3523
+      },
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 245,
+        "size_bytes": 8017
+      }
+    },
+    "cuda_file_count": 2,
+    "prompt_payload_files": [
+      "main.cu"
+    ],
+    "support_files": [
+      "graph.h"
+    ],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "error",
+        "FAIL"
+      ],
+      "verification_strings": []
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) internet.egr 100",
+      "run_args": "internet.egr 100",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "bezier-surface",
+    "domain": "geometric_3D",
+    "status": "primary",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 312,
+        "size_bytes": 9716
+      }
+    },
+    "cuda_file_count": 1,
+    "prompt_payload_files": [
+      "main.cu"
+    ],
+    "support_files": [],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "error",
+        "PASS",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "printf(\"%s\\n\", (status == 0) ? \"PASS\" : \"FAIL\");"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) -n 8192",
+      "run_args": "-n 8192",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "murmurhash3",
+    "domain": "hashing",
+    "status": "backup",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "murmurhash3.cu": {
+        "role": "prompt_payload",
+        "lines": 246,
+        "size_bytes": 6909
+      }
+    },
+    "cuda_file_count": 1,
+    "prompt_payload_files": [
+      "murmurhash3.cu"
+    ],
+    "support_files": [],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "memcmp",
+        "error",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "printf(\"FAIL\\n\");"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 100000 100",
+      "run_args": "100000 100",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "stencil1d",
+    "domain": "stencil",
+    "status": "backup",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "stencil_1d.cu": {
+        "role": "prompt_payload",
+        "lines": 122,
+        "size_bytes": 3198
+      }
+    },
+    "cuda_file_count": 1,
+    "prompt_payload_files": [
+      "stencil_1d.cu"
+    ],
+    "support_files": [],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "error",
+        "PASS",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 134217728 1000",
+      "run_args": "134217728 1000",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "nw",
+    "domain": "bioinformatics",
+    "status": "backup",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "nw.cu": {
+        "role": "prompt_payload",
+        "lines": 418,
+        "size_bytes": 13796
+      },
+      "reference.h": {
+        "role": "verification_only",
+        "lines": 111,
+        "size_bytes": 3877
+      }
+    },
+    "cuda_file_count": 2,
+    "prompt_payload_files": [
+      "nw.cu"
+    ],
+    "support_files": [],
+    "verification_only_files": [
+      "reference.h"
+    ],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "error",
+        "PASS",
+        "FAIL",
+        "memcmp"
+      ],
+      "verification_strings": [
+        "printf(\"%s\\n\", err ? \"FAIL\" : \"PASS\");"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 16384 10",
+      "run_args": "16384 10",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "file_io_patterns": [
+      "result.txt"
+    ],
+    "needs_external_data": true,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "knn",
+    "domain": "ML",
+    "status": "backup",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 494,
+        "size_bytes": 16051
+      }
+    },
+    "cuda_file_count": 1,
+    "prompt_payload_files": [
+      "main.cu"
+    ],
+    "support_files": [],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "error",
+        "PASS",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "printf(\"%s\\n\", (precision_accuracy == 1.f) ? \"PASS\" : \"FAIL\");",
+        "printf(\"Memory allocation error\\n\");"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 100",
+      "run_args": "100",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  },
+  {
+    "kernel": "floydwarshall",
+    "domain": "graph",
+    "status": "backup",
+    "cuda_dir_exists": true,
+    "omp_dir_exists": true,
+    "cuda_source_files": {
+      "main.cu": {
+        "role": "prompt_payload",
+        "lines": 296,
+        "size_bytes": 10011
+      }
+    },
+    "cuda_file_count": 1,
+    "prompt_payload_files": [
+      "main.cu"
+    ],
+    "support_files": [],
+    "verification_only_files": [],
+    "verification": {
+      "method": "stdout_pattern",
+      "patterns_found": [
+        "verify",
+        "memcmp",
+        "PASS",
+        "FAIL"
+      ],
+      "verification_strings": [
+        "printf(\"PASS\\n\");",
+        "printf(\"FAIL\\n\");"
+      ]
+    },
+    "makefile_info": {
+      "executable": "$@",
+      "run_command": "$(LAUNCHER) ./$(program) 1024 100 16",
+      "run_args": "1024 100 16",
+      "data_dependencies": [],
+      "compiler": "nvcc",
+      "makefile_exists": true
+    },
+    "needs_external_data": false,
+    "omp_info": {
+      "makefile_exists": true,
+      "uses_icpx": true,
+      "uses_gcc": false,
+      "uses_clang": false,
+      "compiler_line": "CC        = icpx",
+      "has_aomp_makefile": true,
+      "openmp_flags": "-fopenmp-targets=spir64"
+    }
+  }
+]

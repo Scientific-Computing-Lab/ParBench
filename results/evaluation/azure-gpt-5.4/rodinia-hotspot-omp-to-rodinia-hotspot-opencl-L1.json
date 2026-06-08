@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-hotspot-omp",
+  "target_spec": "rodinia-hotspot-opencl",
+  "kernel": "hotspot",
+  "model": "azure-gpt-5.4",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 325865020,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-04-27T03:34:18Z",
+  "prompt_tokens": 7314,
+  "completion_tokens": 3922,
+  "llm_response_time_seconds": 104.218,
+  "build_status": "pass",
+  "build_time_seconds": 0.18,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.448,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nPlatform: NVIDIA Corporation\nnum_devices = 1\nDevice: NVIDIA GeForce RTX 4070\nUse GPU device\nInit: 155.354996\nMemAlloc: 0.003000\nHtoD: 0.444000\nExec: 153.227264\nDtoH: 0.039776\nClose: 0.306000\nTotal: 352.122986\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.159,
+  "translated_wall_time_seconds": 0.448,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.3549,
+  "translated_files": {
+    "hotspot_kernel.cl": "#define AMB_TEMP 80.0f\n\nstatic inline float compute_delta(__global const float *temp,\n                                  __global const float *power,\n                                  int row, int col, int r, int c,\n                                  float Cap_1, float Rx_1, float Ry_1, float Rz_1)\n{\n    if ((r == 0) && (c == 0)) {\n        return Cap_1 * (power[0] +\n                        (temp[1] - temp[0]) * Rx_1 +\n                        (temp[col] - temp[0]) * Ry_1 +\n                        (AMB_TEMP - temp[0]) * Rz_1);\n    } else if ((r == 0) && (c == col - 1)) {\n        return Cap_1 * (power[c] +\n                        (temp[c - 1] - temp[c]) * Rx_1 +\n                        (temp[c + col] - temp[c]) * Ry_1 +\n                        (AMB_TEMP - temp[c]) * Rz_1);\n    } else if ((r == row - 1) && (c == col - 1)) {\n        int idx = r * col + c;\n        return Cap_1 * (power[idx] +\n                        (temp[idx - 1] - temp[idx]) * Rx_1 +\n                        (temp[(r - 1) * col + c] - temp[idx]) * Ry_1 +\n                        (AMB_TEMP - temp[idx]) * Rz_1);\n    } else if ((r == row - 1) && (c == 0)) {\n        int idx = r * col;\n        return Cap_1 * (power[idx] +\n                        (temp[idx + 1] - temp[idx]) * Rx_1 +\n                        (temp[(r - 1) * col] - temp[idx]) * Ry_1 +\n                        (AMB_TEMP - temp[idx]) * Rz_1);\n    } else if (r == 0) {\n        int idx = c;\n        return Cap_1 * (power[idx] +\n                        (temp[idx + 1] + temp[idx - 1] - 2.0f * temp[idx]) * Rx_1 +\n                        (temp[col + c] - temp[idx]) * Ry_1 +\n                        (AMB_TEMP - temp[idx]) * Rz_1);\n    } else if (c == col - 1) {\n        int idx = r * col + c;\n        return Cap_1 * (power[idx] +\n                        (temp[(r + 1) * col + c] + temp[(r - 1) * col + c] - 2.0f * temp[idx]) * Ry_1 +\n                        (temp[idx - 1] - temp[idx]) * Rx_1 +\n                        (AMB_TEMP - temp[idx]) * Rz_1);\n    } else if (r == row - 1) {\n        int idx = r * col + c;\n        return Cap_1 * (power[idx] +\n                        (temp[idx + 1] + temp[idx - 1] - 2.0f * temp[idx]) * Rx_1 +\n                        (temp[(r - 1) * col + c] - temp[idx]) * Ry_1 +\n                        (AMB_TEMP - temp[idx]) * Rz_1);\n    } else if (c == 0) {\n        int idx = r * col;\n        return Cap_1 * (power[idx] +\n                        (temp[(r + 1) * col] + temp[(r - 1) * col] - 2.0f * temp[idx]) * Ry_1 +\n                        (temp[idx + 1] - temp[idx]) * Rx_1 +\n                        (AMB_TEMP - temp[idx]) * Rz_1);\n    } else {\n        int idx = r * col + c;\n        return Cap_1 * (power[idx] +\n                        (temp[(r + 1) * col + c] + temp[(r - 1) * col + c] - 2.0f * temp[idx]) * Ry_1 +\n                        (temp[idx + 1] + temp[idx - 1] - 2.0f * temp[idx]) * Rx_1 +\n                        (AMB_TEMP - temp[idx]) * Rz_1);\n    }\n}\n\n__kernel void hotspot(const int iteration,\n                      __global const float *power,\n                      __global float *temp_src,\n                      __global float *temp_dst,\n                      const int col,\n                      const int row,\n                      const int borderCols,\n                      const int borderRows,\n                      const float Cap,\n                      const float Rx,\n                      const float Ry,\n                      const float Rz,\n                      const float step)\n{\n    (void)borderCols;\n    (void)borderRows;\n\n    if (get_global_id(0) != 0 || get_global_id(1) != 0) {\n        return;\n    }\n\n    const float Cap_1 = (step / 1000.0f) / Cap;\n    const float Rx_1 = 1.0f / Rx;\n    const float Ry_1 = 1.0f / Ry;\n    const float Rz_1 = 1.0f / Rz;\n\n    __global float *src = temp_src;\n    __global float *dst = temp_dst;\n\n    for (int it = 0; it < iteration; ++it) {\n        for (int r = 0; r < row; ++r) {\n            for (int c = 0; c < col; ++c) {\n                int idx = r * col + c;\n                float delta = compute_delta((__global const float *)src, power, row, col, r, c,\n                                            Cap_1, Rx_1, Ry_1, Rz_1);\n                dst[idx] = src[idx] + delta;\n            }\n        }\n\n        __global float *tmp = src;\n        src = dst;\n        dst = tmp;\n    }\n\n    if ((iteration & 1) == 0) {\n        int size = row * col;\n        for (int i = 0; i < size; ++i) {\n            temp_dst[i] = temp_src[i];\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "hotspot_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspot_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 104.218,
+      "prompt_tokens": 7314,
+      "completion_tokens": 3922,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

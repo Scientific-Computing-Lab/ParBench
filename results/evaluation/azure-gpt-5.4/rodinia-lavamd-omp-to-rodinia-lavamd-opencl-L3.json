@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lavamd-omp",
+  "target_spec": "rodinia-lavamd-opencl",
+  "kernel": "lavamd",
+  "model": "azure-gpt-5.4",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 98940247,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-boxes1d",
+    "10"
+  ],
+  "timestamp": "2026-04-27T03:56:27Z",
+  "prompt_tokens": 9226,
+  "completion_tokens": 2097,
+  "llm_response_time_seconds": 54.646,
+  "build_status": "pass",
+  "build_time_seconds": 0.224,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.195,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 128 \nConfiguration used: arch = 0, cores = 1, boxes1d = 10\nPlatform: NVIDIA Corporation\nDevice: NVIDIA GeForce RTX 4070\n# of blocks = 1000, # of threads/block = 128 (ensure that device can handle)\nTime spent in different stages of the application:\nInit: 134.962006\nMemAlloc: 0.005000\nHtoD: 0.190368\nExec: 0.969312\nDtoH: 0.062080\nClose: 48.923000\nTotal: 185.632996\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": 0.195,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0051,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#define fp float\n\n#define NUMBER_PAR_PER_BOX 100\n\n#ifdef RD_WG_SIZE_0_0\n#define NUMBER_THREADS RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n#define NUMBER_THREADS RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n#define NUMBER_THREADS RD_WG_SIZE\n#else\n#define NUMBER_THREADS 128\n#endif\n\n#define DOT(A,B) ((A.x)*(B.x)+(A.y)*(B.y)+(A.z)*(B.z))\n\ntypedef struct\n{\n\tfp x, y, z;\n} THREE_VECTOR;\n\ntypedef struct\n{\n\tfp v, x, y, z;\n} FOUR_VECTOR;\n\ntypedef struct nei_str\n{\n\tint x, y, z;\n\tint number;\n\tlong offset;\n} nei_str;\n\ntypedef struct box_str\n{\n\tint x, y, z;\n\tint number;\n\tlong offset;\n\n\tint nn;\n\tnei_str nei[26];\n} box_str;\n\ntypedef struct par_str\n{\n\tfp alpha;\n} par_str;\n\ntypedef struct dim_str\n{\n\tint cur_arg;\n\tint arch_arg;\n\tint cores_arg;\n\tint boxes1d_arg;\n\n\tlong number_boxes;\n\tlong box_mem;\n\tlong space_elem;\n\tlong space_mem;\n\tlong space_mem2;\n} dim_str;\n\n__kernel void\nkernel_gpu_opencl(par_str par,\n                  dim_str dim,\n                  __global box_str* box,\n                  __global FOUR_VECTOR* rv,\n                  __global fp* qv,\n                  __global FOUR_VECTOR* fv)\n{\n\tint l = get_group_id(0);\n\tint i = get_local_id(0);\n\n\tif ((long)l >= dim.number_boxes || i >= NUMBER_PAR_PER_BOX) {\n\t\treturn;\n\t}\n\n\tfp alpha = par.alpha;\n\tfp a2 = (fp)2.0f * alpha * alpha;\n\n\tlong first_i = box[l].offset;\n\t__global FOUR_VECTOR* rA = rv + first_i;\n\t__global FOUR_VECTOR* fA = fv + first_i;\n\n\tFOUR_VECTOR rAi = rA[i];\n\tFOUR_VECTOR fAi = fA[i];\n\n\tfor (int k = 0; k < (1 + box[l].nn); k++) {\n\t\tint pointer;\n\t\tif (k == 0) {\n\t\t\tpointer = l;\n\t\t} else {\n\t\t\tpointer = box[l].nei[k - 1].number;\n\t\t}\n\n\t\tlong first_j = box[pointer].offset;\n\t\t__global FOUR_VECTOR* rB = rv + first_j;\n\t\t__global fp* qB = qv + first_j;\n\n\t\tfor (int j = 0; j < NUMBER_PAR_PER_BOX; j++) {\n\t\t\tfp r2 = rAi.v + rB[j].v - DOT(rAi, rB[j]);\n\t\t\tfp u2 = a2 * r2;\n\t\t\tfp vij = exp(-u2);\n\t\t\tfp fs = (fp)2.0f * vij;\n\n\t\t\tfp dx = rAi.x - rB[j].x;\n\t\t\tfp dy = rAi.y - rB[j].y;\n\t\t\tfp dz = rAi.z - rB[j].z;\n\n\t\t\tfp fxij = fs * dx;\n\t\t\tfp fyij = fs * dy;\n\t\t\tfp fzij = fs * dz;\n\n\t\t\tfp q = qB[j];\n\t\t\tfAi.v += q * vij;\n\t\t\tfAi.x += q * fxij;\n\t\t\tfAi.y += q * fyij;\n\t\t\tfAi.z += q * fzij;\n\t\t}\n\t}\n\n\tfA[i] = fAi;\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 54.646,
+      "prompt_tokens": 9226,
+      "completion_tokens": 2097,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

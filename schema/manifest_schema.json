@@ -1,0 +1,72 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "manifest_schema.json",
+    "title": "ParBench Manifest Entry",
+    "description": "Schema for each line in manifest.jsonl — the master index of all kernel variants in ParBench.",
+    "type": "object",
+    "required": [
+        "kernel_name",
+        "parallel_api",
+        "source_suite",
+        "spec_file",
+        "source_dir"
+    ],
+    "additionalProperties": false,
+    "properties": {
+        "kernel_name": {
+            "type": "string",
+            "description": "Logical kernel name used as the pairing key across API variants (e.g., 'bfs', 'sgemm', 'md5hash')."
+        },
+        "parallel_api": {
+            "type": "string",
+            "description": "Parallel programming API used by this variant.",
+            "enum": [
+                "serial",
+                "cuda",
+                "hip",
+                "sycl",
+                "opencl",
+                "omp",
+                "omp_target",
+                "openacc",
+                "kokkos",
+                "raja",
+                "mpi",
+                "omp_mpi",
+                "tbb",
+                "stdpar",
+                "thrust"
+            ]
+        },
+        "source_suite": {
+            "type": "string",
+            "description": "Origin benchmark suite in lowercase (e.g., 'rodinia', 'polybench-gpu', 'heteromark')."
+        },
+        "spec_file": {
+            "type": "string",
+            "description": "Relative path from parbench/ to the Level 2 spec JSON file (e.g., 'specs/rodinia-bfs-cuda.json')."
+        },
+        "source_dir": {
+            "type": "string",
+            "description": "Relative path from parbench/ to the directory containing all relevant source files."
+        },
+        "category": {
+            "type": "string",
+            "description": "Optional computational-domain category for the kernel.",
+            "enum": [
+                "ml",
+                "graph",
+                "physics",
+                "linear_algebra",
+                "stencil",
+                "reduction",
+                "sort",
+                "molecular_dynamics",
+                "image",
+                "crypto",
+                "financial",
+                "other"
+            ]
+        }
+    }
+}

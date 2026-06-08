@@ -1,0 +1,3499 @@
+[
+  {
+    "spec_id": "hecbench-aes-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/aes-cuda"
+  },
+  {
+    "spec_id": "hecbench-aes-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/aes-cuda"
+  },
+  {
+    "spec_id": "hecbench-aes-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/aes-cuda"
+  },
+  {
+    "spec_id": "hecbench-babelstream-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/babelstream-cuda"
+  },
+  {
+    "spec_id": "hecbench-babelstream-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/babelstream-cuda"
+  },
+  {
+    "spec_id": "hecbench-babelstream-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/babelstream-cuda"
+  },
+  {
+    "spec_id": "hecbench-backprop-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/backprop-cuda"
+  },
+  {
+    "spec_id": "hecbench-backprop-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/backprop-cuda"
+  },
+  {
+    "spec_id": "hecbench-backprop-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/backprop-cuda"
+  },
+  {
+    "spec_id": "hecbench-bezier-surface-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/bezier-surface-cuda"
+  },
+  {
+    "spec_id": "hecbench-bezier-surface-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/bezier-surface-cuda"
+  },
+  {
+    "spec_id": "hecbench-bezier-surface-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/bezier-surface-cuda"
+  },
+  {
+    "spec_id": "hecbench-bilateral-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/bilateral-cuda"
+  },
+  {
+    "spec_id": "hecbench-bilateral-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/bilateral-cuda"
+  },
+  {
+    "spec_id": "hecbench-bilateral-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/bilateral-cuda"
+  },
+  {
+    "spec_id": "hecbench-binomial-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/binomial-cuda"
+  },
+  {
+    "spec_id": "hecbench-binomial-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/binomial-cuda"
+  },
+  {
+    "spec_id": "hecbench-binomial-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/binomial-cuda"
+  },
+  {
+    "spec_id": "hecbench-ccsd-trpdrv-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/ccsd-trpdrv-cuda"
+  },
+  {
+    "spec_id": "hecbench-ccsd-trpdrv-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/ccsd-trpdrv-cuda"
+  },
+  {
+    "spec_id": "hecbench-ccsd-trpdrv-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/ccsd-trpdrv-cuda"
+  },
+  {
+    "spec_id": "hecbench-chacha20-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/chacha20-cuda"
+  },
+  {
+    "spec_id": "hecbench-chacha20-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/chacha20-cuda"
+  },
+  {
+    "spec_id": "hecbench-chacha20-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/chacha20-cuda"
+  },
+  {
+    "spec_id": "hecbench-chi2-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/chi2-cuda"
+  },
+  {
+    "spec_id": "hecbench-chi2-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/chi2-cuda"
+  },
+  {
+    "spec_id": "hecbench-chi2-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/chi2-cuda"
+  },
+  {
+    "spec_id": "hecbench-convolution3d-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/convolution3D-cuda"
+  },
+  {
+    "spec_id": "hecbench-convolution3d-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/convolution3D-cuda"
+  },
+  {
+    "spec_id": "hecbench-convolution3d-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/convolution3D-cuda"
+  },
+  {
+    "spec_id": "hecbench-convolutionseparable-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/convolutionSeparable-cuda"
+  },
+  {
+    "spec_id": "hecbench-convolutionseparable-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/convolutionSeparable-cuda"
+  },
+  {
+    "spec_id": "hecbench-convolutionseparable-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/convolutionSeparable-cuda"
+  },
+  {
+    "spec_id": "hecbench-crc64-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/crc64-cuda"
+  },
+  {
+    "spec_id": "hecbench-crc64-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/crc64-cuda"
+  },
+  {
+    "spec_id": "hecbench-crc64-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/crc64-cuda"
+  },
+  {
+    "spec_id": "hecbench-dct8x8-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/dct8x8-cuda"
+  },
+  {
+    "spec_id": "hecbench-dct8x8-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/dct8x8-cuda"
+  },
+  {
+    "spec_id": "hecbench-dct8x8-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/dct8x8-cuda"
+  },
+  {
+    "spec_id": "hecbench-deredundancy-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/deredundancy-cuda"
+  },
+  {
+    "spec_id": "hecbench-deredundancy-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/deredundancy-cuda"
+  },
+  {
+    "spec_id": "hecbench-deredundancy-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/deredundancy-cuda"
+  },
+  {
+    "spec_id": "hecbench-eigenvalue-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/eigenvalue-cuda"
+  },
+  {
+    "spec_id": "hecbench-eigenvalue-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/eigenvalue-cuda"
+  },
+  {
+    "spec_id": "hecbench-eigenvalue-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/eigenvalue-cuda"
+  },
+  {
+    "spec_id": "hecbench-feynman-kac-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/feynman-kac-cuda"
+  },
+  {
+    "spec_id": "hecbench-feynman-kac-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/feynman-kac-cuda"
+  },
+  {
+    "spec_id": "hecbench-feynman-kac-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/feynman-kac-cuda"
+  },
+  {
+    "spec_id": "hecbench-fft-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/fft-cuda"
+  },
+  {
+    "spec_id": "hecbench-fft-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/fft-cuda"
+  },
+  {
+    "spec_id": "hecbench-fft-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/fft-cuda"
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/floydwarshall-cuda"
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/floydwarshall-cuda"
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/floydwarshall-cuda"
+  },
+  {
+    "spec_id": "hecbench-fpc-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/fpc-cuda"
+  },
+  {
+    "spec_id": "hecbench-fpc-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/fpc-cuda"
+  },
+  {
+    "spec_id": "hecbench-fpc-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/fpc-cuda"
+  },
+  {
+    "spec_id": "hecbench-fwt-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/fwt-cuda"
+  },
+  {
+    "spec_id": "hecbench-fwt-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/fwt-cuda"
+  },
+  {
+    "spec_id": "hecbench-fwt-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/fwt-cuda"
+  },
+  {
+    "spec_id": "hecbench-ga-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/ga-cuda"
+  },
+  {
+    "spec_id": "hecbench-ga-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/ga-cuda"
+  },
+  {
+    "spec_id": "hecbench-ga-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/ga-cuda"
+  },
+  {
+    "spec_id": "hecbench-gaussian-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/gaussian-cuda"
+  },
+  {
+    "spec_id": "hecbench-gaussian-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/gaussian-cuda"
+  },
+  {
+    "spec_id": "hecbench-gaussian-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/gaussian-cuda"
+  },
+  {
+    "spec_id": "hecbench-geglu-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/geglu-cuda"
+  },
+  {
+    "spec_id": "hecbench-geglu-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/geglu-cuda"
+  },
+  {
+    "spec_id": "hecbench-geglu-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/geglu-cuda"
+  },
+  {
+    "spec_id": "hecbench-heat2d-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/heat2d-cuda"
+  },
+  {
+    "spec_id": "hecbench-heat2d-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/heat2d-cuda"
+  },
+  {
+    "spec_id": "hecbench-heat2d-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/heat2d-cuda"
+  },
+  {
+    "spec_id": "hecbench-ising-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/ising-cuda"
+  },
+  {
+    "spec_id": "hecbench-ising-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/ising-cuda"
+  },
+  {
+    "spec_id": "hecbench-ising-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/ising-cuda"
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/iso2dfd-cuda"
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/iso2dfd-cuda"
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/iso2dfd-cuda"
+  },
+  {
+    "spec_id": "hecbench-jenkins-hash-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/jenkins-hash-cuda"
+  },
+  {
+    "spec_id": "hecbench-jenkins-hash-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/jenkins-hash-cuda"
+  },
+  {
+    "spec_id": "hecbench-jenkins-hash-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/jenkins-hash-cuda"
+  },
+  {
+    "spec_id": "hecbench-keccaktreehash-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/keccaktreehash-cuda"
+  },
+  {
+    "spec_id": "hecbench-keccaktreehash-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/keccaktreehash-cuda"
+  },
+  {
+    "spec_id": "hecbench-keccaktreehash-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/keccaktreehash-cuda"
+  },
+  {
+    "spec_id": "hecbench-knn-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/knn-cuda"
+  },
+  {
+    "spec_id": "hecbench-knn-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/knn-cuda"
+  },
+  {
+    "spec_id": "hecbench-knn-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/knn-cuda"
+  },
+  {
+    "spec_id": "hecbench-laplace3d-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/laplace3d-cuda"
+  },
+  {
+    "spec_id": "hecbench-laplace3d-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/laplace3d-cuda"
+  },
+  {
+    "spec_id": "hecbench-laplace3d-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/laplace3d-cuda"
+  },
+  {
+    "spec_id": "hecbench-lud-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/lud-cuda"
+  },
+  {
+    "spec_id": "hecbench-lud-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/lud-cuda"
+  },
+  {
+    "spec_id": "hecbench-lud-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/lud-cuda"
+  },
+  {
+    "spec_id": "hecbench-lulesh-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/lulesh-cuda"
+  },
+  {
+    "spec_id": "hecbench-lulesh-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/lulesh-cuda"
+  },
+  {
+    "spec_id": "hecbench-lulesh-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/lulesh-cuda"
+  },
+  {
+    "spec_id": "hecbench-mandelbrot-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/mandelbrot-cuda"
+  },
+  {
+    "spec_id": "hecbench-mandelbrot-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/mandelbrot-cuda"
+  },
+  {
+    "spec_id": "hecbench-mandelbrot-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/mandelbrot-cuda"
+  },
+  {
+    "spec_id": "hecbench-maxpool3d-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/maxpool3d-cuda"
+  },
+  {
+    "spec_id": "hecbench-maxpool3d-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/maxpool3d-cuda"
+  },
+  {
+    "spec_id": "hecbench-maxpool3d-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/maxpool3d-cuda"
+  },
+  {
+    "spec_id": "hecbench-md5hash-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/md5hash-cuda"
+  },
+  {
+    "spec_id": "hecbench-md5hash-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/md5hash-cuda"
+  },
+  {
+    "spec_id": "hecbench-md5hash-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/md5hash-cuda"
+  },
+  {
+    "spec_id": "hecbench-merge-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/merge-cuda"
+  },
+  {
+    "spec_id": "hecbench-merge-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/merge-cuda"
+  },
+  {
+    "spec_id": "hecbench-merge-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/merge-cuda"
+  },
+  {
+    "spec_id": "hecbench-mis-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/mis-cuda"
+  },
+  {
+    "spec_id": "hecbench-mis-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/mis-cuda"
+  },
+  {
+    "spec_id": "hecbench-mis-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/mis-cuda"
+  },
+  {
+    "spec_id": "hecbench-murmurhash3-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/murmurhash3-cuda"
+  },
+  {
+    "spec_id": "hecbench-murmurhash3-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/murmurhash3-cuda"
+  },
+  {
+    "spec_id": "hecbench-murmurhash3-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/murmurhash3-cuda"
+  },
+  {
+    "spec_id": "hecbench-myocyte-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/myocyte-cuda"
+  },
+  {
+    "spec_id": "hecbench-myocyte-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/myocyte-cuda"
+  },
+  {
+    "spec_id": "hecbench-myocyte-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/myocyte-cuda"
+  },
+  {
+    "spec_id": "hecbench-nbody-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/nbody-cuda"
+  },
+  {
+    "spec_id": "hecbench-nbody-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/nbody-cuda"
+  },
+  {
+    "spec_id": "hecbench-nbody-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/nbody-cuda"
+  },
+  {
+    "spec_id": "hecbench-nn-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/nn-cuda"
+  },
+  {
+    "spec_id": "hecbench-nn-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/nn-cuda"
+  },
+  {
+    "spec_id": "hecbench-nn-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/nn-cuda"
+  },
+  {
+    "spec_id": "hecbench-nw-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/nw-cuda"
+  },
+  {
+    "spec_id": "hecbench-nw-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/nw-cuda"
+  },
+  {
+    "spec_id": "hecbench-nw-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/nw-cuda"
+  },
+  {
+    "spec_id": "hecbench-particle-diffusion-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/particle-diffusion-cuda"
+  },
+  {
+    "spec_id": "hecbench-particle-diffusion-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/particle-diffusion-cuda"
+  },
+  {
+    "spec_id": "hecbench-particle-diffusion-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/particle-diffusion-cuda"
+  },
+  {
+    "spec_id": "hecbench-pathfinder-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/pathfinder-cuda"
+  },
+  {
+    "spec_id": "hecbench-pathfinder-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/pathfinder-cuda"
+  },
+  {
+    "spec_id": "hecbench-pathfinder-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/pathfinder-cuda"
+  },
+  {
+    "spec_id": "hecbench-perplexity-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/perplexity-cuda"
+  },
+  {
+    "spec_id": "hecbench-perplexity-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/perplexity-cuda"
+  },
+  {
+    "spec_id": "hecbench-perplexity-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/perplexity-cuda"
+  },
+  {
+    "spec_id": "hecbench-popcount-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/popcount-cuda"
+  },
+  {
+    "spec_id": "hecbench-popcount-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/popcount-cuda"
+  },
+  {
+    "spec_id": "hecbench-popcount-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/popcount-cuda"
+  },
+  {
+    "spec_id": "hecbench-pso-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/pso-cuda"
+  },
+  {
+    "spec_id": "hecbench-pso-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/pso-cuda"
+  },
+  {
+    "spec_id": "hecbench-pso-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/pso-cuda"
+  },
+  {
+    "spec_id": "hecbench-radixsort-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/radixsort-cuda"
+  },
+  {
+    "spec_id": "hecbench-radixsort-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/radixsort-cuda"
+  },
+  {
+    "spec_id": "hecbench-radixsort-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/radixsort-cuda"
+  },
+  {
+    "spec_id": "hecbench-rmsnorm-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/rmsnorm-cuda"
+  },
+  {
+    "spec_id": "hecbench-rmsnorm-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/rmsnorm-cuda"
+  },
+  {
+    "spec_id": "hecbench-rmsnorm-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/rmsnorm-cuda"
+  },
+  {
+    "spec_id": "hecbench-scan-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/scan-cuda"
+  },
+  {
+    "spec_id": "hecbench-scan-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/scan-cuda"
+  },
+  {
+    "spec_id": "hecbench-scan-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/scan-cuda"
+  },
+  {
+    "spec_id": "hecbench-secp256k1-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/secp256k1-cuda"
+  },
+  {
+    "spec_id": "hecbench-secp256k1-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/secp256k1-cuda"
+  },
+  {
+    "spec_id": "hecbench-secp256k1-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/secp256k1-cuda"
+  },
+  {
+    "spec_id": "hecbench-simplespmv-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/simpleSpmv-cuda"
+  },
+  {
+    "spec_id": "hecbench-simplespmv-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/simpleSpmv-cuda"
+  },
+  {
+    "spec_id": "hecbench-simplespmv-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/simpleSpmv-cuda"
+  },
+  {
+    "spec_id": "hecbench-sobel-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/sobel-cuda"
+  },
+  {
+    "spec_id": "hecbench-sobel-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/sobel-cuda"
+  },
+  {
+    "spec_id": "hecbench-sobel-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/sobel-cuda"
+  },
+  {
+    "spec_id": "hecbench-sobol-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/sobol-cuda"
+  },
+  {
+    "spec_id": "hecbench-sobol-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/sobol-cuda"
+  },
+  {
+    "spec_id": "hecbench-sobol-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/sobol-cuda"
+  },
+  {
+    "spec_id": "hecbench-softmax-online-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/softmax-online-cuda"
+  },
+  {
+    "spec_id": "hecbench-softmax-online-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/softmax-online-cuda"
+  },
+  {
+    "spec_id": "hecbench-softmax-online-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/softmax-online-cuda"
+  },
+  {
+    "spec_id": "hecbench-stencil1d-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/stencil1d-cuda"
+  },
+  {
+    "spec_id": "hecbench-stencil1d-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/stencil1d-cuda"
+  },
+  {
+    "spec_id": "hecbench-stencil1d-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/stencil1d-cuda"
+  },
+  {
+    "spec_id": "hecbench-thomas-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/thomas-cuda"
+  },
+  {
+    "spec_id": "hecbench-thomas-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/thomas-cuda"
+  },
+  {
+    "spec_id": "hecbench-thomas-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/thomas-cuda"
+  },
+  {
+    "spec_id": "hecbench-tissue-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/tissue-cuda"
+  },
+  {
+    "spec_id": "hecbench-tissue-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/tissue-cuda"
+  },
+  {
+    "spec_id": "hecbench-tissue-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/tissue-cuda"
+  },
+  {
+    "spec_id": "hecbench-triad-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/triad-cuda"
+  },
+  {
+    "spec_id": "hecbench-triad-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/triad-cuda"
+  },
+  {
+    "spec_id": "hecbench-triad-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/triad-cuda"
+  },
+  {
+    "spec_id": "hecbench-tsp-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/tsp-cuda"
+  },
+  {
+    "spec_id": "hecbench-tsp-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/tsp-cuda"
+  },
+  {
+    "spec_id": "hecbench-tsp-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "overall_status": "ERROR",
+    "details": "Working directory not found: ./HeCBench-master/src/tsp-cuda"
+  },
+  {
+    "spec_id": "rodinia-backprop-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "backprop_cuda.cu": [],
+      "backprop_cuda_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.28,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-backprop-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "backprop_cuda.cu": [],
+      "backprop_cuda_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.161,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-backprop-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "backprop_cuda.cu": [
+        "ChangeNames"
+      ],
+      "backprop_cuda_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "backprop_cuda.cu",
+      "backprop_cuda_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "                           ^\n\nbackprop_cuda_kernel.cu(75): error: a value of type \"float *\" cannot be assigned to an entity of type \"float\"\n      *((tmp_3) + (var_6 * elem_5 + data_8)) = *((data_12) + (val_7))val_7]) + (data_8));\n                                             ^\n\nbackprop_cuda_kernel.cu(75): error: expected a \";\"\n      *((tmp_3) + (var_6 * elem_5 + data_8)) = *((data_12) + (val_7))val_7]) + (data_8));\n                                                                     ^\n\n6 errors detected in the compilation of \"backprop_cuda.cu\".\nmake: *** [Makefile:37: backprop_cuda.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-bfs-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bfs.cu": [],
+      "kernel.cu": [],
+      "kernel2.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.856,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bfs-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bfs.cu": [],
+      "kernel.cu": [],
+      "kernel2.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.845,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bfs-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bfs.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "bfs.cu",
+      "kernel.cu",
+      "kernel2.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "on must have class type but it has type \"Node *\"\n    for(int i=*((data_0) + (tmp_7)).starting; *((data_0) + (tmp_7)).no_of_edges + *((data_0) + (tmp_7)).starting > i; i++)\n                                                                                   ^\n\nbfs.cu(121): error: expression must have class type but it has type \"Node *\"\n    *((tmp_4) + (i)).starting = tmp_8;\n     ^\n\nbfs.cu(122): error: expression must have class type but it has type \"Node *\"\n    *((tmp_4) + (i)).no_of_edges = val_9;\n     ^\n\n5 errors detected in the compilation of \"bfs.cu\".\nmake: *** [Makefile:12: release] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-bptree-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [],
+      "kernel/kernel_gpu_cuda_2.cu": [],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [],
+      "kernel/kernel_gpu_cuda_wrapper_2.cu": [
+        "SwapCondition"
+      ],
+      "util/cuda/cuda.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_cuda_wrapper_2.cu",
+      "util/cuda/cuda.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.501,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bptree-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [],
+      "kernel/kernel_gpu_cuda_2.cu": [],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [],
+      "kernel/kernel_gpu_cuda_wrapper_2.cu": [
+        "SwapCondition"
+      ],
+      "util/cuda/cuda.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_cuda_wrapper_2.cu",
+      "util/cuda/cuda.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.471,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bptree-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel/kernel_gpu_cuda_2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ],
+      "kernel/kernel_gpu_cuda_wrapper_2.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ],
+      "util/cuda/cuda.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_cuda.cu",
+      "kernel/kernel_gpu_cuda_2.cu",
+      "kernel/kernel_gpu_cuda_wrapper.cu",
+      "kernel/kernel_gpu_cuda_wrapper_2.cu",
+      "util/cuda/cuda.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "var_9)) == *((data_1) + (v_4[var_9]))d]].keys) + (x_8))ys[x_8]){\n                                                                ^\n\n./kernel/./kernel_gpu_cuda.cu(46): error: expected a \";\"\n   if(*((x_6) + (var_9)) == *((data_1) + (v_4[var_9]))d]].keys) + (x_8))ys[x_8]){\n                                                                       ^\n\n./kernel/./kernel_gpu_cuda.cu(50): warning #12-D: parsing restarts here after previous syntax error\n  }\n  ^\n\n6 errors detected in the compilation of \"./kernel/kernel_gpu_cuda_wrapper.cu\".\nmake: *** [Makefile:129: kernel/kernel_gpu_cuda_wrapper.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-cfd-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "euler3d.cu": [],
+      "euler3d_double.cu": [],
+      "pre_euler3d.cu": [],
+      "pre_euler3d_double.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pre_euler3d_double.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "euler3d.cu:5:10: fatal error: helper_cuda.h: No such file or directory\n    5 | #include <helper_cuda.h>\n      |          ^~~~~~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:17: euler3d] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-cfd-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "euler3d.cu": [],
+      "euler3d_double.cu": [],
+      "pre_euler3d.cu": [],
+      "pre_euler3d_double.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pre_euler3d_double.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "euler3d.cu:5:10: fatal error: helper_cuda.h: No such file or directory\n    5 | #include <helper_cuda.h>\n      |          ^~~~~~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:17: euler3d] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-cfd-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "euler3d.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "euler3d_double.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "pre_euler3d.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "pre_euler3d_double.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "euler3d.cu",
+      "euler3d_double.cu",
+      "pre_euler3d.cu",
+      "pre_euler3d_double.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "euler3d.cu:5:10: fatal error: helper_cuda.h: No such file or directory\n    5 | #include <helper_cuda.h>\n      |          ^~~~~~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:17: euler3d] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-dwt2d-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "components.cu": [],
+      "dwt.cu": [],
+      "dwt_cuda/common.cu": [],
+      "dwt_cuda/fdwt53.cu": [
+        "SwapCondition"
+      ],
+      "dwt_cuda/fdwt97.cu": [
+        "SwapCondition"
+      ],
+      "dwt_cuda/rdwt53.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "dwt_cuda/rdwt97.cu": [
+        "ChangeNames"
+      ],
+      "main.cu": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "dwt_cuda/fdwt53.cu",
+      "dwt_cuda/fdwt97.cu",
+      "dwt_cuda/rdwt53.cu",
+      "dwt_cuda/rdwt97.cu",
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.177,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-dwt2d-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "components.cu": [],
+      "dwt.cu": [],
+      "dwt_cuda/common.cu": [],
+      "dwt_cuda/fdwt53.cu": [
+        "SwapCondition"
+      ],
+      "dwt_cuda/fdwt97.cu": [
+        "SwapCondition"
+      ],
+      "dwt_cuda/rdwt53.cu": [
+        "ArithmeticTransform"
+      ],
+      "dwt_cuda/rdwt97.cu": [
+        "ArithmeticTransform"
+      ],
+      "main.cu": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "dwt_cuda/fdwt53.cu",
+      "dwt_cuda/fdwt97.cu",
+      "dwt_cuda/rdwt53.cu",
+      "dwt_cuda/rdwt97.cu",
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.194,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-dwt2d-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "components.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "dwt.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "dwt_cuda/common.cu": [],
+      "dwt_cuda/fdwt53.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ],
+      "dwt_cuda/fdwt97.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ],
+      "dwt_cuda/rdwt53.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ],
+      "dwt_cuda/rdwt97.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ],
+      "main.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "components.cu",
+      "dwt.cu",
+      "dwt_cuda/fdwt53.cu",
+      "dwt_cuda/fdwt97.cu",
+      "dwt_cuda/rdwt53.cu",
+      "dwt_cuda/rdwt97.cu",
+      "main.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "95wh\", x_8, &data_6)) {\n             ^\n\nmain.cu(248): warning #549-D: variable \"var_7\" is used before its value is set\n      while (-1 != var_7 = getopt_long(argc, argv, \"d:c:b:l:D:fr95wh\", x_8, &data_6)) {\n                   ^\n\nmain.cu(342): error: class \"dwt\" has no member \"var_9\"\n      d->var_9 = var_9;\n         ^\n\nmain.cu(343): error: class \"dwt\" has no member \"data_10\"\n      d->data_10 = data_10;\n         ^\n\nmain.cu(345): error: class \"dwt\" has no member \"v_13\"\n      d->v_13 = v_13;\n         ^\n\n4 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:102: main.cu.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-gaussian-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "gaussian.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.141,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-gaussian-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "gaussian.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.126,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-gaussian-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "gaussian.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "gaussian.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "_api.h)\n   cudaFree(data_38);\n   ^\n\ngaussian.cu(410): error: this declaration has no storage class or type specifier\n   cudaFree(val_39);\n   ^\n\ngaussian.cu(410): error: variable \"cudaFree\" has already been defined\n   cudaFree(val_39);\n   ^\n\ngaussian.cu(411): error: this declaration has no storage class or type specifier\n   cudaFree(tmp_40);\n   ^\n\ngaussian.cu(411): error: variable \"cudaFree\" has already been defined\n   cudaFree(tmp_40);\n   ^\n\ngaussian.cu(412): error: expected a declaration\n  }\n  ^\n\n91 errors detected in the compilation of \"gaussian.cu\".\nmake: *** [Makefile:11: release] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-heartwall-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel.cu": [],
+      "main.cu": [],
+      "setdevice.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.272,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-heartwall-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel.cu": [],
+      "main.cu": [],
+      "setdevice.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.243,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-heartwall-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "main.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "setdevice.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel.cu",
+      "main.cu",
+      "setdevice.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "*\"\n    cudaFree(*((unique) + (i)).d_in2_sqr_sub2);\n              ^\n\nmain.cu(767): error: expression must have class type but it has type \"params_unique *\"\n    cudaFree(*((unique) + (i)).d_in_sqr);\n              ^\n\nmain.cu(769): error: expression must have class type but it has type \"params_unique *\"\n    cudaFree(*((unique) + (i)).d_tMask);\n              ^\n\nmain.cu(770): error: expression must have class type but it has type \"params_unique *\"\n    cudaFree(*((unique) + (i)).d_mask_conv);\n              ^\n\n38 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:12: main.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-hotspot-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.289,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.249,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "hotspot.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "e a modifiable lvalue\n   if(0 >= var_81 = atoi(*((argv) + (1)))||\n                    ^\n\nhotspot.cu(286): error: expression must be a modifiable lvalue\n   if(0 >= var_81 = atoi(*((argv) + (1)))||\n      ^\n\nhotspot.cu(286): warning #549-D: variable \"var_81\" is used before its value is set\n   if(0 >= var_81 = atoi(*((argv) + (1)))||\n           ^\n\nhotspot.cu(312): warning #2464-D: conversion from a string literal to \"char *\" is deprecated\n          fatal(\"unable to allocate memory\");\n                ^\n\n12 errors detected in the compilation of \"hotspot.cu\".\nmake: *** [Makefile:12: release] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-hotspot3d-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "3D.cu": [],
+      "opt1.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 2.472,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot3d-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "3D.cu": [],
+      "opt1.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 2.443,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot3d-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "3D.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "opt1.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "3D.cu",
+      "opt1.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "en(val_4, \"r\" ) )\n          ^\n\n3D.cu(40): warning #549-D: variable \"var_5\" is used before its value is set\n      if( 0 == var_5 = fopen(val_4, \"r\" ) )\n               ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\n3D.cu(67): error: expression must be a modifiable lvalue\n      if( 0 == data_14 = fopen(data_12, \"w\" ) )\n          ^\n\n3D.cu(67): warning #549-D: variable \"data_14\" is used before its value is set\n      if( 0 == data_14 = fopen(data_12, \"w\" ) )\n               ^\n\n2 errors detected in the compilation of \"3D.cu\".\nmake: *** [Makefile:15: release] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-huffman-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hist.cu": [],
+      "main_test_cu.cu": [],
+      "pabio_kernels_v2.cu": [],
+      "pack_kernels.cu": [
+        "SwapCondition"
+      ],
+      "scan.cu": [
+        "SwapCondition"
+      ],
+      "scanLargeArray_kernel.cu": [
+        "ArithmeticTransform"
+      ],
+      "vlc_kernel_sm64huff.cu": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pack_kernels.cu",
+      "scan.cu",
+      "scanLargeArray_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.155,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-huffman-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hist.cu": [],
+      "main_test_cu.cu": [],
+      "pabio_kernels_v2.cu": [],
+      "pack_kernels.cu": [
+        "SwapCondition"
+      ],
+      "scan.cu": [
+        "SwapCondition"
+      ],
+      "scanLargeArray_kernel.cu": [
+        "ArithmeticTransform"
+      ],
+      "vlc_kernel_sm64huff.cu": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pack_kernels.cu",
+      "scan.cu",
+      "scanLargeArray_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.144,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-huffman-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hist.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "main_test_cu.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "pabio_kernels_v2.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "pack_kernels.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "scan.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "scanLargeArray_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "vlc_kernel_sm64huff.cu": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "hist.cu",
+      "main_test_cu.cu",
+      "pabio_kernels_v2.cu",
+      "pack_kernels.cu",
+      "scan.cu",
+      "scanLargeArray_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "hist.cu(46): error: no instance of overloaded function \"atomicAdd\" matches the argument list\n            argument types are: (unsigned int *)\n          atomicAdd( &*((elem_6) + (val_3[i])) + (i))], 1 );\n          ^\n\nhist.cu(46): error: expected a \";\"\n          atomicAdd( &*((elem_6) + (val_3[i])) + (i))], 1 );\n                                                     ^\n\n2 errors detected in the compilation of \"main_test_cu.cu\".\nmake: *** [Makefile:38: main_test_cu.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-hybridsort-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bucketsort.cu": [],
+      "bucketsort_kernel.cu": [],
+      "histogram1024_kernel.cu": [],
+      "main.cu": [
+        "SwapCondition"
+      ],
+      "mergesort.cu": [
+        "SwapCondition"
+      ],
+      "mergesort_kernel.cu": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu",
+      "mergesort.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "rm: cannot remove '*.o': No such file or directory\nrm: cannot remove 'hybridsort': No such file or directory\nmake: *** [Makefile:23: clean] Error 1\n\nbucketsort.cu:10:10: fatal error: GL/glew.h: No such file or directory\n   10 | #include <GL/glew.h>\n      |          ^~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:19: hybridsort] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-hybridsort-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bucketsort.cu": [],
+      "bucketsort_kernel.cu": [],
+      "histogram1024_kernel.cu": [],
+      "main.cu": [
+        "SwapCondition"
+      ],
+      "mergesort.cu": [
+        "SwapCondition"
+      ],
+      "mergesort_kernel.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu",
+      "mergesort.cu",
+      "mergesort_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "rm: cannot remove '*.o': No such file or directory\nrm: cannot remove 'hybridsort': No such file or directory\nmake: *** [Makefile:23: clean] Error 1\n\nbucketsort.cu:10:10: fatal error: GL/glew.h: No such file or directory\n   10 | #include <GL/glew.h>\n      |          ^~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:19: hybridsort] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-hybridsort-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bucketsort.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "bucketsort_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "histogram1024_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "main.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "mergesort.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "mergesort_kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "bucketsort.cu",
+      "bucketsort_kernel.cu",
+      "histogram1024_kernel.cu",
+      "main.cu",
+      "mergesort.cu",
+      "mergesort_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "rm: cannot remove '*.o': No such file or directory\nrm: cannot remove 'hybridsort': No such file or directory\nmake: *** [Makefile:23: clean] Error 1\n\nbucketsort.cu:10:10: fatal error: GL/glew.h: No such file or directory\n   10 | #include <GL/glew.h>\n      |          ^~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:19: hybridsort] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-kmeans-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kmeans_cuda.cu": [],
+      "kmeans_cuda_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "ElementType> t_features_flipped;\n  ^\n\nkmeans_cuda_kernel.cu(18): error: texture is not a template\n  texture<float, 1, cudaReadModeElementType> t_clusters;\n  ^\n\nkmeans_cuda_kernel.cu(89): error: no instance of overloaded function \"tex1Dfetch\" matches the argument list\n            argument types are: (<error-type>, int)\n      float diff = (tex1Dfetch(t_features,addr) -\n                    ^\n\nkmeans_cuda.cu(169): error: identifier \"cudaBindTexture\" is undefined\n   if(cudaBindTexture(\n      ^\n\n5 errors detected in the compilation of \"kmeans_cuda.cu\".\nmake: *** [Makefile:31: kmeans_cuda.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-kmeans-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kmeans_cuda.cu": [],
+      "kmeans_cuda_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "ElementType> t_features_flipped;\n  ^\n\nkmeans_cuda_kernel.cu(18): error: texture is not a template\n  texture<float, 1, cudaReadModeElementType> t_clusters;\n  ^\n\nkmeans_cuda_kernel.cu(89): error: no instance of overloaded function \"tex1Dfetch\" matches the argument list\n            argument types are: (<error-type>, int)\n      float diff = (tex1Dfetch(t_features,addr) -\n                    ^\n\nkmeans_cuda.cu(169): error: identifier \"cudaBindTexture\" is undefined\n   if(cudaBindTexture(\n      ^\n\n5 errors detected in the compilation of \"kmeans_cuda.cu\".\nmake: *** [Makefile:31: kmeans_cuda.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-kmeans-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kmeans_cuda.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kmeans_cuda_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kmeans_cuda.cu",
+      "kmeans_cuda_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "be a modifiable lvalue\n    *((elem_10) + (elem_18))++;\n     ^\n\nkmeans_cuda.cu(251): warning #174-D: expression has no effect\n     *((x_11[elem_18]) + (j))_id))[j] = *((x_11) + (elem_18))id]) + (j)) + *((var_4[i]) + (j)) (i))[j];\n     ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nkmeans_cuda.cu(251): error: expected a \";\"\n     *((x_11[elem_18]) + (j))_id))[j] = *((x_11) + (elem_18))id]) + (j)) + *((var_4[i]) + (j)) (i))[j];\n                             ^\n\n7 errors detected in the compilation of \"kmeans_cuda.cu\".\nmake: *** [Makefile:31: kmeans_cuda.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-lavamd-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [],
+      "util/device/device.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lavamd-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [],
+      "util/device/device.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lavamd-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [
+        "ChangeNames"
+      ],
+      "util/device/device.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_cuda.cu",
+      "kernel/kernel_gpu_cuda_wrapper.cu",
+      "util/device/device.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": ")rA_shared[elem_8].z)*((double)rB_shared[j].z));\n                         ^\n\n./kernel/./kernel_gpu_cuda.cu(166): error: identifier \"rB_shared\" is undefined\n       data_19 = (double)rA_shared[elem_8].v + (double)rB_shared[j].v - (((double)rA_shared[elem_8].x)*((double)rB_shared[j].x)+((double)rA_shared[elem_8].y)*((double)rB_shared[j].y)+((double)rA_shared[elem_8].z)*((double)rB_shared[j].z));\n                                                       ^\n\n17 errors detected in the compilation of \"./kernel/kernel_gpu_cuda_wrapper.cu\".\nmake: *** [makefile:58: kernel/kernel_gpu_cuda_wrapper.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-lud-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "cuda/lud.cu": [],
+      "cuda/lud_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.14,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lud-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "cuda/lud.cu": [],
+      "cuda/lud_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.125,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lud-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "cuda/lud.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "cuda/lud_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "cuda/lud.cu",
+      "cuda/lud_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "-result]\n   61 |           fscanf(fp, \"%f \", m+i*size+j);\n      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nlud.cu(79): error: expression must be a modifiable lvalue\n    while (-1 != x_3 = getopt_long(argc, argv, \"::vs:i:\",\n           ^\n\nlud.cu(79): warning #549-D: variable \"x_3\" is used before its value is set\n    while (-1 != x_3 = getopt_long(argc, argv, \"::vs:i:\",\n                 ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\n1 error detected in the compilation of \"lud.cu\".\nmake[1]: *** [Makefile:37: lud.o] Error 2\nmake: *** [Makefile:4: lud_cuda] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-mummergpu-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "src/common.cu": [],
+      "src/mummergpu.cu": [],
+      "src/mummergpu_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "int, TextureAddress, int, int, int, bool, bool)\u2019:\nsuffix-tree.cpp:2491:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2491 |   if (printParentId == matchNodeId)\n      |       ~~~~~~~~~~~~~~^~~~~~~~~~~~~~\nsuffix-tree.cpp:2631:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2631 |             if (cid == matchNodeId)\n      |                 ~~~~^~~~~~~~~~~~~~\nmake[1]: *** [Makefile:114: obj/release/suffix-tree.cpp_o] Error 1\nmake: *** [Makefile:4: mummer] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-mummergpu-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "src/common.cu": [],
+      "src/mummergpu.cu": [],
+      "src/mummergpu_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "int, TextureAddress, int, int, int, bool, bool)\u2019:\nsuffix-tree.cpp:2491:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2491 |   if (printParentId == matchNodeId)\n      |       ~~~~~~~~~~~~~~^~~~~~~~~~~~~~\nsuffix-tree.cpp:2631:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2631 |             if (cid == matchNodeId)\n      |                 ~~~~^~~~~~~~~~~~~~\nmake[1]: *** [Makefile:114: obj/release/suffix-tree.cpp_o] Error 1\nmake: *** [Makefile:4: mummer] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-mummergpu-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "src/common.cu": [],
+      "src/mummergpu.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "src/mummergpu_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "src/mummergpu.cu",
+      "src/mummergpu_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "int, TextureAddress, int, int, int, bool, bool)\u2019:\nsuffix-tree.cpp:2491:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2491 |   if (printParentId == matchNodeId)\n      |       ~~~~~~~~~~~~~~^~~~~~~~~~~~~~\nsuffix-tree.cpp:2631:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2631 |             if (cid == matchNodeId)\n      |                 ~~~~^~~~~~~~~~~~~~\nmake[1]: *** [Makefile:114: obj/release/suffix-tree.cpp_o] Error 1\nmake: *** [Makefile:4: mummer] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-myocyte-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "embedded_fehlberg_7_8.cu": [],
+      "embedded_fehlberg_7_8_2.cu": [],
+      "kernel.cu": [],
+      "kernel_2.cu": [
+        "SwapCondition"
+      ],
+      "kernel_cam.cu": [
+        "SwapCondition"
+      ],
+      "kernel_cam_2.cu": [],
+      "kernel_ecc.cu": [
+        "ChangeNames"
+      ],
+      "kernel_ecc_2.cu": [
+        "ChangeNames"
+      ],
+      "kernel_fin.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kernel_fin_2.cu": [],
+      "main.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "master.cu": [
+        "SwapCondition"
+      ],
+      "solver.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "solver_2.cu": [
+        "ChangeNames"
+      ],
+      "work.cu": [],
+      "work_2.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel_2.cu",
+      "kernel_cam.cu",
+      "kernel_ecc.cu",
+      "kernel_ecc_2.cu",
+      "kernel_fin.cu",
+      "main.cu",
+      "master.cu",
+      "solver.cu",
+      "solver_2.cu",
+      "work_2.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "tring literal to \"char *\" is deprecated\n    read(\"../../data/myocyte/params.txt\",\n         ^\n\nmain.cu(157): error: identifier \"gv\" is undefined\n    mode = atoi(*((gv[3) + ())));\n                   ^\n\nmain.cu(157): error: expected a \"]\"\n    mode = atoi(*((gv[3) + ())));\n                       ^\n\nmain.cu(157): error: expected an expression\n    mode = atoi(*((gv[3) + ())));\n                            ^\n\nmain.cu(157): error: expected a \";\"\n    mode = atoi(*((gv[3) + ())));\n                               ^\n\n4 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:38: main.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-myocyte-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "embedded_fehlberg_7_8.cu": [],
+      "embedded_fehlberg_7_8_2.cu": [],
+      "kernel.cu": [],
+      "kernel_2.cu": [
+        "SwapCondition"
+      ],
+      "kernel_cam.cu": [
+        "SwapCondition"
+      ],
+      "kernel_cam_2.cu": [],
+      "kernel_ecc.cu": [
+        "ChangeNames"
+      ],
+      "kernel_ecc_2.cu": [],
+      "kernel_fin.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kernel_fin_2.cu": [],
+      "main.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "master.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "solver.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "solver_2.cu": [
+        "ChangeNames"
+      ],
+      "work.cu": [
+        "SwapCondition"
+      ],
+      "work_2.cu": []
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel_2.cu",
+      "kernel_cam.cu",
+      "kernel_ecc.cu",
+      "kernel_fin.cu",
+      "main.cu",
+      "master.cu",
+      "solver.cu",
+      "solver_2.cu",
+      "work.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "tring literal to \"char *\" is deprecated\n    read(\"../../data/myocyte/params.txt\",\n         ^\n\nmain.cu(157): error: identifier \"gv\" is undefined\n    mode = atoi(*((gv[3) + ())));\n                   ^\n\nmain.cu(157): error: expected a \"]\"\n    mode = atoi(*((gv[3) + ())));\n                       ^\n\nmain.cu(157): error: expected an expression\n    mode = atoi(*((gv[3) + ())));\n                            ^\n\nmain.cu(157): error: expected a \";\"\n    mode = atoi(*((gv[3) + ())));\n                               ^\n\n4 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:38: main.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-myocyte-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "embedded_fehlberg_7_8.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "embedded_fehlberg_7_8_2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_cam.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_cam_2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_ecc.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_ecc_2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_fin.cu": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_fin_2.cu": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "main.cu": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "master.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "solver.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "solver_2.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "work.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "work_2.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "embedded_fehlberg_7_8.cu",
+      "embedded_fehlberg_7_8_2.cu",
+      "kernel.cu",
+      "kernel_2.cu",
+      "kernel_cam.cu",
+      "kernel_cam_2.cu",
+      "kernel_ecc.cu",
+      "kernel_ecc_2.cu",
+      "kernel_fin.cu",
+      "kernel_fin_2.cu",
+      "main.cu",
+      "master.cu",
+      "solver.cu",
+      "solver_2.cu",
+      "work.cu",
+      "work_2.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "d an expression\n    item_1 = atoi(*((gv[2) + ())));\n                              ^\n\nmain.cu(146): error: expected a \";\"\n    item_1 = atoi(*((gv[2) + ())));\n                                 ^\n\nmain.cu(157): error: expected a \"]\"\n    var_2 = atoi(*((gv[3) + ())));\n                        ^\n\nmain.cu(157): error: expected an expression\n    var_2 = atoi(*((gv[3) + ())));\n                             ^\n\nmain.cu(157): error: expected a \";\"\n    var_2 = atoi(*((gv[3) + ())));\n                                ^\n\n46 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:38: main.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-nn-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "nn_cuda.cu": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "nn_cuda.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "exit_code=-11 != expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.062,
+    "exit_code": -11,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nn-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "nn_cuda.cu": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "nn_cuda.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "exit_code=-11 != expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.064,
+    "exit_code": -11,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nn-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "nn_cuda.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "nn_cuda.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "           ^\n\nnn_cuda.cu(349): error: this declaration has no storage class or type specifier\n    printf(\"          you must declare both.\\n\\n\");\n    ^\n\nnn_cuda.cu(349): error: variable \"printf\" has already been defined\n    printf(\"          you must declare both.\\n\\n\");\n    ^\n\nnn_cuda.cu(349): error: a value of type \"const char *\" cannot be used to initialize an entity of type \"int\"\n    printf(\"          you must declare both.\\n\\n\");\n           ^\n\nnn_cuda.cu(350): error: expected a declaration\n  }\n  ^\n\n30 errors detected in the compilation of \"nn_cuda.cu\".\nmake: *** [Makefile:12: nn] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-nw-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "needle.cu": [],
+      "needle_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.169,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nw-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "needle.cu": [],
+      "needle_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.157,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nw-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "needle.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "needle_kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "needle.cu",
+      "needle_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "                                                                    ^\n\nneedle.cu(144): error: expression preceding parentheses of apparent call must have (pointer-to-) function type\n    *((x_5) + (i*data_1+j)) = *((blosum62[x_3[i*data_1]]) + (x_3[j]))(x_3) + (j))];\n                               ^\n\nneedle.cu(144): error: expected a \";\"\n    *((x_5) + (i*data_1+j)) = *((blosum62[x_3[i*data_1]]) + (x_3[j]))(x_3) + (j))];\n                                                                                ^\n\n17 errors detected in the compilation of \"needle.cu\".\nmake: *** [Makefile:12: release] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-particlefilter-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "ex_particle_CUDA_float_seq.cu": [],
+      "ex_particle_CUDA_naive_seq.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.156,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-particlefilter-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "ex_particle_CUDA_float_seq.cu": [],
+      "ex_particle_CUDA_naive_seq.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.151,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-particlefilter-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "ex_particle_CUDA_float_seq.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "ex_particle_CUDA_naive_seq.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "ex_particle_CUDA_float_seq.cu",
+      "ex_particle_CUDA_naive_seq.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "] - 100),2) - pow((double)(*((I) + (data_81[y])) + (y))]-228),2))/50.0;\n                                                                                                                          ^\n\nex_particle_CUDA_naive_seq.cu(619): warning #2464-D: conversion from a string literal to \"char *\" is deprecated\n   char* val_139 = \"naive.out -x <dimX> -y <dimY> -z <Nfr> -np <Nparticles>\";\n                   ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\n5 errors detected in the compilation of \"ex_particle_CUDA_naive_seq.cu\".\nmake: *** [Makefile:12: naive] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-pathfinder-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "pathfinder.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.197,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-pathfinder-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "pathfinder.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.189,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-pathfinder-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "pathfinder.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pathfinder.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "pathfinder.cu(60): error: expression preceding parentheses of apparent call must have (pointer-to-) function type\n              *((wall[i]) + (j)) (i))[j] = rand() % 10;\n               ^\n\npathfinder.cu(60): error: expected a \";\"\n              *((wall[i]) + (j)) (i))[j] = rand() % 10;\n                                    ^\n\n2 errors detected in the compilation of \"pathfinder.cu\".\nmake: *** [Makefile:11: release] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-srad-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "srad.cu": [],
+      "srad_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.137,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-srad-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "srad.cu": [],
+      "srad_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.127,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-srad-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "srad.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "srad_kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "srad.cu",
+      "srad_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "[tmp_42]) + (item_41))tmp_42))[item_41] = *((elem_56) + (tmp_42))tmp_42]) + (item_41)) + 0.25 * x_37 * v_51;\n     ^\n\nsrad_kernel.cu(251): error: expected a \";\"\n     *((tmp_55[tmp_42]) + (item_41))tmp_42))[item_41] = *((elem_56) + (tmp_42))tmp_42]) + (item_41)) + 0.25 * x_37 * v_51;\n                                    ^\n\nsrad_kernel.cu(255): error: expected a \";\"\n     *((x_33) + (elem_43)) = *((tmp_55[tmp_42]) + (item_41))tmp_42))[item_41];\n                                                            ^\n\n87 errors detected in the compilation of \"srad.cu\".\nmake: *** [Makefile:12: release] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-streamcluster-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "streamcluster_cuda.cu": [],
+      "streamcluster_header.cu": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "streamcluster_header.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": " %lu\nstreamcluster_cuda_cpu.cpp: In function \u2018void streamCluster(PStream*, long int, long int, int, long int, long int, char*)\u2019:\nstreamcluster_cuda_cpu.cpp:793:27: warning: format \u2018%d\u2019 expects argument of type \u2018int\u2019, but argument 3 has type \u2018size_t\u2019 {aka \u2018long unsigned int\u2019} [-Wformat=]\n  793 |     fprintf(stderr,\"read %d points\\n\",numRead);\n      |                          ~^           ~~~~~~~\n      |                           |           |\n      |                           int         size_t {aka long unsigned int}\n      |                          %ld\nmake: *** [Makefile:29: sc_gpu] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-streamcluster-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "streamcluster_cuda.cu": [],
+      "streamcluster_header.cu": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "streamcluster_header.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "e_t\u2019 {aka \u2018long unsigned int\u2019} [-Wformat=]\n  793 |     fprintf(stderr,\"read %d points\\n\",numRead);\n      |                          ~^           ~~~~~~~\n      |                           |           |\n      |                           int         size_t {aka long unsigned int}\n      |                          %ld\nstreamcluster_cuda_cpu.cpp:802:19: error: request for member \u2018weight\u2019 in \u2018*(points.Points::p + ((sizetype)(((long unsigned int)i) * 4)))\u2019, which is of non-class type \u2018int\u2019\n  802 |       points.p[i].weight = 1.0;\n      |                   ^~~~~~\nmake: *** [Makefile:29: sc_gpu] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-streamcluster-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "streamcluster_cuda.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "streamcluster_header.cu": [
+        "SwapCondition",
+        "TypedefExpansion",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "streamcluster_cuda.cu",
+      "streamcluster_header.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "e_t\u2019 {aka \u2018long unsigned int\u2019} [-Wformat=]\n  793 |     fprintf(stderr,\"read %d points\\n\",numRead);\n      |                          ~^           ~~~~~~~\n      |                           |           |\n      |                           int         size_t {aka long unsigned int}\n      |                          %ld\nstreamcluster_cuda_cpu.cpp:802:19: error: request for member \u2018weight\u2019 in \u2018*(points.Points::p + ((sizetype)(((long unsigned int)i) * 4)))\u2019, which is of non-class type \u2018int\u2019\n  802 |       points.p[i].weight = 1.0;\n      |                   ^~~~~~\nmake: *** [Makefile:29: sc_gpu] Error 1\n"
+  }
+]

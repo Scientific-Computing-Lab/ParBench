@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-bptree-omp",
+  "target_spec": "rodinia-bptree-opencl",
+  "kernel": "bptree",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1320770141,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-04-22T01:24:18Z",
+  "prompt_tokens": 23207,
+  "completion_tokens": 1599,
+  "llm_response_time_seconds": 17.881,
+  "build_status": "pass",
+  "build_time_seconds": 0.551,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.472,
+  "run_exit_code": 245,
+  "run_stderr_snippet": "1 error generated.\nCould not open file: /tmp/dep-a66864.d\n1 error generated.\n",
+  "run_stdout_snippet": "ta to a GPU suitable structure...\nTree transformation took 0.065984\nWaiting for command\n> \n******command: j count=6000, rSize=6000 \nknodes_elem=7874, knodes_unit_mem=2068, knodes_mem=16283432\nPlatform: NVIDIA Corporation\nDevice num: 1\nCreating GPU Context\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n<<<<\n<kernel>:1:10: fatal error: 'CL/cl.h' file not found\n#include <CL/cl.h>\n         ^~~~~~~~~\n\n>>>>\n--------------------------------\nError at line 258: CL_BUILD_PROGRAM_FAILURE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 245)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.453,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#include <CL/cl.h>\n\n#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 508\n#endif\n\ntypedef struct record {\n    int value;\n} record;\n\ntypedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    bool is_leaf;\n    int num_keys;\n} knode;\n\nkernel void findK(long maxheight,\n                  const knode *knodes,\n                  long knodes_elem,\n                  const record *records,\n                  long *currKnode,\n                  long *offset,\n                  const int *keys,\n                  record *ans)\n{\n    int bid = get_global_id(0) / get_local_size(0);\n    int thid = get_global_id(0) % get_local_size(0);\n    int threadsPerBlock = get_local_size(0);\n    \n    if (bid >= get_global_size(0) / get_local_size(0))\n        return;\n    \n    int i;\n    \n    for (i = 0; i < maxheight; i++) {\n        if (thid < threadsPerBlock) {\n            if ((knodes[currKnode[bid]].keys[thid] <= keys[bid]) && \n                (knodes[currKnode[bid]].keys[thid + 1] > keys[bid])) {\n                if (knodes[currKnode[bid]].indices[thid] < knodes_elem) {\n                    offset[bid] = knodes[currKnode[bid]].indices[thid];\n                }\n            }\n        }\n        \n        if (thid == 0) {\n            currKnode[bid] = offset[bid];\n        }\n    }\n    \n    if (thid < threadsPerBlock) {\n        if (knodes[currKnode[bid]].keys[thid] == keys[bid]) {\n            ans[bid].value = records[knodes[currKnode[bid]].indices[thid]].value;\n        }\n    }\n}\n",
+    "kernel/kernel_gpu_opencl_2.cl": "#include <CL/cl.h>\n\n#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 508\n#endif\n\ntypedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    bool is_leaf;\n    int num_keys;\n} knode;\n\nkernel void findK(long maxheight,\n                  const knode *knodes,\n                  long knodes_elem,\n                  long *currKnode,\n                  long *offset,\n                  long *lastKnode,\n                  long *offset_2,\n                  const int *start,\n                  const int *end,\n                  int *recstart,\n                  int *reclength)\n{\n    int bid = get_global_id(0) / get_local_size(0);\n    int thid = get_global_id(0) % get_local_size(0);\n    int threadsPerBlock = get_local_size(0);\n    \n    if (bid >= get_global_size(0) / get_local_size(0))\n        return;\n    \n    int i;\n    \n    for (i = 0; i < maxheight; i++) {\n        if (thid < threadsPerBlock) {\n            if ((knodes[currKnode[bid]].keys[thid] <= start[bid]) && \n                (knodes[currKnode[bid]].keys[thid + 1] > start[bid])) {\n                if (knodes[currKnode[bid]].indices[thid] < knodes_elem) {\n                    offset[bid] = knodes[currKnode[bid]].indices[thid];\n                }\n            }\n            if ((knodes[lastKnode[bid]].keys[thid] <= end[bid]) && \n                (knodes[lastKnode[bid]].keys[thid + 1] > end[bid])) {\n                if (knodes[lastKnode[bid]].indices[thid] < knodes_elem) {\n                    offset_2[bid] = knodes[lastKnode[bid]].indices[thid];\n                }\n            }\n        }\n        \n        if (thid == 0) {\n            currKnode[bid] = offset[bid];\n            lastKnode[bid] = offset_2[bid];\n        }\n    }\n    \n    if (thid < threadsPerBlock) {\n        if (knodes[currKnode[bid]].keys[thid] == start[bid]) {\n            recstart[bid] = knodes[currKnode[bid]].indices[thid];\n        }\n    }\n    \n    if (thid < threadsPerBlock) {\n        if (knodes[lastKnode[bid]].keys[thid] == end[bid]) {\n            reclength[bid] = knodes[lastKnode[bid]].indices[thid] - recstart[bid] + 1;\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 17.881,
+      "prompt_tokens": 23207,
+      "completion_tokens": 1599,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "1 error generated.\nCould not open file: /tmp/dep-a66864.d\n1 error generated.\n",
+      "run_stdout_snippet": "ta to a GPU suitable structure...\nTree transformation took 0.065984\nWaiting for command\n> \n******command: j count=6000, rSize=6000 \nknodes_elem=7874, knodes_unit_mem=2068, knodes_mem=16283432\nPlatform: NVIDIA Corporation\nDevice num: 1\nCreating GPU Context\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n<<<<\n<kernel>:1:10: fatal error: 'CL/cl.h' file not found\n#include <CL/cl.h>\n         ^~~~~~~~~\n\n>>>>\n--------------------------------\nError at line 258: CL_BUILD_PROGRAM_FAILURE\n",
+      "extraction_fail": null
+    }
+  ]
+}

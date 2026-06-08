@@ -1,0 +1,77 @@
+{
+  "source_spec": "hecbench-stencil1d-cuda",
+  "target_spec": "hecbench-stencil1d-omp",
+  "kernel": "stencil1d",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 568875222,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "134217728",
+    "1"
+  ],
+  "timestamp": "2026-04-22T04:54:51Z",
+  "prompt_tokens": 1109,
+  "completion_tokens": 11114,
+  "llm_response_time_seconds": 174.925,
+  "build_status": "pass",
+  "build_time_seconds": 0.12,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.439,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Average kernel execution time: 0.038037 (s)\nPASS\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 0.038037,
+      "unit": "s"
+    }
+  },
+  "baseline_wall_time_seconds": 4.97,
+  "translated_wall_time_seconds": 0.439,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 11.3212,
+  "translated_files": {
+    "stencil_1d.cpp": "#include <stdio.h>\n#include <stdlib.h>\n#include <chrono>\n#include <omp.h>\n\n#define RADIUS 7\n#define BLOCK_SIZE 256\n\nvoid stencil_1d(const int *__restrict__ in, int *__restrict__ out, int length)\n{\n  #pragma omp parallel for\n  for (int gindex = 0; gindex < length; gindex++) {\n    int result = 0;\n    for (int offset = -RADIUS ; offset <= RADIUS ; offset++) {\n      int idx = gindex + offset;\n      if (idx < 0) result += 0;\n      else result += in[idx];\n    }\n    out[gindex] = result; \n  }\n}\n\nint main(int argc, char* argv[]) {\n  if (argc != 3) {\n    printf(\"Usage: %s <length> <repeat>\\n\", argv[0]);\n    printf(\"length is a multiple of %d\\n\", BLOCK_SIZE);\n    return 1;\n  }\n  const int length = atoi(argv[1]);\n  const int repeat = atoi(argv[2]);\n\n  int size = length * sizeof(int);\n  int pad_size = (length + RADIUS) * sizeof(int);\n\n  int *a, *b;\n  \n  a = (int *)malloc(pad_size); \n  b = (int *)malloc(size);\n\n  for (int i = 0; i < length+RADIUS; i++) a[i] = i;\n\n  int *d_a, *d_b;\n  \n  d_a = a;\n  d_b = b;\n\n  auto start = std::chrono::steady_clock::now();\n\n  for (int i = 0; i < repeat; i++)\n    stencil_1d(d_a, d_b, length);\n\n  auto end = std::chrono::steady_clock::now();\n  auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n  printf(\"Average kernel execution time: %f (s)\\n\", (time * 1e-9f) / repeat);\n\n  bool ok = true;\n  for (int i = 0; i < 2*RADIUS; i++) {\n    int s = 0;\n    for (int j = i; j <= i+2*RADIUS; j++)\n      s += j < RADIUS ? 0 : (a[j] - RADIUS);\n    if (s != b[i]) {\n      printf(\"Error at %d: %d (host) != %d (device)\\n\", i, s, b[i]);\n      ok = false;\n      break;\n    }\n  }\n\n  for (int i = 2*RADIUS; i < length; i++) {\n    int s = 0;\n    for (int j = i-RADIUS; j <= i+RADIUS; j++)\n      s += a[j];\n    if (s != b[i]) {\n      printf(\"Error at %d: %d (host) != %d (device)\\n\", i, s, b[i]);\n      ok = false;\n      break;\n    }\n  }\n  printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");\n\n  free(a);\n  free(b); \n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "stencil_1d.cpp"
+  ],
+  "target_files_extracted": [
+    "stencil_1d.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 174.925,
+      "prompt_tokens": 1109,
+      "completion_tokens": 11114,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

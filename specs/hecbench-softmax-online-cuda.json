@@ -1,0 +1,198 @@
+{
+  "spec_version": "1.0.0",
+  "identity": {
+    "kernel_name": "softmax-online",
+    "parallel_api": "cuda",
+    "unique_id": "hecbench-softmax-online-cuda",
+    "source_suite": "hecbench"
+  },
+  "provenance": {
+    "repository": {
+      "url": "https://github.com/zjin-lcf/HeCBench",
+      "commit": "archive-download",
+      "branch": "master"
+    },
+    "repo_root": "HeCBench-master/",
+    "source_path": "src/softmax-online-cuda",
+    "license": "MIT"
+  },
+  "files": {
+    "prompt_payload": [
+      "main.cu",
+      "common.h"
+    ],
+    "support_files": [
+      "Makefile",
+      "CMakeLists.txt",
+      "LICENSE"
+    ],
+    "verification_only": [
+      "reference.h"
+    ],
+    "translation_targets": [
+      "main.cu",
+      "common.h"
+    ]
+  },
+  "implementation": {
+    "api": "cuda",
+    "api_version": null,
+    "language": "C++",
+    "language_standard": "C++17"
+  },
+  "build": {
+    "environment": {
+      "preferred": "system",
+      "conda": null,
+      "system": {
+        "dependencies": [
+          "CUDA Toolkit >= 11.0",
+          "GCC >= 9.0"
+        ]
+      }
+    },
+    "build_system": "make",
+    "working_directory": "src/softmax-online-cuda",
+    "commands": {
+      "configure": null,
+      "build": "make ARCH=sm_89",
+      "clean": "make clean"
+    },
+    "variables": null,
+    "outputs": {
+      "executable": "main"
+    }
+  },
+  "run": {
+    "executable": "./main",
+    "default_arguments": [
+      "1"
+    ],
+    "timeout_seconds": 300,
+    "environment_variables": null,
+    "input_configurations": {
+      "correctness": {
+        "arguments": [
+          "1"
+        ],
+        "description": "Run online softmax kernel variant 1; validates GPU results against CPU reference",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "All results match"
+        }
+      },
+      "performance": {
+        "arguments": [
+          "1"
+        ],
+        "description": "Online softmax with performance benchmarks at multiple block sizes",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "All results match"
+        }
+      }
+    }
+  },
+  "verification": {
+    "method": "self_checking",
+    "strategies": [
+      {
+        "type": "stdout_pattern",
+        "pattern": "All results match",
+        "description": "validate_result() compares GPU output against CPU softmax; prints 'All results match' on success"
+      },
+      {
+        "type": "exit_code",
+        "expected": 0,
+        "description": "Process exits cleanly; non-zero on mismatch"
+      }
+    ],
+    "floating_point": {
+      "tolerance": 0.0001,
+      "tolerance_type": "absolute",
+      "note": "validate_result uses element-wise tolerance check with epsilon scaling"
+    }
+  },
+  "performance": {
+    "metrics": [
+      {
+        "name": "kernel_time",
+        "extraction": {
+          "type": "regex",
+          "pattern": "block_size\\s+\\d+\\s+\\|\\s+time\\s+([\\d.eE+-]+)\\s+ms",
+          "capture_group": 1
+        },
+        "unit": "ms"
+      }
+    ],
+    "warmup_runs": 1,
+    "measurement_runs": 5
+  },
+  "hardware": {
+    "target": "gpu",
+    "requirements": {
+      "gpu": {
+        "vendor": "NVIDIA",
+        "min_compute_capability": "sm_60",
+        "min_memory_gb": 2
+      }
+    },
+    "reference_platform": {
+      "platform_id": "rtx4070-r9-7900x",
+      "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+      },
+      "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+      },
+      "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+      }
+    }
+  },
+  "baseline_results": {
+    "reference_platform": "rtx4070-r9-7900x",
+    "timestamp": "2026-03-03T00:24:53Z",
+    "configurations": {
+      "correctness": {
+        "status": "pass",
+        "exit_code": 0,
+        "stdout_snippet": "Using kernel baseline 1\nLargest output is: 0.999878\nChecking block size 32.\nChecking block size 64.\nChecking block size 128.\nChecking block size 256.\nChecking block size 512.\nChecking block size 1024.\nAll results match. Starting benchmarks.\n\nblock_size   32 | time 16.1683 ms | per token 1.97 \u00b5s\nblock_size   64 | time 16.1783 ms | per token 1.97 \u00b5s\nblock_size  128 | time 16.1834 ms | per token 1.98 \u00b5s\nblock_size  256 | time 16.1893 ms | per token 1.98 \u00b5s\nblock_size  512 | time 16.1934 ms | per to",
+        "wall_time_seconds": 19.966
+      },
+      "performance": {
+        "status": "pass",
+        "wall_time_seconds": 19.966,
+        "metrics": {
+          "kernel_time_ms": 16.1683
+        }
+      }
+    }
+  },
+  "metadata": {
+    "description": "Online numerically-stable softmax forward pass optimized for GPU. Uses online normalization trick to compute softmax in a single pass, avoiding the two-pass max-subtract-exp-sum approach.",
+    "domain": "machine learning",
+    "complexity": "O(n)",
+    "tags": [
+      "softmax",
+      "online-softmax",
+      "attention",
+      "ml",
+      "transformer",
+      "warp-reduction"
+    ],
+    "multi_file": false,
+    "translation_complexity": null
+  }
+}

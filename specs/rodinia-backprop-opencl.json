@@ -1,0 +1,187 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "backprop",
+        "parallel_api": "opencl",
+        "unique_id": "rodinia-backprop-opencl",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "opencl/backprop",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "backprop_kernel.cl",
+            "backprop.c",
+            "backprop_ocl.cpp",
+            "facetrain.c",
+            "imagenet.c"
+        ],
+        "support_files": [
+            "backprop.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "backprop_kernel.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl>=2.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl/backprop",
+        "commands": {
+            "configure": null,
+            "build": "make OPENCL_INC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include OPENCL_LIB=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+            "clean": "make clean"
+        },
+        "variables": {
+            "OPENCL_INC": {
+                "description": "Path to OpenCL headers",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include",
+                "detection": "find /usr -name 'cl.h' -path '*/CL/cl.h' | head -1 | xargs dirname | xargs dirname"
+            },
+            "OPENCL_LIB": {
+                "description": "Path to OpenCL libraries",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+                "detection": "find /usr -name 'libOpenCL.so' | head -1 | xargs dirname"
+            }
+        },
+        "outputs": {
+            "executable": "./backprop.out"
+        }
+    },
+    "run": {
+        "executable": "./backprop.out",
+        "default_arguments": [
+            "-n",
+            "65536"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-n",
+                    "65536"
+                ],
+                "description": "Small input for correctness verification of backprop (OPENCL)",
+                "input_files": [],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "-n",
+                    "1048576"
+                ],
+                "description": "Large input for performance measurement of backprop (OPENCL)",
+                "input_files": [],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Finish the training for one iteration",
+                "description": "Computation completed successfully"
+            },
+            {
+                "type": "stdout_exclude_pattern",
+                "pattern": "ERROR.*cl",
+                "description": "No OpenCL runtime errors (clBuildProgram, clEnqueueReadBuffer, etc.)"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.271613+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "",
+                "wall_time_seconds": 0.001,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Backpropagation neural network training on GPU",
+        "domain": "machine learning",
+        "complexity": "neural network training (backpropagation)",
+        "tags": [
+            "backprop",
+            "backpropagation",
+            "machine-learning",
+            "neural-network",
+            "opencl",
+            "rodinia"
+        ],
+        "multi_file": true,
+        "translation_complexity": "single_file"
+    }
+}

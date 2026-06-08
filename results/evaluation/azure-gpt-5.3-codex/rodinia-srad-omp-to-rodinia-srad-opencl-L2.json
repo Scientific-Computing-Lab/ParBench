@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-srad-omp",
+  "target_spec": "rodinia-srad-opencl",
+  "kernel": "srad",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1195621770,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "502",
+    "458",
+    "-n",
+    "2",
+    "-l",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-05-01T01:07:52Z",
+  "prompt_tokens": 10537,
+  "completion_tokens": 3028,
+  "llm_response_time_seconds": 35.744,
+  "build_status": "pass",
+  "build_time_seconds": 0.256,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.244,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 256 \nPlatform: NVIDIA Corporation\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n--------------------------------\nmax # of workgroups = 899, # of threads/workgroup = 256 (ensure that device can handle)\nIterations Progress: hidden\nTime spent in different stages of the application:\nInit: 170.662994\nMemAlloc: 0.005000\nHtoD: 0.039776\nExec: 0.093056\nDtoH: 0.036416\nClose: 48.728001\nTotal: 220.188995\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.085,
+  "translated_wall_time_seconds": 0.244,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.3484,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n\n__kernel void extract_kernel(const long d_Ne,\n                             __global float *d_I) {\n    const long ei = (long)get_group_id(0) * (long)get_local_size(0) + (long)get_local_id(0);\n    if (ei < d_Ne) {\n        d_I[ei] = exp(d_I[ei] / 255.0f);\n    }\n}\n\n__kernel void prepare_kernel(const long d_Ne,\n                             __global float *d_I,\n                             __global float *d_sums,\n                             __global float *d_sums2) {\n    const long ei = (long)get_group_id(0) * (long)get_local_size(0) + (long)get_local_id(0);\n    if (ei < d_Ne) {\n        float v = d_I[ei];\n        d_sums[ei] = v;\n        d_sums2[ei] = v * v;\n    }\n}\n\n__kernel void reduce_kernel(const long d_Ne,\n                            const long d_no,\n                            const int d_mul,\n                            __global float *d_sums,\n                            __global float *d_sums2,\n                            const int d_blocks) {\n    (void)d_Ne;\n\n    const int bx = (int)get_group_id(0);\n    const int tx = (int)get_local_id(0);\n    const int ls = (int)get_local_size(0);\n    const int ei = bx * ls + tx;\n    const int nf = ls - (d_blocks * ls - (int)d_no);\n\n    __local float lsum[1024];\n    __local float lsum2[1024];\n\n    float v1 = 0.0f;\n    float v2 = 0.0f;\n    if (ei < (int)d_no) {\n        const int idx = ei * d_mul;\n        v1 = d_sums[idx];\n        v2 = d_sums2[idx];\n    }\n    lsum[tx] = v1;\n    lsum2[tx] = v2;\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (nf == ls || bx != (d_blocks - 1)) {\n        for (int i = 2; i <= ls; i <<= 1) {\n            if (((tx + 1) % i) == 0) {\n                lsum[tx] += lsum[tx - (i >> 1)];\n                lsum2[tx] += lsum2[tx - (i >> 1)];\n            }\n            barrier(CLK_LOCAL_MEM_FENCE);\n        }\n\n        if (tx == (ls - 1)) {\n            const int out_idx = bx * d_mul * ls;\n            d_sums[out_idx] = lsum[tx];\n            d_sums2[out_idx] = lsum2[tx];\n        }\n    } else {\n        int df = 0;\n        for (int i = 2; i <= ls; i <<= 1) {\n            if (nf >= i) df = i;\n        }\n\n        for (int i = 2; i <= df; i <<= 1) {\n            if (((tx + 1) % i) == 0 && tx < df) {\n                lsum[tx] += lsum[tx - (i >> 1)];\n                lsum2[tx] += lsum2[tx - (i >> 1)];\n            }\n            barrier(CLK_LOCAL_MEM_FENCE);\n        }\n\n        if (tx == (df - 1)) {\n            for (int i = bx * ls + df; i < bx * ls + nf; i++) {\n                lsum[tx] += d_sums[i];\n                lsum2[tx] += d_sums2[i];\n            }\n            const int out_idx = bx * d_mul * ls;\n            d_sums[out_idx] = lsum[tx];\n            d_sums2[out_idx] = lsum2[tx];\n        }\n    }\n}\n\n__kernel void srad_kernel(const float lambda,\n                          const int Nr,\n                          const int Nc,\n                          const long Ne,\n                          __global int *iN,\n                          __global int *iS,\n                          __global int *jE,\n                          __global int *jW,\n                          __global float *d_dN,\n                          __global float *d_dS,\n                          __global float *d_dW,\n                          __global float *d_dE,\n                          const float q0sqr,\n                          __global float *d_c,\n                          __global float *d_I) {\n    (void)lambda;\n    const long ei = (long)get_group_id(0) * (long)get_local_size(0) + (long)get_local_id(0);\n    if (ei >= Ne) return;\n\n    const int row = (int)(ei / (long)Nc);\n    const int col = (int)(ei - (long)row * (long)Nc);\n\n    if (row < Nr && col < Nc) {\n        const int k = row * Nc + col;\n        const float Jc = d_I[k];\n\n        const float dN = d_I[iN[row] * Nc + col] - Jc;\n        const float dS = d_I[iS[row] * Nc + col] - Jc;\n        const float dW = d_I[row * Nc + jW[col]] - Jc;\n        const float dE = d_I[row * Nc + jE[col]] - Jc;\n\n        d_dN[k] = dN;\n        d_dS[k] = dS;\n        d_dW[k] = dW;\n        d_dE[k] = dE;\n\n        const float G2 = (dN * dN + dS * dS + dW * dW + dE * dE) / (Jc * Jc);\n        const float L = (dN + dS + dW + dE) / Jc;\n        const float num = 0.5f * G2 - 0.0625f * (L * L);\n        float den = 1.0f + 0.25f * L;\n        const float qsqr = num / (den * den);\n\n        den = (qsqr - q0sqr) / (q0sqr * (1.0f + q0sqr));\n        float c = 1.0f / (1.0f + den);\n\n        if (c < 0.0f) c = 0.0f;\n        else if (c > 1.0f) c = 1.0f;\n\n        d_c[k] = c;\n    }\n}\n\n__kernel void srad2_kernel(const float lambda,\n                           const int Nr,\n                           const int Nc,\n                           const long Ne,\n                           __global int *iN,\n                           __global int *iS,\n                           __global int *jE,\n                           __global int *jW,\n                           __global float *d_dN,\n                           __global float *d_dS,\n                           __global float *d_dW,\n                           __global float *d_dE,\n                           __global float *d_c,\n                           __global float *d_I) {\n    (void)iN;\n    (void)jW;\n\n    const long ei = (long)get_group_id(0) * (long)get_local_size(0) + (long)get_local_id(0);\n    if (ei >= Ne) return;\n\n    const int row = (int)(ei / (long)Nc);\n    const int col = (int)(ei - (long)row * (long)Nc);\n\n    if (row < Nr && col < Nc) {\n        const int k = row * Nc + col;\n\n        const float cN = d_c[k];\n        const float cS = d_c[iS[row] * Nc + col];\n        const float cW = d_c[k];\n        const float cE = d_c[row * Nc + jE[col]];\n\n        const float D = cN * d_dN[k] + cS * d_dS[k] + cW * d_dW[k] + cE * d_dE[k];\n        d_I[k] = d_I[k] + 0.25f * lambda * D;\n    }\n}\n\n__kernel void compress_kernel(const long d_Ne,\n                              __global float *d_I) {\n    const long ei = (long)get_group_id(0) * (long)get_local_size(0) + (long)get_local_id(0);\n    if (ei < d_Ne) {\n        d_I[ei] = log(d_I[ei]) * 255.0f;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 35.744,
+      "prompt_tokens": 10537,
+      "completion_tokens": 3028,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

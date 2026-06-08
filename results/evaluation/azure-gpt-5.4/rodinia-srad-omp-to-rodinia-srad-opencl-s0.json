@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-srad-omp",
+  "target_spec": "rodinia-srad-opencl",
+  "kernel": "srad",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1195621770,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "502",
+    "458",
+    "-n",
+    "2",
+    "-l",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-26T07:54:28Z",
+  "prompt_tokens": 10537,
+  "completion_tokens": 4790,
+  "llm_response_time_seconds": 77.151,
+  "build_status": "pass",
+  "build_time_seconds": 0.234,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.22,
+  "run_exit_code": 205,
+  "run_stderr_snippet": "",
+  "run_stdout_snippet": "WG size of kernel = 256 \nPlatform: NVIDIA Corporation\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n--------------------------------\nmax # of workgroups = 899, # of threads/workgroup = 256 (ensure that device can handle)\nIterations Progress: hiddenError at line 947: CL_INVALID_ARG_SIZE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 205)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.085,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#define MAX_THREADS 1024\n\ntypedef float fp;\n\n__kernel void extract_kernel(long d_Ne,\n                             __global fp *d_I)\n{\n    long ei = (long)get_global_id(0);\n    if (ei < d_Ne) {\n        d_I[ei] = exp(d_I[ei] / (fp)255.0f);\n    }\n}\n\n__kernel void prepare_kernel(long d_Ne,\n                             __global fp *d_I,\n                             __global fp *d_sums,\n                             __global fp *d_sums2)\n{\n    long ei = (long)get_global_id(0);\n    if (ei < d_Ne) {\n        fp v = d_I[ei];\n        d_sums[ei] = v;\n        d_sums2[ei] = v * v;\n    }\n}\n\n__kernel void reduce_kernel(long d_Ne,\n                            int d_no,\n                            int d_mul,\n                            __global fp *d_sums,\n                            __global fp *d_sums2,\n                            int blocks_work_size)\n{\n    (void)d_Ne;\n\n    int bx = (int)get_group_id(0);\n    int tx = (int)get_local_id(0);\n    int local_sz = (int)get_local_size(0);\n    int ei = bx * local_sz + tx;\n    int nf = local_sz - (blocks_work_size * local_sz - d_no);\n    int df = 0;\n\n    __local fp d_psum[MAX_THREADS];\n    __local fp d_psum2[MAX_THREADS];\n\n    if (tx < MAX_THREADS) {\n        if (ei < d_no) {\n            d_psum[tx] = d_sums[ei * d_mul];\n            d_psum2[tx] = d_sums2[ei * d_mul];\n        } else {\n            d_psum[tx] = (fp)0.0f;\n            d_psum2[tx] = (fp)0.0f;\n        }\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (nf == local_sz) {\n        for (int i = 2; i <= local_sz; i <<= 1) {\n            if (((tx + 1) % i) == 0) {\n                d_psum[tx] = d_psum[tx] + d_psum[tx - (i >> 1)];\n                d_psum2[tx] = d_psum2[tx] + d_psum2[tx - (i >> 1)];\n            }\n            barrier(CLK_LOCAL_MEM_FENCE);\n        }\n\n        if (tx == (local_sz - 1)) {\n            d_sums[bx * d_mul * local_sz] = d_psum[tx];\n            d_sums2[bx * d_mul * local_sz] = d_psum2[tx];\n        }\n    } else {\n        if (bx != (blocks_work_size - 1)) {\n            for (int i = 2; i <= local_sz; i <<= 1) {\n                if (((tx + 1) % i) == 0) {\n                    d_psum[tx] = d_psum[tx] + d_psum[tx - (i >> 1)];\n                    d_psum2[tx] = d_psum2[tx] + d_psum2[tx - (i >> 1)];\n                }\n                barrier(CLK_LOCAL_MEM_FENCE);\n            }\n\n            if (tx == (local_sz - 1)) {\n                d_sums[bx * d_mul * local_sz] = d_psum[tx];\n                d_sums2[bx * d_mul * local_sz] = d_psum2[tx];\n            }\n        } else {\n            for (int i = 2; i <= local_sz; i <<= 1) {\n                if (nf >= i) {\n                    df = i;\n                }\n            }\n\n            for (int i = 2; i <= df; i <<= 1) {\n                if (((tx + 1) % i) == 0 && tx < df) {\n                    d_psum[tx] = d_psum[tx] + d_psum[tx - (i >> 1)];\n                    d_psum2[tx] = d_psum2[tx] + d_psum2[tx - (i >> 1)];\n                }\n                barrier(CLK_LOCAL_MEM_FENCE);\n            }\n\n            if (tx == (df - 1)) {\n                for (int i = (bx * local_sz) + df; i < (bx * local_sz) + nf; i++) {\n                    d_psum[tx] = d_psum[tx] + d_sums[i];\n                    d_psum2[tx] = d_psum2[tx] + d_sums2[i];\n                }\n\n                d_sums[bx * d_mul * local_sz] = d_psum[tx];\n                d_sums2[bx * d_mul * local_sz] = d_psum2[tx];\n            }\n        }\n    }\n}\n\n__kernel void srad_kernel(fp lambda,\n                          int Nr,\n                          int Nc,\n                          long Ne,\n                          __global int *d_iN,\n                          __global int *d_iS,\n                          __global int *d_jE,\n                          __global int *d_jW,\n                          __global fp *d_dN,\n                          __global fp *d_dS,\n                          __global fp *d_dW,\n                          __global fp *d_dE,\n                          fp d_q0sqr,\n                          __global fp *d_c,\n                          __global fp *d_I)\n{\n    (void)lambda;\n\n    long ei = (long)get_global_id(0);\n    if (ei < Ne) {\n        int row = (int)(ei / (long)Nc);\n        int col = (int)(ei % (long)Nc);\n\n        fp Jc = d_I[ei];\n\n        fp dN = d_I[d_iN[row] * Nc + col] - Jc;\n        fp dS = d_I[d_iS[row] * Nc + col] - Jc;\n        fp dW = d_I[row * Nc + d_jW[col]] - Jc;\n        fp dE = d_I[row * Nc + d_jE[col]] - Jc;\n\n        d_dN[ei] = dN;\n        d_dS[ei] = dS;\n        d_dW[ei] = dW;\n        d_dE[ei] = dE;\n\n        fp G2 = (dN * dN + dS * dS + dW * dW + dE * dE) / (Jc * Jc);\n        fp L = (dN + dS + dW + dE) / Jc;\n\n        fp num = (fp)0.5f * G2 - (fp)0.0625f * (L * L);\n        fp den = (fp)1.0f + (fp)0.25f * L;\n        fp qsqr = num / (den * den);\n\n        den = (qsqr - d_q0sqr) / (d_q0sqr * ((fp)1.0f + d_q0sqr));\n        fp c = (fp)1.0f / ((fp)1.0f + den);\n\n        if (c < (fp)0.0f) {\n            c = (fp)0.0f;\n        } else if (c > (fp)1.0f) {\n            c = (fp)1.0f;\n        }\n\n        d_c[ei] = c;\n    }\n}\n\n__kernel void srad2_kernel(fp lambda,\n                           int Nr,\n                           int Nc,\n                           long Ne,\n                           __global int *d_iN,\n                           __global int *d_iS,\n                           __global int *d_jE,\n                           __global int *d_jW,\n                           __global fp *d_dN,\n                           __global fp *d_dS,\n                           __global fp *d_dW,\n                           __global fp *d_dE,\n                           __global fp *d_c,\n                           __global fp *d_I)\n{\n    (void)Nr;\n    (void)d_iN;\n    (void)d_jW;\n\n    long ei = (long)get_global_id(0);\n    if (ei < Ne) {\n        int row = (int)(ei / (long)Nc);\n        int col = (int)(ei % (long)Nc);\n\n        fp cN = d_c[ei];\n        fp cS = d_c[d_iS[row] * Nc + col];\n        fp cW = d_c[ei];\n        fp cE = d_c[row * Nc + d_jE[col]];\n\n        fp D = cN * d_dN[ei] + cS * d_dS[ei] + cW * d_dW[ei] + cE * d_dE[ei];\n        d_I[ei] = d_I[ei] + (fp)0.25f * lambda * D;\n    }\n}\n\n__kernel void compress_kernel(long d_Ne,\n                              __global fp *d_I)\n{\n    long ei = (long)get_global_id(0);\n    if (ei < d_Ne) {\n        d_I[ei] = log(d_I[ei]) * (fp)255.0f;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 77.151,
+      "prompt_tokens": 10537,
+      "completion_tokens": 4790,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "",
+      "run_stdout_snippet": "WG size of kernel = 256 \nPlatform: NVIDIA Corporation\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n--------------------------------\nmax # of workgroups = 899, # of threads/workgroup = 256 (ensure that device can handle)\nIterations Progress: hiddenError at line 947: CL_INVALID_ARG_SIZE\n",
+      "extraction_fail": null
+    }
+  ]
+}

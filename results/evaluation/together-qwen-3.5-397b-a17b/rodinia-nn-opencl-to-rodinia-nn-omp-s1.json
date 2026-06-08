@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-nn-opencl",
+  "target_spec": "rodinia-nn-omp",
+  "kernel": "nn",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 977069789,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T02:55:19Z",
+  "prompt_tokens": 14526,
+  "completion_tokens": 2829,
+  "llm_response_time_seconds": 50.993,
+  "build_status": "fail",
+  "build_time_seconds": 0.019,
+  "build_error_snippet": "nn_openmp.c:6:10: fatal error: vector: No such file or directory\n    6 | #include <vector>\n      |          ^~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:12: nn] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: nn_openmp.c:6:10: fatal error: vector: No such file or directory\n    6 | #include <vector>\n      |          ^~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:12: nn] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.016,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "nn_openmp.c": "#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <omp.h>\n#include <vector>\n#include <iostream>\n\nusing namespace std;\n\ntypedef struct latLong\n{\n    float lat;\n    float lng;\n} LatLong;\n\ntypedef struct record\n{\n    char recString[49];\n    float distance;\n} Record;\n\nvoid computeNearestNeighbor(LatLong *locations,\n                            float *distances,\n                            const int numRecords,\n                            const float lat,\n                            const float lng) {\n    #pragma omp parallel for\n    for (int i = 0; i < numRecords; i++) {\n        LatLong *latLong = &locations[i];\n        distances[i] = (float)sqrt((lat - latLong->lat) * (lat - latLong->lat) + \n                                   (lng - latLong->lng) * (lng - latLong->lng));\n    }\n}\n\nvoid* alloc(size_t size) {\n    void* ptr = NULL;\n    ptr = malloc(size);\n    if(ptr == NULL) {\n        perror(\"malloc\");\n        exit(-1);\n    }\n    return ptr;\n}\n\nint loadData(char *filename, std::vector<Record> &records, std::vector<LatLong> &locations) {\n    FILE   *flist, *fp;\n    int    i = 0;\n    char dbname[64], db_fullname[128];\n    int recNum = 0;\n    \n    char *data_folder = getenv(\"DATA_FOLDER\");\n    if (data_folder == NULL) {\n        data_folder = \".\";\n    }\n    \n    flist = fopen(filename, \"r\");\n    if (!flist) {\n        printf(\"Error opening filelist: %s\\n\", filename);\n        exit(0);\n    }\n    \n    while (!feof(flist)) {\n        if (fscanf(flist, \"%s\\n\", dbname) != 1) {\n            fprintf(stderr, \"error reading filelist\\n\");\n            exit(0);\n        }\n        sprintf(db_fullname, \"%s/%s\", data_folder, dbname);\n        fp = fopen(db_fullname, \"r\");\n        if (!fp) {\n            printf(\"error opening a db (%s)\\n\", db_fullname);\n            exit(1);\n        }\n        \n        while (!feof(fp)) {\n            Record record;\n            LatLong latLong;\n            fgets(record.recString, 49, fp);\n            fgetc(fp);\n            if (feof(fp)) break;\n            \n            char substr[6];\n            \n            for (i = 0; i < 5; i++) substr[i] = *(record.recString + i + 28);\n            substr[5] = '\\0';\n            latLong.lat = atof(substr);\n            \n            for (i = 0; i < 5; i++) substr[i] = *(record.recString + i + 33);\n            substr[5] = '\\0';\n            latLong.lng = atof(substr);\n            \n            locations.push_back(latLong);\n            records.push_back(record);\n            recNum++;\n        }\n        fclose(fp);\n    }\n    fclose(flist);\n    return recNum;\n}\n\nvoid findLowest(std::vector<Record> &records, float *distances, int numRecords, int topN) {\n    int i, j;\n    float val;\n    int minLoc;\n    Record *tempRec;\n    float tempDist;\n    \n    for (i = 0; i < topN; i++) {\n        minLoc = i;\n        for (j = i; j < numRecords; j++) {\n            val = distances[j];\n            if (val < distances[minLoc]) minLoc = j;\n        }\n        \n        tempRec = &records[i];\n        records[i] = records[minLoc];\n        records[minLoc] = *tempRec;\n        \n        tempDist = distances[i];\n        distances[i] = distances[minLoc];\n        distances[minLoc] = tempDist;\n        \n        records[i].distance = distances[i];\n    }\n}\n\nint parseCommandline(int argc, char *argv[], char* filename, int *r, float *lat, float *lng,\n                     int *q, int *t, int *p, int *d) {\n    int i;\n    if (argc < 2) return 1;\n    strncpy(filename, argv[1], 100);\n    char flag;\n    \n    for (i = 1; i < argc; i++) {\n        if (argv[i][0] == '-') {\n            flag = argv[i][1];\n            switch (flag) {\n                case 'r':\n                    i++;\n                    *r = atoi(argv[i]);\n                    break;\n                case 'l':\n                    if (argv[i][2] == 'a') {\n                        *lat = atof(argv[i + 1]);\n                    }\n                    else {\n                        *lng = atof(argv[i + 1]);\n                    }\n                    i++;\n                    break;\n                case 'h':\n                    return 1;\n                    break;\n                case 'q':\n                    *q = 1;\n                    break;\n                case 't':\n                    *t = 1;\n                    break;\n                case 'p':\n                    i++;\n                    *p = atoi(argv[i]);\n                    break;\n                case 'd':\n                    i++;\n                    *d = atoi(argv[i]);\n                    break;\n                case 'f':\n                    i++;\n                    break;\n            }\n        }\n    }\n    if ((*d >= 0 && *p < 0) || (*p >= 0 && *d < 0))\n        return 1;\n    return 0;\n}\n\nvoid printUsage() {\n    printf(\"Nearest Neighbor Usage\\n\");\n    printf(\"\\n\");\n    printf(\"nearestNeighbor [filename] -r [int] -lat [float] -lng [float] [-hqt] [-p [int] -d [int]]\\n\");\n    printf(\"\\n\");\n    printf(\"example:\\n\");\n    printf(\"$ ./nearestNeighbor filelist.txt -r 5 -lat 30 -lng 90\\n\");\n    printf(\"\\n\");\n    printf(\"filename     the filename that lists the data input files\\n\");\n    printf(\"-r [int]     the number of records to return (default: 10)\\n\");\n    printf(\"-lat [float] the latitude for nearest neighbors (default: 0)\\n\");\n    printf(\"-lng [float] the longitude for nearest neighbors (default: 0)\\n\");\n    printf(\"\\n\");\n    printf(\"-h, --help   Display the help file\\n\");\n    printf(\"-q           Quiet mode. Suppress all text output.\\n\");\n    printf(\"-t           Print timing information.\\n\");\n    printf(\"\\n\");\n    printf(\"-p [int]     Choose the platform (must choose both platform and device)\\n\");\n    printf(\"-d [int]     Choose the device (must choose both platform and device)\\n\");\n    printf(\"\\n\");\n    printf(\"\\n\");\n    printf(\"Notes: 1. The filename is required as the first parameter.\\n\");\n    printf(\"       2. If you declare either the device or the platform,\\n\");\n    printf(\"          you must declare both.\\n\\n\");\n}\n\nfloat *OpenMPFindNearestNeighbors(\n    int numRecords,\n    std::vector<LatLong> &locations,\n    float lat,\n    float lng,\n    int timing) {\n\n    LatLong *locations_array = (LatLong *)malloc(sizeof(LatLong) * numRecords);\n    float *distances = (float *)malloc(sizeof(float) * numRecords);\n    \n    for (int i = 0; i < numRecords; i++) {\n        locations_array[i] = locations[i];\n    }\n    \n    double start_time = 0.0, end_time = 0.0;\n    if (timing) {\n        start_time = omp_get_wtime();\n    }\n    \n    computeNearestNeighbor(locations_array, distances, numRecords, lat, lng);\n    \n    if (timing) {\n        end_time = omp_get_wtime();\n        printf(\"# Records\\tKernel(s)\\t\\tTotal(s)\\n\");\n        printf(\"%d        \\t%f\\t%f\\n\\n\", numRecords, end_time - start_time, end_time - start_time);\n    }\n    \n    free(locations_array);\n    \n    return distances;\n}\n\nint main(int argc, char *argv[]) {\n    std::vector<Record> records;\n    float *recordDistances;\n    \n    std::vector<LatLong> locations;\n    int i;\n    \n    char filename[100];\n    int resultsCount = 10, quiet = 0, timing = 0, platform = -1, device = -1;\n    float lat = 0.0, lng = 0.0;\n    \n    if (parseCommandline(argc, argv, filename, &resultsCount, &lat, &lng,\n                         &quiet, &timing, &platform, &device)) {\n        printUsage();\n        return 0;\n    }\n    \n    int numRecords = loadData(filename, records, locations);\n    \n    if (!quiet) {\n        printf(\"Number of records: %d\\n\", numRecords);\n        printf(\"Finding the %d closest neighbors.\\n\", resultsCount);\n    }\n\n    if (resultsCount > numRecords) resultsCount = numRecords;\n\n    double total_start = 0.0, init_end = 0.0;\n    if (timing) {\n        total_start = omp_get_wtime();\n    }\n    \n    if (timing) {\n        init_end = omp_get_wtime();\n        printf(\"Init: %f\\n\", (init_end - total_start) * 1000.0);\n    }\n\n    recordDistances = OpenMPFindNearestNeighbors(numRecords, locations, lat, lng, timing);\n\n    findLowest(records, recordDistances, numRecords, resultsCount);\n\n    if (!quiet)\n        for (i = 0; i < resultsCount; i++) {\n            printf(\"%s --> Distance=%f\\n\", records[i].recString, records[i].distance);\n        }\n    free(recordDistances);\n    \n    if (timing) {\n        double total_end = omp_get_wtime();\n        printf(\"Total: %f\\n\", (total_end - total_start) * 1000.0);\n    }\n    \n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "nn_openmp.c"
+  ],
+  "target_files_extracted": [
+    "nn_openmp.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 50.993,
+      "prompt_tokens": 14526,
+      "completion_tokens": 2829,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "nn_openmp.c:6:10: fatal error: vector: No such file or directory\n    6 | #include <vector>\n      |          ^~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:12: nn] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

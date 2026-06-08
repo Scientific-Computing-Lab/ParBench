@@ -1,0 +1,78 @@
+{
+  "source_spec": "rodinia-bfs-omp",
+  "target_spec": "rodinia-bfs-cuda",
+  "kernel": "bfs",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1686162046,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "4",
+    "../../data/bfs/graph1MW_6.txt"
+  ],
+  "timestamp": "2026-04-30T02:22:40Z",
+  "prompt_tokens": 1300,
+  "completion_tokens": 2719,
+  "llm_response_time_seconds": 34.698,
+  "build_status": "pass",
+  "build_time_seconds": 0.624,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.648,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Reading File\nStart traversing the tree\nCompute time: 0.011819\nResult stored in result.txt\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.546,
+  "translated_wall_time_seconds": 0.648,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.8426,
+  "translated_files": {
+    "bfs.cu": "#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <stdlib.h>\n#include <chrono>\n#include <cuda_runtime.h>\n\nFILE *fp;\n\nstruct Node {\n    int starting;\n    int no_of_edges;\n};\n\nstatic inline void Usage(int argc, char **argv) {\n    (void)argc;\n    fprintf(stderr, \"Usage: %s <num_threads> <input_file>\\n\", argv[0]);\n}\n\n__global__ void bfs_expand_kernel(\n    int no_of_nodes,\n    const Node *graph_nodes,\n    const int *graph_edges,\n    bool *graph_mask,\n    bool *updating_graph_mask,\n    const bool *graph_visited,\n    int *cost)\n{\n    int tid = blockIdx.x * blockDim.x + threadIdx.x;\n    if (tid < no_of_nodes) {\n        if (graph_mask[tid]) {\n            graph_mask[tid] = false;\n            int start = graph_nodes[tid].starting;\n            int end = start + graph_nodes[tid].no_of_edges;\n            for (int i = start; i < end; i++) {\n                int id = graph_edges[i];\n                if (!graph_visited[id]) {\n                    cost[id] = cost[tid] + 1;\n                    updating_graph_mask[id] = true;\n                }\n            }\n        }\n    }\n}\n\n__global__ void bfs_update_kernel(\n    int no_of_nodes,\n    bool *graph_mask,\n    bool *updating_graph_mask,\n    bool *graph_visited,\n    int *stop_flag)\n{\n    int tid = blockIdx.x * blockDim.x + threadIdx.x;\n    if (tid < no_of_nodes) {\n        if (updating_graph_mask[tid]) {\n            graph_mask[tid] = true;\n            graph_visited[tid] = true;\n            updating_graph_mask[tid] = false;\n            atomicExch(stop_flag, 1);\n        }\n    }\n}\n\nvoid BFSGraph(int argc, char **argv) {\n    int no_of_nodes = 0;\n    int edge_list_size = 0;\n    char *input_f;\n    int num_omp_threads;\n\n    if (argc != 3) {\n        Usage(argc, argv);\n        exit(0);\n    }\n\n    num_omp_threads = atoi(argv[1]);\n    (void)num_omp_threads;\n    input_f = argv[2];\n\n    printf(\"Reading File\\n\");\n\n    fp = fopen(input_f, \"r\");\n    if (!fp) {\n        printf(\"Error Reading graph file\\n\");\n        return;\n    }\n\n    int source = 0;\n    fscanf(fp, \"%d\", &no_of_nodes);\n\n    Node *h_graph_nodes = (Node *)malloc(sizeof(Node) * no_of_nodes);\n    bool *h_graph_mask = (bool *)malloc(sizeof(bool) * no_of_nodes);\n    bool *h_updating_graph_mask = (bool *)malloc(sizeof(bool) * no_of_nodes);\n    bool *h_graph_visited = (bool *)malloc(sizeof(bool) * no_of_nodes);\n\n    int start, edgeno;\n    for (unsigned int i = 0; i < (unsigned int)no_of_nodes; i++) {\n        fscanf(fp, \"%d %d\", &start, &edgeno);\n        h_graph_nodes[i].starting = start;\n        h_graph_nodes[i].no_of_edges = edgeno;\n        h_graph_mask[i] = false;\n        h_updating_graph_mask[i] = false;\n        h_graph_visited[i] = false;\n    }\n\n    fscanf(fp, \"%d\", &source);\n\n    h_graph_mask[source] = true;\n    h_graph_visited[source] = true;\n\n    fscanf(fp, \"%d\", &edge_list_size);\n\n    int id, cost_read;\n    int *h_graph_edges = (int *)malloc(sizeof(int) * edge_list_size);\n    for (int i = 0; i < edge_list_size; i++) {\n        fscanf(fp, \"%d\", &id);\n        fscanf(fp, \"%d\", &cost_read);\n        h_graph_edges[i] = id;\n    }\n\n    if (fp) fclose(fp);\n\n    int *h_cost = (int *)malloc(sizeof(int) * no_of_nodes);\n    for (int i = 0; i < no_of_nodes; i++) h_cost[i] = -1;\n    h_cost[source] = 0;\n\n    printf(\"Start traversing the tree\\n\");\n\n    Node *d_graph_nodes = nullptr;\n    int *d_graph_edges = nullptr;\n    bool *d_graph_mask = nullptr;\n    bool *d_updating_graph_mask = nullptr;\n    bool *d_graph_visited = nullptr;\n    int *d_cost = nullptr;\n    int *d_stop = nullptr;\n\n    cudaMalloc((void **)&d_graph_nodes, sizeof(Node) * no_of_nodes);\n    cudaMalloc((void **)&d_graph_edges, sizeof(int) * edge_list_size);\n    cudaMalloc((void **)&d_graph_mask, sizeof(bool) * no_of_nodes);\n    cudaMalloc((void **)&d_updating_graph_mask, sizeof(bool) * no_of_nodes);\n    cudaMalloc((void **)&d_graph_visited, sizeof(bool) * no_of_nodes);\n    cudaMalloc((void **)&d_cost, sizeof(int) * no_of_nodes);\n    cudaMalloc((void **)&d_stop, sizeof(int));\n\n    cudaMemcpy(d_graph_nodes, h_graph_nodes, sizeof(Node) * no_of_nodes, cudaMemcpyHostToDevice);\n    cudaMemcpy(d_graph_edges, h_graph_edges, sizeof(int) * edge_list_size, cudaMemcpyHostToDevice);\n    cudaMemcpy(d_graph_mask, h_graph_mask, sizeof(bool) * no_of_nodes, cudaMemcpyHostToDevice);\n    cudaMemcpy(d_updating_graph_mask, h_updating_graph_mask, sizeof(bool) * no_of_nodes, cudaMemcpyHostToDevice);\n    cudaMemcpy(d_graph_visited, h_graph_visited, sizeof(bool) * no_of_nodes, cudaMemcpyHostToDevice);\n    cudaMemcpy(d_cost, h_cost, sizeof(int) * no_of_nodes, cudaMemcpyHostToDevice);\n\n    int k = 0;\n    (void)k;\n\n    auto t0 = std::chrono::high_resolution_clock::now();\n\n    bool stop;\n    int threads = 256;\n    int blocks = (no_of_nodes + threads - 1) / threads;\n\n    do {\n        stop = false;\n        int zero = 0;\n        cudaMemcpy(d_stop, &zero, sizeof(int), cudaMemcpyHostToDevice);\n\n        bfs_expand_kernel<<<blocks, threads>>>(\n            no_of_nodes, d_graph_nodes, d_graph_edges, d_graph_mask,\n            d_updating_graph_mask, d_graph_visited, d_cost);\n\n        bfs_update_kernel<<<blocks, threads>>>(\n            no_of_nodes, d_graph_mask, d_updating_graph_mask, d_graph_visited, d_stop);\n\n        int h_stop = 0;\n        cudaMemcpy(&h_stop, d_stop, sizeof(int), cudaMemcpyDeviceToHost);\n        stop = (h_stop != 0);\n        k++;\n    } while (stop);\n\n    auto t1 = std::chrono::high_resolution_clock::now();\n    double elapsed = std::chrono::duration<double>(t1 - t0).count();\n    printf(\"Compute time: %lf\\n\", elapsed);\n\n    cudaMemcpy(h_cost, d_cost, sizeof(int) * no_of_nodes, cudaMemcpyDeviceToHost);\n\n    FILE *fpo = fopen(\"result.txt\", \"w\");\n    for (int i = 0; i < no_of_nodes; i++)\n        fprintf(fpo, \"%d) cost:%d\\n\", i, h_cost[i]);\n    fclose(fpo);\n    printf(\"Result stored in result.txt\\n\");\n\n    cudaFree(d_graph_nodes);\n    cudaFree(d_graph_edges);\n    cudaFree(d_graph_mask);\n    cudaFree(d_updating_graph_mask);\n    cudaFree(d_graph_visited);\n    cudaFree(d_cost);\n    cudaFree(d_stop);\n\n    free(h_graph_nodes);\n    free(h_graph_edges);\n    free(h_graph_mask);\n    free(h_updating_graph_mask);\n    free(h_graph_visited);\n    free(h_cost);\n}\n\nint main(int argc, char **argv) {\n    BFSGraph(argc, argv);\n    return 0;\n}\n",
+    "kernel.cu": "// Intentionally left empty.\n",
+    "kernel2.cu": "// Intentionally left empty.\n"
+  },
+  "target_files_expected": [
+    "bfs.cu",
+    "kernel.cu",
+    "kernel2.cu"
+  ],
+  "target_files_extracted": [
+    "bfs.cu",
+    "kernel.cu",
+    "kernel2.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 34.698,
+      "prompt_tokens": 1300,
+      "completion_tokens": 2719,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "lud",
+        "parallel_api": "opencl",
+        "unique_id": "rodinia-lud-opencl",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "opencl/lud",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "lud_kernel.cl",
+            "common/common.c",
+            "ocl/lud.cpp"
+        ],
+        "support_files": [
+            "common/common.h",
+            "Makefile",
+            "base/Makefile",
+            "ocl/Makefile",
+            "tools/Makefile",
+            "base/lud.c",
+            "base/lud_base.c",
+            "tools/gen_input.c"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "lud_kernel.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl>=2.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl/lud",
+        "commands": {
+            "configure": null,
+            "build": "make",
+            "clean": "make clean"
+        },
+        "variables": null,
+        "outputs": {
+            "executable": "./lud.out"
+        }
+    },
+    "run": {
+        "executable": "./lud.out",
+        "default_arguments": [
+            "-s",
+            "256"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-s",
+                    "256"
+                ],
+                "description": "Small input for correctness verification of lud (OPENCL)",
+                "input_files": [],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "-f",
+                    "../../data/lud/256.dat"
+                ],
+                "description": "Large input for performance measurement of lud (OPENCL)",
+                "input_files": [
+                    "../../data/lud/256.dat"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Total:",
+                "description": "LU decomposition completed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.278259+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nInit: 46.919998\nMemAlloc: 0.002000\nHtoD: 0.011392\nExec: 0.358944\nDtoH: 0.010592\nClose: 0.044000\nTotal: 47.801998\n",
+                "wall_time_seconds": 0.07,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "LU decomposition on GPU",
+        "domain": "linear algebra",
+        "complexity": "LU decomposition",
+        "tags": [
+            "linear-algebra",
+            "lu-decomposition",
+            "lud",
+            "opencl",
+            "rodinia"
+        ],
+        "multi_file": true,
+        "translation_complexity": "single_file"
+    }
+}

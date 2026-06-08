@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-cuda",
+  "target_spec": "rodinia-lud-omp",
+  "kernel": "lud",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 54614963,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-30T22:12:03Z",
+  "prompt_tokens": 8880,
+  "completion_tokens": 4250,
+  "llm_response_time_seconds": 50.434,
+  "build_status": "pass",
+  "build_time_seconds": 0.239,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.004,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Generate input matrix internally, size =256\nCreating matrix internally size=256\nTime consumed(ms): 2.713000\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.004,
+  "translated_wall_time_seconds": 0.004,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 1.0,
+  "translated_files": {
+    "omp/lud_omp.c": "#include <omp.h>\n#include <stdlib.h>\n\n#include \"common.h\"\n\n#ifdef RD_WG_SIZE_0_0\n#define BLOCK_SIZE RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n#define BLOCK_SIZE RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n#define BLOCK_SIZE RD_WG_SIZE\n#else\n#define BLOCK_SIZE 16\n#endif\n\nextern int omp_num_threads;\n\nstatic void lud_diagonal_omp(float *m, int matrix_dim, int offset) {\n    int i, j, tx;\n    float shadow[BLOCK_SIZE][BLOCK_SIZE];\n\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (tx = 0; tx < BLOCK_SIZE; tx++) {\n            shadow[i][tx] = m[(offset + i) * matrix_dim + (offset + tx)];\n        }\n    }\n\n    for (i = 0; i < BLOCK_SIZE - 1; i++) {\n        for (tx = i + 1; tx < BLOCK_SIZE; tx++) {\n            for (j = 0; j < i; j++) {\n                shadow[tx][i] -= shadow[tx][j] * shadow[j][i];\n            }\n            shadow[tx][i] /= shadow[i][i];\n        }\n\n        for (tx = i + 1; tx < BLOCK_SIZE; tx++) {\n            for (j = 0; j < i + 1; j++) {\n                shadow[i + 1][tx] -= shadow[i + 1][j] * shadow[j][tx];\n            }\n        }\n    }\n\n    for (i = 1; i < BLOCK_SIZE; i++) {\n        for (tx = 0; tx < BLOCK_SIZE; tx++) {\n            m[(offset + i) * matrix_dim + (offset + tx)] = shadow[i][tx];\n        }\n    }\n}\n\nstatic void lud_perimeter_block_omp(float *m, int matrix_dim, int offset, int bidx) {\n    int i, j, r, c;\n    float dia[BLOCK_SIZE][BLOCK_SIZE];\n    float peri_row[BLOCK_SIZE][BLOCK_SIZE];\n    float peri_col[BLOCK_SIZE][BLOCK_SIZE];\n\n    int col_base = offset + (bidx + 1) * BLOCK_SIZE;\n    int row_base = offset + (bidx + 1) * BLOCK_SIZE;\n\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (j = 0; j < BLOCK_SIZE; j++) {\n            dia[i][j] = m[(offset + i) * matrix_dim + (offset + j)];\n            peri_row[i][j] = m[(offset + i) * matrix_dim + (col_base + j)];\n            peri_col[i][j] = m[(row_base + i) * matrix_dim + (offset + j)];\n        }\n    }\n\n    for (c = 0; c < BLOCK_SIZE; c++) {\n        for (r = 1; r < BLOCK_SIZE; r++) {\n            for (j = 0; j < r; j++) {\n                peri_row[r][c] -= dia[r][j] * peri_row[j][c];\n            }\n        }\n    }\n\n    for (r = 0; r < BLOCK_SIZE; r++) {\n        for (c = 0; c < BLOCK_SIZE; c++) {\n            for (j = 0; j < c; j++) {\n                peri_col[r][c] -= peri_col[r][j] * dia[j][c];\n            }\n            peri_col[r][c] /= dia[c][c];\n        }\n    }\n\n    for (i = 1; i < BLOCK_SIZE; i++) {\n        for (j = 0; j < BLOCK_SIZE; j++) {\n            m[(offset + i) * matrix_dim + (col_base + j)] = peri_row[i][j];\n        }\n    }\n\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (j = 0; j < BLOCK_SIZE; j++) {\n            m[(row_base + i) * matrix_dim + (offset + j)] = peri_col[i][j];\n        }\n    }\n}\n\nstatic void lud_internal_block_omp(float *m, int matrix_dim, int offset, int by, int bx) {\n    int i, r, c;\n    float sum;\n    int global_row_id = offset + (by + 1) * BLOCK_SIZE;\n    int global_col_id = offset + (bx + 1) * BLOCK_SIZE;\n\n    for (r = 0; r < BLOCK_SIZE; r++) {\n        for (c = 0; c < BLOCK_SIZE; c++) {\n            sum = 0.0f;\n            for (i = 0; i < BLOCK_SIZE; i++) {\n                sum += m[(global_row_id + r) * matrix_dim + (offset + i)] *\n                       m[(offset + i) * matrix_dim + (global_col_id + c)];\n            }\n            m[(global_row_id + r) * matrix_dim + (global_col_id + c)] -= sum;\n        }\n    }\n}\n\nvoid lud_omp(float *m, int matrix_dim) {\n    int i = 0;\n\n    omp_set_num_threads(omp_num_threads);\n\n    for (i = 0; i < matrix_dim - BLOCK_SIZE; i += BLOCK_SIZE) {\n        int chunks = (matrix_dim - i) / BLOCK_SIZE;\n\n        lud_diagonal_omp(m, matrix_dim, i);\n\n#pragma omp parallel for schedule(static)\n        for (int bx = 0; bx < chunks - 1; bx++) {\n            lud_perimeter_block_omp(m, matrix_dim, i, bx);\n        }\n\n#pragma omp parallel for collapse(2) schedule(static)\n        for (int by = 0; by < chunks - 1; by++) {\n            for (int bx = 0; bx < chunks - 1; bx++) {\n                lud_internal_block_omp(m, matrix_dim, i, by, bx);\n            }\n        }\n    }\n\n    lud_diagonal_omp(m, matrix_dim, i);\n}\n"
+  },
+  "target_files_expected": [
+    "omp/lud_omp.c"
+  ],
+  "target_files_extracted": [
+    "omp/lud_omp.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 50.434,
+      "prompt_tokens": 8880,
+      "completion_tokens": 4250,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

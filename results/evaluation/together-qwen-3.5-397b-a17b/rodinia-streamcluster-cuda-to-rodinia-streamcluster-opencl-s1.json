@@ -1,0 +1,81 @@
+{
+  "source_spec": "rodinia-streamcluster-cuda",
+  "target_spec": "rodinia-streamcluster-opencl",
+  "kernel": "streamcluster",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 451758301,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "10",
+    "20",
+    "256",
+    "65536",
+    "65536",
+    "1000",
+    "none",
+    "output.txt",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-21T23:45:11Z",
+  "prompt_tokens": 21512,
+  "completion_tokens": 3123,
+  "llm_response_time_seconds": 44.342,
+  "build_status": "pass",
+  "build_time_seconds": 0.735,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.154,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "1 error generated.\nCould not open file: /tmp/dep-bbaa5f.d\n1 error generated.\nInitCL()::Error: In clBuildProgram\nIn file included from <kernel>:1:\nIn file included from ./streamcluster.h:25:\n/usr/include/stdio.h:34:10: fatal error: 'stddef.h' file not found\n#include <stddef.h>\n         ^~~~~~~~~~\n\n",
+  "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Building Program (clBuildProgram)\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 2.092,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "Kernels.cl": "#include \"streamcluster.h\"\n\nusing namespace std;\n\n#define THREADS_PER_BLOCK 256\n#define MAXBLOCKS 65536\n\nfloat *work_mem_h;\nfloat *coord_h;\nfloat *gl_lower;\nPoint_Struct *p_h;\n\ncl_mem work_mem_d;\ncl_mem coord_d;\ncl_mem center_table_d;\ncl_mem switch_membership_d;\ncl_mem p_d;\n\nstatic int iter = 0;\n\nstatic float\ncl_dist(int p1, int p2, int num, int dim, float *coord_d)\n{\n\tfloat retval = 0.0;\n\tfor(int i = 0; i < dim; i++){\n\t\tfloat tmp = coord_d[(i*num)+p1] - coord_d[(i*num)+p2];\n\t\tretval += tmp * tmp;\n\t}\n\treturn retval;\n}\n\nkernel void\nkernel_compute_cost(int num, int dim, long x, Point_Struct *p, int K, int stride,\n\t\t\t\t\tfloat *coord_d, float *work_mem_d, int *center_table_d, char *switch_membership_d)\n{\n\tconst int tid = get_global_id(0);\n\n\tif(tid < num)\n\t{\n\t\tfloat *lower = &work_mem_d[tid*stride];\n\t\t\n\t\tfloat x_cost = cl_dist(tid, x, num, dim, coord_d) * p[tid].weight;\n\t\t\n\t\tif ( x_cost < p[tid].cost )\n\t\t{\n\t\t\tswitch_membership_d[tid] = 1;\n\t\t\tlower[K] += x_cost - p[tid].cost;\n\t\t}\n\t\telse\n\t\t{\n\t\t\tlower[center_table_d[p[tid].assign]] += p[tid].cost - x_cost;\n\t\t}\n\t}\n}\n\nvoid allocDevMem(int num, int dim, int kmax)\n{\n\ttry{\n\t\twork_mem_d = _clMalloc((kmax + 1) * num * sizeof(float));\n\t\tcenter_table_d = _clMalloc(num * sizeof(int));\n\t\tswitch_membership_d = _clMalloc(num * sizeof(char));\n\t\tp_d = _clMalloc(num * sizeof(Point_Struct));\n\t\tcoord_d = _clMalloc(num * dim * sizeof(float));\n\t}\n\tcatch(string msg){\n\t\tquit(&(msg[0]));\n\t}\t\n}\n\nvoid allocHostMem(int num, int dim)\n{\n\tcoord_h = (float*) malloc( num * dim * sizeof(float) );\n}\n\nvoid freeDevMem()\n{\n\ttry{\n\t\t_clFree(work_mem_d);\n\t\t_clFree(center_table_d);\n\t\t_clFree(switch_membership_d);\n\t\t_clFree(p_d);\n\t\t_clFree(coord_d);\n\n\t\t_clFreeHost(1, work_mem_h);\n\t\t\n\t\tif(coord_h!=NULL)\n\t\t\tfree(coord_h);\n\t\tif(gl_lower!=NULL)\n\t\t\tfree(gl_lower);\n\t\tif(p_h!=NULL)\n\t\t\tfree(p_h);\n\t}\n\tcatch(string msg){\n\t\tquit(&(msg[0]));\n\t}\t\n}\n\nvoid freeHostMem()\n{\n\tfree(coord_h);\n}\n\nfloat pgain( long x, Points *points, float z, long int *numcenters, int kmax, bool *is_center, int *center_table, char *switch_membership, bool isCoordChanged,\n\t\t\t\t\t\t\tdouble *serial_t, double *cpu_to_gpu_t, double *gpu_to_cpu_t, double *alloc_t, double *kernel_t, double *free_t)\n{\t\n#ifdef PROFILE_TMP\n\tdouble tmp_t;\n\tdouble t_start, t_stop;\n#endif\n\n#ifdef PROFILE_TMP\n\tt_start = gettime();\n#endif\n\n\tint stride\t= *numcenters + 1;\t\t\t\n\tint K\t\t= *numcenters ;\t\t\t\t\n\tint num\t\t=  points->num;\t\t\t\t\n\tint dim\t\t=  points->dim;\t\t\t\t\n\tint nThread =  num;\t\t\t\t\t\t\n\t\n\twork_mem_h = (float*) malloc(stride * (nThread + 1) * sizeof(float) );\n\t\n\tif(iter == 0)\n\t{\n\t\tallocHostMem(num, dim);\n\t}\n\t\n\tint count = 0;\n\tfor( int i=0; i<num; i++)\n\t{\n\t\tif( is_center[i] )\n\t\t{\n\t\t\tcenter_table[i] = count++;\n\t\t}\n\t}\n\n\tif(isCoordChanged || iter == 0)\n\t{\n\t\tfor(int i=0; i<dim; i++)\n\t\t{\n\t\t\tfor(int j=0; j<num; j++)\n\t\t\t{\n\t\t\t\tcoord_h[ (num*i)+j ] = points->p[j].coord[i];\n\t\t\t}\n\t\t}\n\t}\n\t\n#ifdef PROFILE_TMP\n\tt_stop = gettime();\n\t*serial_t += (t_stop - t_start);\n\tt_start = gettime();\n#endif\n\n#ifdef  TIMING\n\tgettimeofday(&tv_mem_alloc_start, NULL);\n#endif\n\twork_mem_h = (float*)_clMallocHost(stride * (nThread + 1) * sizeof(float));\n#ifdef  TIMING\n    gettimeofday(&tv_mem_alloc_end, NULL);\n    tvsub(&tv_mem_alloc_end, &tv_mem_alloc_start, &tv);\n    mem_alloc_time += tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\t\n\tif( iter == 0 )\n\t{\n\t\tallocDevMem(num, dim, kmax);\n\t}\n\t\n#ifdef PROFILE_TMP\n\tt_stop = gettime();\n\t*alloc_t += (t_stop - t_start);\n\tt_start = gettime();\n#endif\n\n\tif(isCoordChanged || iter == 0)\n\t{\n\t\t_clMemcpyH2D(coord_d,  coord_h,\t num * dim * sizeof(float));\n\t}\n\t_clMemcpyH2D(center_table_d,  center_table,  num * sizeof(int));\n\t\n\tp_h = (Point_Struct*)malloc(num*sizeof(Point_Struct));\n\tfor(int i=0; i<num; i++){\n\t\tp_h[i].weight = points->p[i].weight;\n\t\tp_h[i].assign = points->p[i].assign;\n\t\tp_h[i].cost = points->p[i].cost;\n\t}\n\t_clMemcpyH2D(p_d,  p_h,\t\t\t\t   num * sizeof(Point_Struct));\n\t\n\t_clMemset((void*) switch_membership_d, 0,\t\t\tnum * sizeof(char));\n\t_clMemset((void*) work_mem_d,  \t\t0, stride * (nThread + 1) * sizeof(float));\n\t\n#ifdef PROFILE_TMP\n\tt_stop = gettime();\n\t*cpu_to_gpu_t += (t_stop - t_start);\n\tt_start = gettime();\n#endif\n\n\tint num_blocks \t = (int) ((float) (num + THREADS_PER_BLOCK - 1) / (float) THREADS_PER_BLOCK);\n\tint num_blocks_y = (int) ((float) (num_blocks + MAXBLOCKS - 1)  / (float) MAXBLOCKS);\n\tint num_blocks_x = (int) ((float) (num_blocks+num_blocks_y - 1) / (float) num_blocks_y);\t\n\n\tint kernel_id = 1;\n\tint arg_idx = 0;\n\t\n\t_clSetArgs(kernel_id, arg_idx++, &num, sizeof(int));\n\t_clSetArgs(kernel_id, arg_idx++, &dim, sizeof(int));\n\t_clSetArgs(kernel_id, arg_idx++, &x, sizeof(long));\n\t_clSetArgs(kernel_id, arg_idx++, p_d);\n\t_clSetArgs(kernel_id, arg_idx++, &K, sizeof(int));\n\t_clSetArgs(kernel_id, arg_idx++, &stride, sizeof(int));\n\t_clSetArgs(kernel_id, arg_idx++, coord_d);\n\t_clSetArgs(kernel_id, arg_idx++, work_mem_d);\n\t_clSetArgs(kernel_id, arg_idx++, center_table_d);\n\t_clSetArgs(kernel_id, arg_idx++, switch_membership_d);\n\n\t_clInvokeKernel(kernel_id, num, THREADS_PER_BLOCK);\n\t_clFinish();\n\t\n#ifdef PROFILE_TMP\n\tt_stop = gettime();\n\t*kernel_t += (t_stop - t_start);\n\tt_start = gettime();\n#endif\n\n\t_clMemcpyD2H(work_mem_h, \t\t  work_mem_d, \tstride * (nThread + 1) * sizeof(float));\n\t_clMemcpyD2H(switch_membership, switch_membership_d,\t num * sizeof(char));\n\t\n#ifdef PROFILE_TMP\n\tt_stop = gettime();\n\t*gpu_to_cpu_t += (t_stop - t_start);\n\tt_start = gettime();\n#endif\n\n\tint number_of_centers_to_close = 0;\n\tfloat gl_cost_of_opening_x = z;\n\tgl_lower = &work_mem_h[stride * nThread];\n\t\n\tfor(int i=0; i < num; i++)\n\t{\n\t\tif( is_center[i] )\n\t\t{\n\t\t\tfloat low = z;\n\t\t    for( int j = 0; j < num; j++ )\n\t\t\t{\n\t\t\t\tlow += work_mem_h[ j*stride + center_table[i] ];\n\t\t\t}\n\t\t\t\n\t\t    gl_lower[center_table[i]] = low;\n\t\t\t\t\n\t\t    if ( low > 0 )\n\t\t\t{\n\t\t\t\t++number_of_centers_to_close;\n\t\t\t\twork_mem_h[i*stride+K] -= low;\n\t\t    }\n\t\t}\n\t\tgl_cost_of_opening_x += work_mem_h[i*stride+K];\n\t}\n\n\tif ( gl_cost_of_opening_x < 0 )\n\t{\n\t\tfor(int i = 0; i < num; i++)\n\t\t{\n\t\t\tbool close_center = gl_lower[center_table[points->p[i].assign]] > 0 ;\n\t\t\tif ( switch_membership[i]=='1' || close_center )\n\t\t\t{\n\t\t\t\tpoints->p[i].cost = dist(points->p[i], points->p[x], dim) * points->p[i].weight;\n\t\t\t\tpoints->p[i].assign = x;\n\t\t\t}\n\t\t}\n\t\t\n\t\tfor(int i = 0; i < num; i++)\n\t\t{\n\t\t\tif( is_center[i] && gl_lower[center_table[i]] > 0 )\n\t\t\t{\n\t\t\t\tis_center[i] = false;\n\t\t\t}\n\t\t}\n\t\t\n\t\tif( x >= 0 && x < num)\n\t\t{\n\t\t\tis_center[x] = true;\n\t\t}\n\t\t*numcenters = *numcenters + 1 - number_of_centers_to_close;\n\t}\n\telse\n\t{\n\t\tgl_cost_of_opening_x = 0;\n\t}\n\n\tfree(work_mem_h);\n\t\n#ifdef PROFILE_TMP\n\tt_stop = gettime();\n\t*serial_t += (t_stop - t_start);\n\tt_start = gettime();\n#endif\n\n#ifdef  TIMING\n\tgettimeofday(&tv_mem_alloc_start, NULL);\n#endif\n\t_clFree(work_mem_d);\n#ifdef  TIMING\n    gettimeofday(&tv_mem_alloc_end, NULL);\n    tvsub(&tv_mem_alloc_end, &tv_mem_alloc_start, &tv);\n    mem_alloc_time += tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\t\n#ifdef PROFILE_TMP\n\tt_stop = gettime();\n\t*free_t += (t_stop - t_start);\n#endif\n\titer++;\n\treturn -gl_cost_of_opening_x;\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 44.342,
+      "prompt_tokens": 21512,
+      "completion_tokens": 3123,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "1 error generated.\nCould not open file: /tmp/dep-bbaa5f.d\n1 error generated.\nInitCL()::Error: In clBuildProgram\nIn file included from <kernel>:1:\nIn file included from ./streamcluster.h:25:\n/usr/include/stdio.h:34:10: fatal error: 'stddef.h' file not found\n#include <stddef.h>\n         ^~~~~~~~~~\n\n",
+      "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Building Program (clBuildProgram)\n",
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-omp",
+  "target_spec": "rodinia-lud-opencl",
+  "kernel": "lud",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 55408477,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-24T05:40:44Z",
+  "prompt_tokens": 12436,
+  "completion_tokens": 2076,
+  "llm_response_time_seconds": 140.534,
+  "build_status": "pass",
+  "build_time_seconds": 0.463,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.265,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nInit: 210.725006\nMemAlloc: 0.002000\nHtoD: 0.011328\nExec: 1.846368\nDtoH: 0.010592\nClose: 0.060000\nTotal: 213.222000\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.07,
+  "translated_wall_time_seconds": 0.265,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.2642,
+  "translated_files": {
+    "lud_kernel.cl": "#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\n#define AA(_i,_j) a[offset*size+_i*size+_j+offset]\n#define BB(_i,_j) a[_i*size+_j]\n\nkernel void lud_diagonal(global float* a, local float* temp, const int size, const int offset)\n{\n    int i = get_global_id(0);\n    int j, k;\n    \n    if (i >= BLOCK_SIZE) return;\n    \n    // Load diagonal block into local memory\n    for (j = 0; j < BLOCK_SIZE; j++) {\n        temp[i * BLOCK_SIZE + j] = a[size * (i + offset) + offset + j];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n    \n    // Process diagonal block\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (j = i; j < BLOCK_SIZE; j++) {\n            for (k = 0; k < i; k++) {\n                temp[i * BLOCK_SIZE + j] = temp[i * BLOCK_SIZE + j] - temp[i * BLOCK_SIZE + k] * temp[k * BLOCK_SIZE + j];\n            }\n        }\n        \n        float temp_val = 1.0f / temp[i * BLOCK_SIZE + i];\n        for (j = i + 1; j < BLOCK_SIZE; j++) {\n            for (k = 0; k < i; k++) {\n                temp[j * BLOCK_SIZE + i] = temp[j * BLOCK_SIZE + i] - temp[j * BLOCK_SIZE + k] * temp[k * BLOCK_SIZE + i];\n            }\n            temp[j * BLOCK_SIZE + i] = temp[j * BLOCK_SIZE + i] * temp_val;\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n    \n    // Write back to global memory\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (j = 0; j < BLOCK_SIZE; j++) {\n            a[size * (i + offset) + offset + j] = temp[i * BLOCK_SIZE + j];\n        }\n    }\n}\n\nkernel void lud_perimeter(global float* a, local float* temp_top, local float* temp_left, local float* temp_div, const int size, const int offset)\n{\n    int idx = get_global_id(0);\n    int i, j, k;\n    float sum;\n    \n    if (idx >= BLOCK_SIZE * 2 * ((size - offset) / BLOCK_SIZE - 1)) return;\n    \n    int chunk_idx = idx / BLOCK_SIZE;\n    int part = idx % BLOCK_SIZE;\n    \n    int i_global, j_global;\n    \n    if (part < BLOCK_SIZE) {\n        // Right perimeter processing\n        j_global = offset + BLOCK_SIZE * (chunk_idx + 1);\n        i_global = offset;\n        \n        // Load temp from diagonal\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < BLOCK_SIZE; j++) {\n                temp_div[i * BLOCK_SIZE + j] = a[size * (i + offset) + offset + j];\n            }\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n        \n        for (j = 0; j < BLOCK_SIZE; j++) {\n            for (i = 0; i < BLOCK_SIZE; i++) {\n                sum = 0.0f;\n                for (k = 0; k < i; k++) {\n                    sum += temp_div[i * BLOCK_SIZE + k] * a[size * (i_global + k) + j_global + j];\n                }\n                a[size * (i_global + i) + j_global + j] = a[size * (i_global + i) + j_global + j] - sum;\n            }\n        }\n    } else {\n        // Bottom perimeter processing\n        i_global = offset + BLOCK_SIZE * (chunk_idx + 1);\n        j_global = offset;\n        \n        // Load temp from diagonal\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < BLOCK_SIZE; j++) {\n                temp_div[i * BLOCK_SIZE + j] = a[size * (i + offset) + offset + j];\n            }\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n        \n        for (i = 0; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < BLOCK_SIZE; j++) {\n                sum = 0.0f;\n                for (k = 0; k < j; k++) {\n                    sum += a[size * (i_global + i) + j_global + k] * temp_div[k * BLOCK_SIZE + j];\n                }\n                a[size * (i_global + i) + j_global + j] = (a[size * (i_global + i) + j_global + j] - sum) / a[size * (offset + j) + offset + j];\n            }\n        }\n    }\n}\n\nkernel void lud_internal(global float* a, local float* temp_top, local float* temp_left, const int size, const int offset)\n{\n    int i_idx = get_global_id(0);\n    int j_idx = get_global_id(1);\n    int i, j, k;\n    float sum[BLOCK_SIZE];\n    \n    int chunks_in_inter_row = (size - offset - BLOCK_SIZE) / BLOCK_SIZE;\n    \n    if (i_idx >= chunks_in_inter_row || j_idx >= chunks_in_inter_row) return;\n    \n    int i_global = offset + BLOCK_SIZE * (1 + i_idx);\n    int j_global = offset + BLOCK_SIZE * (1 + j_idx);\n    \n    // Load temp_top and temp_left\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (j = 0; j < BLOCK_SIZE; j++) {\n            temp_top[i * BLOCK_SIZE + j] = a[size * (i + offset) + j + j_global];\n            temp_left[i * BLOCK_SIZE + j] = a[size * (i + i_global) + offset + j];\n        }\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n    \n    // Initialize sum\n    for (j = 0; j < BLOCK_SIZE; j++) {\n        sum[j] = 0.0f;\n    }\n    \n    // Process internal block\n    for (i = 0; i < BLOCK_SIZE; i++) {\n        for (k = 0; k < BLOCK_SIZE; k++) {\n            for (j = 0; j < BLOCK_SIZE; j++) {\n                sum[j] += temp_left[BLOCK_SIZE * i + k] * temp_top[BLOCK_SIZE * k + j];\n            }\n        }\n        for (j = 0; j < BLOCK_SIZE; j++) {\n            a[size * (i + i_global) + j + j_global] -= sum[j];\n            sum[j] = 0.0f;\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "lud_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "lud_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 140.534,
+      "prompt_tokens": 12436,
+      "completion_tokens": 2076,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

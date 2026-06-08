@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-dwt2d-cuda",
+  "target_spec": "rodinia-dwt2d-opencl",
+  "kernel": "dwt2d",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1922236906,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "rgb.bmp",
+    "-i",
+    "../../data/dwt2d",
+    "-D",
+    "1024x1024",
+    "-f",
+    "-5",
+    "-l",
+    "3"
+  ],
+  "timestamp": "2026-04-26T02:22:32Z",
+  "prompt_tokens": 30828,
+  "completion_tokens": 9656,
+  "llm_response_time_seconds": 223.16,
+  "build_status": "pass",
+  "build_time_seconds": 0.31,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.29,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "sliding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 3 , gx = 4 , gy = 11 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\n\nWriting to rgb.bmp.dwt.r (1024 x 1024)\n\nWriting to rgb.bmp.dwt.g (1024 x 1024)\n\nWriting to rgb.bmp.dwt.b (1024 x 1024)\nInit: 214.787994\nMemAlloc: 10.627000\nHtoD: 0.000000\nExec: 0.022432\nDtoH: 0.874000\nClose: 0.641000\nTotal: 235.772995\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.1,
+  "translated_wall_time_seconds": 0.29,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.3448,
+  "translated_files": {
+    "com_dwt.cl": "#define THREADS 256\n\ninline int mirror_coord(int d, int sizeD)\n{\n    if (sizeD <= 1) return 0;\n    while (d < 0 || d >= sizeD) {\n        if (d < 0) {\n            d = -d;\n        }\n        if (d >= sizeD) {\n            d = 2 * sizeD - 2 - d;\n        }\n    }\n    return d;\n}\n\ninline int read_pixel(__global const int *input, int sx, int sy, int x, int y)\n{\n    int mx = mirror_coord(x, sx);\n    int my = mirror_coord(y, sy);\n    return input[my * sx + mx];\n}\n\ninline int row_detail53(__global const int *input, int sx, int sy, int xodd, int y)\n{\n    const int c = read_pixel(input, sx, sy, xodd, y);\n    const int p = read_pixel(input, sx, sy, xodd - 1, y);\n    const int n = read_pixel(input, sx, sy, xodd + 1, y);\n    return c - ((p + n) / 2);\n}\n\ninline int row_approx53(__global const int *input, int sx, int sy, int xeven, int y)\n{\n    const int c  = read_pixel(input, sx, sy, xeven, y);\n    const int dl = row_detail53(input, sx, sy, xeven - 1, y);\n    const int dr = row_detail53(input, sx, sy, xeven + 1, y);\n    return c + ((dl + dr + 2) / 4);\n}\n\ninline int col_detail53_low(__global const int *input, int sx, int sy, int xlow, int yodd)\n{\n    const int xeven = 2 * xlow;\n    const int c = row_approx53(input, sx, sy, xeven, yodd);\n    const int p = row_approx53(input, sx, sy, xeven, yodd - 1);\n    const int n = row_approx53(input, sx, sy, xeven, yodd + 1);\n    return c - ((p + n) / 2);\n}\n\ninline int col_approx53_low(__global const int *input, int sx, int sy, int xlow, int yeven)\n{\n    const int xeven = 2 * xlow;\n    const int c  = row_approx53(input, sx, sy, xeven, yeven);\n    const int dl = col_detail53_low(input, sx, sy, xlow, yeven - 1);\n    const int dr = col_detail53_low(input, sx, sy, xlow, yeven + 1);\n    return c + ((dl + dr + 2) / 4);\n}\n\ninline int col_detail53_high(__global const int *input, int sx, int sy, int xhigh, int yodd)\n{\n    const int xodd = 2 * xhigh + 1;\n    const int c = row_detail53(input, sx, sy, xodd, yodd);\n    const int p = row_detail53(input, sx, sy, xodd, yodd - 1);\n    const int n = row_detail53(input, sx, sy, xodd, yodd + 1);\n    return c - ((p + n) / 2);\n}\n\ninline int col_approx53_high(__global const int *input, int sx, int sy, int xhigh, int yeven)\n{\n    const int xodd = 2 * xhigh + 1;\n    const int c  = row_detail53(input, sx, sy, xodd, yeven);\n    const int dl = col_detail53_high(input, sx, sy, xhigh, yeven - 1);\n    const int dr = col_detail53_high(input, sx, sy, xhigh, yeven + 1);\n    return c + ((dl + dr + 2) / 4);\n}\n\n__kernel void c_CopySrcToComponents(__global int *d_r,\n                                    __global int *d_g,\n                                    __global int *d_b,\n                                    __global const uchar *d_src,\n                                    int pixels)\n{\n    int gid = (int)get_global_id(0);\n    int gsz = (int)get_global_size(0);\n\n    for (int pos = gid; pos < pixels; pos += gsz) {\n        int base = pos * 3;\n        d_r[pos] = (int)d_src[base + 0] - 128;\n        d_g[pos] = (int)d_src[base + 1] - 128;\n        d_b[pos] = (int)d_src[base + 2] - 128;\n    }\n}\n\n__kernel void c_CopySrcToComponent(__global int *d_c,\n                                   __global const uchar *d_src,\n                                   int pixels)\n{\n    int gid = (int)get_global_id(0);\n    int gsz = (int)get_global_size(0);\n\n    for (int pos = gid; pos < pixels; pos += gsz) {\n        d_c[pos] = (int)d_src[pos] - 128;\n    }\n}\n\n__kernel void cl_fdwt53Kernel(__global const int *input,\n                              __global int *output,\n                              int sizeX,\n                              int sizeY,\n                              int winSteps,\n                              int WIN_SX,\n                              int WIN_SY)\n{\n    const int x = (int)get_global_id(0);\n    const int groupY = (int)get_group_id(1);\n\n    const int tileH = WIN_SY * winSteps;\n    const int yStart = groupY * tileH;\n    const int yEnd = min(sizeY, yStart + tileH);\n\n    const int llx = (sizeX + 1) / 2;\n    const int hlx = sizeX / 2;\n    const int lly = (sizeY + 1) / 2;\n    const int lhy = sizeY / 2;\n\n    const int offLL = 0;\n    const int offHL = llx * lly;\n    const int offLH = offHL + hlx * lly;\n    const int offHH = offLH + llx * lhy;\n\n    if (x < llx) {\n        for (int ry = (yStart + 1) / 2; (2 * ry) < yEnd; ++ry) {\n            output[offLL + ry * llx + x] = col_approx53_low(input, sizeX, sizeY, x, 2 * ry);\n        }\n        for (int ry = yStart / 2; (2 * ry + 1) < yEnd; ++ry) {\n            output[offLH + ry * llx + x] = col_detail53_low(input, sizeX, sizeY, x, 2 * ry + 1);\n        }\n    }\n\n    if (x < hlx) {\n        for (int ry = (yStart + 1) / 2; (2 * ry) < yEnd; ++ry) {\n            output[offHL + ry * hlx + x] = col_approx53_high(input, sizeX, sizeY, x, 2 * ry);\n        }\n        for (int ry = yStart / 2; (2 * ry + 1) < yEnd; ++ry) {\n            output[offHH + ry * hlx + x] = col_detail53_high(input, sizeX, sizeY, x, 2 * ry + 1);\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "com_dwt.cl"
+  ],
+  "target_files_extracted": [
+    "com_dwt.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 223.16,
+      "prompt_tokens": 30828,
+      "completion_tokens": 9656,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-omp",
+  "target_spec": "rodinia-lud-opencl",
+  "kernel": "lud",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 55408477,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-24T05:43:05Z",
+  "prompt_tokens": 12436,
+  "completion_tokens": 1752,
+  "llm_response_time_seconds": 36.673,
+  "build_status": "pass",
+  "build_time_seconds": 0.463,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.159,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "36 errors generated.\n",
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nERROR: clBuildProgram() => -11\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.07,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "lud_kernel.cl": "#define BS BLOCK_SIZE\n\n#define AA(_i,_j) a[offset*size+_i*size+_j+offset]\n#define BB(_i,_j) a[_i*size+_j]\n\nkernel void lud_diagonal(global float* a, local float* temp, const int size, const int offset)\n{\n    int i = get_global_id(0);\n    int j, k;\n    \n    if (i >= BS) return;\n    \n    for (j = i; j < BS; j++) {\n        for (k = 0; k < i; k++) {\n            AA(i,j) = AA(i,j) - AA(i,k) * AA(k,j);\n        }\n    }\n   \n    float temp_val = 1.f/AA(i,i);\n    for (j = i+1; j < BS; j++) {\n        for (k = 0; k < i; k++) {\n            AA(j,i) = AA(j,i) - AA(j,k) * AA(k,i);\n        }\n        AA(j,i) = AA(j,i)*temp_val;\n    }\n}\n\nkernel void lud_perimeter(global float* a, local float* temp_top, local float* temp_left, local float* temp_diag, const int size, const int offset)\n{\n    int idx = get_global_id(0);\n    int i, j, k, i_global, j_global, i_here, j_here;\n    float sum;\n    \n    int chunks_in_inter_row = (size - offset - BS) / BS;\n    \n    if (idx < BS * chunks_in_inter_row) {\n        int chunk_idx = idx / BS;\n        int elem_idx = idx % BS;\n        \n        float temp[BS*BS];\n        \n        for (i = 0; i < BS; i++) {\n            for (j = 0; j < BS; j++){\n                temp[i*BS + j] = a[size*(i + offset) + offset + j];\n            }\n        }\n        \n        i_global = offset;\n        j_global = offset + BS * (chunk_idx + 1);\n        \n        j = elem_idx;\n        for (i = 0; i < BS; i++) {\n            sum = 0.f;\n            for (k = 0; k < i; k++) {\n                sum += temp[BS*i + k] * BB((i_global + k), (j_global + j));\n            }\n            i_here = i_global + i;\n            j_here = j_global + j;\n            BB(i_here, j_here) = BB(i_here, j_here) - sum;\n        }\n    } else if (idx < BS * 2 * chunks_in_inter_row) {\n        int chunk_idx = (idx - BS * chunks_in_inter_row) / BS;\n        int elem_idx = (idx - BS * chunks_in_inter_row) % BS;\n        \n        float temp[BS*BS];\n        \n        for (i = 0; i < BS; i++) {\n            for (j = 0; j < BS; j++){\n                temp[i*BS + j] = a[size*(i + offset) + offset + j];\n            }\n        }\n        \n        j_global = offset;\n        i_global = offset + BS * (chunk_idx + 1);\n        \n        i = elem_idx;\n        for (j = 0; j < BS; j++) {\n            sum = 0.f;\n            for (k = 0; k < j; k++) {\n                sum += BB((i_global + i), (j_global + k)) * temp[BS*k + j];\n            }\n            i_here = i_global + i;\n            j_here = j_global + j;\n            a[size*i_here + j_here] = (a[size*i_here + j_here] - sum) / a[size*(offset + j) + offset + j];\n        }\n    }\n}\n\nkernel void lud_internal(global float* a, local float* temp_top, local float* temp_left, const int size, const int offset)\n{\n    int i_local = get_global_id(0) % BS;\n    int j_local = get_global_id(0) / BS;\n    int chunk_row = get_global_id(1) % ((size - offset - BS) / BS);\n    int chunk_col = get_global_id(1) / ((size - offset - BS) / BS);\n    \n    int chunks_in_inter_row = (size - offset - BS) / BS;\n    \n    if (chunk_row >= chunks_in_inter_row || chunk_col >= chunks_in_inter_row) return;\n    \n    int i_global = offset + BS * (1 + chunk_row);\n    int j_global = offset + BS * (1 + chunk_col);\n    \n    float sum[BS];\n    for (int idx = 0; idx < BS; idx++) sum[idx] = 0.f;\n    \n    for (i = 0; i < BS; i++) {\n        for (j = 0; j < BS; j++){\n            temp_top[i*BS + j] = a[size*(i + offset) + j + j_global];\n            temp_left[i*BS + j] = a[size*(i + i_global) + offset + j];\n        }\n    }\n    \n    for (i = 0; i < BS; i) {\n        for (k = 0; k < BS; k++) {\n            for (j = 0; j < BS; j++) {\n                sum[j] += temp_left[BS*i + k] * temp_top[BS*k + j];\n            }\n        }\n        for (j = 0; j < BS; j++) {\n            BB((i + i_global), (j + j_global)) -= sum[j];\n            sum[j] = 0.f;\n        }\n        i++;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "lud_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "lud_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 36.673,
+      "prompt_tokens": 12436,
+      "completion_tokens": 1752,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "36 errors generated.\n",
+      "run_stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nERROR: clBuildProgram() => -11\n",
+      "extraction_fail": null
+    }
+  ]
+}

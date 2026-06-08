@@ -1,0 +1,74 @@
+{
+  "source_spec": "hecbench-jacobi-omp_target",
+  "target_spec": "hecbench-jacobi-cuda",
+  "kernel": "jacobi",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1850264477,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T06:04:24Z",
+  "prompt_tokens": 1229,
+  "completion_tokens": 3059,
+  "llm_response_time_seconds": 22.337,
+  "build_status": "pass",
+  "build_time_seconds": 1.096,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 34.352,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Error after iteration 0 = 0.00781058\nError after iteration 1000 = 3.91045e-05\nError after iteration 2000 = 2.3202e-05\nError after iteration 3000 = 1.70789e-05\nError after iteration 4000 = 1.37311e-05\nError after iteration 5000 = 1.15878e-05\nError after iteration 6000 = 1.00829e-05\nAverage execution time per iteration: 0.00563802 (s)\nPASS\nTotal elapsed time: 34.3 seconds\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 0.00563802,
+      "unit": "s"
+    }
+  },
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 34.352,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cu": "#include <cstdio>\n#include <iostream>\n#include <iomanip>\n#include <cmath>\n#include <limits>\n#include <ctime>\n#include <chrono>\n#include <cuda_runtime.h>\n\n#define N 2048\n\n#define IDX(i, j) ((i) + (j) * N)\n\n__global__ void initialize_data_kernel(float* f, int N_val) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int total = N_val * N_val;\n    \n    if (idx < total) {\n        int i = idx % N_val;\n        int j = idx / N_val;\n        \n        if (i == 0 || i == N_val-1) {\n            f[idx] = sinf(j * 2 * M_PI / (N_val - 1));\n        }\n        else if (j == 0 || j == N_val-1) {\n            f[idx] = sinf(i * 2 * M_PI / (N_val - 1));\n        }\n        else {\n            f[idx] = 0.0f;\n        }\n    }\n}\n\n__global__ void compute_iteration_kernel(float* f, float* f_old, float* error_ptr, int N_val) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int total_elems = (N_val - 2) * (N_val - 2);\n    \n    if (idx < total_elems) {\n        int i = (idx % (N_val - 2)) + 1;\n        int j = (idx / (N_val - 2)) + 1;\n        \n        float t = 0.25f * (f_old[IDX(i-1,j)] +\n                           f_old[IDX(i+1,j)] +\n                           f_old[IDX(i,j-1)] +\n                           f_old[IDX(i,j+1)]);\n        float df = t - f_old[IDX(i, j)];\n        f[IDX(i,j)] = t;\n        \n        atomicAdd(error_ptr, df * df);\n    }\n}\n\n__global__ void copy_f_to_f_old_kernel(float* f, float* f_old, int N_val) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int total = N_val * N_val;\n    \n    if (idx < total) {\n        int i = idx % N_val;\n        int j = idx / N_val;\n        \n        if (j >= 1 && j <= N_val-2 && i >= 1 && i <= N_val-2) {\n            f_old[idx] = f[idx];\n        }\n    }\n}\n\nvoid initialize_data(float* f) {\n    int total = N * N;\n    int block_size = 256;\n    int num_blocks = (total + block_size - 1) / block_size;\n    \n    initialize_data_kernel<<<num_blocks, block_size>>>(f, N);\n    cudaDeviceSynchronize();\n}\n\nint main() {\n    auto start_time = std::chrono::steady_clock::now();\n    \n    float* f;\n    float* f_old;\n    float* error_ptr;\n    \n    cudaMalloc(&f, N * N * sizeof(float));\n    cudaMalloc(&f_old, N * N * sizeof(float));\n    cudaMalloc(&error_ptr, sizeof(float));\n    \n    float error = std::numeric_limits<float>::max();\n    const float tolerance = 1.e-5f;\n    \n    initialize_data(f);\n    initialize_data(f_old);\n    \n    const int max_iters = 10000;\n    int num_iters = 0;\n    \n    auto start = std::chrono::steady_clock::now();\n    \n    while (error > tolerance && num_iters < max_iters) {\n        error = 0.f;\n        cudaMemcpy(error_ptr, &error, sizeof(float), cudaMemcpyHostToDevice);\n        \n        int total_elems = (N - 2) * (N - 2);\n        int block_size = 256;\n        int num_blocks = (total_elems + block_size - 1) / block_size;\n        \n        compute_iteration_kernel<<<num_blocks, block_size>>>(f, f_old, error_ptr, N);\n        cudaDeviceSynchronize();\n        \n        cudaMemcpy(&error, error_ptr, sizeof(float), cudaMemcpyDeviceToHost);\n        \n        int total = N * N;\n        num_blocks = (total + block_size - 1) / block_size;\n        copy_f_to_f_old_kernel<<<num_blocks, block_size>>>(f, f_old, N);\n        cudaDeviceSynchronize();\n        \n        error = sqrtf(error / (N * N));\n        \n        if (num_iters % 1000 == 0) {\n            std::cout << \"Error after iteration \" << num_iters << \" = \" << error << std::endl;\n        }\n        \n        ++num_iters;\n    }\n    \n    auto end = std::chrono::steady_clock::now();\n    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n    std::cout << \"Average execution time per iteration: \" << (time * 1e-9f) / num_iters << \" (s)\\n\";\n    \n    if (error <= tolerance && num_iters < max_iters) {\n        std::cout << \"PASS\" << std::endl;\n    }\n    else {\n        std::cout << \"FAIL\" << std::endl;\n        cudaFree(f);\n        cudaFree(f_old);\n        cudaFree(error_ptr);\n        return -1;\n    }\n    \n    cudaFree(f);\n    cudaFree(f_old);\n    cudaFree(error_ptr);\n    \n    auto end_time = std::chrono::steady_clock::now();\n    auto total_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();\n    double duration = total_time * 1e-9;\n    std::cout << \"Total elapsed time: \" << std::setprecision(4) << duration << \" seconds\" << std::endl;\n    \n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cu"
+  ],
+  "target_files_extracted": [
+    "main.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 22.337,
+      "prompt_tokens": 1229,
+      "completion_tokens": 3059,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

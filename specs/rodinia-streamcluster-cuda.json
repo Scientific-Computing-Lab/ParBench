@@ -1,0 +1,199 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "streamcluster",
+        "parallel_api": "cuda",
+        "unique_id": "rodinia-streamcluster-cuda",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "cuda/streamcluster",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "streamcluster_cuda.cu",
+            "streamcluster_header.cu"
+        ],
+        "support_files": [
+            "streamcluster_cuda_cpu.cpp",
+            "streamcluster_original.cpp",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "streamcluster_cuda.cu",
+            "streamcluster_header.cu"
+        ]
+    },
+    "implementation": {
+        "api": "cuda",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "cuda-toolkit>=11.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "cuda/streamcluster",
+        "commands": {
+            "configure": null,
+            "build": "make CUDA_DIR=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda",
+            "clean": "make clean"
+        },
+        "variables": {
+            "CUDA_DIR": {
+                "description": "Path to CUDA toolkit installation",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda",
+                "detection": "dirname $(dirname $(which nvcc))"
+            }
+        },
+        "outputs": {
+            "executable": "./sc_gpu"
+        }
+    },
+    "run": {
+        "executable": "./sc_gpu",
+        "default_arguments": [
+            "10",
+            "20",
+            "256",
+            "65536",
+            "65536",
+            "1000",
+            "none",
+            "output.txt",
+            "1"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "10",
+                    "20",
+                    "256",
+                    "65536",
+                    "65536",
+                    "1000",
+                    "none",
+                    "output.txt",
+                    "1"
+                ],
+                "description": "Small input for correctness verification of streamcluster (CUDA)",
+                "input_files": [],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "10",
+                    "20",
+                    "256",
+                    "1048576",
+                    "1048576",
+                    "1000",
+                    "none",
+                    "output.txt",
+                    "1"
+                ],
+                "description": "Large input for performance measurement of streamcluster (CUDA)",
+                "input_files": [],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "time =",
+                "description": "Streamcluster total execution time printed (always output, not #ifdef guarded)"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "vendor": "NVIDIA",
+                "min_compute_capability": "sm_60",
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.282294+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "PARSEC Benchmark Suite\ntime = 2.133800s\ntime pgain = 0.000000s\ntime pgain_dist = 0.000000s\ntime pgain_init = 0.000000s\ntime pselect = 0.000185s\ntime pspeedy = 0.272882s\ntime pshuffle = 0.001694s\ntime localSearch = 2.037939s\n\n\n====CUDA Timing info (pgain)====\ntime serial = 0.894227s\ntime CPU to GPU memory copy = 0.272529s\ntime GPU to CPU memory copy back = 0.181779s\ntime GPU malloc = 0.020744s\ntime GPU free = 0.028095s\ntime kernel = 0.256051s\n",
+                "wall_time_seconds": 2.16,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Online stream clustering algorithm on GPU",
+        "domain": "data mining",
+        "complexity": "online stream clustering",
+        "tags": [
+            "cuda",
+            "data-mining",
+            "online-learning",
+            "rodinia",
+            "stream-clustering",
+            "streamcluster"
+        ],
+        "multi_file": true,
+        "translation_complexity": null
+    }
+}

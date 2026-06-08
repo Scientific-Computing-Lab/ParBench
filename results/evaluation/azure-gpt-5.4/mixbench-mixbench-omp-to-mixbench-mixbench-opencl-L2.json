@@ -1,0 +1,74 @@
+{
+  "source_spec": "mixbench-mixbench-omp",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "azure-gpt-5.4",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1825021715,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-27T03:16:05Z",
+  "prompt_tokens": 10182,
+  "completion_tokens": 5645,
+  "llm_response_time_seconds": 134.907,
+  "build_status": "pass",
+  "build_time_seconds": 0.473,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 4.348,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "0.97\n          192,     96.250,    0.45,28631.33, 297.47,     48.125,   26.68,  484.12,  10.06,    192.500,    0.00,     inf,    inf,    96.250,    0.82,15789.34, 164.05\n          256,    128.250,    0.59,29336.80, 228.75,     64.125,   35.15,  489.66,   7.64,    256.500,    0.00,     inf,    inf,   128.250,    1.09,15769.22, 122.96\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "single_precision_gflops": {
+      "value": 92.56,
+      "unit": "GFLOPS"
+    }
+  },
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": 4.348,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 6.8997,
+  "translated_files": {
+    "mix_kernels.cl": "#ifdef ENABLE_DP\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n\n#ifdef ENABLE_HP\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n\ninline size_t chunk_base(const uint fusion_idx) {\n#ifndef BLOCK_STRIDED\n  return (((size_t)fusion_idx * (size_t)get_global_size(0)) +\n          (size_t)get_global_id(0)) *\n         (size_t)ELEMENTS_PER_THREAD;\n#else\n  return ((((size_t)get_group_id(0) * (size_t)FUSION_DEGREE) +\n           (size_t)fusion_idx) *\n              (size_t)get_local_size(0) +\n          (size_t)get_local_id(0)) *\n         (size_t)ELEMENTS_PER_THREAD;\n#endif\n}\n\n__kernel void benchmark_func(const class_T seed, __global class_T* data) {\n  (void)seed;\n\n  class_T sum = (class_T)(0);\n  const size_t out_idx = chunk_base(0);\n\n  for (uint fusion = 0; fusion < (uint)FUSION_DEGREE; ++fusion) {\n    const size_t base_idx = chunk_base(fusion);\n\n    const class_T f0 = data[base_idx + 0];\n    const class_T f1 = data[base_idx + ((ELEMENTS_PER_THREAD > 1) ? 1 : 0)];\n    const class_T f2 = data[base_idx + ((ELEMENTS_PER_THREAD > 2) ? 2 : 0)];\n    const class_T f3 = data[base_idx + ((ELEMENTS_PER_THREAD > 3) ? 3 : 0)];\n    const class_T f4 = data[base_idx + ((ELEMENTS_PER_THREAD > 4) ? 4 : 0)];\n    const class_T f5 = data[base_idx + ((ELEMENTS_PER_THREAD > 5) ? 5 : 0)];\n    const class_T f6 = data[base_idx + ((ELEMENTS_PER_THREAD > 6) ? 6 : 0)];\n    const class_T f7 = data[base_idx + ((ELEMENTS_PER_THREAD > 7) ? 7 : 0)];\n\n    for (uint i = 0; i < (uint)ELEMENTS_PER_THREAD; ++i) {\n      const class_T v = data[base_idx + (size_t)i];\n\n      class_T t0 = v;\n      class_T t1 = v;\n      class_T t2 = v;\n      class_T t3 = v;\n      class_T t4 = v;\n      class_T t5 = v;\n      class_T t6 = v;\n      class_T t7 = v;\n\n      for (uint j = 0; j < (uint)(COMPUTE_ITERATIONS / 8); ++j) {\n        t0 = t0 * t0 + f0;\n        t1 = t1 * t1 + f1;\n        t2 = t2 * t2 + f2;\n        t3 = t3 * t3 + f3;\n        t4 = t4 * t4 + f4;\n        t5 = t5 * t5 + f5;\n        t6 = t6 * t6 + f6;\n        t7 = t7 * t7 + f7;\n      }\n\n#if (COMPUTE_ITERATIONS % 8) > 0\n      t0 = t0 * t0 + f0;\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 1\n      t1 = t1 * t1 + f1;\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 2\n      t2 = t2 * t2 + f2;\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 3\n      t3 = t3 * t3 + f3;\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 4\n      t4 = t4 * t4 + f4;\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 5\n      t5 = t5 * t5 + f5;\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 6\n      t6 = t6 * t6 + f6;\n#endif\n\n      sum += t0 + t1 + t2 + t3 + t4 + t5 + t6 + t7;\n    }\n  }\n\n  data[out_idx] = sum;\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 134.907,
+      "prompt_tokens": 10182,
+      "completion_tokens": 5645,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

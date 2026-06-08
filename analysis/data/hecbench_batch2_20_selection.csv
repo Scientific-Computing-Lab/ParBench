@@ -1,0 +1,21 @@
+kernel,category,description,apis,all_4_apis,cuda_source_files,has_makefile,has_self_check,original_pick,replacement_note
+floydwarshall,graph,Floyd-Warshall all-pairs shortest path,"cuda,hip,omp,sycl",True,1,True,True,pathfinder,Replaced pathfinder (no PASS/FAIL verification)
+nw,bioinformatics,Needleman-Wunsch sequence alignment,"cuda,hip,omp,sycl",True,2,True,True,heartwall,Replaced heartwall (no PASS/FAIL verification)
+myocyte,bio_medical,Myocyte cardiac cell simulation,"cuda,hip,omp,sycl",True,11,True,True,myocyte,
+geglu,ml,Gated GELU activation,"cuda,hip,omp,sycl",True,2,True,True,geglu,
+perplexity,ml,Perplexity computation,"cuda,hip,omp,sycl",True,2,True,True,perplexity,
+knn,ml,K-nearest neighbors,"cuda,hip,omp,sycl",True,1,True,True,b+tree,Replaced b+tree (needs external tar.bz data)
+iso2dfd,stencil,2D finite-difference wave propagation,"cuda,hip,omp,sycl",True,2,True,True,iso2dfd,
+heat2d,stencil,2D heat equation solver,"cuda,hip,omp,sycl",True,1,True,True,heat2d,
+stencil1d,stencil,1D stencil computation,"cuda,hip,omp,sycl",True,1,True,True,srad,Replaced srad (no PASS/FAIL verification)
+murmurhash3,hashing,MurmurHash3 hash function,"cuda,hip,omp,sycl",True,1,True,True,cfd,Replaced cfd (needs external tar.bz data + verify not called)
+crc64,hashing,CRC-64 checksum computation,"cuda,hip,omp,sycl",True,3,True,True,crc64,
+jenkins-hash,hashing,Jenkins hash function,"cuda,hip,omp,sycl",True,1,True,True,jenkins-hash,
+gaussian,linear_algebra,Gaussian elimination,"cuda,hip,omp,sycl",True,4,True,True,gaussian,
+triad,memory_bandwidth,STREAM triad bandwidth test,"cuda,hip,omp,sycl",True,10,True,True,triad,
+popcount,bit_manipulation,Population count (bit counting),"cuda,hip,omp,sycl",True,1,True,True,popcount,
+sobol,quasi_random,Sobol quasi-random number generator,"cuda,hip,omp,sycl",True,8,True,True,sobol,
+convolution3D,3d_processing,3D convolution,"cuda,hip,omp,sycl",True,2,True,True,convolution3D,
+mandelbrot,fractal_math,Mandelbrot set computation,"cuda,hip,omp,sycl",True,3,True,True,mandelbrot,
+mis,graph_combinatorial,Maximal independent set,"cuda,hip,omp,sycl",True,2,True,True,mis,
+bezier-surface,geometric_3d,Bezier surface evaluation,"cuda,hip,omp,sycl",True,1,True,True,bezier-surface,

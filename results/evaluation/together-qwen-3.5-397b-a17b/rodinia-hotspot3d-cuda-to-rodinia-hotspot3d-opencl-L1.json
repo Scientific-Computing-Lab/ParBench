@@ -1,0 +1,82 @@
+{
+  "source_spec": "rodinia-hotspot3d-cuda",
+  "target_spec": "rodinia-hotspot3d-opencl",
+  "kernel": "hotspot3d",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1604894664,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-n",
+    "512",
+    "-l",
+    "8",
+    "-i",
+    "100",
+    "-f",
+    "../../data/hotspot3D/power_512x8",
+    "../../data/hotspot3D/temp_512x8",
+    "output.out",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-24T05:10:33Z",
+  "prompt_tokens": 7581,
+  "completion_tokens": 2317,
+  "llm_response_time_seconds": 36.167,
+  "build_status": "pass",
+  "build_time_seconds": 0.192,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.529,
+  "run_exit_code": 1,
+  "run_stderr_snippet": "3 errors generated.\n",
+  "run_stdout_snippet": "ble!\n CL_BUILD_PROGRAM_FAILURE \n<kernel>:3:25: error: unknown type name 'cl_mem'\nkernel void hotspotOpt1(cl_mem p, cl_mem tIn, cl_mem tOut, float sdc,\n                        ^\n<kernel>:3:35: error: unknown type name 'cl_mem'\nkernel void hotspotOpt1(cl_mem p, cl_mem tIn, cl_mem tOut, float sdc,\n                                  ^\n<kernel>:3:47: error: unknown type name 'cl_mem'\nkernel void hotspotOpt1(cl_mem p, cl_mem tIn, cl_mem tOut, float sdc,\n                                              ^\n\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.156,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "hotspotKernel.cl": "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n\nkernel void hotspotOpt1(cl_mem p, cl_mem tIn, cl_mem tOut, float sdc,\n        int nx, int ny, int nz,\n        float ce, float cw, \n        float cn, float cs,\n        float ct, float cb, \n        float cc) \n{\n    float amb_temp = 80.0;\n\n    int i = get_local_id(0) + get_group_id(0) * get_local_size(0);  \n    int j = get_local_id(1) + get_group_id(1) * get_local_size(1);\n\n    int c = i + j * nx;\n    int xy = nx * ny;\n\n    int W = (i == 0)        ? c : c - 1;\n    int E = (i == nx-1)     ? c : c + 1;\n    int N = (j == 0)        ? c : c - nx;\n    int S = (j == ny-1)     ? c : c + nx;\n\n    float temp1, temp2, temp3;\n    temp1 = temp2 = ((const float*)tIn)[c];\n    temp3 = ((const float*)tIn)[c+xy];\n    ((float*)tOut)[c] = cc * temp2 + cw * ((const float*)tIn)[W] + ce * ((const float*)tIn)[E] + cs * ((const float*)tIn)[S]\n        + cn * ((const float*)tIn)[N] + cb * temp1 + ct * temp3 + sdc * ((const float*)p)[c] + ct * amb_temp;\n    c += xy;\n    W += xy;\n    E += xy;\n    N += xy;\n    S += xy;\n\n    for (int k = 1; k < nz-1; ++k) {\n        temp1 = temp2;\n        temp2 = temp3;\n        temp3 = ((const float*)tIn)[c+xy];\n        ((float*)tOut)[c] = cc * temp2 + cw * ((const float*)tIn)[W] + ce * ((const float*)tIn)[E] + cs * ((const float*)tIn)[S]\n            + cn * ((const float*)tIn)[N] + cb * temp1 + ct * temp3 + sdc * ((const float*)p)[c] + ct * amb_temp;\n        c += xy;\n        W += xy;\n        E += xy;\n        N += xy;\n        S += xy;\n    }\n    temp1 = temp2;\n    temp2 = temp3;\n    ((float*)tOut)[c] = cc * temp2 + cw * ((const float*)tIn)[W] + ce * ((const float*)tIn)[E] + cs * ((const float*)tIn)[S]\n        + cn * ((const float*)tIn)[N] + cb * temp1 + ct * temp3 + sdc * ((const float*)p)[c] + ct * amb_temp;\n    return;\n}\n\n"
+  },
+  "target_files_expected": [
+    "hotspotKernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspotKernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 36.167,
+      "prompt_tokens": 7581,
+      "completion_tokens": 2317,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "3 errors generated.\n",
+      "run_stdout_snippet": "ble!\n CL_BUILD_PROGRAM_FAILURE \n<kernel>:3:25: error: unknown type name 'cl_mem'\nkernel void hotspotOpt1(cl_mem p, cl_mem tIn, cl_mem tOut, float sdc,\n                        ^\n<kernel>:3:35: error: unknown type name 'cl_mem'\nkernel void hotspotOpt1(cl_mem p, cl_mem tIn, cl_mem tOut, float sdc,\n                                  ^\n<kernel>:3:47: error: unknown type name 'cl_mem'\nkernel void hotspotOpt1(cl_mem p, cl_mem tIn, cl_mem tOut, float sdc,\n                                              ^\n\n",
+      "extraction_fail": null
+    }
+  ]
+}

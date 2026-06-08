@@ -1,0 +1,71 @@
+{
+  "source_spec": "rodinia-bfs-cuda",
+  "target_spec": "rodinia-bfs-opencl",
+  "kernel": "bfs",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 488879252,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "../../data/bfs/graph1MW_6.txt"
+  ],
+  "timestamp": "2026-04-21T22:43:07Z",
+  "prompt_tokens": 14143,
+  "completion_tokens": 811,
+  "llm_response_time_seconds": 6.706,
+  "build_status": "pass",
+  "build_time_seconds": 0.793,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.673,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Reading File\nnumber of platforms:1\nvendor is NVIDIA Corporation\ndevice number: 1\nCreating GPU Context\nInit: 169.985001\nMemAlloc: 0.003000\nHtoD: 2.072544\nExec: 0.523232\nDtoH: 0.238048\nClose: 0.898000\nTotal: 175.095001\n--cambine:passed:-)\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.519,
+  "translated_wall_time_seconds": 0.673,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.7712,
+  "translated_files": {
+    "Kernels.cl": "#ifndef _KERNEL_H_\n#define _KERNEL_H_\n\n#define MAX_THREADS_PER_BLOCK 256\n\nstruct Node\n{\n    int starting;\n    int no_of_edges;\n};\n\n__kernel void\nBFS_1(__global struct Node* g_graph_nodes, __global int* g_graph_edges, __global char* g_graph_mask, __global char* g_updating_graph_mask, __global char* g_graph_visited, __global int* g_cost, int no_of_nodes) \n{\n    int tid = get_global_id(0);\n    if(tid < no_of_nodes && g_graph_mask[tid])\n    {\n        g_graph_mask[tid] = 0;\n        for(int i = g_graph_nodes[tid].starting; i < (g_graph_nodes[tid].no_of_edges + g_graph_nodes[tid].starting); i++)\n        {\n            int id = g_graph_edges[i];\n            if(!g_graph_visited[id])\n            {\n                g_cost[id] = g_cost[tid] + 1;\n                g_updating_graph_mask[id] = 1;\n            }\n        }\n    }\n}\n\n__kernel void\nBFS_2(__global char* g_graph_mask, __global char* g_updating_graph_mask, __global char* g_graph_visited, __global char* g_over, int no_of_nodes)\n{\n    int tid = get_global_id(0);\n    if(tid < no_of_nodes && g_updating_graph_mask[tid])\n    {\n        g_graph_mask[tid] = 1;\n        g_graph_visited[tid] = 1;\n        *g_over = 1;\n        g_updating_graph_mask[tid] = 0;\n    }\n}\n\n#endif\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 6.706,
+      "prompt_tokens": 14143,
+      "completion_tokens": 811,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

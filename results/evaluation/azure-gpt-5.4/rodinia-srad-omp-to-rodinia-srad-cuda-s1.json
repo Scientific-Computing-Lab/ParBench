@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-srad-omp",
+  "target_spec": "rodinia-srad-cuda",
+  "kernel": "srad",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 965158283,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-26T01:48:46Z",
+  "prompt_tokens": 2301,
+  "completion_tokens": 5111,
+  "llm_response_time_seconds": 122.7,
+  "build_status": "fail",
+  "build_time_seconds": 0.53,
+  "build_error_snippet": "srad.cu(30): warning #550-D: variable \"size_R\" was set but never used\n   int rows, cols, size_I, size_R, niter = 10, k;\n                           ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nsrad.cu(34): warning #550-D: variable \"nthreads\" was set but never used\n   int nthreads;\n       ^\n\n/usr/bin/ld: /tmp/tmpxft_002bc454_00000000-11_srad.o: in function `main':\ntmpxft_002bc454_00000000-6_srad.cudafe1.cpp:(.text+0x43b): undefined reference to `srad_cuda'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:12: release] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: : in function `main':\ntmpxft_002bc454_00000000-6_srad.cudafe1.cpp:(.text+0x43b): undefined reference to `srad_cuda'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:12: release] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.068,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "srad.cu": "#define OPEN\n#define ITERATION\n#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n\nextern \"C\" void srad_cuda(float *h_J, int rows, int cols, int r1, int r2, int c1, int c2, float lambda, int niter);\n\nvoid random_matrix(float *I, int rows, int cols);\n\nvoid usage(int argc, char **argv)\n{\n\tfprintf(stderr, \"Usage: %s <rows> <cols> <y1> <y2> <x1> <x2> <no. of threads><lamda> <no. of iter>\\n\", argv[0]);\n\tfprintf(stderr, \"\\t<rows>   - number of rows\\n\");\n\tfprintf(stderr, \"\\t<cols>    - number of cols\\n\");\n\tfprintf(stderr, \"\\t<y1> \\t - y1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<y2>      - y2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x1>       - x1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x2>       - x2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<no. of threads>  - no. of threads\\n\");\n\tfprintf(stderr, \"\\t<lamda>   - lambda (0,1)\\n\");\n\tfprintf(stderr, \"\\t<no. of iter>   - number of iterations\\n\");\n\n\texit(1);\n}\n\nint main(int argc, char* argv[])\n{\n\tint rows, cols, size_I, size_R, niter = 10, k;\n\tfloat *I, *J;\n\tint r1, r2, c1, c2;\n\tfloat lambda;\n\tint nthreads;\n\n\tif (argc == 10)\n\t{\n\t\trows = atoi(argv[1]);\n\t\tcols = atoi(argv[2]);\n\t\tif ((rows % 16 != 0) || (cols % 16 != 0)) {\n\t\t\tfprintf(stderr, \"rows and cols must be multiples of 16\\n\");\n\t\t\texit(1);\n\t\t}\n\t\tr1 = atoi(argv[3]);\n\t\tr2 = atoi(argv[4]);\n\t\tc1 = atoi(argv[5]);\n\t\tc2 = atoi(argv[6]);\n\t\tnthreads = atoi(argv[7]);\n\t\tlambda = (float)atof(argv[8]);\n\t\tniter = atoi(argv[9]);\n\t}\n\telse {\n\t\tusage(argc, argv);\n\t}\n\n\t(void)nthreads;\n\n\tsize_I = cols * rows;\n\tsize_R = (r2 - r1 + 1) * (c2 - c1 + 1);\n\t(void)size_R;\n\n\tI = (float *)malloc(size_I * sizeof(float));\n\tJ = (float *)malloc(size_I * sizeof(float));\n\n\tif (I == NULL || J == NULL) {\n\t\tfprintf(stderr, \"memory allocation error\\n\");\n\t\tfree(I);\n\t\tfree(J);\n\t\treturn 1;\n\t}\n\n\tprintf(\"Randomizing the input matrix\\n\");\n\n\trandom_matrix(I, rows, cols);\n\n\tfor (k = 0; k < size_I; k++) {\n\t\tJ[k] = (float)exp((double)I[k]);\n\t}\n\n\tprintf(\"Start the SRAD main loop\\n\");\n\n\tsrad_cuda(J, rows, cols, r1, r2, c1, c2, lambda, niter);\n\n#ifdef OUTPUT\n\tfor (int i = 0; i < rows; i++) {\n\t\tfor (int j = 0; j < cols; j++) {\n\t\t\tprintf(\"%.5f \", J[i * cols + j]);\n\t\t}\n\t\tprintf(\"\\n\");\n\t}\n#endif\n\n\tprintf(\"Computation Done\\n\");\n\n\tfree(I);\n\tfree(J);\n\treturn 0;\n}\n\nvoid random_matrix(float *I, int rows, int cols)\n{\n\tsrand(7);\n\n\tfor (int i = 0; i < rows; i++) {\n\t\tfor (int j = 0; j < cols; j++) {\n\t\t\tI[i * cols + j] = rand() / (float)RAND_MAX;\n#ifdef OUTPUT\n#endif\n\t\t}\n#ifdef OUTPUT\n#endif\n\t}\n}\n",
+    "srad_kernel.cu": "#include <stdlib.h>\n#include <stdio.h>\n#include <math.h>\n#include <cuda_runtime.h>\n\n#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\n#define CUDA_CHECK(call)                                                      \\\n\tdo {                                                                      \\\n\t\tcudaError_t err__ = (call);                                           \\\n\t\tif (err__ != cudaSuccess) {                                           \\\n\t\t\tfprintf(stderr, \"CUDA error: %s\\n\", cudaGetErrorString(err__));   \\\n\t\t\texit(1);                                                          \\\n\t\t}                                                                     \\\n\t} while (0)\n\n__global__ static void srad_kernel_1(\n\tconst float *J,\n\tfloat *dN,\n\tfloat *dS,\n\tfloat *dW,\n\tfloat *dE,\n\tfloat *c,\n\tint rows,\n\tint cols,\n\tfloat q0sqr)\n{\n\tint j = blockIdx.x * blockDim.x + threadIdx.x;\n\tint i = blockIdx.y * blockDim.y + threadIdx.y;\n\n\tif (i < rows && j < cols) {\n\t\tint k = i * cols + j;\n\n\t\tint iN = (i == 0) ? 0 : (i - 1);\n\t\tint iS = (i == rows - 1) ? (rows - 1) : (i + 1);\n\t\tint jW = (j == 0) ? 0 : (j - 1);\n\t\tint jE = (j == cols - 1) ? (cols - 1) : (j + 1);\n\n\t\tfloat Jc = J[k];\n\n\t\tfloat dNk = J[iN * cols + j] - Jc;\n\t\tfloat dSk = J[iS * cols + j] - Jc;\n\t\tfloat dWk = J[i * cols + jW] - Jc;\n\t\tfloat dEk = J[i * cols + jE] - Jc;\n\n\t\tdN[k] = dNk;\n\t\tdS[k] = dSk;\n\t\tdW[k] = dWk;\n\t\tdE[k] = dEk;\n\n\t\tfloat G2 = (dNk * dNk + dSk * dSk + dWk * dWk + dEk * dEk) / (Jc * Jc);\n\t\tfloat L = (dNk + dSk + dWk + dEk) / Jc;\n\n\t\tfloat num = (0.5f * G2) - (0.0625f * (L * L));\n\t\tfloat den = 1.0f + (0.25f * L);\n\t\tfloat qsqr = num / (den * den);\n\n\t\tden = (qsqr - q0sqr) / (q0sqr * (1.0f + q0sqr));\n\t\tfloat ck = 1.0f / (1.0f + den);\n\n\t\tif (ck < 0.0f) ck = 0.0f;\n\t\telse if (ck > 1.0f) ck = 1.0f;\n\n\t\tc[k] = ck;\n\t}\n}\n\n__global__ static void srad_kernel_2(\n\tfloat *J,\n\tconst float *c,\n\tconst float *dN,\n\tconst float *dS,\n\tconst float *dW,\n\tconst float *dE,\n\tint rows,\n\tint cols,\n\tfloat lambda)\n{\n\tint j = blockIdx.x * blockDim.x + threadIdx.x;\n\tint i = blockIdx.y * blockDim.y + threadIdx.y;\n\n\tif (i < rows && j < cols) {\n\t\tint k = i * cols + j;\n\n\t\tint iS = (i == rows - 1) ? (rows - 1) : (i + 1);\n\t\tint jE = (j == cols - 1) ? (cols - 1) : (j + 1);\n\n\t\tfloat cN = c[k];\n\t\tfloat cS = c[iS * cols + j];\n\t\tfloat cW = c[k];\n\t\tfloat cE = c[i * cols + jE];\n\n\t\tfloat D = cN * dN[k] + cS * dS[k] + cW * dW[k] + cE * dE[k];\n\n\t\tJ[k] = J[k] + 0.25f * lambda * D;\n\t}\n}\n\nextern \"C\" void srad_cuda(float *h_J, int rows, int cols, int r1, int r2, int c1, int c2, float lambda, int niter)\n{\n\tint size_I = rows * cols;\n\tint size_R = (r2 - r1 + 1) * (c2 - c1 + 1);\n\tsize_t bytes = (size_t)size_I * sizeof(float);\n\n\tfloat *d_J = NULL;\n\tfloat *d_c = NULL;\n\tfloat *dN = NULL;\n\tfloat *dS = NULL;\n\tfloat *dW = NULL;\n\tfloat *dE = NULL;\n\n\tCUDA_CHECK(cudaMalloc((void **)&d_J, bytes));\n\tCUDA_CHECK(cudaMalloc((void **)&d_c, bytes));\n\tCUDA_CHECK(cudaMalloc((void **)&dN, bytes));\n\tCUDA_CHECK(cudaMalloc((void **)&dS, bytes));\n\tCUDA_CHECK(cudaMalloc((void **)&dW, bytes));\n\tCUDA_CHECK(cudaMalloc((void **)&dE, bytes));\n\n\tCUDA_CHECK(cudaMemcpy(d_J, h_J, bytes, cudaMemcpyHostToDevice));\n\n\tdim3 block(BLOCK_SIZE, BLOCK_SIZE);\n\tdim3 grid((cols + block.x - 1) / block.x, (rows + block.y - 1) / block.y);\n\n\tfor (int iter = 0; iter < niter; iter++) {\n\t\tfloat sum = 0.0f;\n\t\tfloat sum2 = 0.0f;\n\n\t\tfor (int i = r1; i <= r2; i++) {\n\t\t\tfor (int j = c1; j <= c2; j++) {\n\t\t\t\tfloat tmp = h_J[i * cols + j];\n\t\t\t\tsum += tmp;\n\t\t\t\tsum2 += tmp * tmp;\n\t\t\t}\n\t\t}\n\n\t\tfloat meanROI = sum / size_R;\n\t\tfloat varROI = (sum2 / size_R) - meanROI * meanROI;\n\t\tfloat q0sqr = varROI / (meanROI * meanROI);\n\n\t\tsrad_kernel_1<<<grid, block>>>(d_J, dN, dS, dW, dE, d_c, rows, cols, q0sqr);\n\t\tCUDA_CHECK(cudaGetLastError());\n\n\t\tsrad_kernel_2<<<grid, block>>>(d_J, d_c, dN, dS, dW, dE, rows, cols, lambda);\n\t\tCUDA_CHECK(cudaGetLastError());\n\n\t\tCUDA_CHECK(cudaDeviceSynchronize());\n\t\tCUDA_CHECK(cudaMemcpy(h_J, d_J, bytes, cudaMemcpyDeviceToHost));\n\t}\n\n\tCUDA_CHECK(cudaFree(d_J));\n\tCUDA_CHECK(cudaFree(d_c));\n\tCUDA_CHECK(cudaFree(dN));\n\tCUDA_CHECK(cudaFree(dS));\n\tCUDA_CHECK(cudaFree(dW));\n\tCUDA_CHECK(cudaFree(dE));\n}\n"
+  },
+  "target_files_expected": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "target_files_extracted": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 122.7,
+      "prompt_tokens": 2301,
+      "completion_tokens": 5111,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "srad.cu(30): warning #550-D: variable \"size_R\" was set but never used\n   int rows, cols, size_I, size_R, niter = 10, k;\n                           ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nsrad.cu(34): warning #550-D: variable \"nthreads\" was set but never used\n   int nthreads;\n       ^\n\n/usr/bin/ld: /tmp/tmpxft_002bc454_00000000-11_srad.o: in function `main':\ntmpxft_002bc454_00000000-6_srad.cudafe1.cpp:(.text+0x43b): undefined reference to `srad_cuda'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:12: release] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

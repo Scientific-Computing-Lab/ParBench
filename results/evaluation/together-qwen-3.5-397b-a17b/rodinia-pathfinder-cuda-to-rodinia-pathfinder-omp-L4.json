@@ -1,0 +1,73 @@
+{
+  "source_spec": "rodinia-pathfinder-cuda",
+  "target_spec": "rodinia-pathfinder-omp",
+  "kernel": "pathfinder",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1919182792,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "100000",
+    "100",
+    "20"
+  ],
+  "timestamp": "2026-04-24T03:38:57Z",
+  "prompt_tokens": 2673,
+  "completion_tokens": 6947,
+  "llm_response_time_seconds": 94.055,
+  "build_status": "pass",
+  "build_time_seconds": 0.064,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.089,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "pyramidHeight: 20\ngridSize: [100000]\nborder:[20]\nblockSize: 256\nblockGrid:[463]\ntargetBlock:[216]\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": 0.089,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0112,
+  "translated_files": {
+    "pathfinder.cpp": "#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <assert.h>\n#include <omp.h>\n\n#ifdef TIMING\n#include \"timing.h\"\n\nstruct timeval tv;\nstruct timeval tv_total_start, tv_total_end;\nstruct timeval tv_h2d_start, tv_h2d_end;\nstruct timeval tv_d2h_start, tv_d2h_end;\nstruct timeval tv_kernel_start, tv_kernel_end;\nstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\nstruct timeval tv_close_start, tv_close_end;\nfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n      d2h_time = 0, close_time = 0, total_time = 0;\n#endif\n\n#define BLOCK_SIZE 256\n#define STR_SIZE 256\n#define DEVICE 0\n#define HALO 1 \n\nvoid run(int argc, char** argv);\n\nint rows, cols;\nint* data;\nint** wall;\nint* result;\n#define M_SEED 9\nint pyramid_height;\n\nvoid\ninit(int argc, char** argv)\n{\n\tif(4 == argc){\n\t\tcols = atoi(argv[1]);\n\t\trows = atoi(argv[2]);\n        pyramid_height=atoi(argv[3]);\n\t}else{\n        printf(\"Usage: dynproc row_len col_len pyramid_height\\n\");\n        exit(0);\n    }\n\tdata = new int[rows*cols];\n\twall = new int*[rows];\n\tfor(int n=0; rows > n; n++)\n\t\twall[n]=data+cols*n;\n\tresult = new int[cols];\n\t\n\tint tmp_4 = M_SEED;\n\tsrand(tmp_4);\n\n\tfor (int i = 0; rows > i; i++)\n    {\n        for (int j = 0; cols > j; j++)\n        {\n            wall[i][j] = rand() % 10;\n        }\n    }\n#ifdef BENCH_PRINT\n    for (int i = 0; i < rows; i++)\n    {\n        for (int j = 0; j < cols; j++)\n        {\n            printf(\"%d \",wall[i][j]) ;\n        }\n        printf(\"\\n\") ;\n    }\n#endif\n}\n\nvoid \nfatal(char *s)\n{\n\tfprintf(stderr, \"error: %s\\n\", s);\n\n}\n\n#define IN_RANGE(x, min, max)   ((x)>=(min) && (x)<=(max))\n#define CLAMP_RANGE(x, min, max) x = (x<(min)) ? min : ((x>(max)) ? max : x )\n#define MIN(a, b) ((a)<=(b) ? (a) : (b))\n\nvoid dynproc_kernel_openmp(\n                int data_5, \n                int *var_15,\n                int *item_25,\n                int *elem_31,\n                int v_38, \n                int data_11,\n                int x_23,\n                int val_19,\n                int elem_16)\n{\n\n        int var_34[BLOCK_SIZE];\n        int x_22[BLOCK_SIZE];\n\n\tint data_3=0;\n\t\n        \n        \n        \n        \n\n        \n\tint elem_24 = BLOCK_SIZE-data_5*HALO*2;\n\n        \n        \n        int item_30 = elem_24*elem_16-val_19;\n        int x_10 = item_30+BLOCK_SIZE-1;\n\n        \n\tint data_21 = item_30+data_3;\n       \n        \n        \n        \n        int tmp_27 = (0 > item_30) ? -item_30 : 0;\n        int val_41 = (v_38-1 < x_10) ? BLOCK_SIZE-1-(x_10-v_38+1) : BLOCK_SIZE-1;\n\n        int W = data_3-1;\n        int E = data_3+1;\n        \n        W = (tmp_27 > W) ? tmp_27 : W;\n        E = (val_41 < E) ? val_41 : E;\n\n        bool tmp_26 = IN_RANGE(data_3, tmp_27, val_41);\n\n\tif(IN_RANGE(data_21, 0, v_38-1)){\n            var_34[data_3] = item_25[data_21];\n\t}\n        bool tmp_6;\n        for (int i=0; data_5 > i ; i++){ \n            tmp_6 = false;\n            if( IN_RANGE(data_3, i+1, BLOCK_SIZE-i-2) &&  \\\n                  tmp_26){\n                  tmp_6 = true;\n                  int left = var_34[W];\n                  int x_39 = var_34[data_3];\n                  int right = var_34[E];\n                  int elem_28 = MIN(left, x_39);\n                  elem_28 = MIN(elem_28, right);\n                  int elem_35 = v_38*(x_23+i)+data_21;\n                  x_22[data_3] = elem_28 + var_15[elem_35];\n\t\n            }\n            if(data_5-1 == i)\n                break;\n            if(tmp_6)\t \n                var_34[data_3]= x_22[data_3];\n      }\n\n      \n      \n      \n      if (tmp_6){\n          elem_31[data_21]=x_22[data_3];\t\t\n      }\n}\n\nvoid dynproc_kernel_parallel(\n                int data_5, \n                int *var_15,\n                int *item_25,\n                int *elem_31,\n                int v_38, \n                int data_11,\n                int x_23,\n                int val_19,\n                int tmp_32)\n{\n    #pragma omp parallel for\n    for (int elem_16 = 0; elem_16 < tmp_32; elem_16++) {\n        dynproc_kernel_openmp(\n            data_5, \n            var_15,\n            item_25,\n            elem_31,\n            v_38, \n            data_11,\n            x_23,\n            val_19,\n            elem_16);\n    }\n}\n\nint calc_path(int *val_7, int *elem_37[2], int x_0, int var_1, \\\n\t int x_2, int tmp_32, int tmp_36)\n{\n        int v_40 = 1, tmp_14 = 0;\n\tfor (int t = 0; x_0-1 > t; t+=x_2) {\n            int x_42 = v_40;\n            v_40 = tmp_14;\n            tmp_14 = x_42;\n            dynproc_kernel_parallel(\n                MIN(pyramid_height, rows-t-1), \n                val_7, elem_37[v_40], elem_37[tmp_14],\n                var_1,x_0, t, tmp_36, tmp_32);\n\n\t}\n        return tmp_14;\n}\n\nint main(int argc, char** argv)\n{\n    int elem_33;\n\n    run(argc,argv);\n\n    return EXIT_SUCCESS;\n}\n\nvoid run(int argc, char** argv)\n{\n    init(argc, argv);\n\n    \n    int v_17 = (pyramid_height)*HALO;\n    int v_13 = BLOCK_SIZE-(pyramid_height)*HALO*2;\n    int elem_9 = cols/v_13+((0 == cols%v_13)?0:1);\n\n    printf(\"pyramidHeight: %d\\ngridSize: [%d]\\nborder:[%d]\\nblockSize: %d\\nblockGrid:[%d]\\ntargetBlock:[%d]\\n\",\\\n\tpyramid_height, cols, v_17, BLOCK_SIZE, elem_9, v_13);\n\t\n    int *val_20, *x_8[2];\n    int size = rows*cols;\n\n    x_8[0] = new int[cols];\n    x_8[1] = new int[cols];\n    for(int i = 0; i < cols; i++)\n        x_8[0][i] = data[i];\n    val_20 = new int[size-cols];\n    for(int i = 0; i < size-cols; i++)\n        val_20[i] = data[cols+i];\n\n#ifdef  TIMING\n    gettimeofday(&tv_kernel_start, NULL);\n#endif\n\n    int var_29 = calc_path(val_20, x_8, rows, cols, \\\n\t pyramid_height, elem_9, v_17);\n\n#ifdef  TIMING\n    gettimeofday(&tv_kernel_end, NULL);\n    tvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n    kernel_time += tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n    for(int i = 0; i < cols; i++)\n        result[i] = x_8[var_29][i];\n\n#ifdef BENCH_PRINT\n    for (int i = 0; i < cols; i++)\n            printf(\"%d \",data[i]) ;\n    printf(\"\\n\") ;\n    for (int i = 0; i < cols; i++)\n            printf(\"%d \",result[i]) ;\n    printf(\"\\n\") ;\n#endif\n\n    delete [] val_20;\n    delete [] x_8[0];\n    delete [] x_8[1];\n\n    delete [] data;\n    delete [] wall;\n    delete [] result;\n\n#ifdef  TIMING\n    printf(\"Exec: %f\\n\", kernel_time);\n#endif\n}\n\n"
+  },
+  "target_files_expected": [
+    "pathfinder.cpp"
+  ],
+  "target_files_extracted": [
+    "pathfinder.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 94.055,
+      "prompt_tokens": 2673,
+      "completion_tokens": 6947,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

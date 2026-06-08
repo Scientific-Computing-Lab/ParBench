@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-pathfinder-omp",
+  "target_spec": "rodinia-pathfinder-cuda",
+  "kernel": "pathfinder",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 2024913104,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "100000",
+    "100"
+  ],
+  "timestamp": "2026-04-21T22:32:19Z",
+  "prompt_tokens": 1339,
+  "completion_tokens": 22236,
+  "llm_response_time_seconds": 147.916,
+  "build_status": "pass",
+  "build_time_seconds": 0.552,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.518,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "48 146 144 144 141 137 138 134 149 151 148 145 144 148 152 145 152 145 150 140 138 136 140 141 144 136 134 134 131 137 129 140 131 134 132 130 136 130 133 133 136 142 143 144 136 138 140 149 138 136 143 142 137 146 151 144 140 147 144 151 151 145 144 150 147 146 151 153 149 153 137 141 136 140 140 142 133 134 137 136 134 136 140 139 134 138 135 134 142 147 153 145 152 154 146 145 145 149 146 151 152 153 149 144 141 152 145 146 143 157 159 157 155 152 146 153 146 147 148 140 147 144 141 143 144 \n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.128,
+  "translated_wall_time_seconds": 0.518,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.2471,
+  "translated_files": {
+    "pathfinder.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <assert.h>\n#include <cuda_runtime.h>\n#include <stdint.h>\n#include <unistd.h>\n#include <sys/time.h>\n\n__inline__ uint64_t rdtsc() \n{\n     uint32_t lo, hi;\n     __asm__ __volatile__ (\"rdtsc\" : \"=a\" (lo), \"=d\" (hi));\n     return (uint64_t)hi << 32 | lo;\n}\n\nunsigned long long start_cycles;\n#define startCycle() (start_cycles = rdtsc())\n#define stopCycle(cycles) (cycles = rdtsc()-start_cycles)\n\n#define pin_stats_reset()   startCycle()\n#define pin_stats_pause(cycles)   stopCycle(cycles)\n#define pin_stats_dump(cycles)    printf(\"timer: %Lu\\n\", cycles)\n\n#define BENCH_PRINT\n\n#define M_SEED 9\n\n#define IN_RANGE(x, min, max)   ((x)>= (min) && (x)<= (max))\n#define CLAMP_RANGE(x, min, max) x = (x<(min)) ? min : ((x>(max)) ? max : x )\n#define MIN(a, b) ((a)<= (b) ? (a) : (b))\n\nint rows, cols;\nint* data;\nint** wall;\nint* result;\n\nvoid fatal(char *s)\n{\n\tfprintf(stderr, \"error: %s\\n\", s);\n}\n\nvoid init(int argc, char** argv)\n{\n\tif(argc==3){\n\t\tcols = atoi(argv[1]);\n\t\trows = atoi(argv[2]);\n\t}else{\n                printf(\"Usage: pathfiner width num_of_steps\\n\");\n                exit(0);\n        }\n\tdata = new int[rows*cols];\n\twall = new int*[rows];\n\tfor(int n=0; n<rows; n++)\n\t\twall[n]=data+cols*n;\n\tresult = new int[cols];\n\t\n\tint seed = M_SEED;\n\tsrand(seed);\n\n\tfor (int i = 0; i < rows; i++)\n    {\n        for (int j = 0; j < cols; j++)\n        {\n            wall[i][j] = rand() % 10;\n        }\n    }\n    for (int j = 0; j < cols; j++)\n        result[j] = wall[0][j];\n#ifdef BENCH_PRINT\n    for (int i = 0; i < rows; i++)\n    {\n        for (int j = 0; j < cols; j++)\n        {\n            printf(\"%d \",wall[i][j]) ;\n        }\n        printf(\"\\n\") ;\n    }\n#endif\n}\n\n__global__ void pathfinder_kernel(int* dst, int* src, int* wall, int cols, int row_offset)\n{\n    int n = blockIdx.x * blockDim.x + threadIdx.x;\n    if (n >= cols) return;\n    \n    int min_val = src[n];\n    if (n > 0) {\n        int left = src[n-1];\n        if (left < min_val) min_val = left;\n    }\n    if (n < cols-1) {\n        int right = src[n+1];\n        if (right < min_val) min_val = right;\n    }\n    dst[n] = wall[row_offset + n] + min_val;\n}\n\nvoid run(int argc, char** argv)\n{\n    init(argc, argv);\n\n    unsigned long long cycles;\n\n    int *src, *dst, *temp;\n    int min;\n\n    dst = result;\n    src = new int[cols];\n\n    // CUDA setup\n    int *d_data, *d_src, *d_dst;\n    cudaError_t err;\n\n    err = cudaMalloc(&d_data, rows*cols*sizeof(int));\n    if (err != cudaSuccess) fatal(\"cudaMalloc d_data\");\n    err = cudaMalloc(&d_src, cols*sizeof(int));\n    if (err != cudaSuccess) fatal(\"cudaMalloc d_src\");\n    err = cudaMalloc(&d_dst, cols*sizeof(int));\n    if (err != cudaSuccess) fatal(\"cudaMalloc d_dst\");\n\n    err = cudaMemcpy(d_data, data, rows*cols*sizeof(int), cudaMemcpyHostToDevice);\n    if (err != cudaSuccess) fatal(\"cudaMemcpy d_data\");\n\n    err = cudaMemcpy(d_src, result, cols*sizeof(int), cudaMemcpyHostToDevice);\n    if (err != cudaSuccess) fatal(\"cudaMemcpy d_src\");\n\n    dim3 block(256);\n    dim3 grid((cols + 255) / 256);\n\n    pin_stats_reset();\n    for (int t = 0; t < rows-1; t++) {\n        temp = src;\n        src = dst;\n        dst = temp;\n\n        int *d_temp = d_src;\n        d_src = d_dst;\n        d_dst = d_temp;\n\n        pathfinder_kernel<<<grid, block>>>(d_dst, d_src, d_data, cols, (t+1)*cols);\n    }\n\n    cudaDeviceSynchronize();\n    pin_stats_pause(cycles);\n    pin_stats_dump(cycles);\n\n    // Copy result back if computation occurred\n    if (rows > 1) {\n        err = cudaMemcpy(dst, d_dst, cols*sizeof(int), cudaMemcpyDeviceToHost);\n        if (err != cudaSuccess) fatal(\"cudaMemcpy result\");\n    }\n\n#ifdef BENCH_PRINT\n\n    for (int i = 0; i < cols; i++)\n\n            printf(\"%d \",data[i]) ;\n\n    printf(\"\\n\") ;\n\n    for (int i = 0; i < cols; i++)\n\n            printf(\"%d \",dst[i]) ;\n\n    printf(\"\\n\") ;\n\n#endif\n\n    cudaFree(d_data);\n    cudaFree(d_src);\n    cudaFree(d_dst);\n\n    delete [] data;\n    delete [] wall;\n    delete [] dst;\n    delete [] src;\n}\n\nint main(int argc, char** argv)\n{\n    run(argc,argv);\n\n    return EXIT_SUCCESS;\n}\n"
+  },
+  "target_files_expected": [
+    "pathfinder.cu"
+  ],
+  "target_files_extracted": [
+    "pathfinder.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 147.916,
+      "prompt_tokens": 1339,
+      "completion_tokens": 22236,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

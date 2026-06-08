@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lavamd-cuda",
+  "target_spec": "rodinia-lavamd-opencl",
+  "kernel": "lavamd",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1011959531,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-boxes1d",
+    "10"
+  ],
+  "timestamp": "2026-04-21T23:12:44Z",
+  "prompt_tokens": 10693,
+  "completion_tokens": 1413,
+  "llm_response_time_seconds": 11.664,
+  "build_status": "pass",
+  "build_time_seconds": 0.221,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.163,
+  "run_exit_code": 245,
+  "run_stderr_snippet": "80 errors generated.\n",
+  "run_stdout_snippet": "ared[j]*fzij);\n                                                       ^\n<kernel>:96:26: error: use of undeclared identifier 'fp'\n                                        fA[wtx].z +=  (fp)((fp)qB_shared[j]*fzij);\n                                                            ^\n<kernel>:100:17: error: use of undeclared identifier 'NUMBER_THREADS'\n                                wtx = wtx + NUMBER_THREADS;\n                                            ^\n\n>>>>\nError at line 238: CL_BUILD_PROGRAM_FAILURE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 245)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "kernel void kernel_gpu_opencl(par_str d_par_gpu,\n\t\t\t\t\t\t\t\tdim_str d_dim_gpu,\n\t\t\t\t\t\t\t\tbox_str* d_box_gpu,\n\t\t\t\t\t\t\t\tFOUR_VECTOR* d_rv_gpu,\n\t\t\t\t\t\t\t\tfp* d_qv_gpu,\n\t\t\t\t\t\t\t\tFOUR_VECTOR* d_fv_gpu)\n{\n\n\tint bx = get_group_id(0);\n\tint tx = get_local_id(0);\n\n\tint wtx = tx;\n\n\tif(bx<d_dim_gpu.number_boxes){\n\n\t\tfp a2 = 2.0*d_par_gpu.alpha*d_par_gpu.alpha;\n\n\t\tint first_i;\n\t\tFOUR_VECTOR* rA;\n\t\tFOUR_VECTOR* fA;\n\t\t__local FOUR_VECTOR rA_shared[100];\n\n\t\tint pointer;\n\t\tint k = 0;\n\t\tint first_j;\n\t\tFOUR_VECTOR* rB;\n\t\tfp* qB;\n\t\tint j = 0;\n\t\t__local FOUR_VECTOR rB_shared[100];\n\t\t__local fp qB_shared[100];\n\n\t\tfp r2;\n\t\tfp u2;\n\t\tfp vij;\n\t\tfp fs;\n\t\tfp fxij;\n\t\tfp fyij;\n\t\tfp fzij;\n\t\tTHREE_VECTOR d;\n\n\t\tfirst_i = d_box_gpu[bx].offset;\n\n\t\trA = &d_rv_gpu[first_i];\n\t\tfA = &d_fv_gpu[first_i];\n\n\t\twhile(wtx<NUMBER_PAR_PER_BOX){\n\t\t\trA_shared[wtx] = rA[wtx];\n\t\t\twtx = wtx + NUMBER_THREADS;\n\t\t}\n\t\twtx = tx;\n\n\t\tbarrier(CLK_LOCAL_MEM_FENCE);\n\n\t\tfor (k=0; k<(1+d_box_gpu[bx].nn); k++){\n\n\t\t\tif(k==0){\n\t\t\t\tpointer = bx;\n\t\t\t}\n\t\t\telse{\n\t\t\t\tpointer = d_box_gpu[bx].nei[k-1].number;\n\t\t\t}\n\n\t\t\tfirst_j = d_box_gpu[pointer].offset;\n\n\t\t\trB = &d_rv_gpu[first_j];\n\t\t\tqB = &d_qv_gpu[first_j];\n\n\t\t\twhile(wtx<NUMBER_PAR_PER_BOX){\n\t\t\t\trB_shared[wtx] = rB[wtx];\n\t\t\t\tqB_shared[wtx] = qB[wtx];\n\t\t\t\twtx = wtx + NUMBER_THREADS;\n\t\t\t}\n\t\t\twtx = tx;\n\n\t\t\tbarrier(CLK_LOCAL_MEM_FENCE);\n\n\t\t\twhile(wtx<NUMBER_PAR_PER_BOX){\n\n\t\t\t\tfor (j=0; j<NUMBER_PAR_PER_BOX; j++){\n\n\t\t\t\t\tr2 = (fp)rA_shared[wtx].v + (fp)rB_shared[j].v - DOT((fp)rA_shared[wtx],(fp)rB_shared[j]);\n\t\t\t\t\tu2 = a2*r2;\n\t\t\t\t\tvij= exp(-u2);\n\t\t\t\t\tfs = 2*vij;\n\n\t\t\t\t\td.x = (fp)rA_shared[wtx].x  - (fp)rB_shared[j].x;\n\t\t\t\t\tfxij=fs*d.x;\n\t\t\t\t\td.y = (fp)rA_shared[wtx].y  - (fp)rB_shared[j].y;\n\t\t\t\t\tfyij=fs*d.y;\n\t\t\t\t\td.z = (fp)rA_shared[wtx].z  - (fp)rB_shared[j].z;\n\t\t\t\t\tfzij=fs*d.z;\n\n\t\t\t\t\tfA[wtx].v +=  (fp)((fp)qB_shared[j]*vij);\n\t\t\t\t\tfA[wtx].x +=  (fp)((fp)qB_shared[j]*fxij);\n\t\t\t\t\tfA[wtx].y +=  (fp)((fp)qB_shared[j]*fyij);\n\t\t\t\t\tfA[wtx].z +=  (fp)((fp)qB_shared[j]*fzij);\n\n\t\t\t\t}\n\n\t\t\t\twtx = wtx + NUMBER_THREADS;\n\n\t\t\t}\n\n\t\t\twtx = tx;\n\n\t\t\tbarrier(CLK_LOCAL_MEM_FENCE);\n\n\t\t}\n\n\t}\n\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 11.664,
+      "prompt_tokens": 10693,
+      "completion_tokens": 1413,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "80 errors generated.\n",
+      "run_stdout_snippet": "ared[j]*fzij);\n                                                       ^\n<kernel>:96:26: error: use of undeclared identifier 'fp'\n                                        fA[wtx].z +=  (fp)((fp)qB_shared[j]*fzij);\n                                                            ^\n<kernel>:100:17: error: use of undeclared identifier 'NUMBER_THREADS'\n                                wtx = wtx + NUMBER_THREADS;\n                                            ^\n\n>>>>\nError at line 238: CL_BUILD_PROGRAM_FAILURE\n",
+      "extraction_fail": null
+    }
+  ]
+}

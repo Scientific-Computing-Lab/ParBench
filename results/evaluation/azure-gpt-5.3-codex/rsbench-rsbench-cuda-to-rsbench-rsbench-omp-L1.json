@@ -1,0 +1,69 @@
+{
+  "source_spec": "rsbench-rsbench-cuda",
+  "target_spec": "rsbench-rsbench-omp",
+  "kernel": "rsbench",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 304976089,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-30T22:41:26Z",
+  "prompt_tokens": 20382,
+  "completion_tokens": 3774,
+  "llm_response_time_seconds": 46.754,
+  "build_status": "fail",
+  "build_time_seconds": 0.333,
+  "build_error_snippet": "/usr/bin/ld: /tmp/cc8ZFRCQ.ltrans0.ltrans.o: in function `run_event_based_simulation_optimization_1._omp_fn.0':\n<artificial>:(.text+0x271): undefined reference to `fast_forward_LCG'\n/usr/bin/ld: <artificial>:(.text+0x27d): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text+0x28c): undefined reference to `LCG_random_double'\n/usr/bin/ld: /tmp/cc8ZFRCQ.ltrans0.ltrans.o: in function `run_event_based_simulation_optimization_1._omp_fn.1':\n<artificial>:(.text+0x604): undefined reference to `calculate_macro_xs'\n/usr/bin/ld: /tmp/cc8ZFRCQ.ltrans0.ltrans.o: in function `run_event_based_simulation._omp_fn.0':\n<artificial>:(.text+0x812): undefined reference to `fast_forward_LCG'\n/usr/bin/ld: <artificial>:(.text+0x81f): undefine\n...[truncated]...\nefined references to `LCG_random_double' follow\n/usr/bin/ld: /tmp/cc8ZFRCQ.ltrans0.ltrans.o: in function `main':\n<artificial>:(.text.startup+0x1003): undefined reference to `LCG_random_int'\n/usr/bin/ld: <artificial>:(.text.startup+0x11bc): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x11ca): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x11d8): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x1400): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x1690): undefined reference to `run_history_based_simulation'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:81: rsbench] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: dom_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x1690): undefined reference to `run_history_based_simulation'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:81: rsbench] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.7,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "simulation.c": "#include \"rsbench.h\"\n\ntypedef struct {\n\tint mat;\n\tdouble E;\n} SamplePair;\n\nstatic int cmp_pair_mat(const void *a, const void *b)\n{\n\tconst SamplePair *pa = (const SamplePair *)a;\n\tconst SamplePair *pb = (const SamplePair *)b;\n\treturn (pa->mat > pb->mat) - (pa->mat < pb->mat);\n}\n\nstatic int cmp_pair_energy(const void *a, const void *b)\n{\n\tconst SamplePair *pa = (const SamplePair *)a;\n\tconst SamplePair *pb = (const SamplePair *)b;\n\tif (pa->E < pb->E) return -1;\n\tif (pa->E > pb->E) return 1;\n\treturn 0;\n}\n\nvoid run_event_based_simulation(Input input, SimulationData data, unsigned long * vhash_result )\n{\n\tprintf(\"Running baseline event-based simulation on device...\\n\");\n\n\tunsigned long verification_scalar = 0;\n\n\t#pragma omp parallel for reduction(+:verification_scalar)\n\tfor (int i = 0; i < input.lookups; i++)\n\t{\n\t\tuint64_t seed = STARTING_SEED;\n\t\tseed = fast_forward_LCG(seed, 2ULL * (uint64_t)i);\n\n\t\tdouble E = LCG_random_double(&seed);\n\t\tint mat  = pick_mat(&seed);\n\n\t\tdouble macro_xs[4] = {0};\n\t\tcalculate_macro_xs(macro_xs, mat, E, input, data);\n\n\t\tdouble max = -DBL_MAX;\n\t\tint max_idx = 0;\n\t\tfor (int x = 0; x < 4; x++)\n\t\t{\n\t\t\tif (macro_xs[x] > max)\n\t\t\t{\n\t\t\t\tmax = macro_xs[x];\n\t\t\t\tmax_idx = x;\n\t\t\t}\n\t\t}\n\t\tverification_scalar += (unsigned long)(max_idx + 1);\n\t}\n\n\tprintf(\"Reducing verification results...\\n\");\n\t*vhash_result = verification_scalar;\n}\n\nvoid run_event_based_simulation_optimization_1(Input in, SimulationData GSD, unsigned long * vhash_result)\n{\n\tconst char * optimization_name = \"Optimization 1 - Material & Energy Sorts + Material-specific Kernels\";\n\tprintf(\"Simulation Kernel:\\\"%s\\\"\\n\", optimization_name);\n\n\tprintf(\"Allocating additional device data required by kernel...\\n\");\n\tsize_t sz;\n\tsize_t total_sz = 0;\n\n\tsz = (size_t)in.lookups * sizeof(double);\n\tGSD.p_energy_samples = (double *)malloc(sz);\n\ttotal_sz += sz;\n\tGSD.length_p_energy_samples = in.lookups;\n\n\tsz = (size_t)in.lookups * sizeof(int);\n\tGSD.mat_samples = (int *)malloc(sz);\n\ttotal_sz += sz;\n\tGSD.length_mat_samples = in.lookups;\n\n\tprintf(\"Allocated an additional %.0lf MB of data on GPU.\\n\", total_sz/1024.0/1024.0);\n\tprintf(\"Beginning optimized simulation...\\n\");\n\n\tSamplePair *pairs = (SamplePair *)malloc((size_t)in.lookups * sizeof(SamplePair));\n\tunsigned long *verification = (unsigned long *)malloc((size_t)in.lookups * sizeof(unsigned long));\n\tint n_lookups_per_material[12];\n\n\t#pragma omp parallel for\n\tfor (int i = 0; i < in.lookups; i++)\n\t{\n\t\tuint64_t seed = STARTING_SEED;\n\t\tseed = fast_forward_LCG(seed, 2ULL * (uint64_t)i);\n\t\tpairs[i].E = LCG_random_double(&seed);\n\t\tpairs[i].mat = pick_mat(&seed);\n\t}\n\n\tfor (int m = 0; m < 12; m++)\n\t{\n\t\tint count = 0;\n\t\tfor (int i = 0; i < in.lookups; i++)\n\t\t\tif (pairs[i].mat == m) count++;\n\t\tn_lookups_per_material[m] = count;\n\t}\n\n\tqsort(pairs, (size_t)in.lookups, sizeof(SamplePair), cmp_pair_mat);\n\n\tint offset = 0;\n\tfor (int m = 0; m < 12; m++)\n\t{\n\t\tint n = n_lookups_per_material[m];\n\t\tif (n > 1)\n\t\t\tqsort(pairs + offset, (size_t)n, sizeof(SamplePair), cmp_pair_energy);\n\t\toffset += n;\n\t}\n\n\tfor (int i = 0; i < in.lookups; i++)\n\t{\n\t\tGSD.p_energy_samples[i] = pairs[i].E;\n\t\tGSD.mat_samples[i] = pairs[i].mat;\n\t}\n\n\toffset = 0;\n\tfor (int m = 0; m < 12; m++)\n\t{\n\t\tint n = n_lookups_per_material[m];\n\t\t#pragma omp parallel for\n\t\tfor (int ii = 0; ii < n; ii++)\n\t\t{\n\t\t\tint i = offset + ii;\n\t\t\tint mat = GSD.mat_samples[i];\n\t\t\tif (mat != m)\n\t\t\t\tcontinue;\n\n\t\t\tdouble macro_xs[4] = {0};\n\t\t\tcalculate_macro_xs(macro_xs, mat, GSD.p_energy_samples[i], in, GSD);\n\n\t\t\tdouble max = -DBL_MAX;\n\t\t\tint max_idx = 0;\n\t\t\tfor (int x = 0; x < 4; x++)\n\t\t\t{\n\t\t\t\tif (macro_xs[x] > max)\n\t\t\t\t{\n\t\t\t\t\tmax = macro_xs[x];\n\t\t\t\t\tmax_idx = x;\n\t\t\t\t}\n\t\t\t}\n\t\t\tverification[i] = (unsigned long)(max_idx + 1);\n\t\t}\n\t\toffset += n;\n\t}\n\n\tprintf(\"Reducing verification results...\\n\");\n\n\tunsigned long verification_scalar = 0;\n\t#pragma omp parallel for reduction(+:verification_scalar)\n\tfor (int i = 0; i < in.lookups; i++)\n\t\tverification_scalar += verification[i];\n\n\t*vhash_result = verification_scalar;\n\n\tfree(verification);\n\tfree(pairs);\n\tfree(GSD.p_energy_samples);\n\tfree(GSD.mat_samples);\n}\n"
+  },
+  "target_files_expected": [
+    "simulation.c"
+  ],
+  "target_files_extracted": [
+    "simulation.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 46.754,
+      "prompt_tokens": 20382,
+      "completion_tokens": 3774,
+      "finish_reason": "completed",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "/usr/bin/ld: /tmp/cc8ZFRCQ.ltrans0.ltrans.o: in function `run_event_based_simulation_optimization_1._omp_fn.0':\n<artificial>:(.text+0x271): undefined reference to `fast_forward_LCG'\n/usr/bin/ld: <artificial>:(.text+0x27d): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text+0x28c): undefined reference to `LCG_random_double'\n/usr/bin/ld: /tmp/cc8ZFRCQ.ltrans0.ltrans.o: in function `run_event_based_simulation_optimization_1._omp_fn.1':\n<artificial>:(.text+0x604): undefined reference to `calculate_macro_xs'\n/usr/bin/ld: /tmp/cc8ZFRCQ.ltrans0.ltrans.o: in function `run_event_based_simulation._omp_fn.0':\n<artificial>:(.text+0x812): undefined reference to `fast_forward_LCG'\n/usr/bin/ld: <artificial>:(.text+0x81f): undefine\n...[truncated]...\nefined references to `LCG_random_double' follow\n/usr/bin/ld: /tmp/cc8ZFRCQ.ltrans0.ltrans.o: in function `main':\n<artificial>:(.text.startup+0x1003): undefined reference to `LCG_random_int'\n/usr/bin/ld: <artificial>:(.text.startup+0x11bc): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x11ca): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x11d8): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x1400): undefined reference to `LCG_random_double'\n/usr/bin/ld: <artificial>:(.text.startup+0x1690): undefined reference to `run_history_based_simulation'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:81: rsbench] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

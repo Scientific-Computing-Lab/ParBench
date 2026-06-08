@@ -1,0 +1,69 @@
+{
+  "source_spec": "mixbench-mixbench-opencl",
+  "target_spec": "mixbench-mixbench-omp",
+  "kernel": "mixbench",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 286119864,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T04:27:21Z",
+  "prompt_tokens": 8622,
+  "completion_tokens": 8423,
+  "llm_response_time_seconds": 40.458,
+  "build_status": "fail",
+  "build_time_seconds": 0.521,
+  "build_error_snippet": "./mixbench/mixbench-src/mixbench-cpu/mix_kernels_cpu.cpp:15:23: warning: use of \u2018auto\u2019 in parameter declaration only available with \u2018-std=c++20\u2019 or \u2018-fconcepts\u2019\n   15 | double getElapsedtime(auto ts_start) {\n      |                       ^~~~\n./mixbench/mixbench-src/mixbench-cpu/mix_kernels_cpu.cpp: In function \u2018void runbench(const int*, unsigned int, long int, unsigned int, unsigned int, bool, double*)\u2019:\n./mixbench/mixbench-src/mixbench-cpu/mix_kernels_cpu.cpp:99:38: warning: format \u2018%f\u2019 expects a matching \u2018double\u2019 argument [-Wformat=]\n   99 |       \"%8.3f,%8.2f,%8.2f,%7.2f,  %8.3f,%8.2f,%8.2f,%7.2f\\n\",\n      |                                  ~\n...[truncated]...\np:121:17: error: conflicting declaration of \u2018void mixbenchCPU(void*, size_t)\u2019 with \u2018C\u2019 linkage\n  121 | extern \"C\" void mixbenchCPU(void* c, size_t datasize) {\n      |                 ^~~~~~~~~~~\nIn file included from ./mixbench/mixbench-src/mixbench-cpu/mix_kernels_cpu.cpp:6:\n./mixbench/mixbench-src/mixbench-cpu/mix_kernels_cpu.h:11:6: note: previous declaration with \u2018C++\u2019 linkage\n   11 | void mixbenchCPU(void*, size_t);\n      |      ^~~~~~~~~~~\ngmake[2]: *** [CMakeFiles/mixbench-cpu.dir/build.make:90: CMakeFiles/mixbench-cpu.dir/mix_kernels_cpu.cpp.o] Error 1\ngmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/mixbench-cpu.dir/all] Error 2\ngmake: *** [Makefile:91: all] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: pu.dir/build.make:90: CMakeFiles/mixbench-cpu.dir/mix_kernels_cpu.cpp.o] Error 1\ngmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/mixbench-cpu.dir/all] Error 2\ngmake: *** [Makefile:91: all] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": 120.0,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "mix_kernels_cpu.cpp": "#include <cstdio>\n#include <cstdlib>\n#include <cstring>\n#include <omp.h>\n#include <chrono>\n#include \"mix_kernels_cpu.h\"\n#include \"version_info.h\"\n\n#define DEF_VECTOR_SIZE (32*1024*1024)\n\nauto getTimestamp() {\n\treturn std::chrono::high_resolution_clock::now();\n}\n\ndouble getElapsedtime(auto ts_start) {\n\tauto ts_end = std::chrono::high_resolution_clock::now();\n\treturn std::chrono::duration<double>(ts_end - ts_start).count();\n}\n\ntemplate<int N, typename Func>\ndouble benchmark(Func f) {\n\tdouble min_time = 1e100;\n\tfor(int i = 0; i < N; i++) {\n\t\tdouble t = f();\n\t\tif(t < min_time) min_time = t;\n\t}\n\treturn min_time;\n}\n\nenum KrnDataType { kdt_int, kdt_float, kdt_double };\n\nconst int compute_iterations[] = {\n    0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,  14,  15, 16,\n    17, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256};\nconst int compute_iterations_len = sizeof(compute_iterations) / sizeof(*compute_iterations);\n\nvoid runbench(const int compute_iterations[],\n              unsigned int krn_idx,\n              long size,\n              unsigned int elements_per_wi,\n              unsigned int fusion_degree,\n              bool use_os_timer,\n              double* c) {\n  const long compute_grid_size = size / elements_per_wi / fusion_degree;\n  const int current_compute_iterations = compute_iterations[krn_idx];\n  const long long computations =\n      (elements_per_wi * (long long)compute_grid_size +\n       (2 * elements_per_wi * current_compute_iterations) *\n           (long long)compute_grid_size) *\n      fusion_degree;\n  const long long memoryoperations = size;\n\n  constexpr auto total_bench_iterations = 3;\n\n  double kernel_time_mad_sp = benchmark<total_bench_iterations>([&]() {\n    auto ts_start = getTimestamp();\n    #pragma omp parallel for\n    for(long i = 0; i < size; i++) {\n      float val = 1.0f;\n      for(int j = 0; j < current_compute_iterations; j++) {\n        val = val * val + 1.0f;\n      }\n      ((float*)c)[i] = val;\n    }\n    auto duration = use_os_timer ? getElapsedtime(ts_start) : 0.0;\n    return duration;\n  });\n\n  double kernel_time_mad_dp = benchmark<total_bench_iterations>([&]() {\n    auto ts_start = getTimestamp();\n    #pragma omp parallel for\n    for(long i = 0; i < size; i++) {\n      double val = 1.0;\n      for(int j = 0; j < current_compute_iterations; j++) {\n        val = val * val + 1.0;\n      }\n      c[i] = val;\n    }\n    auto duration = use_os_timer ? getElapsedtime(ts_start) : 0.0;\n    return duration;\n  });\n\n  double kernel_time_mad_int = benchmark<total_bench_iterations>([&]() {\n    auto ts_start = getTimestamp();\n    #pragma omp parallel for\n    for(long i = 0; i < size; i++) {\n      int val = 1;\n      for(int j = 0; j < current_compute_iterations; j++) {\n        val = val * val + 1;\n      }\n      ((int*)c)[i] = val;\n    }\n    auto duration = use_os_timer ? getElapsedtime(ts_start) : 0.0;\n    return duration;\n  });\n\n  printf(\n      \"         %4d,   %8.3f,%8.2f,%8.2f,%7.2f,   %8.3f,%8.2f,%8.2f,%7.2f,   \"\n      \"%8.3f,%8.2f,%8.2f,%7.2f,  %8.3f,%8.2f,%8.2f,%7.2f\\n\",\n      current_compute_iterations,\n      ((double)computations) / ((double)memoryoperations * sizeof(float)),\n      kernel_time_mad_sp,\n      ((double)computations) / kernel_time_mad_sp * 1000. /\n          (double)(1000 * 1000 * 1000),\n      ((double)memoryoperations * sizeof(float)) / kernel_time_mad_sp * 1000. /\n          (1000. * 1000. * 1000.),\n      ((double)computations) / ((double)memoryoperations * sizeof(double)),\n      kernel_time_mad_dp,\n      ((double)computations) / kernel_time_mad_dp * 1000. /\n          (double)(1000 * 1000 * 1000),\n      ((double)memoryoperations * sizeof(double)) / kernel_time_mad_dp * 1000. /\n          (1000. * 1000. * 1000.),\n      ((double)computations) / ((double)memoryoperations * sizeof(int)),\n      kernel_time_mad_int,\n      ((double)computations) / kernel_time_mad_int * 1000. /\n          (double)(1000 * 1000 * 1000),\n      ((double)memoryoperations * sizeof(int)) / kernel_time_mad_int * 1000. /\n          (1000. * 1000. * 1000.));\n}\n\nextern \"C\" void mixbenchCPU(void* c, size_t datasize) {\n  const long size = datasize / sizeof(double);\n  const unsigned int elements_per_wi = 8;\n  const unsigned int fusion_degree = 4;\n  const bool use_os_timer = false;\n  \n  double* data = (double*)c;\n  \n  #pragma omp parallel for\n  for(long i = 0; i < size; i++) {\n    data[i] = 0;\n  }\n\n  printf(\n      \"------------------------------------------------------------------------\"\n      \"----- CSV data \"\n      \"------------------------------------------------------------------------\"\n      \"-----\\n\");\n  printf(\n      \"Experiment ID, Single Precision ops,,,,              Double precision \"\n      \"ops,,,,              Half precision ops,,,,                Integer \"\n      \"operations,,, \\n\");\n  printf(\n      \"Compute iters, Flops/byte, ex.time,  GFLOPS, GB/sec, Flops/byte, \"\n      \"ex.time,  GFLOPS, GB/sec, Flops/byte, ex.time,  GFLOPS, GB/sec, \"\n      \"Iops/byte, ex.time,   GIOPS, GB/sec\\n\");\n\n  for (int i = 0; i < compute_iterations_len; i++)\n    runbench(compute_iterations, i, size,\n             elements_per_wi, fusion_degree, use_os_timer, data);\n\n  printf(\n      \"------------------------------------------------------------------------\"\n      \"------------------------------------------------------------------------\"\n      \"--------------------\\n\");\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels_cpu.cpp"
+  ],
+  "target_files_extracted": [
+    "mix_kernels_cpu.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 40.458,
+      "prompt_tokens": 8622,
+      "completion_tokens": 8423,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "./mixbench/mixbench-src/mixbench-cpu/mix_kernels_cpu.cpp:15:23: warning: use of \u2018auto\u2019 in parameter declaration only available with \u2018-std=c++20\u2019 or \u2018-fconcepts\u2019\n   15 | double getElapsedtime(auto ts_start) {\n      |                       ^~~~\n./mixbench/mixbench-src/mixbench-cpu/mix_kernels_cpu.cpp: In function \u2018void runbench(const int*, unsigned int, long int, unsigned int, unsigned int, bool, double*)\u2019:\n./mixbench/mixbench-src/mixbench-cpu/mix_kernels_cpu.cpp:99:38: warning: format \u2018%f\u2019 expects a matching \u2018double\u2019 argument [-Wformat=]\n   99 |       \"%8.3f,%8.2f,%8.2f,%7.2f,  %8.3f,%8.2f,%8.2f,%7.2f\\n\",\n      |                                  ~\n...[truncated]...\np:121:17: error: conflicting declaration of \u2018void mixbenchCPU(void*, size_t)\u2019 with \u2018C\u2019 linkage\n  121 | extern \"C\" void mixbenchCPU(void* c, size_t datasize) {\n      |                 ^~~~~~~~~~~\nIn file included from ./mixbench/mixbench-src/mixbench-cpu/mix_kernels_cpu.cpp:6:\n./mixbench/mixbench-src/mixbench-cpu/mix_kernels_cpu.h:11:6: note: previous declaration with \u2018C++\u2019 linkage\n   11 | void mixbenchCPU(void*, size_t);\n      |      ^~~~~~~~~~~\ngmake[2]: *** [CMakeFiles/mixbench-cpu.dir/build.make:90: CMakeFiles/mixbench-cpu.dir/mix_kernels_cpu.cpp.o] Error 1\ngmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/mixbench-cpu.dir/all] Error 2\ngmake: *** [Makefile:91: all] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

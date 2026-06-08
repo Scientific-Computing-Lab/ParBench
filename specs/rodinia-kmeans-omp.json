@@ -1,0 +1,174 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "kmeans",
+        "parallel_api": "omp",
+        "unique_id": "rodinia-kmeans-omp",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "openmp/kmeans",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "kmeans_openmp/cluster.c",
+            "kmeans_openmp/getopt.c",
+            "kmeans_openmp/kmeans.c",
+            "kmeans_openmp/kmeans_clustering.c"
+        ],
+        "support_files": [
+            "kmeans_openmp/getopt.h",
+            "kmeans_openmp/kmeans.h",
+            "kmeans_openmp/unistd.h",
+            "kmeans_serial/getopt.h",
+            "kmeans_serial/kmeans.h",
+            "kmeans_serial/unistd.h",
+            "Makefile",
+            "kmeans_openmp/Makefile",
+            "kmeans_serial/Makefile",
+            "kmeans_serial/cluster.c",
+            "kmeans_serial/getopt.c",
+            "kmeans_serial/kmeans.c",
+            "kmeans_serial/kmeans_clustering.c"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "kmeans_openmp/kmeans_clustering.c"
+        ]
+    },
+    "implementation": {
+        "api": "omp",
+        "api_version": null,
+        "language": "C",
+        "language_standard": null
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "gcc>=9.0 (with OpenMP support)"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "openmp/kmeans",
+        "commands": {
+            "configure": null,
+            "build": "make",
+            "clean": "make clean"
+        },
+        "variables": null,
+        "outputs": {
+            "executable": "./kmeans_openmp/kmeans"
+        }
+    },
+    "run": {
+        "executable": "./kmeans_openmp/kmeans",
+        "default_arguments": [
+            "-i",
+            "../../data/kmeans/kdd_cup"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-i",
+                    "../../data/kmeans/kdd_cup"
+                ],
+                "description": "Small input for correctness verification of kmeans (OMP)",
+                "input_files": [
+                    "../../data/kmeans/kdd_cup"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "number of Clusters",
+                "description": "K-means clustering completed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "cpu",
+        "requirements": {
+            "cpu": {
+                "min_cores": 4,
+                "min_memory_gb": 8
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.276944+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "I/O completed\nnum of threads = 1\nnumber of Clusters 5\nnumber of Attributes 34\n\nTime for process: 1.495930\n",
+                "wall_time_seconds": 1.859,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "K-means clustering on GPU",
+        "domain": "machine learning",
+        "complexity": "k-means clustering",
+        "tags": [
+            "clustering",
+            "k-means",
+            "kmeans",
+            "machine-learning",
+            "omp",
+            "rodinia"
+        ],
+        "multi_file": true,
+        "translation_complexity": "multi_to_single"
+    }
+}

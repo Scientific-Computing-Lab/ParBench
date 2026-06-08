@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-dwt2d-cuda",
+  "target_spec": "rodinia-dwt2d-opencl",
+  "kernel": "dwt2d",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1365683746,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "rgb.bmp",
+    "-i",
+    "../../data/dwt2d",
+    "-D",
+    "1024x1024",
+    "-f",
+    "-5",
+    "-l",
+    "3"
+  ],
+  "timestamp": "2026-04-30T03:16:59Z",
+  "prompt_tokens": 30828,
+  "completion_tokens": 6409,
+  "llm_response_time_seconds": 87.257,
+  "build_status": "pass",
+  "build_time_seconds": 0.312,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.324,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "\nsliding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 3 , gx = 4 , gy = 11 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\n\nWriting to rgb.bmp.dwt.r (1024 x 1024)\n\nWriting to rgb.bmp.dwt.g (1024 x 1024)\n\nWriting to rgb.bmp.dwt.b (1024 x 1024)\nInit: 253.602005\nMemAlloc: 7.697000\nHtoD: 0.000000\nExec: 0.023328\nDtoH: 0.856000\nClose: 0.633000\nTotal: 271.230988\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.1,
+  "translated_wall_time_seconds": 0.324,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.3086,
+  "translated_files": {
+    "com_dwt.cl": "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n\ninline int mirror_index(int d, int sizeD)\n{\n    if (sizeD <= 1) return 0;\n    if (d >= sizeD) {\n        d = 2 * sizeD - 2 - d;\n    } else if (d < 0) {\n        d = -d;\n    }\n    if (d < 0) d = 0;\n    if (d >= sizeD) d = sizeD - 1;\n    return d;\n}\n\ninline int get_src(__global const int *in, int sx, int sy, int x, int y)\n{\n    x = mirror_index(x, sx);\n    y = mirror_index(y, sy);\n    return in[y * sx + x];\n}\n\ninline int h_detail(__global const int *in, int sx, int sy, int y, int k)\n{\n    int x_odd = 2 * k + 1;\n    int p = get_src(in, sx, sy, 2 * k, y);\n    int c = get_src(in, sx, sy, x_odd, y);\n    int n = get_src(in, sx, sy, 2 * k + 2, y);\n    return c - ((p + n) / 2);\n}\n\ninline int h_low(__global const int *in, int sx, int sy, int y, int k)\n{\n    const int hlx = sx / 2;\n    int c = get_src(in, sx, sy, 2 * k, y);\n    if (hlx <= 0) return c;\n\n    int dl = h_detail(in, sx, sy, y, mirror_index(k - 1, hlx));\n    int dr = h_detail(in, sx, sy, y, mirror_index(k, hlx));\n    return c + ((dl + dr + 2) / 4);\n}\n\ninline int h_coeff(__global const int *in, int sx, int sy, int y, int kx, int highBandX)\n{\n    return highBandX ? h_detail(in, sx, sy, y, kx) : h_low(in, sx, sy, y, kx);\n}\n\ninline int v_detail(__global const int *in, int sx, int sy, int kx, int ky, int highBandX)\n{\n    int c = h_coeff(in, sx, sy, 2 * ky + 1, kx, highBandX);\n    int p = h_coeff(in, sx, sy, 2 * ky,     kx, highBandX);\n    int n = h_coeff(in, sx, sy, 2 * ky + 2, kx, highBandX);\n    return c - ((p + n) / 2);\n}\n\ninline int v_low(__global const int *in, int sx, int sy, int kx, int ky, int highBandX)\n{\n    const int hly = sy / 2;\n    int c = h_coeff(in, sx, sy, 2 * ky, kx, highBandX);\n    if (hly <= 0) return c;\n\n    int dl = v_detail(in, sx, sy, kx, mirror_index(ky - 1, hly), highBandX);\n    int dr = v_detail(in, sx, sy, kx, mirror_index(ky,     hly), highBandX);\n    return c + ((dl + dr + 2) / 4);\n}\n\n__kernel void c_CopySrcToComponents(__global int *d_r,\n                                    __global int *d_g,\n                                    __global int *d_b,\n                                    __global const uchar *d_src,\n                                    int pixels)\n{\n    size_t gid = get_global_id(0);\n    size_t gsz = get_global_size(0);\n\n    for (int i = (int)gid; i < pixels; i += (int)gsz) {\n        int base = i * 3;\n        d_r[i] = ((int)d_src[base + 0]) - 128;\n        d_g[i] = ((int)d_src[base + 1]) - 128;\n        d_b[i] = ((int)d_src[base + 2]) - 128;\n    }\n}\n\n__kernel void c_CopySrcToComponent(__global int *d_c,\n                                   __global const uchar *d_src,\n                                   int pixels)\n{\n    size_t gid = get_global_id(0);\n    size_t gsz = get_global_size(0);\n\n    for (int i = (int)gid; i < pixels; i += (int)gsz) {\n        d_c[i] = ((int)d_src[i]) - 128;\n    }\n}\n\n__kernel void cl_fdwt53Kernel(__global const int *input,\n                              __global int *output,\n                              const int sizeX,\n                              const int sizeY,\n                              const int winSteps,\n                              const int WIN_SX,\n                              const int WIN_SY)\n{\n    (void)winSteps;\n    (void)WIN_SX;\n    (void)WIN_SY;\n\n    const int llx = (sizeX + 1) / 2;\n    const int lly = (sizeY + 1) / 2;\n    const int hlx = sizeX / 2;\n    const int hly = sizeY / 2;\n\n    const int LLsize = llx * lly;\n    const int HLsize = hlx * lly;\n    const int LHsize = llx * hly;\n    const int total  = sizeX * sizeY;\n\n    size_t gid0 = get_global_id(0);\n    size_t gid1 = get_global_id(1);\n    size_t gsz0 = get_global_size(0);\n    size_t gsz1 = get_global_size(1);\n\n    int tid = (int)(gid1 * gsz0 + gid0);\n    int tstride = (int)(gsz0 * gsz1);\n\n    for (int idx = tid; idx < total; idx += tstride) {\n        int bandXHigh, bandYHigh;\n        int kx, ky;\n        int val;\n\n        if (idx < LLsize) {\n            bandXHigh = 0; bandYHigh = 0;\n            ky = idx / llx;\n            kx = idx - ky * llx;\n            val = v_low(input, sizeX, sizeY, kx, ky, bandXHigh);\n        } else if (idx < LLsize + HLsize) {\n            int o = idx - LLsize;\n            bandXHigh = 1; bandYHigh = 0;\n            ky = (hlx > 0) ? (o / hlx) : 0;\n            kx = (hlx > 0) ? (o - ky * hlx) : 0;\n            val = v_low(input, sizeX, sizeY, kx, ky, bandXHigh);\n        } else if (idx < LLsize + HLsize + LHsize) {\n            int o = idx - LLsize - HLsize;\n            bandXHigh = 0; bandYHigh = 1;\n            ky = (llx > 0) ? (o / llx) : 0;\n            kx = (llx > 0) ? (o - ky * llx) : 0;\n            (void)bandYHigh;\n            val = v_detail(input, sizeX, sizeY, kx, ky, bandXHigh);\n        } else {\n            int o = idx - LLsize - HLsize - LHsize;\n            bandXHigh = 1; bandYHigh = 1;\n            ky = (hlx > 0) ? (o / hlx) : 0;\n            kx = (hlx > 0) ? (o - ky * hlx) : 0;\n            (void)bandYHigh;\n            val = v_detail(input, sizeX, sizeY, kx, ky, bandXHigh);\n        }\n\n        output[idx] = val;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "com_dwt.cl"
+  ],
+  "target_files_extracted": [
+    "com_dwt.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 87.257,
+      "prompt_tokens": 30828,
+      "completion_tokens": 6409,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

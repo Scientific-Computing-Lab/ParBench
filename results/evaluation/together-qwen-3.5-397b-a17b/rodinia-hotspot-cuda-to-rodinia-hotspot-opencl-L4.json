@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-hotspot-cuda",
+  "target_spec": "rodinia-hotspot-opencl",
+  "kernel": "hotspot",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 368292467,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-04-24T05:10:01Z",
+  "prompt_tokens": 8336,
+  "completion_tokens": 2022,
+  "llm_response_time_seconds": 31.668,
+  "build_status": "pass",
+  "build_time_seconds": 0.181,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.205,
+  "run_exit_code": 245,
+  "run_stderr_snippet": "1 warning and 6 errors generated.\n",
+  "run_stdout_snippet": "     read_only float *elem_14,    \n                                     ^\n<kernel>:17:39: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n                    write_only float *data_19,    \n                                      ^\n<kernel>:37:16: warning: implicit declaration of function 'get_block_id' is invalid in OpenCL\n        int data_51 = get_block_id(0);\n                      ^\n\n>>>>\nError at line 306: CL_BUILD_PROGRAM_FAILURE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 245)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.159,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "hotspot_kernel.cl": "#define STR_SIZE 256\n\n#define MAX_PD\t(3.0e6)\n\n#define PRECISION\t0.001\n#define SPEC_HEAT_SI 1.75e6\n#define K_SI 100\n\n#define FACTOR_CHIP\t0.5\n\n#define IN_RANGE(x, min, max)   ((x)>=(min) && (x)<=(max))\n#define MIN(a, b) ((a)<=(b) ? (a) : (b))\n\nkernel void hotspot(int num_iterations,  \n                    read_only float *item_17,   \n                    read_only float *elem_14,    \n                    write_only float *data_19,    \n                    int val_61,  \n                    int elem_93,  \n                    int x_23,  \n                    int v_41,  \n                    float elem_3,      \n                    float tmp_71, \n                    float v_30, \n                    float tmp_43, \n                    float x_67, \n                    float v_26){\n\t\n        local float data_84[BLOCK_SIZE][BLOCK_SIZE];\n        local float elem_6[BLOCK_SIZE][BLOCK_SIZE];\n        local float var_8[BLOCK_SIZE][BLOCK_SIZE]; \n\n\tfloat elem_65 = 80.0;\n        float data_27;\n        float var_54,elem_46,v_80;\n        \n\tint data_51 = get_block_id(0);\n        int x_49 = get_block_id(1);\n\n\tint elem_69=get_local_id(0);\n\tint val_11=get_local_id(1);\n\t\n\tdata_27=x_67/elem_3;\n\t\n\tvar_54=1/tmp_71;\n\telem_46=1/v_30;\n\tv_80=1/tmp_43;\n\t\n        \n        \n        \n        \n\n        \n\tint elem_64 = BLOCK_SIZE-num_iterations*2;\n\tint var_15 = BLOCK_SIZE-num_iterations*2;\n\n        \n        \n        int v_74 = elem_64*x_49-v_41;\n        int var_83 = var_15*data_51-x_23;\n        int elem_21 = v_74+BLOCK_SIZE-1;\n        int x_76 = var_83+BLOCK_SIZE-1;\n\n        \n\tint data_94 = v_74+val_11;\n\tint val_4 = var_83+elem_69;\n\n        \n\tint elem_62=data_94, tmp_70=val_4;\n        int val_97 = elem_93*elem_62+tmp_70;\n       \n\tif(IN_RANGE(elem_62, 0, val_61-1) && IN_RANGE(tmp_70, 0, elem_93-1)){\n            data_84[val_11][elem_69] = elem_14[val_97];  \n            elem_6[val_11][elem_69] = item_17[val_97];\n\t}\n\tbarrier(CLK_LOCAL_MEM_FENCE);\n\n        \n        \n        \n        int x_72 = (0 > v_74) ? -v_74 : 0;\n        int data_13 = (elem_93-1 < elem_21) ? BLOCK_SIZE-1-(elem_21-elem_93+1) : BLOCK_SIZE-1;\n        int v_12 = (0 > var_83) ? -var_83 : 0;\n        int x_33 = (val_61-1 < x_76) ? BLOCK_SIZE-1-(x_76-val_61+1) : BLOCK_SIZE-1;\n\n        int N = val_11-1;\n        int S = val_11+1;\n        int W = elem_69-1;\n        int E = elem_69+1;\n        \n        N = (x_72 > N) ? x_72 : N;\n        S = (data_13 < S) ? data_13 : S;\n        W = (v_12 > W) ? v_12 : W;\n        E = (x_33 < E) ? x_33 : E;\n\n        bool item_85;\n        for (int i=0; num_iterations > i ; i++){ \n            item_85 = false;\n            if( IN_RANGE(elem_69, i+1, BLOCK_SIZE-i-2) &&  \\\n                  IN_RANGE(val_11, i+1, BLOCK_SIZE-i-2) &&  \\\n                  IN_RANGE(elem_69, v_12, x_33) && \\\n                  IN_RANGE(val_11, x_72, data_13) ) {\n                  item_85 = true;\n                  var_8[val_11][elem_69] =   data_84[val_11][elem_69] + data_27 * (elem_6[val_11][elem_69] + \n\t       \t         (data_84[S][elem_69] + data_84[N][elem_69] - 2.0*data_84[val_11][elem_69]) * elem_46 + \n\t\t             (data_84[val_11][E] + data_84[val_11][W] - 2.0*data_84[val_11][elem_69]) * var_54 + \n\t\t             (elem_65 - data_84[val_11][elem_69]) * v_80);\n\t\n            }\n            barrier(CLK_LOCAL_MEM_FENCE);\n            if(num_iterations-1 == i)\n                break;\n            if(item_85)\t \n                data_84[val_11][elem_69]= var_8[val_11][elem_69];\n            barrier(CLK_LOCAL_MEM_FENCE);\n          }\n\n      \n      \n      \n      if (item_85){\n          data_19[val_97]= var_8[val_11][elem_69];\t\t\n      }\n}\n\n"
+  },
+  "target_files_expected": [
+    "hotspot_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspot_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 31.668,
+      "prompt_tokens": 8336,
+      "completion_tokens": 2022,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "1 warning and 6 errors generated.\n",
+      "run_stdout_snippet": "     read_only float *elem_14,    \n                                     ^\n<kernel>:17:39: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n                    write_only float *data_19,    \n                                      ^\n<kernel>:37:16: warning: implicit declaration of function 'get_block_id' is invalid in OpenCL\n        int data_51 = get_block_id(0);\n                      ^\n\n>>>>\nError at line 306: CL_BUILD_PROGRAM_FAILURE\n",
+      "extraction_fail": null
+    }
+  ]
+}

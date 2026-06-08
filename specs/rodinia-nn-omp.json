@@ -1,0 +1,169 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "nn",
+        "parallel_api": "omp",
+        "unique_id": "rodinia-nn-omp",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "openmp/nn",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "nn_openmp.c"
+        ],
+        "support_files": [
+            "Makefile",
+            "hurricane_gen.c"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "nn_openmp.c"
+        ]
+    },
+    "implementation": {
+        "api": "omp",
+        "api_version": null,
+        "language": "C",
+        "language_standard": null
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "gcc>=9.0 (with OpenMP support)"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "openmp/nn",
+        "commands": {
+            "configure": null,
+            "build": "make",
+            "clean": "make clean"
+        },
+        "variables": null,
+        "outputs": {
+            "executable": "./nn"
+        }
+    },
+    "run": {
+        "executable": "./nn",
+        "default_arguments": [
+            "filelist_4",
+            "5",
+            "30",
+            "90"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "filelist_4",
+                    "5",
+                    "30",
+                    "90"
+                ],
+                "description": "Small input for correctness verification of nn (OMP)",
+                "input_files": [
+                    "filelist_4",
+                    "../../data/nn/cane4_0.db",
+                    "../../data/nn/cane4_1.db",
+                    "../../data/nn/cane4_2.db",
+                    "../../data/nn/cane4_3.db"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "total time",
+                "description": "Nearest neighbor computation timing reported"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "cpu",
+        "requirements": {
+            "cpu": {
+                "min_cores": 4,
+                "min_memory_gb": 8
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.279670+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "total time :  0.346406996250 s",
+                "wall_time_seconds": 0.016,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Nearest neighbor search on GPU",
+        "domain": "data mining",
+        "complexity": "nearest neighbor search",
+        "tags": [
+            "data-mining",
+            "knn",
+            "nearest-neighbor",
+            "nn",
+            "omp",
+            "rodinia",
+            "search"
+        ],
+        "multi_file": true,
+        "translation_complexity": "single_file"
+    }
+}

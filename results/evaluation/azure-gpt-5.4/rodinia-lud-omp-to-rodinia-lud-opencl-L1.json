@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-omp",
+  "target_spec": "rodinia-lud-opencl",
+  "kernel": "lud",
+  "model": "azure-gpt-5.4",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 55408477,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-27T03:58:31Z",
+  "prompt_tokens": 11428,
+  "completion_tokens": 4170,
+  "llm_response_time_seconds": 95.537,
+  "build_status": "pass",
+  "build_time_seconds": 0.468,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.286,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nInit: 230.419998\nMemAlloc: 0.003000\nHtoD: 0.011328\nExec: 1.698528\nDtoH: 0.010656\nClose: 0.061000\nTotal: 232.755005\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.07,
+  "translated_wall_time_seconds": 0.286,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.2448,
+  "translated_files": {
+    "lud_kernel.cl": "#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\n#define BS BLOCK_SIZE\n\n__kernel void lud_diagonal(__global float *m,\n                           __local float *shadow,\n                           int matrix_dim,\n                           int offset)\n{\n    const int lid = (int)get_local_id(0);\n\n    if (lid == 0) {\n        int i, j, k;\n\n        for (i = 0; i < BS; i++) {\n            for (j = 0; j < BS; j++) {\n                shadow[i * BS + j] = m[(offset + i) * matrix_dim + (offset + j)];\n            }\n        }\n\n        for (i = 0; i < BS; i++) {\n            for (j = i; j < BS; j++) {\n                float sum = shadow[i * BS + j];\n                for (k = 0; k < i; k++) {\n                    sum -= shadow[i * BS + k] * shadow[k * BS + j];\n                }\n                shadow[i * BS + j] = sum;\n            }\n\n            for (j = i + 1; j < BS; j++) {\n                float sum = shadow[j * BS + i];\n                for (k = 0; k < i; k++) {\n                    sum -= shadow[j * BS + k] * shadow[k * BS + i];\n                }\n                shadow[j * BS + i] = sum / shadow[i * BS + i];\n            }\n        }\n\n        for (i = 0; i < BS; i++) {\n            for (j = 0; j < BS; j++) {\n                m[(offset + i) * matrix_dim + (offset + j)] = shadow[i * BS + j];\n            }\n        }\n    }\n}\n\n__kernel void lud_perimeter(__global float *m,\n                            __local float *dia,\n                            __local float *peri_row,\n                            __local float *peri_col,\n                            int matrix_dim,\n                            int offset)\n{\n    const int lid = (int)get_local_id(0);\n    const int chunk_idx = (int)get_group_id(0);\n\n    if (lid == 0) {\n        int i, j, k;\n        const int j_global = offset + BS * (chunk_idx + 1);\n        const int i_global = offset + BS * (chunk_idx + 1);\n\n        for (i = 0; i < BS; i++) {\n            for (j = 0; j < BS; j++) {\n                dia[i * BS + j] = m[(offset + i) * matrix_dim + (offset + j)];\n            }\n        }\n\n        for (i = 0; i < BS; i++) {\n            for (j = 0; j < BS; j++) {\n                peri_row[i * BS + j] = m[(offset + i) * matrix_dim + (j_global + j)];\n            }\n        }\n\n        for (j = 0; j < BS; j++) {\n            for (i = 0; i < BS; i++) {\n                float sum = 0.0f;\n                for (k = 0; k < i; k++) {\n                    sum += dia[i * BS + k] * peri_row[k * BS + j];\n                }\n                peri_row[i * BS + j] = peri_row[i * BS + j] - sum;\n            }\n        }\n\n        for (i = 0; i < BS; i++) {\n            for (j = 0; j < BS; j++) {\n                m[(offset + i) * matrix_dim + (j_global + j)] = peri_row[i * BS + j];\n            }\n        }\n\n        for (i = 0; i < BS; i++) {\n            for (j = 0; j < BS; j++) {\n                peri_col[i * BS + j] = m[(i_global + i) * matrix_dim + (offset + j)];\n            }\n        }\n\n        for (i = 0; i < BS; i++) {\n            for (j = 0; j < BS; j++) {\n                float sum = 0.0f;\n                for (k = 0; k < j; k++) {\n                    sum += peri_col[i * BS + k] * dia[k * BS + j];\n                }\n                peri_col[i * BS + j] = (peri_col[i * BS + j] - sum) / dia[j * BS + j];\n            }\n        }\n\n        for (i = 0; i < BS; i++) {\n            for (j = 0; j < BS; j++) {\n                m[(i_global + i) * matrix_dim + (offset + j)] = peri_col[i * BS + j];\n            }\n        }\n    }\n}\n\n__kernel void lud_internal(__global float *m,\n                           __local float *peri_row,\n                           __local float *peri_col,\n                           int matrix_dim,\n                           int offset)\n{\n    const int tx = (int)get_local_id(0);\n    const int ty = (int)get_local_id(1);\n    const int bx = (int)get_group_id(0);\n    const int by = (int)get_group_id(1);\n\n    const int j_global = offset + BS * (bx + 1);\n    const int i_global = offset + BS * (by + 1);\n\n    const int row = i_global + ty;\n    const int col = j_global + tx;\n\n    int k;\n    float sum = 0.0f;\n\n    for (k = 0; k < BS; k++) {\n        sum += m[row * matrix_dim + (offset + k)] *\n               m[(offset + k) * matrix_dim + col];\n    }\n\n    m[row * matrix_dim + col] -= sum;\n}\n"
+  },
+  "target_files_expected": [
+    "lud_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "lud_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 95.537,
+      "prompt_tokens": 11428,
+      "completion_tokens": 4170,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

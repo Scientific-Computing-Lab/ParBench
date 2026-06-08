@@ -1,0 +1,69 @@
+{
+  "source_spec": "mixbench-mixbench-omp",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1825021715,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-24T05:16:49Z",
+  "prompt_tokens": 11195,
+  "completion_tokens": 2423,
+  "llm_response_time_seconds": 52.827,
+  "build_status": "pass",
+  "build_time_seconds": 0.475,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 3.172,
+  "run_exit_code": 1,
+  "run_stderr_snippet": "OpenCL error in file './mixbench/mixbench-src/mixbench-opencl/mix_kernels_ocl.cpp' in line 178 : Code -51.\n",
+  "run_stdout_snippet": "/\b>\\\b|\b/\b>\\\b|\b/\b>\n----------------------------------------------------------------------------- CSV data -----------------------------------------------------------------------------\nExperiment ID, Single Precision ops,,,,              Double precision ops,,,,              Half precision ops,,,,                Integer operations,,, \nCompute iters, Flops/byte, ex.time,  GFLOPS, GB/sec, Flops/byte, ex.time,  GFLOPS, GB/sec, Flops/byte, ex.time,  GFLOPS, GB/sec, Iops/byte, ex.time,   GIOPS, GB/sec\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "mix_kernels.cl": "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#ifdef ENABLE_HP\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n\n#ifdef class_T\ntypedef class_T data_type;\n#else\ntypedef float data_type;\n#endif\n\n#ifdef BLOCK_STRIDED\n#define USE_BLOCK_STRIDE 1\n#else\n#define USE_BLOCK_STRIDE 0\n#endif\n\nkernel void benchmark_func(short seed, global data_type* data) {\n    const size_t global_id = get_global_id(0);\n    const size_t global_size = get_global_size(0);\n    const size_t local_id = get_local_id(0);\n    const size_t local_size = get_local_size(0);\n    \n    const size_t total_elements = global_size * ELEMENTS_PER_THREAD * FUSION_DEGREE;\n    \n    data_type f = data[0];\n    data_type sum = 0;\n    \n    for (size_t fusion = 0; fusion < FUSION_DEGREE; fusion++) {\n        for (size_t elem = 0; elem < ELEMENTS_PER_THREAD; elem++) {\n            size_t idx = global_id * ELEMENTS_PER_THREAD * FUSION_DEGREE + \n                         elem * FUSION_DEGREE + fusion;\n            \n            if (idx < total_elements) {\n                data_type t = data[idx];\n                \n                #if COMPUTE_ITERATIONS == 0\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 1\n                t = t * t + f;\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 2\n                t = t * t + f;\n                t = t * t + f;\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 3\n                t = t * t + f;\n                t = t * t + f;\n                t = t * t + f;\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 4\n                t = t * t + f;\n                t = t * t + f;\n                t = t * t + f;\n                t = t * t + f;\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 6\n                t = t * t + f;\n                t = t * t + f;\n                t = t * t + f;\n                t = t * t + f;\n                t = t * t + f;\n                t = t * t + f;\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 8\n                t = t * t + f;\n                t = t * t + f;\n                t = t * t + f;\n                t = t * t + f;\n                t = t * t + f;\n                t = t * t + f;\n                t = t * t + f;\n                t = t * t + f;\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 12\n                for (size_t j = 0; j < 12; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 16\n                for (size_t j = 0; j < 16; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 20\n                for (size_t j = 0; j < 20; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 24\n                for (size_t j = 0; j < 24; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 28\n                for (size_t j = 0; j < 28; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 32\n                for (size_t j = 0; j < 32; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 40\n                for (size_t j = 0; j < 40; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 48\n                for (size_t j = 0; j < 48; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 56\n                for (size_t j = 0; j < 56; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 64\n                for (size_t j = 0; j < 64; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 128\n                for (size_t j = 0; j < 128; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 192\n                for (size_t j = 0; j < 192; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #elif COMPUTE_ITERATIONS == 256\n                for (size_t j = 0; j < 256; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #else\n                for (size_t j = 0; j < COMPUTE_ITERATIONS; j++) {\n                    t = t * t + f;\n                }\n                sum += t;\n                #endif\n            }\n        }\n    }\n    \n    if (USE_BLOCK_STRIDE) {\n        data[global_id * ELEMENTS_PER_THREAD * FUSION_DEGREE] = sum;\n    } else {\n        data[global_id] = sum;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 52.827,
+      "prompt_tokens": 11195,
+      "completion_tokens": 2423,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "OpenCL error in file './mixbench/mixbench-src/mixbench-opencl/mix_kernels_ocl.cpp' in line 178 : Code -51.\n",
+      "run_stdout_snippet": "/\b>\\\b|\b/\b>\\\b|\b/\b>\n----------------------------------------------------------------------------- CSV data -----------------------------------------------------------------------------\nExperiment ID, Single Precision ops,,,,              Double precision ops,,,,              Half precision ops,,,,                Integer operations,,, \nCompute iters, Flops/byte, ex.time,  GFLOPS, GB/sec, Flops/byte, ex.time,  GFLOPS, GB/sec, Flops/byte, ex.time,  GFLOPS, GB/sec, Iops/byte, ex.time,   GIOPS, GB/sec\n",
+      "extraction_fail": null
+    }
+  ]
+}

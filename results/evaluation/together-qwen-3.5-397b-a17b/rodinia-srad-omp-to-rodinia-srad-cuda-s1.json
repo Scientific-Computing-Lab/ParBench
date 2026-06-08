@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-srad-omp",
+  "target_spec": "rodinia-srad-cuda",
+  "kernel": "srad",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 965158283,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-21T22:35:58Z",
+  "prompt_tokens": 2453,
+  "completion_tokens": 4725,
+  "llm_response_time_seconds": 28.782,
+  "build_status": "fail",
+  "build_time_seconds": 0.196,
+  "build_error_snippet": "srad.cu(220): error: expected a declaration\n   }\n   ^\n\nsrad.cu(224): warning #12-D: parsing restarts here after previous syntax error\n   cudaMemcpy(J, d_J, size_I * sizeof(float), cudaMemcpyDeviceToHost);\n                                                                     ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nsrad.cu(237): error: this declaration has no storage class or type specifier\n   printf(\"Computation Done\\n\");\n   ^\n\nsrad.cu(237): error: declaration is incompatible with \"int printf(const char *, ...)\" (declared at line 363 of /usr/include/stdio.h)\n   printf(\"Computation Done\\n\");\n   ^\n\nsrad.cu(237): error: a value of type \"const char *\" cannot be used to initialize an entity of type \"int\"\n \n...[truncated]...\nor: this declaration has no storage class or type specifier\n   cudaFree(d_jW);\n   ^\n\nsrad.cu(255): error: variable \"cudaFree\" has already been defined\n   cudaFree(d_jW);\n   ^\n\nsrad.cu(255): error: identifier \"d_jW\" is undefined\n   cudaFree(d_jW);\n            ^\n\nsrad.cu(256): error: this declaration has no storage class or type specifier\n   cudaFree(d_jE);\n   ^\n\nsrad.cu(256): error: variable \"cudaFree\" has already been defined\n   cudaFree(d_jE);\n   ^\n\nsrad.cu(256): error: identifier \"d_jE\" is undefined\n   cudaFree(d_jE);\n            ^\n\nsrad.cu(258): error: expected a declaration\n   return 0;\n   ^\n\nsrad.cu(259): error: expected a declaration\n  }\n  ^\n\n69 errors detected in the compilation of \"srad.cu\".\nmake: *** [Makefile:12: release] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: 58): error: expected a declaration\n   return 0;\n   ^\n\nsrad.cu(259): error: expected a declaration\n  }\n  ^\n\n69 errors detected in the compilation of \"srad.cu\".\nmake: *** [Makefile:12: release] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.068,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "srad.cu": "#define OPEN\n#define ITERATION\n#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <cuda.h>\n\n#ifdef BLOCK_SIZE\n#define BLOCK_DIM BLOCK_SIZE\n#else\n#define BLOCK_DIM 16\n#endif\n\nvoid random_matrix(float *I, int rows, int cols);\n\n// CUDA kernel for computing c values\n__global__ void compute_c_kernel(float *J, float *dN, float *dS, float *dW, float *dE, \n                                  float *c, int *iN, int *iS, int *jW, int *jE,\n                                  int rows, int cols, float q0sqr)\n{\n    int i = blockIdx.y * blockDim.y + threadIdx.y;\n    int j = blockIdx.x * blockDim.x + threadIdx.x;\n    int k = i * cols + j;\n    \n    if (i < rows && j < cols) {\n        float Jc = J[k];\n        \n        dN[k] = J[iN[i] * cols + j] - Jc;\n        dS[k] = J[iS[i] * cols + j] - Jc;\n        dW[k] = J[i * cols + jW[j]] - Jc;\n        dE[k] = J[i * cols + jE[j]] - Jc;\n        \n        float G2 = (dN[k]*dN[k] + dS[k]*dS[k] + dW[k]*dW[k] + dE[k]*dE[k]) / (Jc*Jc);\n        float L = (dN[k] + dS[k] + dW[k] + dE[k]) / Jc;\n        \n        float num = (0.5*G2) - ((1.0/16.0)*(L*L));\n        float den = 1 + (.25*L);\n        float qsqr = num/(den*den);\n        \n        den = (qsqr-q0sqr) / (q0sqr * (1+q0sqr));\n        c[k] = 1.0 / (1.0+den);\n        \n        if (c[k] < 0) c[k] = 0;\n        else if (c[k] > 1) c[k] = 1;\n    }\n}\n\n// CUDA kernel for updating J values\n__global__ void update_J_kernel(float *J, float *c, float *dN, float *dS, float *dW, float *dE,\n                                 int *iN, int *iS, int *jW, int *jE,\n                                 int rows, int cols, float lambda)\n{\n    int i = blockIdx.y * blockDim.y + threadIdx.y;\n    int j = blockIdx.x * blockDim.x + threadIdx.x;\n    int k = i * cols + j;\n    \n    if (i < rows && j < cols) {\n        float cN = c[k];\n        float cS = c[iS[i] * cols + j];\n        float cW = c[k];\n        float cE = c[i * cols + jE[j]];\n        \n        float D = cN * dN[k] + cS * dS[k] + cW * dW[k] + cE * dE[k];\n        \n        J[k] = J[k] + 0.25*lambda*D;\n    }\n}\n\nvoid usage(int argc, char **argv)\n{\n\tfprintf(stderr, \"Usage: %s <rows> <cols> <y1> <y2> <x1> <x2> <no. of threads><lamda> <no. of iter>\\n\", argv[0]);\n\tfprintf(stderr, \"\\t<rows>   - number of rows\\n\");\n\tfprintf(stderr, \"\\t<cols>    - number of cols\\n\");\n\tfprintf(stderr, \"\\t<y1> \t - y1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<y2>      - y2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x1>       - x1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x2>       - x2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<no. of threads>  - no. of threads\\n\");\n\tfprintf(stderr, \"\\t<lamda>   - lambda (0,1)\\n\");\n\tfprintf(stderr, \"\\t<no. of iter>   - number of iterations\\n\");\n\t\n\texit(1);\n}\n\nint main(int argc, char* argv[])\n{   \n\tint rows, cols, size_I, size_R, niter = 10, iter, k;\n    float *I, *J, q0sqr, sum, sum2, tmp, meanROI,varROI ;\n\tfloat Jc, G2, L, num, den, qsqr;\n\tint *iN,*iS,*jE,*jW;\n\tfloat *dN,*dS,*dW,*dE;\n\tint r1, r2, c1, c2;\n\tfloat cN,cS,cW,cE;\n\tfloat *c, D;\n\tfloat lambda;\n\tint i, j;\n    int nthreads;\n\n\tif (argc == 10)\n\t{\n\t\trows = atoi(argv[1]); \n\t\tcols = atoi(argv[2]); \n\t\tif ((rows%16!=0) || (cols%16!=0)){\n\t\t\tfprintf(stderr, \"rows and cols must be multiples of 16\\n\");\n\t\t\texit(1);\n\t\t}\n\t\tr1   = atoi(argv[3]); \n\t\tr2   = atoi(argv[4]); \n\t\tc1   = atoi(argv[5]); \n\t\tc2   = atoi(argv[6]); \n\t\tnthreads = atoi(argv[7]); \n\t\tlambda = atof(argv[8]); \n\t\tniter = atoi(argv[9]); \n\t}\n    else{\n\t\tusage(argc, argv);\n    }\n\n\n\tsize_I = cols * rows;\n    size_R = (r2-r1+1)*(c2-c1+1);   \n\n\tI = (float *)malloc( size_I * sizeof(float) );\n    J = (float *)malloc( size_I * sizeof(float) );\n\tc  = (float *)malloc(sizeof(float)* size_I) ;\n\n    iN = (int *)malloc(sizeof(int) * rows) ;\n    iS = (int *)malloc(sizeof(int) * rows) ;\n    jW = (int *)malloc(sizeof(int) * cols) ;\n    jE = (int *)malloc(sizeof(int) * cols) ;    \n\n\n\tdN = (float *)malloc(sizeof(float)* size_I) ;\n    dS = (float *)malloc(sizeof(float)* size_I) ;\n    dW = (float *)malloc(sizeof(float)* size_I) ;\n    dE = (float *)malloc(sizeof(float)* size_I) ;    \n    \n\n    for (int i=0; i< rows; i++) {\n        iN[i] = i-1;\n        iS[i] = i+1;\n    }    \n    for (int j=0; j< cols; j++) {\n        jW[j] = j-1;\n        jE[j] = j+1;\n    }\n    iN[0]    = 0;\n    iS[rows-1] = rows-1;\n    jW[0]    = 0;\n    jE[cols-1] = cols-1;\n\t\n\tprintf(\"Randomizing the input matrix\\n\");\n\n    random_matrix(I, rows, cols);\n\n    for (k = 0;  k < size_I; k++ ) {\n     \tJ[k] = (float)exp(I[k]) ;\n    }\n   \n\tprintf(\"Start the SRAD main loop\\n\");\n\n\t// CUDA device memory allocation\n\tfloat *d_J, *d_dN, *d_dS, *d_dW, *d_dE, *d_c;\n\tint *d_iN, *d_iS, *d_jW, *d_jE;\n\t\n\tcudaMalloc(&d_J, size_I * sizeof(float));\n\tcudaMalloc(&d_dN, size_I * sizeof(float));\n\tcudaMalloc(&d_dS, size_I * sizeof(float));\n\tcudaMalloc(&d_dW, size_I * sizeof(float));\n\tcudaMalloc(&d_dE, size_I * sizeof(float));\n\tcudaMalloc(&d_c, size_I * sizeof(float));\n\tcudaMalloc(&d_iN, rows * sizeof(int));\n\tcudaMalloc(&d_iS, rows * sizeof(int));\n\tcudaMalloc(&d_jW, cols * sizeof(int));\n\tcudaMalloc(&d_jE, cols * sizeof(int));\n\t\n\t// Copy data to device\n\tcudaMemcpy(d_J, J, size_I * sizeof(float), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_iN, iN, rows * sizeof(int), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_iS, iS, rows * sizeof(int), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_jW, jW, cols * sizeof(int), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_jE, jE, cols * sizeof(int), cudaMemcpyHostToDevice);\n\n\t// Setup kernel dimensions\n\tdim3 blockDim(BLOCK_DIM, BLOCK_DIM);\n\tdim3 gridDim((cols + BLOCK_DIM - 1) / BLOCK_DIM, (rows + BLOCK_DIM - 1) / BLOCK_DIM);\n\n#ifdef ITERATION\n\tfor (iter=0; iter< niter; iter++){\n#endif        \n\t\tsum=0; sum2=0;     \n\t\tfor (i=r1; i<=r2; i++) {\n            for (j=c1; j<=c2; j++) {\n                tmp   = J[i * cols + j];\n                sum  += tmp ;\n                sum2 += tmp*tmp;\n            }\n        }\n        meanROI = sum / size_R;\n        varROI  = (sum2 / size_R) - meanROI*meanROI;\n        q0sqr   = varROI / (meanROI*meanROI);\n\t\t\n\n#ifdef OPEN\n\t\t// Launch compute_c kernel\n\t\tcompute_c_kernel<<<gridDim, blockDim>>>(d_J, d_dN, d_dS, d_dW, d_dE, d_c, d_iN, d_iS, d_jW, d_jE, rows, cols, q0sqr);\n\t\tcudaDeviceSynchronize();\n#endif    \n  \n    }\n#ifdef OPEN\n\t\t// Launch update_J kernel\n\t\tupdate_J_kernel<<<gridDim, blockDim>>>(d_J, d_c, d_dN, d_dS, d_dW, d_dE, d_iN, d_iS, d_jW, d_jE, rows, cols, lambda);\n\t\tcudaDeviceSynchronize();\n#endif \n\t     }\n\n#ifdef ITERATION\n\t}\n#endif\n\n\t// Copy result back to host\n\tcudaMemcpy(J, d_J, size_I * sizeof(float), cudaMemcpyDeviceToHost);\n\n#ifdef OUTPUT\n\t  for( int i = 0 ; i < rows ; i++){\n\t\tfor ( int j = 0 ; j < cols ; j++){\n\n         printf(\"%.5f \", J[i * cols + j]); \n    \n\t\t}\n         printf(\"\\n\"); \n   }\n#endif \n\n\tprintf(\"Computation Done\\n\");\n\n\tfree(I);\n\tfree(J);\n\tfree(iN); free(iS); free(jW); free(jE);\n    free(dN); free(dS); free(dW); free(dE);\n\n\tfree(c);\n\t\n\t// Free CUDA device memory\n\tcudaFree(d_J);\n\tcudaFree(d_dN);\n\tcudaFree(d_dS);\n\tcudaFree(d_dW);\n\tcudaFree(d_dE);\n\tcudaFree(d_c);\n\tcudaFree(d_iN);\n\tcudaFree(d_iS);\n\tcudaFree(d_jW);\n\tcudaFree(d_jE);\n\t\n\treturn 0;\n}\n",
+    "srad_kernel.cu": "#define OPEN\n#define ITERATION\n#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <cuda.h>\n\nvoid random_matrix(float *I, int rows, int cols){\n\n\tsrand(7);\n\t\n\tfor( int i = 0 ; i < rows ; i++){\n\t\tfor ( int j = 0 ; j < cols ; j++){\n\t\t I[i * cols + j] = rand()/(float)RAND_MAX ;\n\t\t #ifdef OUTPUT\n         \n         #endif \n\t\t}\n\t\t #ifdef OUTPUT\n         \n         #endif \n\t}\n\n}\n"
+  },
+  "target_files_expected": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "target_files_extracted": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 28.782,
+      "prompt_tokens": 2453,
+      "completion_tokens": 4725,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "srad.cu(220): error: expected a declaration\n   }\n   ^\n\nsrad.cu(224): warning #12-D: parsing restarts here after previous syntax error\n   cudaMemcpy(J, d_J, size_I * sizeof(float), cudaMemcpyDeviceToHost);\n                                                                     ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nsrad.cu(237): error: this declaration has no storage class or type specifier\n   printf(\"Computation Done\\n\");\n   ^\n\nsrad.cu(237): error: declaration is incompatible with \"int printf(const char *, ...)\" (declared at line 363 of /usr/include/stdio.h)\n   printf(\"Computation Done\\n\");\n   ^\n\nsrad.cu(237): error: a value of type \"const char *\" cannot be used to initialize an entity of type \"int\"\n \n...[truncated]...\nor: this declaration has no storage class or type specifier\n   cudaFree(d_jW);\n   ^\n\nsrad.cu(255): error: variable \"cudaFree\" has already been defined\n   cudaFree(d_jW);\n   ^\n\nsrad.cu(255): error: identifier \"d_jW\" is undefined\n   cudaFree(d_jW);\n            ^\n\nsrad.cu(256): error: this declaration has no storage class or type specifier\n   cudaFree(d_jE);\n   ^\n\nsrad.cu(256): error: variable \"cudaFree\" has already been defined\n   cudaFree(d_jE);\n   ^\n\nsrad.cu(256): error: identifier \"d_jE\" is undefined\n   cudaFree(d_jE);\n            ^\n\nsrad.cu(258): error: expected a declaration\n   return 0;\n   ^\n\nsrad.cu(259): error: expected a declaration\n  }\n  ^\n\n69 errors detected in the compilation of \"srad.cu\".\nmake: *** [Makefile:12: release] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

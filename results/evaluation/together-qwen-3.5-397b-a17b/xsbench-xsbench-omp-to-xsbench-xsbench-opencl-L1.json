@@ -1,0 +1,76 @@
+{
+  "source_spec": "xsbench-xsbench-omp",
+  "target_spec": "xsbench-xsbench-opencl",
+  "kernel": "xsbench",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1316987975,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-m",
+    "event",
+    "-s",
+    "small",
+    "-G",
+    "nuclide"
+  ],
+  "timestamp": "2026-04-24T05:55:30Z",
+  "prompt_tokens": 28434,
+  "completion_tokens": 2873,
+  "llm_response_time_seconds": 30.856,
+  "build_status": "pass",
+  "build_time_seconds": 0.464,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.282,
+  "run_exit_code": 1,
+  "run_stderr_snippet": "29 errors generated.\n",
+  "run_stdout_snippet": "=============================================\nNOTE: Timings are estimated -- use nvprof/nsys/iprof/rocprof for formal analysis\nTotal Time Statistics (OpenCL Init / JIT Compilation + Simulation Kernel)\nRuntime:     0.143 seconds\nLookups:     17,000,000\nLookups/s:   118,881,212\nSimulation Kernel Only Statistics\nRuntime:     0.026 seconds\nLookups/s:   653,845,578\nVerification checksum: 0 (WARNING - INAVALID CHECKSUM!)\n================================================================================\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.44,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel.cl": "#define MAX_SOURCE_SIZE 100000\n\ntypedef struct{\n    double energy;\n    double total_xs;\n    double elastic_xs;\n    double absorbtion_xs;\n    double fission_xs;\n    double nu_fission_xs;\n} NuclideGridPoint;\n\ntypedef struct{\n    int nthreads;\n    long n_isotopes;\n    long n_gridpoints;\n    int lookups;\n    int HM;\n    int grid_type;\n    int hash_bins;\n    int particles;\n    int simulation_method;\n    int binary_mode;\n    int kernel_id;\n    int platform_id;\n    int device_id;\n} Inputs;\n\n#define UNIONIZED 0\n#define NUCLIDE 1\n#define HASH 2\n\n#define SMALL 0\n#define LARGE 1\n#define XL 2\n#define XXL 3\n\n#define STARTING_SEED 1070\n\nconst uint64_t LCG_M = 9223372036854775808ULL;\nconst uint64_t LCG_A = 2806196910506780709ULL;\nconst uint64_t LCG_C = 1ULL;\n\ndouble LCG_random_double(uint64_t * seed)\n{\n    *seed = (LCG_A * (*seed) + LCG_C) % LCG_M;\n    return (double) (*seed) / (double) LCG_M;\n}\n\nuint64_t fast_forward_LCG(uint64_t seed, uint64_t n)\n{\n    n = n % LCG_M;\n\n    uint64_t a_new = 1;\n    uint64_t c_new = 0;\n    uint64_t a = LCG_A;\n    uint64_t c = LCG_C;\n\n    while(n > 0)\n    {\n        if(n & 1)\n        {\n            a_new *= a;\n            c_new = c_new * a + c;\n        }\n        c *= (a + 1);\n        a *= a;\n        n >>= 1;\n    }\n\n    return (a_new * seed + c_new) % LCG_M;\n}\n\nint pick_mat(uint64_t * seed)\n{\n    double dist[12];\n    dist[0]  = 0.140;\n    dist[1]  = 0.052;\n    dist[2]  = 0.275;\n    dist[3]  = 0.134;\n    dist[4]  = 0.154;\n    dist[5]  = 0.064;\n    dist[6]  = 0.066;\n    dist[7]  = 0.055;\n    dist[8]  = 0.008;\n    dist[9]  = 0.015;\n    dist[10] = 0.025;\n    dist[11] = 0.013;\n\n    double roll = LCG_random_double(seed);\n\n    for(int i = 0; i < 12; i++)\n    {\n        double running = 0;\n        for(int j = i; j > 0; j--)\n            running += dist[j];\n        if(roll < running)\n            return i;\n    }\n\n    return 0;\n}\n\nlong grid_search_nuclide(long n, double quarry, const NuclideGridPoint * A, long low, long high)\n{\n    long lowerLimit = low;\n    long upperLimit = high;\n    long examinationPoint;\n    long length = upperLimit - lowerLimit;\n\n    while(length > 1)\n    {\n        examinationPoint = lowerLimit + (length / 2);\n\n        if(A[examinationPoint].energy > quarry)\n            upperLimit = examinationPoint;\n        else\n            lowerLimit = examinationPoint;\n\n        length = upperLimit - lowerLimit;\n    }\n\n    return lowerLimit;\n}\n\nlong grid_search(long n, double quarry, const double * A)\n{\n    long lowerLimit = 0;\n    long upperLimit = n - 1;\n    long examinationPoint;\n    long length = upperLimit - lowerLimit;\n\n    while(length > 1)\n    {\n        examinationPoint = lowerLimit + (length / 2);\n\n        if(A[examinationPoint] > quarry)\n            upperLimit = examinationPoint;\n        else\n            lowerLimit = examinationPoint;\n\n        length = upperLimit - lowerLimit;\n    }\n\n    return lowerLimit;\n}\n\nvoid calculate_micro_xs(double p_energy, int nuc, long n_isotopes,\n                        long n_gridpoints,\n                        const double * egrid, const int * index_data,\n                        const NuclideGridPoint * nuclide_grids,\n                        long idx, double * xs_vector, int grid_type, int hash_bins)\n{\n    double f;\n    const NuclideGridPoint * low, * high;\n\n    if(grid_type == NUCLIDE)\n    {\n        idx = grid_search_nuclide(n_gridpoints, p_energy, &nuclide_grids[nuc * n_gridpoints], 0, n_gridpoints - 1);\n\n        if(idx == n_gridpoints - 1)\n            low = &nuclide_grids[nuc * n_gridpoints + idx - 1];\n        else\n            low = &nuclide_grids[nuc * n_gridpoints + idx];\n    }\n    else if(grid_type == UNIONIZED)\n    {\n        if(index_data[idx * n_isotopes + nuc] == n_gridpoints - 1)\n            low = &nuclide_grids[nuc * n_gridpoints + index_data[idx * n_isotopes + nuc] - 1];\n        else\n            low = &nuclide_grids[nuc * n_gridpoints + index_data[idx * n_isotopes + nuc]];\n    }\n    else\n    {\n        int u_low = index_data[idx * n_isotopes + nuc];\n\n        int u_high;\n        if(idx == hash_bins - 1)\n            u_high = n_gridpoints - 1;\n        else\n            u_high = index_data[(idx + 1) * n_isotopes + nuc] + 1;\n\n        double e_low = nuclide_grids[nuc * n_gridpoints + u_low].energy;\n        double e_high = nuclide_grids[nuc * n_gridpoints + u_high].energy;\n        int lower;\n        if(p_energy <= e_low)\n            lower = 0;\n        else if(p_energy >= e_high)\n            lower = n_gridpoints - 1;\n        else\n            lower = grid_search_nuclide(n_gridpoints, p_energy, &nuclide_grids[nuc * n_gridpoints], u_low, u_high);\n\n        if(lower == n_gridpoints - 1)\n            low = &nuclide_grids[nuc * n_gridpoints + lower - 1];\n        else\n            low = &nuclide_grids[nuc * n_gridpoints + lower];\n    }\n\n    high = low + 1;\n\n    f = (high->energy - p_energy) / (high->energy - low->energy);\n\n    xs_vector[0] = high->total_xs - f * (high->total_xs - low->total_xs);\n    xs_vector[1] = high->elastic_xs - f * (high->elastic_xs - low->elastic_xs);\n    xs_vector[2] = high->absorbtion_xs - f * (high->absorbtion_xs - low->absorbtion_xs);\n    xs_vector[3] = high->fission_xs - f * (high->fission_xs - low->fission_xs);\n    xs_vector[4] = high->nu_fission_xs - f * (high->nu_fission_xs - low->nu_fission_xs);\n}\n\nvoid calculate_macro_xs(double p_energy, int mat, long n_isotopes,\n                        long n_gridpoints, const int * num_nucs,\n                        const double * concs,\n                        const double * egrid, const int * index_data,\n                        const NuclideGridPoint * nuclide_grids,\n                        const int * mats,\n                        double * macro_xs_vector, int grid_type, int hash_bins, int max_num_nucs)\n{\n    int p_nuc;\n    long idx = -1;\n    double conc;\n\n    for(int k = 0; k < 5; k++)\n        macro_xs_vector[k] = 0;\n\n    if(grid_type == UNIONIZED)\n        idx = grid_search(n_isotopes * n_gridpoints, p_energy, egrid);\n    else if(grid_type == HASH)\n    {\n        double du = 1.0 / hash_bins;\n        idx = (long)(p_energy / du);\n    }\n\n    for(int j = 0; j < num_nucs[mat]; j++)\n    {\n        double xs_vector[5];\n        p_nuc = mats[mat * max_num_nucs + j];\n        conc = concs[mat * max_num_nucs + j];\n        calculate_micro_xs(p_energy, p_nuc, n_isotopes,\n                           n_gridpoints, egrid, index_data,\n                           nuclide_grids, idx, xs_vector, grid_type, hash_bins);\n        for(int k = 0; k < 5; k++)\n            macro_xs_vector[k] += xs_vector[k] * conc;\n    }\n}\n\n__kernel void macro_xs_lookup_kernel(__global const Inputs * in,\n                                      int max_num_nucs,\n                                      __global const int * num_nucs,\n                                      __global const double * concs,\n                                      __global const double * unionized_energy_array,\n                                      __global const int * index_grid,\n                                      __global const NuclideGridPoint * nuclide_grid,\n                                      __global const int * mats,\n                                      __global int * verification_array)\n{\n    int i = get_global_id(0);\n\n    if(i >= in->lookups)\n        return;\n\n    uint64_t seed = STARTING_SEED;\n    seed = fast_forward_LCG(seed, 2 * i);\n\n    double p_energy = LCG_random_double(&seed);\n    int mat = pick_mat(&seed);\n\n    double macro_xs_vector[5] = {0};\n\n    calculate_macro_xs(p_energy, mat, in->n_isotopes, in->n_gridpoints,\n                       num_nucs, concs, unionized_energy_array, index_grid,\n                       nuclide_grid, mats, macro_xs_vector, in->grid_type,\n                       in->hash_bins, max_num_nucs);\n\n    double max = -1.0;\n    int max_idx = 0;\n    for(int j = 0; j < 5; j++)\n    {\n        if(macro_xs_vector[j] > max)\n        {\n            max = macro_xs_vector[j];\n            max_idx = j;\n        }\n    }\n\n    verification_array[i] = max_idx + 1;\n}\n"
+  },
+  "target_files_expected": [
+    "kernel.cl"
+  ],
+  "target_files_extracted": [
+    "kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 30.856,
+      "prompt_tokens": 28434,
+      "completion_tokens": 2873,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "29 errors generated.\n",
+      "run_stdout_snippet": "=============================================\nNOTE: Timings are estimated -- use nvprof/nsys/iprof/rocprof for formal analysis\nTotal Time Statistics (OpenCL Init / JIT Compilation + Simulation Kernel)\nRuntime:     0.143 seconds\nLookups:     17,000,000\nLookups/s:   118,881,212\nSimulation Kernel Only Statistics\nRuntime:     0.026 seconds\nLookups/s:   653,845,578\nVerification checksum: 0 (WARNING - INAVALID CHECKSUM!)\n================================================================================\n",
+      "extraction_fail": null
+    }
+  ]
+}

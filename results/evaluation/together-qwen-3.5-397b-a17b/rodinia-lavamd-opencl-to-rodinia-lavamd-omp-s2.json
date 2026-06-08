@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-lavamd-opencl",
+  "target_spec": "rodinia-lavamd-omp",
+  "kernel": "lavamd",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1186288043,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T02:44:53Z",
+  "prompt_tokens": 11048,
+  "completion_tokens": 1685,
+  "llm_response_time_seconds": 15.945,
+  "build_status": "fail",
+  "build_time_seconds": 0.088,
+  "build_error_snippet": "rm: cannot remove './kernel/*.o': No such file or directory\nrm: cannot remove './util/num/*.o': No such file or directory\nrm: cannot remove './util/timer/*.o': No such file or directory\nrm: cannot remove './util/device/*.o': No such file or directory\nrm: cannot remove 'lavaMD': No such file or directory\nmake: *** [makefile:67: clean] Error 1\n\nmain.c: In function \u2018main\u2019:\nmain.c:95:20: warning: implicit declaration of function \u2018strcmp\u2019 [-Wimplicit-function-declaration]\n   95 |                 if(strcmp(argv[dim_cpu.cur_arg], \"-cores\")==0){\n      |                    ^~~~~~\nmain.c:42:1: note: include \u2018<string.h>\u2019 or provide a declaration of \u2018strcmp\u2019\n   41 | #include \"./kernel/kernel_cpu.h\"                                // (in library path specified here)\n  +++ |+#include <string.h>\n   42 | \nmain.c:253:15: warning: implicit declaration of function \u2018time\u2019 [-Wimplicit-function-declaration]\n  253 |         srand(time(NULL));\n      |               ^~~~\nmain.c:42:1: note: \u2018time\u2019 is defined in header \u2018<time.h>\u2019; did you forget to \u2018#include <time.h>\u2019?\n   41 | #include \"./kernel/kernel_cpu.h\"                                // (in library path specified here)\n  +++ |+#include <time.h>\n   42 | \n./kernel/kernel_cpu.c:10:10: fatal error: ./main.h: No such file or directory\n   10 | #include \"./main.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\nmake: *** [makefile:45: kernel/kernel_cpu.o] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: rnel_cpu.c:10:10: fatal error: ./main.h: No such file or directory\n   10 | #include \"./main.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\nmake: *** [makefile:45: kernel/kernel_cpu.o] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_cpu.c": "#ifdef __cplusplus\nextern \"C\" {\n#endif\n\n#include <omp.h>\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#include \"./main.h\"\n\n#define fp double\n\n#define NUMBER_PAR_PER_BOX 100\n\n#define NUMBER_THREADS 128\n\n#define DOT(A,B) ((A.x)*(B.x)+(A.y)*(B.y)+(A.z)*(B.z))\n\ntypedef struct\n{\n\tfp x, y, z;\n\n} THREE_VECTOR;\n\ntypedef struct\n{\n\tfp v, x, y, z;\n\n} FOUR_VECTOR;\n\ntypedef struct nei_str\n{\n\n\tint x, y, z;\n\tint number;\n\tlong offset;\n\n} nei_str;\n\ntypedef struct box_str\n{\n\n\tint x, y, z;\n\tint number;\n\tlong offset;\n\n\tint nn;\n\tnei_str nei[26];\n\n} box_str;\n\ntypedef struct par_str\n{\n\n\tfp alpha;\n\n} par_str;\n\ntypedef struct dim_str\n{\n\n\tint cur_arg;\n\tint arch_arg;\n\tint cores_arg;\n\tint boxes1d_arg;\n\n\tlong number_boxes;\n\tlong box_mem;\n\tlong space_elem;\n\tlong space_mem;\n\tlong space_mem2;\n\n} dim_str;\n\nvoid kernel_cpu(\tpar_str par_cpu,\n\t\t\t\t\tdim_str dim_cpu,\n\t\t\t\t\tbox_str* box_cpu,\n\t\t\t\t\tFOUR_VECTOR* rv_cpu,\n\t\t\t\t\tfp* qv_cpu,\n\t\t\t\t\tFOUR_VECTOR* fv_cpu)\n{\n\tint bx;\n\tint tx;\n\tint wtx;\n\n\tfp a2 = 2.0 * par_cpu.alpha * par_cpu.alpha;\n\n\tint first_i;\n\tint pointer;\n\tint k;\n\tint first_j;\n\tint j;\n\n\tfp r2;\n\tfp u2;\n\tfp vij;\n\tfp fs;\n\tfp fxij;\n\tfp fyij;\n\tfp fzij;\n\tTHREE_VECTOR d;\n\n\tFOUR_VECTOR rA_shared[NUMBER_PAR_PER_BOX];\n\tFOUR_VECTOR rB_shared[NUMBER_PAR_PER_BOX];\n\tfp qB_shared[NUMBER_PAR_PER_BOX];\n\n#pragma omp parallel for private(bx, tx, wtx, first_i, pointer, k, first_j, j, r2, u2, vij, fs, fxij, fyij, fzij, d, rA_shared, rB_shared, qB_shared)\n\tfor(bx = 0; bx < dim_cpu.number_boxes; bx++){\n\n\t\tfirst_i = box_cpu[bx].offset;\n\n\t\tfor(wtx = 0; wtx < NUMBER_PAR_PER_BOX; wtx++){\n\t\t\trA_shared[wtx] = rv_cpu[first_i + wtx];\n\t\t}\n\n\t\tfor(k = 0; k < (1 + box_cpu[bx].nn); k++){\n\n\t\t\tif(k == 0){\n\t\t\t\tpointer = bx;\n\t\t\t}\n\t\t\telse{\n\t\t\t\tpointer = box_cpu[bx].nei[k - 1].number;\n\t\t\t}\n\n\t\t\tfirst_j = box_cpu[pointer].offset;\n\n\t\t\tfor(wtx = 0; wtx < NUMBER_PAR_PER_BOX; wtx++){\n\t\t\t\trB_shared[wtx] = rv_cpu[first_j + wtx];\n\t\t\t\tqB_shared[wtx] = qv_cpu[first_j + wtx];\n\t\t\t}\n\n\t\t\tfor(wtx = 0; wtx < NUMBER_PAR_PER_BOX; wtx++){\n\n\t\t\t\tfor(j = 0; j < NUMBER_PAR_PER_BOX; j++){\n\n\t\t\t\t\tr2 = rA_shared[wtx].v + rB_shared[j].v - DOT(rA_shared[wtx], rB_shared[j]);\n\t\t\t\t\tu2 = a2 * r2;\n\t\t\t\t\tvij = exp(-u2);\n\t\t\t\t\tfs = 2.0 * vij;\n\t\t\t\t\td.x = rA_shared[wtx].x - rB_shared[j].x;\n\t\t\t\t\tfxij = fs * d.x;\n\t\t\t\t\td.y = rA_shared[wtx].y - rB_shared[j].y;\n\t\t\t\t\tfyij = fs * d.y;\n\t\t\t\t\td.z = rA_shared[wtx].z - rB_shared[j].z;\n\t\t\t\t\tfzij = fs * d.z;\n\t\t\t\t\tfv_cpu[first_i + wtx].v += qB_shared[j] * vij;\n\t\t\t\t\tfv_cpu[first_i + wtx].x += qB_shared[j] * fxij;\n\t\t\t\t\tfv_cpu[first_i + wtx].y += qB_shared[j] * fyij;\n\t\t\t\t\tfv_cpu[first_i + wtx].z += qB_shared[j] * fzij;\n\n\t\t\t\t}\n\n\t\t\t}\n\n\t\t}\n\n\t}\n\n}\n\n#ifdef __cplusplus\n}\n#endif\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_cpu.c"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_cpu.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 15.945,
+      "prompt_tokens": 11048,
+      "completion_tokens": 1685,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "rm: cannot remove './kernel/*.o': No such file or directory\nrm: cannot remove './util/num/*.o': No such file or directory\nrm: cannot remove './util/timer/*.o': No such file or directory\nrm: cannot remove './util/device/*.o': No such file or directory\nrm: cannot remove 'lavaMD': No such file or directory\nmake: *** [makefile:67: clean] Error 1\n\nmain.c: In function \u2018main\u2019:\nmain.c:95:20: warning: implicit declaration of function \u2018strcmp\u2019 [-Wimplicit-function-declaration]\n   95 |                 if(strcmp(argv[dim_cpu.cur_arg], \"-cores\")==0){\n      |                    ^~~~~~\nmain.c:42:1: note: include \u2018<string.h>\u2019 or provide a declaration of \u2018strcmp\u2019\n   41 | #include \"./kernel/kernel_cpu.h\"                                // (in library path specified here)\n  +++ |+#include <string.h>\n   42 | \nmain.c:253:15: warning: implicit declaration of function \u2018time\u2019 [-Wimplicit-function-declaration]\n  253 |         srand(time(NULL));\n      |               ^~~~\nmain.c:42:1: note: \u2018time\u2019 is defined in header \u2018<time.h>\u2019; did you forget to \u2018#include <time.h>\u2019?\n   41 | #include \"./kernel/kernel_cpu.h\"                                // (in library path specified here)\n  +++ |+#include <time.h>\n   42 | \n./kernel/kernel_cpu.c:10:10: fatal error: ./main.h: No such file or directory\n   10 | #include \"./main.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\nmake: *** [makefile:45: kernel/kernel_cpu.o] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

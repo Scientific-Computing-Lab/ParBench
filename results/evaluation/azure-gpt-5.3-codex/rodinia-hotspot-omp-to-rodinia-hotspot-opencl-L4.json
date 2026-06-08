@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-hotspot-omp",
+  "target_spec": "rodinia-hotspot-opencl",
+  "kernel": "hotspot",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 325865020,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-05-01T00:44:13Z",
+  "prompt_tokens": 7488,
+  "completion_tokens": 2787,
+  "llm_response_time_seconds": 29.763,
+  "build_status": "pass",
+  "build_time_seconds": 0.178,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.284,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nPlatform: NVIDIA Corporation\nnum_devices = 1\nDevice: NVIDIA GeForce RTX 4070\nUse GPU device\nInit: 144.949997\nMemAlloc: 0.003000\nHtoD: 0.430000\nExec: 0.026688\nDtoH: 0.039776\nClose: 0.330000\nTotal: 187.785995\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.159,
+  "translated_wall_time_seconds": 0.284,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.5599,
+  "translated_files": {
+    "hotspot_kernel.cl": "#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\n#define IN_RANGE(x, min, max) ((x) >= (min) && (x) <= (max))\n\n__kernel void hotspot(\n    int iteration,\n    __global float *power,\n    __global float *temp_src,\n    __global float *temp_dst,\n    int grid_cols,\n    int grid_rows,\n    int border_cols,\n    int border_rows,\n    float Cap,\n    float Rx,\n    float Ry,\n    float Rz,\n    float step)\n{\n    const float amb_temp = 80.0f;\n\n    int bx = get_group_id(0);\n    int by = get_group_id(1);\n\n    int tx = get_local_id(0);\n    int ty = get_local_id(1);\n\n    int small_block_cols = BLOCK_SIZE - iteration * 2;\n    int small_block_rows = BLOCK_SIZE - iteration * 2;\n\n    int blkX = small_block_cols * bx - border_cols;\n    int blkY = small_block_rows * by - border_rows;\n\n    int xidx = blkX + tx;\n    int yidx = blkY + ty;\n\n    int load_x = xidx;\n    int load_y = yidx;\n\n    if (load_x < 0) load_x = 0;\n    if (load_x > grid_cols - 1) load_x = grid_cols - 1;\n    if (load_y < 0) load_y = 0;\n    if (load_y > grid_rows - 1) load_y = grid_rows - 1;\n\n    int load_index = load_y * grid_cols + load_x;\n\n    __local float temp_l[BLOCK_SIZE][BLOCK_SIZE];\n    __local float power_l[BLOCK_SIZE][BLOCK_SIZE];\n\n    temp_l[ty][tx] = temp_src[load_index];\n    power_l[ty][tx] = power[load_index];\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    int valid_x_min = (blkX < 0) ? -blkX : 0;\n    int valid_y_min = (blkY < 0) ? -blkY : 0;\n    int valid_x_max = (blkX + BLOCK_SIZE > grid_cols) ? (grid_cols - blkX - 1) : (BLOCK_SIZE - 1);\n    int valid_y_max = (blkY + BLOCK_SIZE > grid_rows) ? (grid_rows - blkY - 1) : (BLOCK_SIZE - 1);\n\n    float temp_t = temp_l[ty][tx];\n\n    int N = ty - 1;\n    int S = ty + 1;\n    int W = tx - 1;\n    int E = tx + 1;\n\n    int computed;\n\n    for (int i = 0; i < iteration; i++) {\n        computed =\n            IN_RANGE(tx, i + 1, BLOCK_SIZE - i - 2) &&\n            IN_RANGE(ty, i + 1, BLOCK_SIZE - i - 2) &&\n            IN_RANGE(tx, valid_x_min, valid_x_max) &&\n            IN_RANGE(ty, valid_y_min, valid_y_max);\n\n        if (computed) {\n            float center = temp_l[ty][tx];\n            float north = temp_l[N][tx];\n            float south = temp_l[S][tx];\n            float west  = temp_l[ty][W];\n            float east  = temp_l[ty][E];\n\n            float delta =\n                (power_l[ty][tx]) +\n                (south + north - 2.0f * center) / Ry +\n                (east + west - 2.0f * center) / Rx +\n                (amb_temp - center) / Rz;\n\n            temp_t = center + (step / (Cap * 1000.0f)) * delta;\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n\n        if (i == iteration - 1) break;\n\n        if (computed) {\n            temp_l[ty][tx] = temp_t;\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    if (IN_RANGE(tx, iteration, BLOCK_SIZE - iteration - 1) &&\n        IN_RANGE(ty, iteration, BLOCK_SIZE - iteration - 1) &&\n        IN_RANGE(tx, valid_x_min, valid_x_max) &&\n        IN_RANGE(ty, valid_y_min, valid_y_max)) {\n        int out_index = yidx * grid_cols + xidx;\n        temp_dst[out_index] = temp_t;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "hotspot_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspot_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 29.763,
+      "prompt_tokens": 7488,
+      "completion_tokens": 2787,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

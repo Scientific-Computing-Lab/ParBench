@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-pathfinder-cuda",
+  "target_spec": "rodinia-pathfinder-opencl",
+  "kernel": "pathfinder",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 505251691,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-c",
+    "100000",
+    "-r",
+    "100",
+    "-h",
+    "20"
+  ],
+  "timestamp": "2026-04-26T03:27:14Z",
+  "prompt_tokens": 4657,
+  "completion_tokens": 2030,
+  "llm_response_time_seconds": 47.315,
+  "build_status": "pass",
+  "build_time_seconds": 0.482,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.261,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Init: 140.556000\nMemAlloc: 0.004000\nHtoD: 2.257664\nExec: 0.394560\nDtoH: 0.017600\nClose: 0.858000\nTotal: 147.065002\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.261,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernels.cl": "#define IN_RANGE(x, min, max)   ((x) >= (min) && (x) <= (max))\n#define MIN(a, b)               ((a) <= (b) ? (a) : (b))\n\n__kernel void dynproc_kernel(\n    int iteration,\n    __global int *gpuWall,\n    __global int *gpuSrc,\n    __global int *gpuResults,\n    int cols,\n    int rows,\n    int startStep,\n    int border,\n    int HALO,\n    __local int *prev,\n    __local int *result,\n    __global int *outputBuffer)\n{\n    size_t bx = get_group_id(0);\n    size_t tx = get_local_id(0);\n    int block_size = (int)get_local_size(0);\n\n    int pyramid_height = border / HALO;\n    int smallBlockCol_host = block_size - pyramid_height * HALO * 2;\n    if (smallBlockCol_host <= 0) {\n        return;\n    }\n    int blockCols_host = cols / smallBlockCol_host + ((cols % smallBlockCol_host == 0) ? 0 : 1);\n    if ((int)bx >= blockCols_host) {\n        return;\n    }\n\n    int small_block_cols = block_size - iteration * HALO * 2;\n\n    int blkX = small_block_cols * (int)bx - border;\n    int blkXmax = blkX + block_size - 1;\n\n    int xidx = blkX + (int)tx;\n\n    int validXmin = (blkX < 0) ? -blkX : 0;\n    int validXmax = (blkXmax > cols - 1) ? block_size - 1 - (blkXmax - cols + 1) : block_size - 1;\n\n    int W = (int)tx - 1;\n    int E = (int)tx + 1;\n\n    W = (W < validXmin) ? validXmin : W;\n    E = (E > validXmax) ? validXmax : E;\n\n    int isValid = IN_RANGE((int)tx, validXmin, validXmax);\n\n    if (IN_RANGE(xidx, 0, cols - 1)) {\n        prev[tx] = gpuSrc[xidx];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    int computed = 0;\n    for (int i = 0; i < iteration; i++) {\n        computed = 0;\n        if (IN_RANGE((int)tx, i + 1, block_size - i - 2) && isValid) {\n            computed = 1;\n            int left = prev[W];\n            int up = prev[tx];\n            int right = prev[E];\n            int shortest = MIN(left, up);\n            shortest = MIN(shortest, right);\n            int index = cols * (startStep + i) + xidx;\n            result[tx] = shortest + gpuWall[index];\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n\n        if (i == iteration - 1) {\n            break;\n        }\n\n        if (computed) {\n            prev[tx] = result[tx];\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    if (computed) {\n        gpuResults[xidx] = result[tx];\n    }\n\n    (void)rows;\n    (void)outputBuffer;\n}\n"
+  },
+  "target_files_expected": [
+    "kernels.cl"
+  ],
+  "target_files_extracted": [
+    "kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 47.315,
+      "prompt_tokens": 4657,
+      "completion_tokens": 2030,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

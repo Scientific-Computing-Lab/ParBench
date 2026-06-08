@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-srad-cuda",
+  "target_spec": "rodinia-srad-opencl",
+  "kernel": "srad",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 262673342,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "502",
+    "458",
+    "-n",
+    "2",
+    "-l",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-21T23:43:10Z",
+  "prompt_tokens": 13937,
+  "completion_tokens": 1864,
+  "llm_response_time_seconds": 13.029,
+  "build_status": "pass",
+  "build_time_seconds": 0.253,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.16,
+  "run_exit_code": 245,
+  "run_stderr_snippet": "4 errors generated.\n",
+  "run_stdout_snippet": " of kernel = 256 \nPlatform: NVIDIA Corporation\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n<<<<\n<kernel>:13:1: error: unknown type name '__global__'\n__global__ void\n^\n<kernel>:13:12: error: expected identifier or '('\n__global__ void\n           ^\n<kernel>:64:1: error: unknown type name '__global__'\n__global__ void\n^\n<kernel>:64:12: error: expected identifier or '('\n__global__ void\n           ^\n\n>>>>\n--------------------------------\nError at line 247: CL_BUILD_PROGRAM_FAILURE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 245)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.085,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#define STR_SIZE 256\n\n#ifdef RD_WG_SIZE_0_0\n        #define BLOCK_SIZE RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n        #define BLOCK_SIZE RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n        #define BLOCK_SIZE RD_WG_SIZE\n#else\n        #define BLOCK_SIZE 16\n#endif\n\n__global__ void\nsrad_kernel(\n          float lambda,\n          int rows,\n          int cols,\n          long size_I,\n          int *iN,\n          int *iS,\n          int *jE,\n          int *jW,\n          float *dN,\n          float *dS,\n          float *dW,\n          float *dE,\n          float q0sqr,\n          float *c,\n          float *J\n)\n{\n  int idx = get_global_id(0);\n  \n  if (idx >= size_I) return;\n  \n  int i = idx / cols;\n  int j = idx % cols;\n  \n  float Jc = J[idx];\n  \n  dN[idx] = J[iN[i] * cols + j] - Jc;\n  dS[idx] = J[iS[i] * cols + j] - Jc;\n  dW[idx] = J[i * cols + jW[j]] - Jc;\n  dE[idx] = J[i * cols + jE[j]] - Jc;\n  \n  float G2 = (dN[idx]*dN[idx] + dS[idx]*dS[idx] \n            + dW[idx]*dW[idx] + dE[idx]*dE[idx]) / (Jc*Jc);\n  \n  float L = (dN[idx] + dS[idx] + dW[idx] + dE[idx]) / Jc;\n  \n  float num = (0.5*G2) - ((1.0/16.0)*(L*L));\n  float den = 1 + (.25*L);\n  float qsqr = num/(den*den);\n  \n  den = (qsqr-q0sqr) / (q0sqr * (1+q0sqr));\n  float coeff = 1.0 / (1.0+den);\n  \n  if (coeff < 0) coeff = 0;\n  else if (coeff > 1) coeff = 1;\n  \n  c[idx] = coeff;\n}\n\n__global__ void\nsrad2_kernel(\n          float lambda,\n          int rows,\n          int cols,\n          long size_I,\n          int *iN,\n          int *iS,\n          int *jE,\n          int *jW,\n          float *dN,\n          float *dS,\n          float *dW,\n          float *dE,\n          float *c,\n          float *J\n)\n{\n  int idx = get_global_id(0);\n  \n  if (idx >= size_I) return;\n  \n  int i = idx / cols;\n  int j = idx % cols;\n  \n  float cN = c[idx];\n  float cS = c[iS[i] * cols + j];\n  float cW = c[idx];\n  float cE = c[i * cols + jE[j]];\n  \n  float D = cN * dN[idx] + cS * dS[idx] + cW * dW[idx] + cE * dE[idx];\n  \n  J[idx] = J[idx] + 0.25*lambda*D;\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 13.029,
+      "prompt_tokens": 13937,
+      "completion_tokens": 1864,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "4 errors generated.\n",
+      "run_stdout_snippet": " of kernel = 256 \nPlatform: NVIDIA Corporation\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n<<<<\n<kernel>:13:1: error: unknown type name '__global__'\n__global__ void\n^\n<kernel>:13:12: error: expected identifier or '('\n__global__ void\n           ^\n<kernel>:64:1: error: unknown type name '__global__'\n__global__ void\n^\n<kernel>:64:12: error: expected identifier or '('\n__global__ void\n           ^\n\n>>>>\n--------------------------------\nError at line 247: CL_BUILD_PROGRAM_FAILURE\n",
+      "extraction_fail": null
+    }
+  ]
+}

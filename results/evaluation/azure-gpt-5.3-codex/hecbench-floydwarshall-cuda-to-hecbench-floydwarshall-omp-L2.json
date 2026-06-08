@@ -1,0 +1,78 @@
+{
+  "source_spec": "hecbench-floydwarshall-cuda",
+  "target_spec": "hecbench-floydwarshall-omp",
+  "kernel": "floydwarshall",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1899745295,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "1024",
+    "1",
+    "16"
+  ],
+  "timestamp": "2026-04-30T21:36:56Z",
+  "prompt_tokens": 1820,
+  "completion_tokens": 2413,
+  "llm_response_time_seconds": 24.591,
+  "build_status": "pass",
+  "build_time_seconds": 0.127,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.589,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Average kernel execution time 0.082137 (s)\nPASS\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 0.082137,
+      "unit": "s"
+    }
+  },
+  "baseline_wall_time_seconds": 1.297,
+  "translated_wall_time_seconds": 0.589,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 2.202,
+  "translated_files": {
+    "main.cpp": "#include <stdio.h>\n#include <stdlib.h>\n#include <assert.h>\n#include <string.h>\n#include <chrono>\n#include <omp.h>\n\n#define MAXDISTANCE    (200)\n\nunsigned int minimum(unsigned int a, unsigned int b)\n{\n  return (b < a) ? b : a;\n}\n\nvoid floydWarshallCPUReference(unsigned int * pathDistanceMatrix,\n    unsigned int * pathMatrix, unsigned int numNodes)\n{\n  unsigned int distanceYtoX, distanceYtoK, distanceKtoX, indirectDistance;\n  unsigned int width = numNodes;\n  unsigned int yXwidth;\n\n  for(unsigned int k = 0; k < numNodes; ++k)\n  {\n    for(unsigned int y = 0; y < numNodes; ++y)\n    {\n      yXwidth =  y*numNodes;\n      for(unsigned int x = 0; x < numNodes; ++x)\n      {\n        distanceYtoX = pathDistanceMatrix[yXwidth + x];\n        distanceYtoK = pathDistanceMatrix[yXwidth + k];\n        distanceKtoX = pathDistanceMatrix[k * width + x];\n\n        indirectDistance = distanceYtoK + distanceKtoX;\n\n        if(indirectDistance < distanceYtoX)\n        {\n          pathDistanceMatrix[yXwidth + x] = indirectDistance;\n          pathMatrix[yXwidth + x]         = k;\n        }\n      }\n    }\n  }\n}\n\nvoid floydWarshallPass(\n    unsigned int *__restrict__ pathDistanceBuffer,\n    unsigned int *__restrict__ pathBuffer,\n    const unsigned int numNodes,\n    const unsigned int pass)\n{\n  int k = (int)pass;\n\n  #pragma omp parallel for collapse(2) schedule(static)\n  for (int yValue = 0; yValue < (int)numNodes; yValue++)\n  {\n    for (int xValue = 0; xValue < (int)numNodes; xValue++)\n    {\n      int oldWeight = (int)pathDistanceBuffer[yValue * (int)numNodes + xValue];\n      int tempWeight = (int)pathDistanceBuffer[yValue * (int)numNodes + k] +\n                       (int)pathDistanceBuffer[k * (int)numNodes + xValue];\n\n      if (tempWeight < oldWeight)\n      {\n        pathDistanceBuffer[yValue * (int)numNodes + xValue] = (unsigned int)tempWeight;\n        pathBuffer[yValue * (int)numNodes + xValue] = (unsigned int)k;\n      }\n    }\n  }\n}\n\nint main(int argc, char** argv) {\n  if (argc != 4) {\n    printf(\"Usage: %s <number of nodes> <iterations> <block size>\\n\", argv[0]);\n    return 1;\n  }\n\n  unsigned int numNodes = atoi(argv[1]);\n  unsigned int numIterations = atoi(argv[2]);\n  unsigned int blockSize = atoi(argv[3]);\n\n  if(numNodes % blockSize != 0) {\n    numNodes = (numNodes / blockSize + 1) * blockSize;\n  }\n\n  unsigned int* pathMatrix = NULL;\n  unsigned int* pathDistanceMatrix = NULL;\n  unsigned int* verificationPathDistanceMatrix = NULL;\n  unsigned int* verificationPathMatrix = NULL;\n  unsigned int matrixSizeBytes;\n\n  matrixSizeBytes = numNodes * numNodes * sizeof(unsigned int);\n  pathDistanceMatrix = (unsigned int *) malloc(matrixSizeBytes);\n  assert (pathDistanceMatrix != NULL);\n\n  pathMatrix = (unsigned int *) malloc(matrixSizeBytes);\n  assert (pathMatrix != NULL) ;\n\n  srand(2);\n  for(unsigned int i = 0; i < numNodes; i++)\n    for(unsigned int j = 0; j < numNodes; j++)\n    {\n      int index = i*numNodes + j;\n      pathDistanceMatrix[index] = rand() % (MAXDISTANCE + 1);\n    }\n  for(unsigned int i = 0; i < numNodes; ++i)\n  {\n    unsigned int iXWidth = i * numNodes;\n    pathDistanceMatrix[iXWidth + i] = 0;\n  }\n\n  for(unsigned int i = 0; i < numNodes; ++i)\n  {\n    for(unsigned int j = 0; j < i; ++j)\n    {\n      pathMatrix[i * numNodes + j] = i;\n      pathMatrix[j * numNodes + i] = j;\n    }\n    pathMatrix[i * numNodes + i] = i;\n  }\n\n  verificationPathDistanceMatrix = (unsigned int *) malloc(numNodes * numNodes * sizeof(int));\n  assert (verificationPathDistanceMatrix != NULL);\n\n  verificationPathMatrix = (unsigned int *) malloc(numNodes * numNodes * sizeof(int));\n  assert(verificationPathMatrix != NULL);\n\n  memcpy(verificationPathDistanceMatrix, pathDistanceMatrix,\n      numNodes * numNodes * sizeof(int));\n  memcpy(verificationPathMatrix, pathMatrix, numNodes*numNodes*sizeof(int));\n\n  unsigned int numPasses = numNodes;\n\n  unsigned int globalThreads[2] = {numNodes, numNodes};\n  unsigned int localThreads[2] = {blockSize, blockSize};\n\n  if((unsigned int)(localThreads[0] * localThreads[0]) >256)\n  {\n    blockSize = 16;\n    localThreads[0] = blockSize;\n    localThreads[1] = blockSize;\n  }\n\n  (void)globalThreads;\n  (void)localThreads;\n\n  unsigned int *pathDistanceBuffer, *pathBuffer;\n  pathDistanceBuffer = (unsigned int*)malloc(matrixSizeBytes);\n  pathBuffer = (unsigned int*)malloc(matrixSizeBytes);\n  assert(pathDistanceBuffer != NULL);\n  assert(pathBuffer != NULL);\n\n  float total_time = 0.f;\n\n  for (unsigned int n = 0; n < numIterations; n++) {\n    memcpy(pathDistanceBuffer, pathDistanceMatrix, matrixSizeBytes);\n\n    auto start = std::chrono::steady_clock::now();\n\n    for(unsigned int i = 0; i < numPasses; i++)\n    {\n      floydWarshallPass(pathDistanceBuffer, pathBuffer, numNodes, i);\n    }\n\n    auto end = std::chrono::steady_clock::now();\n    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n    total_time += time;\n  }\n\n  printf(\"Average kernel execution time %f (s)\\n\", (total_time * 1e-9f) / numIterations);\n\n  memcpy(pathDistanceMatrix, pathDistanceBuffer, matrixSizeBytes);\n  free(pathDistanceBuffer);\n  free(pathBuffer);\n\n  floydWarshallCPUReference(verificationPathDistanceMatrix, verificationPathMatrix, numNodes);\n  if(memcmp(pathDistanceMatrix, verificationPathDistanceMatrix, matrixSizeBytes) == 0)\n  {\n    printf(\"PASS\\n\");\n  }\n  else\n  {\n    printf(\"FAIL\\n\");\n    if (numNodes <= 8)\n    {\n      for (unsigned int i = 0; i < numNodes; i++) {\n        for (unsigned int j = 0; j < numNodes; j++)\n          printf(\"host: %u \", verificationPathDistanceMatrix[i*numNodes+j]);\n        printf(\"\\n\");\n      }\n      for (unsigned int i = 0; i < numNodes; i++) {\n        for (unsigned int j = 0; j < numNodes; j++)\n          printf(\"device: %u \", pathDistanceMatrix[i*numNodes+j]);\n        printf(\"\\n\");\n      }\n    }\n  }\n\n  free(pathDistanceMatrix);\n  free(pathMatrix);\n  free(verificationPathDistanceMatrix);\n  free(verificationPathMatrix);\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cpp"
+  ],
+  "target_files_extracted": [
+    "main.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 24.591,
+      "prompt_tokens": 1820,
+      "completion_tokens": 2413,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

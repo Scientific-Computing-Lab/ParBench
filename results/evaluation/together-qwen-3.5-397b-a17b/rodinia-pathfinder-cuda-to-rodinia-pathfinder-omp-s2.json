@@ -1,0 +1,73 @@
+{
+  "source_spec": "rodinia-pathfinder-cuda",
+  "target_spec": "rodinia-pathfinder-omp",
+  "kernel": "pathfinder",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1195499398,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "100000",
+    "100",
+    "20"
+  ],
+  "timestamp": "2026-04-21T21:36:05Z",
+  "prompt_tokens": 2397,
+  "completion_tokens": 3490,
+  "llm_response_time_seconds": 20.003,
+  "build_status": "pass",
+  "build_time_seconds": 0.063,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 14.445,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "pyramidHeight: 20\ngridSize: [100000]\nborder:[20]\nblockSize: 256\nblockGrid:[463]\ntargetBlock:[216]\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": 14.445,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0001,
+  "translated_files": {
+    "pathfinder.cpp": "#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <assert.h>\n#include <omp.h>\n\n#ifdef TIMING\n#include \"timing.h\"\n\nstruct timeval tv;\nstruct timeval tv_total_start, tv_total_end;\nstruct timeval tv_h2d_start, tv_h2d_end;\nstruct timeval tv_d2h_start, tv_d2h_end;\nstruct timeval tv_kernel_start, tv_kernel_end;\nstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\nstruct timeval tv_close_start, tv_close_end;\nfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n      d2h_time = 0, close_time = 0, total_time = 0;\n#endif\n\n#define BLOCK_SIZE 256\n#define STR_SIZE 256\n#define DEVICE 0\n#define HALO 1 \n\nvoid run(int argc, char** argv);\n\nint rows, cols;\nint* data;\nint** wall;\nint* result;\n#define M_SEED 9\nint pyramid_height;\n\nvoid\ninit(int argc, char** argv)\n{\n\tif(argc==4){\n\t\tcols = atoi(argv[1]);\n\t\trows = atoi(argv[2]);\n        pyramid_height=atoi(argv[3]);\n\t}else{\n        printf(\"Usage: dynproc row_len col_len pyramid_height\\n\");\n        exit(0);\n    }\n\tdata = new int[rows*cols];\n\twall = new int*[rows];\n\tfor(int n=0; n<rows; n++)\n\t\twall[n]=data+cols*n;\n\tresult = new int[cols];\n\t\n\tint seed = M_SEED;\n\tsrand(seed);\n\n\tfor (int i = 0; i < rows; i++)\n    {\n        for (int j = 0; j < cols; j++)\n        {\n            wall[i][j] = rand() % 10;\n        }\n    }\n#ifdef BENCH_PRINT\n    for (int i = 0; i < rows; i++)\n    {\n        for (int j = 0; j < cols; j++)\n        {\n            printf(\"%d \",wall[i][j]) ;\n        }\n        printf(\"\\n\") ;\n    }\n#endif\n}\n\nvoid \nfatal(char *s)\n{\n\tfprintf(stderr, \"error: %s\\n\", s);\n\n}\n\n#define IN_RANGE(x, min, max)   ((x)>=(min) && (x)<=(max))\n#define CLAMP_RANGE(x, min, max) x = (x<(min)) ? min : ((x>(max)) ? max : x )\n#define MIN(a, b) ((a)<=(b) ? (a) : (b))\n\nvoid dynproc_kernel(\n                int iteration, \n                int *gpuWall,\n                int *gpuSrc,\n                int *gpuResults,\n                int cols, \n                int rows,\n                int startStep,\n                int border,\n                int bx)\n{\n\tint tx = omp_get_thread_num();\n\t\n\tint small_block_cols = BLOCK_SIZE-iteration*HALO*2;\n\n\tint blkX = small_block_cols*bx-border;\n\tint blkXmax = blkX+BLOCK_SIZE-1;\n\n\tint xidx = blkX+tx;\n\n\tint validXmin = (blkX < 0) ? -blkX : 0;\n\tint validXmax = (blkXmax > cols-1) ? BLOCK_SIZE-1-(blkXmax-cols+1) : BLOCK_SIZE-1;\n\n\tint W = tx-1;\n\tint E = tx+1;\n\t\n\tW = (W < validXmin) ? validXmin : W;\n\tE = (E > validXmax) ? validXmax : E;\n\n\tbool isValid = IN_RANGE(tx, validXmin, validXmax);\n\n\tint prev[BLOCK_SIZE];\n\tint result[BLOCK_SIZE];\n\n\tif(IN_RANGE(xidx, 0, cols-1)){\n\t\tprev[tx] = gpuSrc[xidx];\n\t}\n\t#pragma omp barrier\n\t\n\tbool computed;\n\tfor (int i=0; i<iteration ; i++){ \n\t\tcomputed = false;\n\t\tif( IN_RANGE(tx, i+1, BLOCK_SIZE-i-2) && isValid){\n\t\t\tcomputed = true;\n\t\t\tint left = prev[W];\n\t\t\tint up = prev[tx];\n\t\t\tint right = prev[E];\n\t\t\tint shortest = MIN(left, up);\n\t\t\tshortest = MIN(shortest, right);\n\t\t\tint index = cols*(startStep+i)+xidx;\n\t\t\tresult[tx] = shortest + gpuWall[index];\n\t\n\t\t}\n\t\t#pragma omp barrier\n\t\tif(i==iteration-1)\n\t\t\tbreak;\n\t\tif(computed)\t \n\t\t\tprev[tx]= result[tx];\n\t\t#pragma omp barrier \n\t}\n\n\tif (computed){\n\t\tgpuResults[xidx]=result[tx];\t\t\n\t}\n}\n\nint calc_path(int *gpuWall, int *gpuResult[2], int rows, int cols, \n\t int pyramid_height, int blockCols, int borderCols)\n{\n\tint src = 1, dst = 0;\n\tfor (int t = 0; t < rows-1; t+=pyramid_height) {\n\t\tint temp = src;\n\t\tsrc = dst;\n\t\tdst = temp;\n\t\t\n\t\t#pragma omp parallel num_threads(BLOCK_SIZE)\n\t\t{\n\t\t\tint bx = 0;\n\t\t\twhile(bx < blockCols) {\n\t\t\t\tdynproc_kernel(\n\t\t\t\t\tMIN(pyramid_height, rows-t-1), \n\t\t\t\t\tgpuWall, gpuResult[src], gpuResult[dst],\n\t\t\t\t\tcols,rows, t, borderCols, bx);\n\t\t\t\tbx++;\n\t\t\t}\n\t\t}\n\t}\n\treturn dst;\n}\n\nint main(int argc, char** argv)\n{\n\trun(argc,argv);\n\n\treturn EXIT_SUCCESS;\n}\n\nvoid run(int argc, char** argv)\n{\n\tinit(argc, argv);\n\n\tint borderCols = (pyramid_height)*HALO;\n\tint smallBlockCol = BLOCK_SIZE-(pyramid_height)*HALO*2;\n\tint blockCols = cols/smallBlockCol+((cols%smallBlockCol==0)?0:1);\n\n\tprintf(\"pyramidHeight: %d\\ngridSize: [%d]\\nborder:[%d]\\nblockSize: %d\\nblockGrid:[%d]\\ntargetBlock:[%d]\\n\",\n\tpyramid_height, cols, borderCols, BLOCK_SIZE, blockCols, smallBlockCol);\n\t\n\tint *gpuWall, *gpuResult[2];\n\tint size = rows*cols;\n\n\tgpuResult[0] = (int*)malloc(sizeof(int)*cols);\n\tgpuResult[1] = (int*)malloc(sizeof(int)*cols);\n\tfor(int i=0; i<cols; i++) gpuResult[0][i] = data[i];\n\tgpuWall = (int*)malloc(sizeof(int)*(size-cols));\n\tfor(int i=0; i<size-cols; i++) gpuWall[i] = data[cols+i];\n\n#ifdef  TIMING\n\tgettimeofday(&tv_kernel_start, NULL);\n#endif\n\n\tint final_ret = calc_path(gpuWall, gpuResult, rows, cols, \n\t pyramid_height, blockCols, borderCols);\n\n#ifdef  TIMING\n\tgettimeofday(&tv_kernel_end, NULL);\n\ttvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n\tkernel_time += tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n\tfor(int i=0; i<cols; i++) result[i] = gpuResult[final_ret][i];\n\n#ifdef BENCH_PRINT\n\tfor (int i = 0; i < cols; i++)\n\t\tprintf(\"%d \",data[i]) ;\n\tprintf(\"\\n\") ;\n\tfor (int i = 0; i < cols; i++)\n\t\tprintf(\"%d \",result[i]) ;\n\tprintf(\"\\n\") ;\n#endif\n\n\tfree(gpuWall);\n\tfree(gpuResult[0]);\n\tfree(gpuResult[1]);\n\n\tdelete [] data;\n\tdelete [] wall;\n\tdelete [] result;\n\n#ifdef  TIMING\n\tprintf(\"Exec: %f\\n\", kernel_time);\n#endif\n}\n"
+  },
+  "target_files_expected": [
+    "pathfinder.cpp"
+  ],
+  "target_files_extracted": [
+    "pathfinder.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 20.003,
+      "prompt_tokens": 2397,
+      "completion_tokens": 3490,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

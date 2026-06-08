@@ -1,0 +1,81 @@
+{
+  "source_spec": "hecbench-scan-omp",
+  "target_spec": "hecbench-scan-cuda",
+  "kernel": "scan",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1295809197,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "10000",
+    "1"
+  ],
+  "timestamp": "2026-04-26T12:55:22Z",
+  "prompt_tokens": 2055,
+  "completion_tokens": 5718,
+  "llm_response_time_seconds": 117.831,
+  "build_status": "pass",
+  "build_time_seconds": 1.812,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.152,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "can (w/o bank conflicts): 6.382000 (us). Reduce the time by 14.8%\nElement size in bytes is 4. Average execution time of scan (w/  bank conflicts): 13.145000 (us)\nElement size in bytes is 4. Average execution time of scan (w/o bank conflicts): 6.352000 (us). Reduce the time by 51.7%\nElement size in bytes is 8. Average execution time of scan (w/  bank conflicts): 19.175001 (us)\nElement size in bytes is 8. Average execution time of scan (w/o bank conflicts): 7.554000 (us). Reduce the time by 60.6%\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "scan_with_bank_conflicts": {
+      "value": 6.061,
+      "unit": "us"
+    },
+    "scan_without_bank_conflicts": {
+      "value": 4.959,
+      "unit": "us"
+    }
+  },
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.152,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <stdint.h>\n#include <chrono>\n#include <cuda_runtime.h>\n\ntemplate<typename T>\nvoid verify(const T* ref_out, const T* out, int64_t n)\n{\n  int error = memcmp(ref_out, out, n * (int64_t)sizeof(T));\n  if (error) {\n    for (int64_t i = 0; i < n; i++) {\n      if (ref_out[i] != out[i]) {\n        printf(\"@%zu: %lf != %lf\\n\", (size_t)i, (double)ref_out[i], (double)out[i]);\n        break;\n      }\n    }\n  }\n  printf(\"%s\\n\", error ? \"FAIL\" : \"PASS\");\n}\n\n#define LOG_MEM_BANKS 5\n#define OFFSET(n) ((n) >> LOG_MEM_BANKS)\n\nstatic inline void cuda_check(cudaError_t err)\n{\n  if (err != cudaSuccess) {\n    fprintf(stderr, \"CUDA error: %s\\n\", cudaGetErrorString(err));\n    exit(1);\n  }\n}\n\ntemplate<typename T, int N>\n__global__ void scan_with_bank_conflicts(const T* in, T* out, int64_t num_blocks)\n{\n  if ((int64_t)blockIdx.x >= num_blocks) return;\n  const int thid = threadIdx.x;\n  if (thid >= (N / 2)) return;\n\n  extern __shared__ __align__(16) unsigned char smem_raw[];\n  T* temp = reinterpret_cast<T*>(smem_raw);\n\n  int64_t bid = (int64_t)blockIdx.x;\n  const T* t_in = in + bid * N;\n  T* t_out = out + bid * N;\n\n  int offset = 1;\n\n  temp[2 * thid]     = t_in[2 * thid];\n  temp[2 * thid + 1] = t_in[2 * thid + 1];\n\n  for (int d = N >> 1; d > 0; d >>= 1) {\n    __syncthreads();\n    if (thid < d) {\n      int ai = offset * (2 * thid + 1) - 1;\n      int bi = offset * (2 * thid + 2) - 1;\n      temp[bi] += temp[ai];\n    }\n    offset *= 2;\n  }\n\n  if (thid == 0) temp[N - 1] = 0;\n\n  for (int d = 1; d < N; d *= 2) {\n    offset >>= 1;\n    __syncthreads();\n    if (thid < d) {\n      int ai = offset * (2 * thid + 1) - 1;\n      int bi = offset * (2 * thid + 2) - 1;\n      T t = temp[ai];\n      temp[ai] = temp[bi];\n      temp[bi] += t;\n    }\n  }\n\n  t_out[2 * thid]     = temp[2 * thid];\n  t_out[2 * thid + 1] = temp[2 * thid + 1];\n}\n\ntemplate<typename T, int N>\n__global__ void scan_without_bank_conflicts(const T* in, T* out, int64_t num_blocks)\n{\n  if ((int64_t)blockIdx.x >= num_blocks) return;\n  const int thid = threadIdx.x;\n  if (thid >= (N / 2)) return;\n\n  extern __shared__ __align__(16) unsigned char smem_raw[];\n  T* temp = reinterpret_cast<T*>(smem_raw);\n\n  int64_t bid = (int64_t)blockIdx.x;\n  const T* t_in = in + bid * N;\n  T* t_out = out + bid * N;\n\n  int a = thid;\n  int b = a + (N / 2);\n  int oa = OFFSET(a);\n  int ob = OFFSET(b);\n\n  temp[a + oa] = t_in[a];\n  temp[b + ob] = t_in[b];\n\n  int offset = 1;\n  for (int d = N >> 1; d > 0; d >>= 1) {\n    __syncthreads();\n    if (thid < d) {\n      int ai = offset * (2 * thid + 1) - 1;\n      int bi = offset * (2 * thid + 2) - 1;\n      ai += OFFSET(ai);\n      bi += OFFSET(bi);\n      temp[bi] += temp[ai];\n    }\n    offset *= 2;\n  }\n\n  if (thid == 0) temp[N - 1 + OFFSET(N - 1)] = 0;\n\n  for (int d = 1; d < N; d *= 2) {\n    offset >>= 1;\n    __syncthreads();\n    if (thid < d) {\n      int ai = offset * (2 * thid + 1) - 1;\n      int bi = offset * (2 * thid + 2) - 1;\n      ai += OFFSET(ai);\n      bi += OFFSET(bi);\n      T t = temp[ai];\n      temp[ai] = temp[bi];\n      temp[bi] += t;\n    }\n  }\n\n  __syncthreads();\n\n  t_out[a] = temp[a + oa];\n  t_out[b] = temp[b + ob];\n}\n\ntemplate<typename T, int N>\nvoid runTest(const int64_t n, const int repeat, bool timing = false)\n{\n  int64_t num_blocks = (n + N - 1) / N;\n  int64_t nelems = num_blocks * N;\n  int64_t bytes = nelems * (int64_t)sizeof(T);\n\n  size_t host_alloc_bytes = bytes > 0 ? (size_t)bytes : (size_t)1;\n  T* in = (T*)malloc(host_alloc_bytes);\n  T* out = (T*)malloc(host_alloc_bytes);\n  T* ref_out = (T*)malloc(host_alloc_bytes);\n\n  srand(123);\n  for (int64_t i = 0; i < nelems; i++) in[i] = (T)(rand() % 5 + 1);\n\n  T* t_in = in;\n  T* t_out = ref_out;\n  for (int64_t blk = 0; blk < num_blocks; blk++) {\n    t_out[0] = 0;\n    for (int i = 1; i < N; i++)\n      t_out[i] = t_out[i - 1] + t_in[i - 1];\n    t_out += N;\n    t_in += N;\n  }\n\n  T *d_in = nullptr, *d_out = nullptr;\n  if (bytes > 0) {\n    cuda_check(cudaMalloc((void**)&d_in, (size_t)bytes));\n    cuda_check(cudaMalloc((void**)&d_out, (size_t)bytes));\n    cuda_check(cudaMemcpy(d_in, in, (size_t)bytes, cudaMemcpyHostToDevice));\n  }\n\n  auto start = std::chrono::steady_clock::now();\n\n  for (int i = 0; i < repeat; i++) {\n    if (num_blocks > 0) {\n      scan_with_bank_conflicts<T, N><<<(unsigned int)num_blocks, N / 2, N * sizeof(T)>>>(d_in, d_out, num_blocks);\n      cuda_check(cudaGetLastError());\n      cuda_check(cudaDeviceSynchronize());\n    }\n  }\n\n  auto end = std::chrono::steady_clock::now();\n  auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n  if (timing) {\n    printf(\"Element size in bytes is %zu. Average execution time of scan (w/  bank conflicts): %f (us)\\n\",\n           sizeof(T), (time * 1e-3f) / repeat);\n  }\n\n  if (bytes > 0) {\n    cuda_check(cudaMemcpy(out, d_out, (size_t)bytes, cudaMemcpyDeviceToHost));\n  }\n  if (!timing) verify(ref_out, out, nelems);\n\n  start = std::chrono::steady_clock::now();\n\n  for (int i = 0; i < repeat; i++) {\n    if (num_blocks > 0) {\n      scan_without_bank_conflicts<T, N><<<(unsigned int)num_blocks, N / 2, (2 * N) * sizeof(T)>>>(d_in, d_out, num_blocks);\n      cuda_check(cudaGetLastError());\n      cuda_check(cudaDeviceSynchronize());\n    }\n  }\n\n  end = std::chrono::steady_clock::now();\n  auto bcao_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n  if (timing) {\n    printf(\"Element size in bytes is %zu. Average execution time of scan (w/o bank conflicts): %f (us). \",\n           sizeof(T), (bcao_time * 1e-3f) / repeat);\n    printf(\"Reduce the time by %.1f%%\\n\", (time - bcao_time) * 1.0 / time * 100);\n  }\n\n  if (bytes > 0) {\n    cuda_check(cudaMemcpy(out, d_out, (size_t)bytes, cudaMemcpyDeviceToHost));\n  }\n  if (!timing) verify(ref_out, out, nelems);\n\n  if (d_in) cuda_check(cudaFree(d_in));\n  if (d_out) cuda_check(cudaFree(d_out));\n  free(in);\n  free(out);\n  free(ref_out);\n}\n\ntemplate<int N>\nvoid run(const int n, const int repeat)\n{\n  for (int i = 0; i < 2; i++) {\n    bool report_timing = i > 0;\n    printf(\"\\nThe number of elements to scan in a thread block: %d\\n\", N);\n    runTest< char, N>(n, repeat, report_timing);\n    runTest<short, N>(n, repeat, report_timing);\n    runTest<  int, N>(n, repeat, report_timing);\n    runTest< long, N>(n, repeat, report_timing);\n  }\n}\n\nint main(int argc, char* argv[])\n{\n  if (argc != 3) {\n    printf(\"Usage: %s <number of elements> <repeat>\\n\", argv[0]);\n    return 1;\n  }\n  const int n = atoi(argv[1]);\n  const int repeat = atoi(argv[2]);\n\n  run< 128>(n, repeat);\n  run< 256>(n, repeat);\n  run< 512>(n, repeat);\n  run<1024>(n, repeat);\n  run<2048>(n, repeat);\n\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cu"
+  ],
+  "target_files_extracted": [
+    "main.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 117.831,
+      "prompt_tokens": 2055,
+      "completion_tokens": 5718,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

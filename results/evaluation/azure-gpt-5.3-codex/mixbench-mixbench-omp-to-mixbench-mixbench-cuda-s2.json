@@ -1,0 +1,76 @@
+{
+  "source_spec": "mixbench-mixbench-omp",
+  "target_spec": "mixbench-mixbench-cuda",
+  "kernel": "mixbench",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1408898955,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "32"
+  ],
+  "timestamp": "2026-04-30T06:21:14Z",
+  "prompt_tokens": 5068,
+  "completion_tokens": 6623,
+  "llm_response_time_seconds": 96.002,
+  "build_status": "pass",
+  "build_time_seconds": 3.765,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 11.052,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "  256,    128.250,    1.22,28334.85, 220.93,     64.125,   35.17,  489.48,   7.63,   128.250,    2.16,15916.25, 124.10\n          320,    160.250,    1.48,29144.16, 181.87,     80.125,   43.62,  493.06,   6.15,   160.250,    2.69,15997.32,  99.83\n          512,    256.250,    2.26,30396.19, 118.62,    128.125,   68.99,  498.55,   3.89,   256.250,    4.27,16113.04,  62.88\n------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "single_precision_gflops": {
+      "value": 116.11,
+      "unit": "GFLOPS"
+    }
+  },
+  "baseline_wall_time_seconds": 15.0,
+  "translated_wall_time_seconds": 11.052,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 1.3572,
+  "translated_files": {
+    "mix_kernels_cuda.cu": "#include <cuda.h>\n#include <cuda_runtime.h>\n\n#include <algorithm>\n#include <chrono>\n#include <cstddef>\n#include <iomanip>\n#include <iostream>\n#include <vector>\n\n#include \"mix_kernels_cuda.h\"\n\nusing benchmark_clock = std::chrono::steady_clock;\n\nconstexpr size_t STATIC_CHUNK_SIZE = 4096;\nconstexpr int BENCH_BLOCK_THREADS = 256;\n\ntemplate <typename T>\n__global__ void zero_kernel(T* data, size_t n) {\n  size_t idx = blockIdx.x * blockDim.x + threadIdx.x;\n  if (idx < n) data[idx] = (T)0;\n}\n\ntemplate <typename T, unsigned int compute_iterations>\n__device__ __forceinline__ T bench_elem(const T x, const T f[8]) {\n  T t0 = x, t1 = x, t2 = x, t3 = x, t4 = x, t5 = x, t6 = x, t7 = x;\n\n#pragma unroll\n  for (unsigned int j = 0; j < compute_iterations / 8; j++) {\n    t0 = t0 * t0 + f[0];\n    t1 = t1 * t1 + f[1];\n    t2 = t2 * t2 + f[2];\n    t3 = t3 * t3 + f[3];\n    t4 = t4 * t4 + f[4];\n    t5 = t5 * t5 + f[5];\n    t6 = t6 * t6 + f[6];\n    t7 = t7 * t7 + f[7];\n  }\n\n  if (compute_iterations % 8 > 0) t0 = t0 * t0 + f[0];\n  if (compute_iterations % 8 > 1) t1 = t1 * t1 + f[1];\n  if (compute_iterations % 8 > 2) t2 = t2 * t2 + f[2];\n  if (compute_iterations % 8 > 3) t3 = t3 * t3 + f[3];\n  if (compute_iterations % 8 > 4) t4 = t4 * t4 + f[4];\n  if (compute_iterations % 8 > 5) t5 = t5 * t5 + f[5];\n  if (compute_iterations % 8 > 6) t6 = t6 * t6 + f[6];\n\n  return t0 + t1 + t2 + t3 + t4 + t5 + t6 + t7;\n}\n\ntemplate <typename T, unsigned int compute_iterations>\n__global__ void bench_chunks_kernel(const T* src, T* partial, size_t num_chunks) {\n  size_t chunk = blockIdx.x;\n  if (chunk >= num_chunks) return;\n\n  size_t base = chunk * STATIC_CHUNK_SIZE;\n\n  T f[8];\n#pragma unroll\n  for (int i = 0; i < 8; i++) f[i] = src[base + i];\n\n  T local_sum = (T)0;\n  for (size_t i = threadIdx.x; i < STATIC_CHUNK_SIZE; i += blockDim.x) {\n    T v = src[base + i];\n    local_sum += bench_elem<T, compute_iterations>(v, f);\n  }\n\n  extern __shared__ unsigned char smem_raw[];\n  T* smem = reinterpret_cast<T*>(smem_raw);\n  smem[threadIdx.x] = local_sum;\n  __syncthreads();\n\n  for (unsigned int s = blockDim.x >> 1; s > 0; s >>= 1) {\n    if (threadIdx.x < s) smem[threadIdx.x] += smem[threadIdx.x + s];\n    __syncthreads();\n  }\n\n  if (threadIdx.x == 0) partial[chunk] = smem[0];\n}\n\ntemplate <typename T>\n__global__ void reduce_sum_kernel(const T* in, T* out, size_t n) {\n  extern __shared__ unsigned char smem_raw[];\n  T* smem = reinterpret_cast<T*>(smem_raw);\n\n  size_t tid = threadIdx.x;\n  size_t i = blockIdx.x * (blockDim.x * 2) + tid;\n\n  T sum = (T)0;\n  if (i < n) sum = in[i];\n  if (i + blockDim.x < n) sum += in[i + blockDim.x];\n\n  smem[tid] = sum;\n  __syncthreads();\n\n  for (unsigned int s = blockDim.x >> 1; s > 0; s >>= 1) {\n    if (tid < s) smem[tid] += smem[tid + s];\n    __syncthreads();\n  }\n\n  if (tid == 0) out[blockIdx.x] = smem[0];\n}\n\ntemplate <typename T>\n__global__ void copy_first_kernel(T* dst, const T* src) {\n  if (threadIdx.x == 0 && blockIdx.x == 0) dst[0] = src[0];\n}\n\ntemplate <typename Element, unsigned int compute_iterations>\nsize_t bench_cuda(size_t len, Element* src, Element* ws1, Element* ws2) {\n  const size_t num_chunks = len / STATIC_CHUNK_SIZE;\n  if (num_chunks == 0) {\n    return len;\n  }\n\n  bench_chunks_kernel<Element, compute_iterations>\n      <<<static_cast<unsigned int>(num_chunks), BENCH_BLOCK_THREADS,\n         BENCH_BLOCK_THREADS * sizeof(Element)>>>(src, ws1, num_chunks);\n\n  Element* in = ws1;\n  Element* out = ws2;\n  size_t n = num_chunks;\n\n  while (n > 1) {\n    size_t blocks = (n + BENCH_BLOCK_THREADS * 2 - 1) / (BENCH_BLOCK_THREADS * 2);\n    reduce_sum_kernel<Element><<<static_cast<unsigned int>(blocks), BENCH_BLOCK_THREADS,\n                                 BENCH_BLOCK_THREADS * sizeof(Element)>>>(in, out, n);\n    n = blocks;\n    Element* tmp = in;\n    in = out;\n    out = tmp;\n  }\n\n  copy_first_kernel<Element><<<1, 1>>>(src, in);\n  return len;\n}\n\ntemplate <typename Op>\ndouble measure_operation(Op op) {\n  auto timer_start = benchmark_clock::now();\n  op();\n  cudaDeviceSynchronize();\n  auto timer_duration = benchmark_clock::now() - timer_start;\n  return std::chrono::duration_cast<std::chrono::microseconds>(timer_duration).count() /\n         1000.0;\n}\n\ntemplate <typename Op>\ndouble benchmark_cuda(Op op, bool half_phase) {\n  constexpr int total_runs = 20;\n  constexpr int total_half_thread_runs = 10;\n\n  auto duration = op();\n  std::vector<double> measurements;\n\n  for (int i = 1; i < total_runs; i++) {\n    duration = op();\n    measurements.push_back(duration);\n  }\n\n  if (half_phase) {\n    for (int i = 1; i < total_half_thread_runs; i++) {\n      duration = op();\n      measurements.push_back(duration);\n    }\n  }\n\n  return *std::min_element(measurements.begin(), measurements.end());\n}\n\nclass ComputeSpace {\n  size_t memory_space_{0};\n  int compute_iterations_{0};\n\n public:\n  ComputeSpace(size_t memory_space, int compute_iterations)\n      : memory_space_{memory_space}, compute_iterations_{compute_iterations} {}\n\n  template <typename T>\n  size_t compute_ops() const {\n    const auto total_elements = element_count<T>();\n    const long long computations =\n        total_elements * compute_iterations_ * 2 * 1 + total_elements - 1;\n    return static_cast<size_t>(computations);\n  }\n\n  size_t memory_traffic() const { return memory_space_; }\n\n  template <typename T>\n  size_t element_count() const {\n    return memory_space_ / sizeof(T);\n  }\n};\n\nauto runbench_warmup(void* dmem, size_t size_bytes) {\n  const size_t num_elements = size_bytes / sizeof(double);\n  const size_t num_chunks = num_elements / STATIC_CHUNK_SIZE;\n  auto timer_start = benchmark_clock::now();\n\n  double* dptr = reinterpret_cast<double*>(dmem);\n  double *ws1 = nullptr, *ws2 = nullptr;\n  cudaMalloc(&ws1, num_chunks * sizeof(double));\n  cudaMalloc(&ws2, num_chunks * sizeof(double));\n\n  bench_cuda<double, 16>(num_elements, dptr, ws1, ws2);\n  cudaDeviceSynchronize();\n\n  cudaFree(ws1);\n  cudaFree(ws2);\n\n  auto timer_duration = benchmark_clock::now() - timer_start;\n  return std::chrono::duration_cast<std::chrono::microseconds>(timer_duration).count();\n}\n\ntemplate <unsigned int compute_iterations>\nvoid runbench(void* dmem, size_t size_bytes, bool half_phase) {\n  ComputeSpace cs{size_bytes, static_cast<int>(compute_iterations)};\n\n  float* c_as_float = reinterpret_cast<float*>(dmem);\n  size_t float_chunks = cs.element_count<float>() / STATIC_CHUNK_SIZE;\n  float *fws1 = nullptr, *fws2 = nullptr;\n  cudaMalloc(&fws1, float_chunks * sizeof(float));\n  cudaMalloc(&fws2, float_chunks * sizeof(float));\n\n  auto kernel_time_mad_sp = benchmark_cuda(\n      [&] {\n        return measure_operation([&] {\n          bench_cuda<float, compute_iterations>(cs.element_count<float>(), c_as_float, fws1,\n                                                fws2);\n        });\n      },\n      half_phase);\n\n  double* c_as_double = reinterpret_cast<double*>(dmem);\n  size_t double_chunks = cs.element_count<double>() / STATIC_CHUNK_SIZE;\n  double *dws1 = nullptr, *dws2 = nullptr;\n  cudaMalloc(&dws1, double_chunks * sizeof(double));\n  cudaMalloc(&dws2, double_chunks * sizeof(double));\n\n  auto kernel_time_mad_dp = benchmark_cuda(\n      [&] {\n        return measure_operation([&] {\n          bench_cuda<double, compute_iterations>(cs.element_count<double>(), c_as_double, dws1,\n                                                 dws2);\n        });\n      },\n      half_phase);\n\n  int* c_as_int = reinterpret_cast<int*>(dmem);\n  size_t int_chunks = cs.element_count<int>() / STATIC_CHUNK_SIZE;\n  int *iws1 = nullptr, *iws2 = nullptr;\n  cudaMalloc(&iws1, int_chunks * sizeof(int));\n  cudaMalloc(&iws2, int_chunks * sizeof(int));\n\n  auto kernel_time_mad_int = benchmark_cuda(\n      [&] {\n        return measure_operation([&] {\n          bench_cuda<int, compute_iterations>(cs.element_count<int>(), c_as_int, iws1, iws2);\n        });\n      },\n      half_phase);\n\n  cudaFree(fws1);\n  cudaFree(fws2);\n  cudaFree(dws1);\n  cudaFree(dws2);\n  cudaFree(iws1);\n  cudaFree(iws2);\n\n  const auto computations_sp = cs.compute_ops<float>();\n  const auto computations_dp = cs.compute_ops<double>();\n  const auto computations_int = cs.compute_ops<int>();\n  const auto memory_traffic = cs.memory_traffic();\n\n  const auto setw = std::setw;\n  const auto setprecision = std::setprecision;\n  std::cout << std::fixed << \"         \" << std::setw(4) << compute_iterations << \",   \"\n            << setw(8) << setprecision(3)\n            << static_cast<double>(computations_sp) / static_cast<double>(memory_traffic) << \",\"\n            << setw(8) << setprecision(2) << kernel_time_mad_sp << \",\" << setw(8)\n            << setprecision(2)\n            << static_cast<double>(computations_sp) / kernel_time_mad_sp * 1000. /\n                   static_cast<double>(1000 * 1000 * 1000)\n            << \",\" << setw(7) << setprecision(2)\n            << static_cast<double>(memory_traffic) / kernel_time_mad_sp * 1000. /\n                   (1000. * 1000. * 1000.)\n\n            << \",   \" << setw(8) << setprecision(3)\n            << static_cast<double>(computations_dp) / static_cast<double>(memory_traffic) << \",\"\n            << setw(8) << setprecision(2) << kernel_time_mad_dp << \",\" << setw(8)\n            << setprecision(2)\n            << static_cast<double>(computations_dp) / kernel_time_mad_dp * 1000. /\n                   static_cast<double>(1000 * 1000 * 1000)\n            << \",\" << setw(7) << setprecision(2)\n            << static_cast<double>(memory_traffic) / kernel_time_mad_dp * 1000. /\n                   (1000. * 1000. * 1000.)\n\n            << \",  \" << setw(8) << setprecision(3)\n            << static_cast<double>(computations_int) / static_cast<double>(memory_traffic) << \",\"\n            << setw(8) << setprecision(2) << kernel_time_mad_int << \",\" << setw(8)\n            << setprecision(2)\n            << static_cast<double>(computations_int) / kernel_time_mad_int * 1000. /\n                   static_cast<double>(1000 * 1000 * 1000)\n            << \",\" << setw(7) << setprecision(2)\n            << static_cast<double>(memory_traffic) / kernel_time_mad_int * 1000. /\n                   (1000. * 1000. * 1000.)\n\n            << std::endl;\n}\n\ntemplate <unsigned int compute_iterations>\nvoid runbench_range(void* dmem, size_t size_bytes, bool half_phase) {\n  runbench<compute_iterations>(dmem, size_bytes, half_phase);\n}\n\ntemplate <unsigned int j1, unsigned int j2, unsigned int... Args>\nvoid runbench_range(void* dmem, size_t size_bytes, bool half_phase) {\n  runbench_range<j1>(dmem, size_bytes, half_phase);\n  runbench_range<j2, Args...>(dmem, size_bytes, half_phase);\n}\n\nextern \"C\" void mixbenchGPU(double* c, long size) {\n  (void)c;\n\n  size_t size_bytes = static_cast<size_t>(size) * sizeof(double);\n\n  void* dmem = nullptr;\n  cudaMalloc(&dmem, size_bytes);\n\n  size_t int_count = size_bytes / sizeof(int);\n  size_t blocks = (int_count + 255) / 256;\n  zero_kernel<int><<<static_cast<unsigned int>(blocks), 256>>>(reinterpret_cast<int*>(dmem),\n                                                                int_count);\n  cudaDeviceSynchronize();\n\n  cudaDeviceProp prop{};\n  int device = 0;\n  cudaGetDevice(&device);\n  cudaGetDeviceProperties(&prop, device);\n  bool half_phase = prop.multiProcessorCount > 1;\n\n  std::cout << \"--------------------------------------------\"\n               \"-------------- CSV data \"\n               \"--------------------------------------------\"\n               \"--------------\"\n            << std::endl;\n  std::cout << \"Experiment ID, Single Precision ops,,,,              Double \"\n               \"precision ops,,,,              Integer operations,,, \"\n            << std::endl;\n  std::cout << \"Compute iters, Flops/byte, ex.time,  GFLOPS, GB/sec, \"\n               \"Flops/byte, ex.time,  GFLOPS, GB/sec, Iops/byte, ex.time,   \"\n               \"GIOPS, GB/sec\"\n            << std::endl;\n\n  runbench_warmup(dmem, size_bytes);\n\n  runbench_range<0, 1, 2, 3, 4, 6, 8, 12, 16, 20, 24, 28, 32, 40, 6 * 8, 7 * 8,\n                 8 * 8, 10 * 8, 13 * 8, 15 * 8, 16 * 8, 20 * 8, 24 * 8, 32 * 8,\n                 40 * 8, 64 * 8>(dmem, size_bytes, half_phase);\n\n  std::cout << \"---------------------------------------------------------------\"\n               \"---------------------------------------------------------------\"\n            << std::endl;\n\n  cudaFree(dmem);\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels_cuda.cu"
+  ],
+  "target_files_extracted": [
+    "mix_kernels_cuda.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 96.002,
+      "prompt_tokens": 5068,
+      "completion_tokens": 6623,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

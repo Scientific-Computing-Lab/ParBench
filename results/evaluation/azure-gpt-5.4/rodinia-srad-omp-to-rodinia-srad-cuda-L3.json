@@ -1,0 +1,82 @@
+{
+  "source_spec": "rodinia-srad-omp",
+  "target_spec": "rodinia-srad-cuda",
+  "kernel": "srad",
+  "model": "azure-gpt-5.4",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 473203659,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "512",
+    "512",
+    "0",
+    "127",
+    "0",
+    "127",
+    "2",
+    "0.5",
+    "2"
+  ],
+  "timestamp": "2026-04-27T01:00:05Z",
+  "prompt_tokens": 2300,
+  "completion_tokens": 3823,
+  "llm_response_time_seconds": 62.738,
+  "build_status": "pass",
+  "build_time_seconds": 0.549,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.169,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Randomizing the input matrix\nStart the SRAD main loop\nComputation Done\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.068,
+  "translated_wall_time_seconds": 0.169,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.4024,
+  "translated_files": {
+    "srad.cu": "#define OPEN\n#define ITERATION\n#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <cuda_runtime.h>\n\n#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\nvoid random_matrix(float *I, int rows, int cols);\n\nvoid usage(int argc, char **argv)\n{\n\tfprintf(stderr, \"Usage: %s <rows> <cols> <y1> <y2> <x1> <x2> <no. of threads><lamda> <no. of iter>\\n\", argv[0]);\n\tfprintf(stderr, \"\\t<rows>   - number of rows\\n\");\n\tfprintf(stderr, \"\\t<cols>    - number of cols\\n\");\n\tfprintf(stderr, \"\\t<y1> \\t - y1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<y2>      - y2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x1>       - x1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x2>       - x2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<no. of threads>  - no. of threads\\n\");\n\tfprintf(stderr, \"\\t<lamda>   - lambda (0,1)\\n\");\n\tfprintf(stderr, \"\\t<no. of iter>   - number of iterations\\n\");\n\n\texit(1);\n}\n\n__global__ void srad_kernel_1(const float *J, float *dN, float *dS, float *dW, float *dE,\n                              float *c, int rows, int cols, float q0sqr)\n{\n\tint j = blockIdx.x * blockDim.x + threadIdx.x;\n\tint i = blockIdx.y * blockDim.y + threadIdx.y;\n\n\tif (i < rows && j < cols) {\n\t\tint k = i * cols + j;\n\n\t\tint iN = (i == 0) ? 0 : (i - 1);\n\t\tint iS = (i == rows - 1) ? (rows - 1) : (i + 1);\n\t\tint jW = (j == 0) ? 0 : (j - 1);\n\t\tint jE = (j == cols - 1) ? (cols - 1) : (j + 1);\n\n\t\tfloat Jc = J[k];\n\n\t\tdN[k] = J[iN * cols + j] - Jc;\n\t\tdS[k] = J[iS * cols + j] - Jc;\n\t\tdW[k] = J[i * cols + jW] - Jc;\n\t\tdE[k] = J[i * cols + jE] - Jc;\n\n\t\tfloat G2 = (dN[k] * dN[k] + dS[k] * dS[k] + dW[k] * dW[k] + dE[k] * dE[k]) / (Jc * Jc);\n\t\tfloat L = (dN[k] + dS[k] + dW[k] + dE[k]) / Jc;\n\n\t\tfloat num = (0.5f * G2) - ((1.0f / 16.0f) * (L * L));\n\t\tfloat den = 1.0f + (0.25f * L);\n\t\tfloat qsqr = num / (den * den);\n\n\t\tden = (qsqr - q0sqr) / (q0sqr * (1.0f + q0sqr));\n\t\tc[k] = 1.0f / (1.0f + den);\n\n\t\tif (0.0f > c[k]) {\n\t\t\tc[k] = 0.0f;\n\t\t} else if (1.0f < c[k]) {\n\t\t\tc[k] = 1.0f;\n\t\t}\n\t}\n}\n\n__global__ void srad_kernel_2(float *J, const float *c, const float *dN, const float *dS,\n                              const float *dW, const float *dE, int rows, int cols, float lambda)\n{\n\tint j = blockIdx.x * blockDim.x + threadIdx.x;\n\tint i = blockIdx.y * blockDim.y + threadIdx.y;\n\n\tif (i < rows && j < cols) {\n\t\tint k = i * cols + j;\n\t\tint iS = (i == rows - 1) ? (rows - 1) : (i + 1);\n\t\tint jE = (j == cols - 1) ? (cols - 1) : (j + 1);\n\n\t\tfloat cN = c[k];\n\t\tfloat cS = c[iS * cols + j];\n\t\tfloat cW = c[k];\n\t\tfloat cE = c[i * cols + jE];\n\n\t\tfloat D = cN * dN[k] + cS * dS[k] + cW * dW[k] + cE * dE[k];\n\n\t\tJ[k] = J[k] + 0.25f * lambda * D;\n\t}\n}\n\nint main(int argc, char* argv[])\n{\n\tint rows, cols, size_I, size_R, niter = 10, iter, k;\n\tfloat *I, *J, q0sqr, sum, sum2, tmp, meanROI, varROI;\n\tint r1, r2, c1, c2;\n\tfloat lambda;\n\tint i, j;\n\tint nthreads;\n\n\tif (argc == 10)\n\t{\n\t\trows = atoi(argv[1]);\n\t\tcols = atoi(argv[2]);\n\t\tif ((rows % 16 != 0) || (0 != cols % 16)) {\n\t\t\tfprintf(stderr, \"rows and cols must be multiples of 16\\n\");\n\t\t\texit(1);\n\t\t}\n\t\tr1 = atoi(argv[3]);\n\t\tr2 = atoi(argv[4]);\n\t\tc1 = atoi(argv[5]);\n\t\tc2 = atoi(argv[6]);\n\t\tnthreads = atoi(argv[7]);\n\t\tlambda = (float)atof(argv[8]);\n\t\tniter = atoi(argv[9]);\n\t}\n\telse {\n\t\tusage(argc, argv);\n\t}\n\n\t(void)nthreads;\n\n\tsize_I = cols * rows;\n\tsize_R = (r2 - r1 + 1) * (c2 - c1 + 1);\n\n\tI = (float *)malloc(size_I * sizeof(float));\n\tJ = (float *)malloc(size_I * sizeof(float));\n\n\tfloat *d_J = NULL;\n\tfloat *d_c = NULL;\n\tfloat *d_dN = NULL;\n\tfloat *d_dS = NULL;\n\tfloat *d_dW = NULL;\n\tfloat *d_dE = NULL;\n\n\tsize_t bytes = (size_t)size_I * sizeof(float);\n\n\tcudaMalloc((void **)&d_J, bytes);\n\tcudaMalloc((void **)&d_c, bytes);\n\tcudaMalloc((void **)&d_dN, bytes);\n\tcudaMalloc((void **)&d_dS, bytes);\n\tcudaMalloc((void **)&d_dW, bytes);\n\tcudaMalloc((void **)&d_dE, bytes);\n\n\tprintf(\"Randomizing the input matrix\\n\");\n\n\trandom_matrix(I, rows, cols);\n\n\tfor (k = 0; size_I > k; k++) {\n\t\tJ[k] = (float)exp(I[k]);\n\t}\n\n\tcudaMemcpy(d_J, J, bytes, cudaMemcpyHostToDevice);\n\n\tprintf(\"Start the SRAD main loop\\n\");\n\n#ifdef ITERATION\n\tfor (iter = 0; niter > iter; iter++) {\n#endif\n\t\tcudaMemcpy(J, d_J, bytes, cudaMemcpyDeviceToHost);\n\n\t\tsum = 0;\n\t\tsum2 = 0;\n\t\tfor (i = r1; i <= r2; i++) {\n\t\t\tfor (j = c1; c2 >= j; j++) {\n\t\t\t\ttmp = J[i * cols + j];\n\t\t\t\tsum = sum + (tmp);\n\t\t\t\tsum2 += tmp * tmp;\n\t\t\t}\n\t\t}\n\t\tmeanROI = sum / size_R;\n\t\tvarROI = (sum2 / size_R) - meanROI * meanROI;\n\t\tq0sqr = varROI / (meanROI * meanROI);\n\n\t\tdim3 block(BLOCK_SIZE, BLOCK_SIZE);\n\t\tdim3 grid((cols + block.x - 1) / block.x, (rows + block.y - 1) / block.y);\n\n\t\tsrad_kernel_1<<<grid, block>>>(d_J, d_dN, d_dS, d_dW, d_dE, d_c, rows, cols, q0sqr);\n\t\tsrad_kernel_2<<<grid, block>>>(d_J, d_c, d_dN, d_dS, d_dW, d_dE, rows, cols, lambda);\n\n#ifdef ITERATION\n\t}\n#endif\n\n#ifdef OUTPUT\n\tcudaMemcpy(J, d_J, bytes, cudaMemcpyDeviceToHost);\n\tfor (int i = 0; i < rows; i++) {\n\t\tfor (int j = 0; j < cols; j++) {\n\t\t\tprintf(\"%.5f \", J[i * cols + j]);\n\t\t}\n\t\tprintf(\"\\n\");\n\t}\n#endif\n\n\tprintf(\"Computation Done\\n\");\n\n\tfree(I);\n\tfree(J);\n\n\tcudaFree(d_J);\n\tcudaFree(d_c);\n\tcudaFree(d_dN);\n\tcudaFree(d_dS);\n\tcudaFree(d_dW);\n\tcudaFree(d_dE);\n\n\treturn 0;\n}\n\nvoid random_matrix(float *I, int rows, int cols)\n{\n\tsrand(7);\n\n\tfor (int i = 0; i < rows; i++) {\n\t\tfor (int j = 0; cols > j; j++) {\n\t\t\tI[i * cols + j] = rand() / (float)RAND_MAX;\n#ifdef OUTPUT\n\n#endif\n\t\t}\n#ifdef OUTPUT\n\n#endif\n\t}\n}\n",
+    "srad_kernel.cu": "/* intentionally empty */\n"
+  },
+  "target_files_expected": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "target_files_extracted": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 62.738,
+      "prompt_tokens": 2300,
+      "completion_tokens": 3823,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

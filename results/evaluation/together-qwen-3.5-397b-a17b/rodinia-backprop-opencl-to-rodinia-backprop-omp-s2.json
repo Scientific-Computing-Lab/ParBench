@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-backprop-opencl",
+  "target_spec": "rodinia-backprop-omp",
+  "kernel": "backprop",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1965264352,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T02:21:34Z",
+  "prompt_tokens": 11243,
+  "completion_tokens": 4715,
+  "llm_response_time_seconds": 42.4,
+  "build_status": "fail",
+  "build_time_seconds": 0.023,
+  "build_error_snippet": "backprop.c: In function \u2018main\u2019:\nbackprop.c:32:9: warning: implicit declaration of function \u2018setup\u2019; did you mean \u2018setbuf\u2019? [-Wimplicit-function-declaration]\n   32 |         setup(argc, argv);\n      |         ^~~~~\n      |         setbuf\nbackprop.c: In function \u2018bpnn_train_kernel\u2019:\nbackprop.c:60:27: error: \u2018BLOCK_SIZE\u2019 undeclared (first use in this function)\n   60 |         num_blocks = in / BLOCK_SIZE;\n      |                           ^~~~~~~~~~\nbackprop.c:60:27: note: each undeclared identifier is reported only once for each function it appears in\nbackprop.c:64:53: error: \u2018WIDTH\u2019 undeclared (first use in this function)\n   64 |         partial_sum = (float *) malloc(num_blocks * WIDTH * sizeof(float));\n      |                              \n...[truncated]...\ntion]\n  132 |         bpnn_output_error(net->output_delta, net->target, net->output_units, out, &out_err);\n      |         ^~~~~~~~~~~~~~~~~\nbackprop.c:133:9: warning: implicit declaration of function \u2018bpnn_hidden_error\u2019 [-Wimplicit-function-declaration]\n  133 |         bpnn_hidden_error(net->hidden_delta, hid, net->output_delta, out, net->hidden_weights, net->hidden_units, &hid_err);\n      |         ^~~~~~~~~~~~~~~~~\nbackprop.c:134:9: warning: implicit declaration of function \u2018bpnn_adjust_weights\u2019 [-Wimplicit-function-declaration]\n  134 |         bpnn_adjust_weights(net->output_delta, out, net->hidden_units, hid, net->hidden_weights, net->hidden_prev_weights);\n      |         ^~~~~~~~~~~~~~~~~~~\nmake: *** [Makefile:16: backprop.o] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: bpnn_adjust_weights(net->output_delta, out, net->hidden_units, hid, net->hidden_weights, net->hidden_prev_weights);\n      |         ^~~~~~~~~~~~~~~~~~~\nmake: *** [Makefile:16: backprop.o] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.016,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "backprop.c": "#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <sys/time.h>\n#include \"backprop.h\"\n#include <omp.h>\n\n#ifdef TIMING\n    #include \"timing.h\"\n#endif\n\n#ifdef TIMING\nstruct timeval tv;\nstruct timeval tv_total_start, tv_total_end;\nstruct timeval tv_init_end;\nstruct timeval tv_h2d_start, tv_h2d_end;\nstruct timeval tv_d2h_start, tv_d2h_end;\nstruct timeval tv_kernel_start, tv_kernel_end;\nstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\nstruct timeval tv_close_start, tv_close_end;\nfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n      d2h_time = 0, close_time = 0, total_time = 0;\n#endif\n\nunsigned int num_threads = NUM_THREAD;\nunsigned int num_blocks = 0;\n\nint\nmain( int argc, char** argv)\n{\n\tsetup(argc, argv);\n}\n\nint bpnn_train_kernel(BPNN *net, float *eo, float *eh)\n{\n\tint in, hid, out;\n\tfloat out_err, hid_err;\n\n\tin = net->input_n;\n\thid = net->hidden_n;\n\tout = net->output_n;\n\n\tint sourcesize = 1024*1024;\n\tchar * source = (char *)calloc(sourcesize, sizeof(char));\n\tif(!source) { printf(\"ERROR: calloc(%d) failed\\n\", sourcesize); return -1; }\n\n#ifdef  TIMING\n    gettimeofday(&tv_total_start, NULL);\n#endif\n\n#ifdef  TIMING\n    gettimeofday(&tv_init_end, NULL);\n#endif\n\n\tfloat *input_weights_one_dim;\n    float *input_weights_prev_one_dim;\n\tfloat * partial_sum;\n\tfloat sum;\n\tnum_blocks = in / BLOCK_SIZE;\n\n\tinput_weights_one_dim = (float *) malloc((in + 1)* (hid + 1) * sizeof(float));\n\tinput_weights_prev_one_dim = (float *) malloc((in + 1)* (hid + 1) * sizeof(float));\n\tpartial_sum = (float *) malloc(num_blocks * WIDTH * sizeof(float));\n\n#ifdef  TIMING\n    gettimeofday(&tv_mem_alloc_start, NULL);\n#endif\n\n\tint m = 0;\n\tfor (int k = 0; k <= in; k++) {\n\t\tfor (int j = 0; j <= hid; j++) {\n\t\tinput_weights_one_dim[m] = net->input_weights[k][j];\n\t\tinput_weights_prev_one_dim[m] = net-> input_prev_weights[k][j];\n\t    m++;\n\t\t}\n\t}\n\n#ifdef  TIMING\n    gettimeofday(&tv_mem_alloc_end, NULL);\n    tvsub(&tv_mem_alloc_end, &tv_mem_alloc_start, &tv);\n    mem_alloc_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n\tprintf(\"Performing CPU computation\\n\");\n\n\t// OpenMP parallel version of bpnn_layerforward_ocl\n\t#pragma omp parallel for num_threads(num_threads) shared(input_weights_one_dim, net, partial_sum, in, hid, num_blocks) private(m, sum)\n\tfor (int by = 0; by < num_blocks; by++) {\n\t\tfor (int ty = 0; ty < HEIGHT; ty++) {\n\t\t\tfloat local_weight[WIDTH];\n\t\t\tfloat input_node = net->input_units[HEIGHT * by + ty + 1];\n\t\t\t\n\t\t\tfor (int tx = 0; tx < WIDTH; tx++) {\n\t\t\t\tint index = (hid + 1) * HEIGHT * by + (hid + 1) * ty + tx + 1 + (hid + 1);\n\t\t\t\tlocal_weight[tx] = input_weights_one_dim[index] * input_node;\n\t\t\t}\n\t\t\t\n\t\t\tfor (int i = 1; i <= HEIGHT; i = i * 2) {\n\t\t\t\tint power_two = i;\n\t\t\t\tif (ty % power_two == 0) {\n\t\t\t\t\tfor (int tx = 0; tx < WIDTH; tx++) {\n\t\t\t\t\t\tif (ty + power_two/2 < HEIGHT) {\n\t\t\t\t\t\t\tint idx2 = (hid + 1) * HEIGHT * by + (hid + 1) * (ty + power_two/2) + tx + 1 + (hid + 1);\n\t\t\t\t\t\t\tlocal_weight[tx] += input_weights_one_dim[idx2];\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\t\n\t\t\tfor (int tx = 0; tx < WIDTH; tx++) {\n\t\t\t\tint index = (hid + 1) * HEIGHT * by + (hid + 1) * ty + tx + 1 + (hid + 1);\n\t\t\t\tinput_weights_one_dim[index] = local_weight[tx];\n\t\t\t\t\n\t\t\t\tif (tx == 0) {\n\t\t\t\t\tpartial_sum[by * hid + ty] = local_weight[tx];\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\n\tfor (int j = 1; j <= hid; j++) {\n\t\tsum = 0.0;\n\t\tfor (int k = 0; k < num_blocks; k++) {\n\t\t\tsum += partial_sum[k * hid + j-1];\n\t\t}\n\t\tsum += net->input_weights[0][j];\n\t\tnet->hidden_units[j] = 1.0 / (1.0 + exp(-sum));\n\t}\n\n\tbpnn_layerforward(net->hidden_units, net->output_units, net->hidden_weights, hid, out);\n\tbpnn_output_error(net->output_delta, net->target, net->output_units, out, &out_err);\n\tbpnn_hidden_error(net->hidden_delta, hid, net->output_delta, out, net->hidden_weights, net->hidden_units, &hid_err);\n\tbpnn_adjust_weights(net->output_delta, out, net->hidden_units, hid, net->hidden_weights, net->hidden_prev_weights);\n\n\t// OpenMP parallel version of bpnn_adjust_weights_ocl\n\t#pragma omp parallel for num_threads(num_threads) shared(input_weights_one_dim, input_weights_prev_one_dim, net) private(m)\n\tfor (int by = 0; by < num_blocks; by++) {\n\t\tfor (int ty = 0; ty < HEIGHT; ty++) {\n\t\t\tfor (int tx = 0; tx < WIDTH; tx++) {\n\t\t\t\tint index = (hid + 1) * HEIGHT * by + (hid + 1) * ty + tx + 1 + (hid + 1);\n\t\t\t\tint index_y = HEIGHT * by + ty + 1;\n\t\t\t\tint index_x = tx + 1;\n\n\t\t\t\tfloat delta_val = net->hidden_delta[index_x];\n\t\t\t\tfloat ly_val = net->input_units[index_y];\n\t\t\t\tfloat oldw_val = input_weights_prev_one_dim[index];\n\t\t\t\t\n\t\t\t\tfloat new_dw = ((ETA * delta_val * ly_val) + (MOMENTUM * oldw_val));\n\t\t\t\tinput_weights_one_dim[index] += new_dw;\n\t\t\t\tinput_weights_prev_one_dim[index] = new_dw;\n\t\t\t\t\n\t\t\t\tif (ty == 0 && by == 0) {\n\t\t\t\t\tnet->input_units[index_x] += ((ETA * delta_val) + (MOMENTUM * oldw_val));\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\n\t// Copy back from 1D array to 2D array\n\tm = 0;\n\tfor (int k = 0; k <= in; k++) {\n\t\tfor (int j = 0; j <= hid; j++) {\n\t\t\tnet->input_weights[k][j] = input_weights_one_dim[m];\n\t\t\tnet->input_prev_weights[k][j] = input_weights_prev_one_dim[m];\n\t\t\tm++;\n\t\t}\n\t}\n\n#ifdef  TIMING\n\tgettimeofday(&tv_close_start, NULL);\n#endif\n\n\tfree(input_weights_prev_one_dim);\n\tfree(partial_sum);\n\tfree(input_weights_one_dim);\n\tfree(source);\n\n#ifdef  TIMING\n\tgettimeofday(&tv_close_end, NULL);\n\ttvsub(&tv_close_end, &tv_close_start, &tv);\n\tclose_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n\ttvsub(&tv_close_end, &tv_total_start, &tv);\n\ttotal_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n\n\tprintf(\"Init: %f\\n\", init_time);\n\tprintf(\"MemAlloc: %f\\n\", mem_alloc_time);\n\tprintf(\"HtoD: %f\\n\", h2d_time);\n\tprintf(\"Exec: %f\\n\", kernel_time);\n\tprintf(\"DtoH: %f\\n\", d2h_time);\n\tprintf(\"Close: %f\\n\", close_time);\n\tprintf(\"Total: %f\\n\", total_time);\n#endif\n\n\treturn 0;\n}\n"
+  },
+  "target_files_expected": [
+    "backprop.c"
+  ],
+  "target_files_extracted": [
+    "backprop.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 42.4,
+      "prompt_tokens": 11243,
+      "completion_tokens": 4715,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "backprop.c: In function \u2018main\u2019:\nbackprop.c:32:9: warning: implicit declaration of function \u2018setup\u2019; did you mean \u2018setbuf\u2019? [-Wimplicit-function-declaration]\n   32 |         setup(argc, argv);\n      |         ^~~~~\n      |         setbuf\nbackprop.c: In function \u2018bpnn_train_kernel\u2019:\nbackprop.c:60:27: error: \u2018BLOCK_SIZE\u2019 undeclared (first use in this function)\n   60 |         num_blocks = in / BLOCK_SIZE;\n      |                           ^~~~~~~~~~\nbackprop.c:60:27: note: each undeclared identifier is reported only once for each function it appears in\nbackprop.c:64:53: error: \u2018WIDTH\u2019 undeclared (first use in this function)\n   64 |         partial_sum = (float *) malloc(num_blocks * WIDTH * sizeof(float));\n      |                              \n...[truncated]...\ntion]\n  132 |         bpnn_output_error(net->output_delta, net->target, net->output_units, out, &out_err);\n      |         ^~~~~~~~~~~~~~~~~\nbackprop.c:133:9: warning: implicit declaration of function \u2018bpnn_hidden_error\u2019 [-Wimplicit-function-declaration]\n  133 |         bpnn_hidden_error(net->hidden_delta, hid, net->output_delta, out, net->hidden_weights, net->hidden_units, &hid_err);\n      |         ^~~~~~~~~~~~~~~~~\nbackprop.c:134:9: warning: implicit declaration of function \u2018bpnn_adjust_weights\u2019 [-Wimplicit-function-declaration]\n  134 |         bpnn_adjust_weights(net->output_delta, out, net->hidden_units, hid, net->hidden_weights, net->hidden_prev_weights);\n      |         ^~~~~~~~~~~~~~~~~~~\nmake: *** [Makefile:16: backprop.o] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

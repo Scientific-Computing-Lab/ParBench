@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-myocyte-opencl",
+  "target_spec": "rodinia-myocyte-omp",
+  "kernel": "myocyte",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 627559786,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-30T04:57:31Z",
+  "prompt_tokens": 41587,
+  "completion_tokens": 7574,
+  "llm_response_time_seconds": 93.36,
+  "build_status": "fail",
+  "build_time_seconds": 0.011,
+  "build_error_snippet": "rm: cannot remove '*.o': No such file or directory\nrm: cannot remove 'myocyte.out': No such file or directory\nrm: cannot remove 'output.txt': No such file or directory\nmake: *** [Makefile:32: clean] Error 1\n\nmain.c:1:10: fatal error: ../common.h: No such file or directory\n    1 | #include \"../common.h\"\n      |          ^~~~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:27: main.o] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: Error 1\n\nmain.c:1:10: fatal error: ../common.h: No such file or directory\n    1 | #include \"../common.h\"\n      |          ^~~~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:27: main.o] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.c": "#include \"../common.h\"\n\n#include <math.h>\n#include <omp.h>\n\nvoid ecc(fp timeinst,\n         fp *initvalu,\n         int initvalu_offset,\n         fp *parameter,\n         int parameter_offset,\n         fp *finavalu);\n\nfp cam(fp timeinst,\n       fp *initvalu,\n       int initvalu_offset,\n       fp *parameter,\n       int parameter_offset,\n       fp *finavalu,\n       fp Ca);\n\nvoid kernel_fin(fp *initvalu,\n                int initvalu_offset_ecc,\n                int initvalu_offset_Dyad,\n                int initvalu_offset_SL,\n                int initvalu_offset_Cyt,\n                fp *parameter,\n                fp *finavalu,\n                fp JCaDyad,\n                fp JCaSL,\n                fp JCaCyt);\n\nvoid master(fp timeinst,\n            fp *initvalu,\n            fp *parameter,\n            fp *finavalu,\n            fp *com)\n{\n    int i;\n\n    int initvalu_offset_ecc = 0;\n    int initvalu_offset_Dyad = 46;\n    int initvalu_offset_SL = 61;\n    int initvalu_offset_Cyt = 76;\n\n    fp JCaDyad = 0.0f;\n    fp JCaSL = 0.0f;\n    fp JCaCyt = 0.0f;\n\n#pragma omp parallel sections\n    {\n#pragma omp section\n        {\n            ecc(timeinst,\n                initvalu,\n                initvalu_offset_ecc,\n                parameter,\n                15,\n                finavalu);\n        }\n\n#pragma omp section\n        {\n            fp CaDyad = initvalu[35] * 1e3f;\n            JCaDyad = cam(timeinst,\n                          initvalu,\n                          initvalu_offset_Dyad,\n                          parameter,\n                          0,\n                          finavalu,\n                          CaDyad);\n        }\n\n#pragma omp section\n        {\n            fp CaSL = initvalu[36] * 1e3f;\n            JCaSL = cam(timeinst,\n                        initvalu,\n                        initvalu_offset_SL,\n                        parameter,\n                        5,\n                        finavalu,\n                        CaSL);\n        }\n\n#pragma omp section\n        {\n            fp CaCyt = initvalu[37] * 1e3f;\n            JCaCyt = cam(timeinst,\n                         initvalu,\n                         initvalu_offset_Cyt,\n                         parameter,\n                         10,\n                         finavalu,\n                         CaCyt);\n        }\n    }\n\n    com[0] = JCaDyad;\n    com[1] = JCaSL;\n    com[2] = JCaCyt;\n\n    kernel_fin(initvalu,\n               initvalu_offset_ecc,\n               initvalu_offset_Dyad,\n               initvalu_offset_SL,\n               initvalu_offset_Cyt,\n               parameter,\n               finavalu,\n               com[0],\n               com[1],\n               com[2]);\n\n    for (i = 0; i < EQUATIONS; i++) {\n        if (isnan(finavalu[i]) == 1 || isinf(finavalu[i]) == 1) {\n            finavalu[i] = 0.0001f;\n        }\n    }\n}\n",
+    "master.c": "#include \"../common.h\"\n\n#include <stdlib.h>\n#include <math.h>\n\nvoid master(fp timeinst,\n            fp *initvalu,\n            fp *parameter,\n            fp *finavalu,\n            fp *com);\n\nvoid embedded_fehlberg_7_8(fp timeinst,\n                           fp h,\n                           fp *initvalu,\n                           fp *finavalu,\n                           fp *error,\n                           fp *parameter,\n                           fp *com)\n{\n    static const fp c_1_11 = 41.0f / 840.0f;\n    static const fp c6 = 34.0f / 105.0f;\n    static const fp c_7_8 = 9.0f / 35.0f;\n    static const fp c_9_10 = 9.0f / 280.0f;\n\n    static const fp a2 = 2.0f / 27.0f;\n    static const fp a3 = 1.0f / 9.0f;\n    static const fp a4 = 1.0f / 6.0f;\n    static const fp a5 = 5.0f / 12.0f;\n    static const fp a6 = 1.0f / 2.0f;\n    static const fp a7 = 5.0f / 6.0f;\n    static const fp a8 = 1.0f / 6.0f;\n    static const fp a9 = 2.0f / 3.0f;\n    static const fp a10 = 1.0f / 3.0f;\n\n    static const fp b31 = 1.0f / 36.0f;\n    static const fp b32 = 3.0f / 36.0f;\n    static const fp b41 = 1.0f / 24.0f;\n    static const fp b43 = 3.0f / 24.0f;\n    static const fp b51 = 20.0f / 48.0f;\n    static const fp b53 = -75.0f / 48.0f;\n    static const fp b54 = 75.0f / 48.0f;\n    static const fp b61 = 1.0f / 20.0f;\n    static const fp b64 = 5.0f / 20.0f;\n    static const fp b65 = 4.0f / 20.0f;\n    static const fp b71 = -25.0f / 108.0f;\n    static const fp b74 = 125.0f / 108.0f;\n    static const fp b75 = -260.0f / 108.0f;\n    static const fp b76 = 250.0f / 108.0f;\n    static const fp b81 = 31.0f / 300.0f;\n    static const fp b85 = 61.0f / 225.0f;\n    static const fp b86 = -2.0f / 9.0f;\n    static const fp b87 = 13.0f / 900.0f;\n    static const fp b91 = 2.0f;\n    static const fp b94 = -53.0f / 6.0f;\n    static const fp b95 = 704.0f / 45.0f;\n    static const fp b96 = -107.0f / 9.0f;\n    static const fp b97 = 67.0f / 90.0f;\n    static const fp b98 = 3.0f;\n    static const fp b10_1 = -91.0f / 108.0f;\n    static const fp b10_4 = 23.0f / 108.0f;\n    static const fp b10_5 = -976.0f / 135.0f;\n    static const fp b10_6 = 311.0f / 54.0f;\n    static const fp b10_7 = -19.0f / 60.0f;\n    static const fp b10_8 = 17.0f / 6.0f;\n    static const fp b10_9 = -1.0f / 12.0f;\n    static const fp b11_1 = 2383.0f / 4100.0f;\n    static const fp b11_4 = -341.0f / 164.0f;\n    static const fp b11_5 = 4496.0f / 1025.0f;\n    static const fp b11_6 = -301.0f / 82.0f;\n    static const fp b11_7 = 2133.0f / 4100.0f;\n    static const fp b11_8 = 45.0f / 82.0f;\n    static const fp b11_9 = 45.0f / 164.0f;\n    static const fp b11_10 = 18.0f / 41.0f;\n    static const fp b12_1 = 3.0f / 205.0f;\n    static const fp b12_6 = -6.0f / 41.0f;\n    static const fp b12_7 = -3.0f / 205.0f;\n    static const fp b12_8 = -3.0f / 41.0f;\n    static const fp b12_9 = 3.0f / 41.0f;\n    static const fp b12_10 = 6.0f / 41.0f;\n    static const fp b13_1 = -1777.0f / 4100.0f;\n    static const fp b13_4 = -341.0f / 164.0f;\n    static const fp b13_5 = 4496.0f / 1025.0f;\n    static const fp b13_6 = -289.0f / 82.0f;\n    static const fp b13_7 = 2193.0f / 4100.0f;\n    static const fp b13_8 = 51.0f / 82.0f;\n    static const fp b13_9 = 33.0f / 164.0f;\n    static const fp b13_10 = 12.0f / 41.0f;\n\n    static const fp err_factor = -41.0f / 840.0f;\n\n    fp h2_7 = a2 * h;\n    fp timeinst_temp;\n\n    fp *initvalu_temp;\n    fp **finavalu_temp;\n\n    int i;\n\n    initvalu_temp = (fp *)malloc(EQUATIONS * sizeof(fp));\n    finavalu_temp = (fp **)malloc(13 * sizeof(fp *));\n    for (i = 0; i < 13; i++) {\n        finavalu_temp[i] = (fp *)malloc(EQUATIONS * sizeof(fp));\n    }\n\n    timeinst_temp = timeinst;\n    for (i = 0; i < EQUATIONS; i++) {\n        initvalu_temp[i] = initvalu[i];\n    }\n    master(timeinst_temp, initvalu_temp, parameter, finavalu_temp[0], com);\n\n    timeinst_temp = timeinst + h2_7;\n    for (i = 0; i < EQUATIONS; i++) {\n        initvalu_temp[i] = initvalu[i] + h2_7 * (finavalu_temp[0][i]);\n    }\n    master(timeinst_temp, initvalu_temp, parameter, finavalu_temp[1], com);\n\n    timeinst_temp = timeinst + a3 * h;\n    for (i = 0; i < EQUATIONS; i++) {\n        initvalu_temp[i] = initvalu[i] + h * (b31 * finavalu_temp[0][i] + b32 * finavalu_temp[1][i]);\n    }\n    master(timeinst_temp, initvalu_temp, parameter, finavalu_temp[2], com);\n\n    timeinst_temp = timeinst + a4 * h;\n    for (i = 0; i < EQUATIONS; i++) {\n        initvalu_temp[i] = initvalu[i] + h * (b41 * finavalu_temp[0][i] + b43 * finavalu_temp[2][i]);\n    }\n    master(timeinst_temp, initvalu_temp, parameter, finavalu_temp[3], com);\n\n    timeinst_temp = timeinst + a5 * h;\n    for (i = 0; i < EQUATIONS; i++) {\n        initvalu_temp[i] = initvalu[i] + h * (b51 * finavalu_temp[0][i] + b53 * finavalu_temp[2][i] + b54 * finavalu_temp[3][i]);\n    }\n    master(timeinst_temp, initvalu_temp, parameter, finavalu_temp[4], com);\n\n    timeinst_temp = timeinst + a6 * h;\n    for (i = 0; i < EQUATIONS; i++) {\n        initvalu_temp[i] = initvalu[i] + h * (b61 * finavalu_temp[0][i] + b64 * finavalu_temp[3][i] + b65 * finavalu_temp[4][i]);\n    }\n    master(timeinst_temp, initvalu_temp, parameter, finavalu_temp[5], com);\n\n    timeinst_temp = timeinst + a7 * h;\n    for (i = 0; i < EQUATIONS; i++) {\n        initvalu_temp[i] = initvalu[i] + h * (b71 * finavalu_temp[0][i] + b74 * finavalu_temp[3][i] + b75 * finavalu_temp[4][i] + b76 * finavalu_temp[5][i]);\n    }\n    master(timeinst_temp, initvalu_temp, parameter, finavalu_temp[6], com);\n\n    timeinst_temp = timeinst + a8 * h;\n    for (i = 0; i < EQUATIONS; i++) {\n        initvalu_temp[i] = initvalu[i] + h * (b81 * finavalu_temp[0][i] + b85 * finavalu_temp[4][i] + b86 * finavalu_temp[5][i] + b87 * finavalu_temp[6][i]);\n    }\n    master(timeinst_temp, initvalu_temp, parameter, finavalu_temp[7], com);\n\n    timeinst_temp = timeinst + a9 * h;\n    for (i = 0; i < EQUATIONS; i++) {\n        initvalu_temp[i] = initvalu[i] + h * (b91 * finavalu_temp[0][i] + b94 * finavalu_temp[3][i] + b95 * finavalu_temp[4][i] + b96 * finavalu_temp[5][i] + b97 * finavalu_temp[6][i] + b98 * finavalu_temp[7][i]);\n    }\n    master(timeinst_temp, initvalu_temp, parameter, finavalu_temp[8], com);\n\n    timeinst_temp = timeinst + a10 * h;\n    for (i = 0; i < EQUATIONS; i++) {\n        initvalu_temp[i] = initvalu[i] + h * (b10_1 * finavalu_temp[0][i] + b10_4 * finavalu_temp[3][i] + b10_5 * finavalu_temp[4][i] + b10_6 * finavalu_temp[5][i] + b10_7 * finavalu_temp[6][i] + b10_8 * finavalu_temp[7][i] + b10_9 * finavalu_temp[8][i]);\n    }\n    master(timeinst_temp, initvalu_temp, parameter, finavalu_temp[9], com);\n\n    timeinst_temp = timeinst + h;\n    for (i = 0; i < EQUATIONS; i++) {\n        initvalu_temp[i] = initvalu[i] + h * (b11_1 * finavalu_temp[0][i] + b11_4 * finavalu_temp[3][i] + b11_5 * finavalu_temp[4][i] + b11_6 * finavalu_temp[5][i] + b11_7 * finavalu_temp[6][i] + b11_8 * finavalu_temp[7][i] + b11_9 * finavalu_temp[8][i] + b11_10 * finavalu_temp[9][i]);\n    }\n    master(timeinst_temp, initvalu_temp, parameter, finavalu_temp[10], com);\n\n    timeinst_temp = timeinst;\n    for (i = 0; i < EQUATIONS; i++) {\n        initvalu_temp[i] = initvalu[i] + h * (b12_1 * finavalu_temp[0][i] + b12_6 * finavalu_temp[5][i] + b12_7 * finavalu_temp[6][i] + b12_8 * finavalu_temp[7][i] + b12_9 * finavalu_temp[8][i] + b12_10 * finavalu_temp[9][i]);\n    }\n    master(timeinst_temp, initvalu_temp, parameter, finavalu_temp[11], com);\n\n    timeinst_temp = timeinst + h;\n    for (i = 0; i < EQUATIONS; i++) {\n        initvalu_temp[i] = initvalu[i] + h * (b13_1 * finavalu_temp[0][i] + b13_4 * finavalu_temp[3][i] + b13_5 * finavalu_temp[4][i] + b13_6 * finavalu_temp[5][i] + b13_7 * finavalu_temp[6][i] + b13_8 * finavalu_temp[7][i] + b13_9 * finavalu_temp[8][i] + b13_10 * finavalu_temp[9][i] + finavalu_temp[11][i]);\n    }\n    master(timeinst_temp, initvalu_temp, parameter, finavalu_temp[12], com);\n\n    for (i = 0; i < EQUATIONS; i++) {\n        finavalu[i] = initvalu[i] + h * (c_1_11 * (finavalu_temp[0][i] + finavalu_temp[10][i]) + c6 * finavalu_temp[5][i] + c_7_8 * (finavalu_temp[6][i] + finavalu_temp[7][i]) + c_9_10 * (finavalu_temp[8][i] + finavalu_temp[9][i]));\n    }\n\n    for (i = 0; i < EQUATIONS; i++) {\n        error[i] = fabsf(err_factor * (finavalu_temp[0][i] + finavalu_temp[10][i] - finavalu_temp[11][i] - finavalu_temp[12][i]));\n    }\n\n    for (i = 0; i < 13; i++) {\n        free(finavalu_temp[i]);\n    }\n    free(finavalu_temp);\n    free(initvalu_temp);\n}\n"
+  },
+  "target_files_expected": [
+    "main.c",
+    "master.c"
+  ],
+  "target_files_extracted": [
+    "main.c",
+    "master.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 93.36,
+      "prompt_tokens": 41587,
+      "completion_tokens": 7574,
+      "finish_reason": "completed",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "rm: cannot remove '*.o': No such file or directory\nrm: cannot remove 'myocyte.out': No such file or directory\nrm: cannot remove 'output.txt': No such file or directory\nmake: *** [Makefile:32: clean] Error 1\n\nmain.c:1:10: fatal error: ../common.h: No such file or directory\n    1 | #include \"../common.h\"\n      |          ^~~~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:27: main.o] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,193 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "particlefilter",
+        "parallel_api": "cuda",
+        "unique_id": "rodinia-particlefilter-cuda",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "cuda/particlefilter",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "ex_particle_CUDA_float_seq.cu",
+            "ex_particle_CUDA_naive_seq.cu"
+        ],
+        "support_files": [
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "ex_particle_CUDA_float_seq.cu"
+        ]
+    },
+    "implementation": {
+        "api": "cuda",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "cuda-toolkit>=11.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "cuda/particlefilter",
+        "commands": {
+            "configure": null,
+            "build": "make CUDA_DIR=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda",
+            "clean": "make clean"
+        },
+        "variables": {
+            "CUDA_DIR": {
+                "description": "Path to CUDA toolkit installation",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda",
+                "detection": "dirname $(dirname $(which nvcc))"
+            }
+        },
+        "outputs": {
+            "executable": "./particlefilter_float"
+        }
+    },
+    "run": {
+        "executable": "./particlefilter_float",
+        "default_arguments": [
+            "-x",
+            "128",
+            "-y",
+            "128",
+            "-z",
+            "10",
+            "-np",
+            "1000"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-x",
+                    "128",
+                    "-y",
+                    "128",
+                    "-z",
+                    "10",
+                    "-np",
+                    "1000"
+                ],
+                "description": "Small input for correctness verification of particlefilter (CUDA)",
+                "input_files": [],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "-x",
+                    "128",
+                    "-y",
+                    "128",
+                    "-z",
+                    "10",
+                    "-np",
+                    "10000"
+                ],
+                "description": "Large input for performance measurement of particlefilter (CUDA)",
+                "input_files": [],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "ENTIRE PROGRAM TOOK",
+                "description": "Particle filter computation completed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "vendor": "NVIDIA",
+                "min_compute_capability": "sm_60",
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.280598+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "VIDEO SEQUENCE TOOK 0.004530\nTIME TO SEND TO GPU: 0.000054\nGPU Execution: 0.015272\nFREE TIME: 0.000013\nTIME TO SEND BACK: 0.000045\nSEND ARRAY X BACK: 0.000015\nSEND ARRAY Y BACK: 0.000012\nSEND WEIGHTS BACK: 0.000005\nXE: 48.591856\nYE: 72.360459\n17.530207\nPARTICLE FILTER TOOK 0.067546\nENTIRE PROGRAM TOOK 0.072076\n",
+                "wall_time_seconds": 0.093,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Particle filter for Bayesian state estimation on GPU",
+        "domain": "signal processing",
+        "complexity": "particle filter (Bayesian estimation)",
+        "tags": [
+            "bayesian",
+            "cuda",
+            "particle-filter",
+            "particlefilter",
+            "rodinia",
+            "state-estimation"
+        ],
+        "multi_file": true,
+        "translation_complexity": null
+    }
+}

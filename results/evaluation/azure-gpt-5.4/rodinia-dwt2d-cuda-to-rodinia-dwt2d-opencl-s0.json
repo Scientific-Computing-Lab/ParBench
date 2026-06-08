@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-dwt2d-cuda",
+  "target_spec": "rodinia-dwt2d-opencl",
+  "kernel": "dwt2d",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 59059947,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "rgb.bmp",
+    "-i",
+    "../../data/dwt2d",
+    "-D",
+    "1024x1024",
+    "-f",
+    "-5",
+    "-l",
+    "3"
+  ],
+  "timestamp": "2026-04-26T02:14:20Z",
+  "prompt_tokens": 30828,
+  "completion_tokens": 8568,
+  "llm_response_time_seconds": 203.444,
+  "build_status": "pass",
+  "build_time_seconds": 0.31,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.253,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "ding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 3 , gx = 4 , gy = 11 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\n\nWriting to rgb.bmp.dwt.r (1024 x 1024)\n\nWriting to rgb.bmp.dwt.g (1024 x 1024)\n\nWriting to rgb.bmp.dwt.b (1024 x 1024)\nInit: 204.886002\nMemAlloc: 10.596001\nHtoD: 0.000000\nExec: 0.017408\nDtoH: 316.575989\nClose: 0.607000\nTotal: 1199.409058\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.1,
+  "translated_wall_time_seconds": 1.253,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0798,
+  "translated_files": {
+    "com_dwt.cl": "#define THREADS 256\n\ninline int mirror_index(int d, int size)\n{\n    if (size <= 1) return 0;\n    while (d < 0 || d >= size) {\n        if (d < 0) {\n            d = -d;\n        }\n        if (d >= size) {\n            d = 2 * size - 2 - d;\n        }\n    }\n    return d;\n}\n\ninline int src_at(__global const int *src, int width, int height, int x, int y)\n{\n    int mx = mirror_index(x, width);\n    int my = mirror_index(y, height);\n    return src[my * width + mx];\n}\n\ninline int tmp_at(__global const int *tmp, int width, int height, int x, int y)\n{\n    int my = mirror_index(y, height);\n    return tmp[my * width + x];\n}\n\ninline int fdwt53_odd_horizontal(__global const int *src, int width, int height, int xodd, int y)\n{\n    int c = src_at(src, width, height, xodd, y);\n    int p = src_at(src, width, height, xodd - 1, y);\n    int n = src_at(src, width, height, xodd + 1, y);\n    return c - (p + n) / 2;\n}\n\ninline int fdwt53_even_horizontal(__global const int *src, int width, int height, int xeven, int y)\n{\n    int c = src_at(src, width, height, xeven, y);\n    int p = fdwt53_odd_horizontal(src, width, height, xeven - 1, y);\n    int n = fdwt53_odd_horizontal(src, width, height, xeven + 1, y);\n    return c + (p + n + 2) / 4;\n}\n\ninline int fdwt53_odd_vertical(__global const int *tmp, int width, int height, int x, int yodd)\n{\n    int c = tmp_at(tmp, width, height, x, yodd);\n    int p = tmp_at(tmp, width, height, x, yodd - 1);\n    int n = tmp_at(tmp, width, height, x, yodd + 1);\n    return c - (p + n) / 2;\n}\n\ninline int fdwt53_even_vertical(__global const int *tmp, int width, int height, int x, int yeven)\n{\n    int c = tmp_at(tmp, width, height, x, yeven);\n    int p = fdwt53_odd_vertical(tmp, width, height, x, yeven - 1);\n    int n = fdwt53_odd_vertical(tmp, width, height, x, yeven + 1);\n    return c + (p + n + 2) / 4;\n}\n\n__kernel void c_CopySrcToComponents(__global int *d_r,\n                                    __global int *d_g,\n                                    __global int *d_b,\n                                    __global const uchar *d_src,\n                                    const int pixels)\n{\n    int gid = (int)get_global_id(0);\n    int gsz = (int)get_global_size(0);\n\n    for (int i = gid; i < pixels; i += gsz) {\n        int base = 3 * i;\n        d_r[i] = (int)d_src[base + 0] - 128;\n        d_g[i] = (int)d_src[base + 1] - 128;\n        d_b[i] = (int)d_src[base + 2] - 128;\n    }\n}\n\n__kernel void c_CopySrcToComponent(__global int *d_c,\n                                   __global const uchar *d_src,\n                                   const int pixels)\n{\n    int gid = (int)get_global_id(0);\n    int gsz = (int)get_global_size(0);\n\n    for (int i = gid; i < pixels; i += gsz) {\n        d_c[i] = (int)d_src[i] - 128;\n    }\n}\n\n__kernel void cl_fdwt53Kernel(__global int *input,\n                              __global int *output,\n                              const int sizeX,\n                              const int sizeY,\n                              const int winSteps,\n                              const int WIN_SX,\n                              const int WIN_SY)\n{\n    (void)winSteps;\n    (void)WIN_SX;\n    (void)WIN_SY;\n\n    if (get_global_id(0) != 0 || get_global_id(1) != 0) {\n        return;\n    }\n\n    const int lowX = (sizeX + 1) >> 1;\n    const int highX = sizeX >> 1;\n    const int lowY = (sizeY + 1) >> 1;\n    const int highY = sizeY >> 1;\n\n    \n    for (int y = 0; y < sizeY; ++y) {\n        for (int k = 0; k < lowX; ++k) {\n            int x = k << 1;\n            output[y * sizeX + k] = fdwt53_even_horizontal(input, sizeX, sizeY, x, y);\n        }\n        for (int k = 0; k < highX; ++k) {\n            int x = (k << 1) + 1;\n            output[y * sizeX + lowX + k] = fdwt53_odd_horizontal(input, sizeX, sizeY, x, y);\n        }\n    }\n\n    \n    int llOffset = 0;\n    int hlOffset = lowX * lowY;\n    int lhOffset = hlOffset + highX * lowY;\n    int hhOffset = lhOffset + lowX * highY;\n\n    \n    for (int x = 0; x < lowX; ++x) {\n        for (int k = 0; k < lowY; ++k) {\n            int y = k << 1;\n            input[llOffset + k * lowX + x] = fdwt53_even_vertical(output, sizeX, sizeY, x, y);\n        }\n        for (int k = 0; k < highY; ++k) {\n            int y = (k << 1) + 1;\n            input[lhOffset + k * lowX + x] = fdwt53_odd_vertical(output, sizeX, sizeY, x, y);\n        }\n    }\n\n    \n    for (int x = 0; x < highX; ++x) {\n        int tx = lowX + x;\n        for (int k = 0; k < lowY; ++k) {\n            int y = k << 1;\n            input[hlOffset + k * highX + x] = fdwt53_even_vertical(output, sizeX, sizeY, tx, y);\n        }\n        for (int k = 0; k < highY; ++k) {\n            int y = (k << 1) + 1;\n            input[hhOffset + k * highX + x] = fdwt53_odd_vertical(output, sizeX, sizeY, tx, y);\n        }\n    }\n\n    \n    int total = sizeX * sizeY;\n    for (int i = 0; i < total; ++i) {\n        output[i] = input[i];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "com_dwt.cl"
+  ],
+  "target_files_extracted": [
+    "com_dwt.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 203.444,
+      "prompt_tokens": 30828,
+      "completion_tokens": 8568,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

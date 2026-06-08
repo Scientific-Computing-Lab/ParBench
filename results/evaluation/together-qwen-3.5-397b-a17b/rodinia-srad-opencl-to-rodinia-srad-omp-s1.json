@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-srad-opencl",
+  "target_spec": "rodinia-srad-omp",
+  "kernel": "srad",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1786597257,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T19:52:11Z",
+  "prompt_tokens": 16593,
+  "completion_tokens": 6735,
+  "llm_response_time_seconds": 31.393,
+  "build_status": "fail",
+  "build_time_seconds": 0.197,
+  "build_error_snippet": "/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':\n(.text+0x1b): undefined reference to `main'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:6: bfs] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':\n(.text+0x1b): undefined reference to `main'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:6: bfs] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.006,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "srad.cpp": "#include \"./main.h\"\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <math.h>\n#include <omp.h>\n\n#ifndef fp\n#define fp float\n#endif\n\n#ifndef NUMBER_THREADS\n#define NUMBER_THREADS 256\n#endif\n\nvoid extract_kernel(long d_Ne, fp* d_I) {\n    #pragma omp parallel for\n    for (long ei = 0; ei < d_Ne; ei++) {\n        d_I[ei] = exp(d_I[ei]/255);\n    }\n}\n\nvoid prepare_kernel(long d_Ne, fp* d_I, fp* d_sums, fp* d_sums2) {\n    #pragma omp parallel for\n    for (long ei = 0; ei < d_Ne; ei++) {\n        d_sums[ei] = d_I[ei];\n        d_sums2[ei] = d_I[ei]*d_I[ei];\n    }\n}\n\nvoid reduce_kernel(long d_Ne, long d_no, int d_mul, fp* d_sums, fp* d_sums2, int gridDim) {\n    int nf = NUMBER_THREADS - (gridDim * NUMBER_THREADS - d_no);\n    int df = 0;\n    \n    fp* d_psum = (fp*)malloc(sizeof(fp) * NUMBER_THREADS);\n    fp* d_psum2 = (fp*)malloc(sizeof(fp) * NUMBER_THREADS);\n    \n    #pragma omp parallel\n    {\n        int tx = omp_get_thread_num();\n        int bx = 0;\n        int ei = bx * NUMBER_THREADS + tx;\n        \n        if (ei < d_no) {\n            d_psum[tx] = d_sums[ei * d_mul];\n            d_psum2[tx] = d_sums2[ei * d_mul];\n        }\n        \n        #pragma omp barrier\n        \n        if (nf == NUMBER_THREADS) {\n            for (int i = 2; i <= NUMBER_THREADS; i = 2 * i) {\n                if ((tx + 1) % i == 0) {\n                    d_psum[tx] = d_psum[tx] + d_psum[tx - i/2];\n                    d_psum2[tx] = d_psum2[tx] + d_psum2[tx - i/2];\n                }\n                #pragma omp barrier\n            }\n            \n            if (tx == (NUMBER_THREADS - 1)) {\n                d_sums[bx * d_mul * NUMBER_THREADS] = d_psum[tx];\n                d_sums2[bx * d_mul * NUMBER_THREADS] = d_psum2[tx];\n            }\n        }\n        else {\n            if (bx != (gridDim - 1)) {\n                for (int i = 2; i <= NUMBER_THREADS; i = 2 * i) {\n                    if ((tx + 1) % i == 0) {\n                        d_psum[tx] = d_psum[tx] + d_psum[tx - i/2];\n                        d_psum2[tx] = d_psum2[tx] + d_psum2[tx - i/2];\n                    }\n                    #pragma omp barrier\n                }\n                \n                if (tx == (NUMBER_THREADS - 1)) {\n                    d_sums[bx * d_mul * NUMBER_THREADS] = d_psum[tx];\n                    d_sums2[bx * d_mul * NUMBER_THREADS] = d_psum2[tx];\n                }\n            }\n            else {\n                for (int i = 2; i <= NUMBER_THREADS; i = 2 * i) {\n                    if (nf >= i) {\n                        df = i;\n                    }\n                }\n                \n                for (int i = 2; i <= df; i = 2 * i) {\n                    if ((tx + 1) % i == 0 && tx < df) {\n                        d_psum[tx] = d_psum[tx] + d_psum[tx - i/2];\n                        d_psum2[tx] = d_psum2[tx] + d_psum2[tx - i/2];\n                    }\n                    #pragma omp barrier\n                }\n                \n                if (tx == (df - 1)) {\n                    for (int i = (bx * NUMBER_THREADS) + df; i < (bx * NUMBER_THREADS) + nf; i++) {\n                        d_psum[tx] = d_psum[tx] + d_sums[i];\n                        d_psum2[tx] = d_psum2[tx] + d_sums2[i];\n                    }\n                    \n                    d_sums[bx * d_mul * NUMBER_THREADS] = d_psum[tx];\n                    d_sums2[bx * d_mul * NUMBER_THREADS] = d_psum2[tx];\n                }\n            }\n        }\n    }\n    \n    free(d_psum);\n    free(d_psum2);\n}\n\nvoid srad_kernel(fp d_lambda, int d_Nr, int d_Nc, long d_Ne, int* d_iN, int* d_iS, int* d_jE, int* d_jW, fp* d_dN, fp* d_dS, fp* d_dW, fp* d_dE, fp d_q0sqr, fp* d_c, fp* d_I) {\n    #pragma omp parallel for\n    for (long ei = 0; ei < d_Ne; ei++) {\n        int row = (ei + 1) % d_Nr - 1;\n        int col = (ei + 1) / d_Nr + 1 - 1;\n        if ((ei + 1) % d_Nr == 0) {\n            row = d_Nr - 1;\n            col = col - 1;\n        }\n        \n        fp d_Jc = d_I[ei];\n        fp d_dN_loc = d_I[d_iN[row] + d_Nr * col] - d_Jc;\n        fp d_dS_loc = d_I[d_iS[row] + d_Nr * col] - d_Jc;\n        fp d_dW_loc = d_I[row + d_Nr * d_jW[col]] - d_Jc;\n        fp d_dE_loc = d_I[row + d_Nr * d_jE[col]] - d_Jc;\n        \n        fp d_G2 = (d_dN_loc * d_dN_loc + d_dS_loc * d_dS_loc + d_dW_loc * d_dW_loc + d_dE_loc * d_dE_loc) / (d_Jc * d_Jc);\n        fp d_L = (d_dN_loc + d_dS_loc + d_dW_loc + d_dE_loc) / d_Jc;\n        \n        fp d_num = (0.5 * d_G2) - ((1.0 / 16.0) * (d_L * d_L));\n        fp d_den = 1 + (0.25 * d_L);\n        fp d_qsqr = d_num / (d_den * d_den);\n        \n        d_den = (d_qsqr - d_q0sqr) / (d_q0sqr * (1 + d_q0sqr));\n        fp d_c_loc = 1.0 / (1.0 + d_den);\n        \n        if (d_c_loc < 0) {\n            d_c_loc = 0;\n        }\n        else if (d_c_loc > 1) {\n            d_c_loc = 1;\n        }\n        \n        d_dN[ei] = d_dN_loc;\n        d_dS[ei] = d_dS_loc;\n        d_dW[ei] = d_dW_loc;\n        d_dE[ei] = d_dE_loc;\n        d_c[ei] = d_c_loc;\n    }\n}\n\nvoid srad2_kernel(fp d_lambda, int d_Nr, int d_Nc, long d_Ne, int* d_iN, int* d_iS, int* d_jE, int* d_jW, fp* d_dN, fp* d_dS, fp* d_dE, fp* d_dW, fp* d_c, fp* d_I) {\n    #pragma omp parallel for\n    for (long ei = 0; ei < d_Ne; ei++) {\n        int row = (ei + 1) % d_Nr - 1;\n        int col = (ei + 1) / d_Nr + 1 - 1;\n        if ((ei + 1) % d_Nr == 0) {\n            row = d_Nr - 1;\n            col = col - 1;\n        }\n        \n        fp d_cN = d_c[ei];\n        fp d_cS = d_c[d_iS[row] + d_Nr * col];\n        fp d_cW = d_c[ei];\n        fp d_cE = d_c[row + d_Nr * d_jE[col]];\n        \n        fp d_D = d_cN * d_dN[ei] + d_cS * d_dS[ei] + d_cW * d_dW[ei] + d_cE * d_dE[ei];\n        \n        d_I[ei] = d_I[ei] + 0.25 * d_lambda * d_D;\n    }\n}\n\nvoid compress_kernel(long d_Ne, fp* d_I) {\n    #pragma omp parallel for\n    for (long ei = 0; ei < d_Ne; ei++) {\n        d_I[ei] = log(d_I[ei]) * 255;\n    }\n}\n\nvoid kernel_gpu_opencl_wrapper(fp* image, int Nr, int Nc, long Ne, int niter, fp lambda, long NeROI, int* iN, int* iS, int* jE, int* jW, int iter, int mem_size_i, int mem_size_j) {\n    printf(\"WG size of kernel = %d \\n\", NUMBER_THREADS);\n    \n    fp* d_I = (fp*)malloc(sizeof(fp) * Ne);\n    fp* d_sums = (fp*)malloc(sizeof(fp) * Ne);\n    fp* d_sums2 = (fp*)malloc(sizeof(fp) * Ne);\n    fp* d_dN = (fp*)malloc(sizeof(fp) * Ne);\n    fp* d_dS = (fp*)malloc(sizeof(fp) * Ne);\n    fp* d_dW = (fp*)malloc(sizeof(fp) * Ne);\n    fp* d_dE = (fp*)malloc(sizeof(fp) * Ne);\n    fp* d_c = (fp*)malloc(sizeof(fp) * Ne);\n    \n    for (long i = 0; i < Ne; i++) {\n        d_I[i] = image[i];\n    }\n    \n    extract_kernel(Ne, d_I);\n    \n    int blocks_work_size = Ne / NUMBER_THREADS;\n    if (Ne % NUMBER_THREADS != 0) {\n        blocks_work_size = blocks_work_size + 1;\n    }\n    \n    printf(\"Iterations Progress: hidden\");\n    \n    for (iter = 0; iter < niter; iter++) {\n        fflush(NULL);\n        \n        prepare_kernel(Ne, d_I, d_sums, d_sums2);\n        \n        int blocks2_work_size = blocks_work_size;\n        long no = Ne;\n        int mul = 1;\n        \n        while (blocks2_work_size != 0) {\n            int gridDim = blocks2_work_size;\n            reduce_kernel(Ne, no, mul, d_sums, d_sums2, gridDim);\n            \n            no = blocks2_work_size;\n            if (blocks2_work_size == 1) {\n                blocks2_work_size = 0;\n            }\n            else {\n                mul = mul * NUMBER_THREADS;\n                blocks_work_size = blocks2_work_size / NUMBER_THREADS;\n                if (blocks2_work_size % NUMBER_THREADS != 0) {\n                    blocks_work_size = blocks_work_size + 1;\n                }\n                blocks2_work_size = blocks_work_size;\n            }\n        }\n        \n        fp total = d_sums[0];\n        fp total2 = d_sums2[0];\n        \n        fp meanROI = total / (fp)(NeROI);\n        fp meanROI2 = meanROI * meanROI;\n        fp varROI = (total2 / (fp)(NeROI)) - meanROI2;\n        fp q0sqr = varROI / meanROI2;\n        \n        srad_kernel(lambda, Nr, Nc, Ne, iN, iS, jE, jW, d_dN, d_dS, d_dW, d_dE, q0sqr, d_c, d_I);\n        \n        srad2_kernel(lambda, Nr, Nc, Ne, iN, iS, jE, jW, d_dN, d_dS, d_dE, d_dW, d_c, d_I);\n    }\n    \n    printf(\"\\n\");\n    \n    compress_kernel(Ne, d_I);\n    \n    for (long i = 0; i < Ne; i++) {\n        image[i] = d_I[i];\n    }\n    \n    free(d_I);\n    free(d_sums);\n    free(d_sums2);\n    free(d_dN);\n    free(d_dS);\n    free(d_dW);\n    free(d_dE);\n    free(d_c);\n}\n"
+  },
+  "target_files_expected": [
+    "srad.cpp"
+  ],
+  "target_files_extracted": [
+    "srad.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 31.393,
+      "prompt_tokens": 16593,
+      "completion_tokens": 6735,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':\n(.text+0x1b): undefined reference to `main'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:6: bfs] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

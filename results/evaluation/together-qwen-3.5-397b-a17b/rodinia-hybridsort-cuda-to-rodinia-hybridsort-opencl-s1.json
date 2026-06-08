@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-hybridsort-cuda",
+  "target_spec": "rodinia-hybridsort-opencl",
+  "kernel": "hybridsort",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1423242032,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "r",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-21T23:10:17Z",
+  "prompt_tokens": 30579,
+  "completion_tokens": 3485,
+  "llm_response_time_seconds": 23.807,
+  "build_status": "pass",
+  "build_time_seconds": 0.147,
+  "build_error_snippet": null,
+  "run_status": "error",
+  "run_time_seconds": 0.262,
+  "run_exit_code": -1,
+  "run_stderr_snippet": "UnicodeDecodeError: 'utf-8' codec can't decode bytes in position 82-83: invalid continuation byte",
+  "run_stdout_snippet": "",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code -1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.272,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "bucketsort_kernels.cl": "#ifndef _BUCKETSORT_KERNEL_H_\n#define _BUCKETSORT_KERNEL_H_\n\n#define BUCKET_WARP_LOG_SIZE\t5\n#define BUCKET_WARP_N\t\t\t1\n#ifdef BUCKET_WG_SIZE_1\n#define BUCKET_THREAD_N BUCKET_WG_SIZE_1\n#else\n#define BUCKET_THREAD_N\t\t\t(BUCKET_WARP_N << BUCKET_WARP_LOG_SIZE)\n#endif\n#define BUCKET_BLOCK_MEMORY\t\t(DIVISIONS * BUCKET_WARP_N)\n#define BUCKET_BAND\t\t\t\t128\n#define LOG_DIVISIONS 10\n#define DIVISIONS (1 << LOG_DIVISIONS)\n\nlocal int addOffset(local unsigned int *s_offset, unsigned int data, unsigned int threadTag){\n    unsigned int count;\n\n    do{\n        count = s_offset[data] & 0x07FFFFFFU;\n        count = threadTag | (count + 1);\n        s_offset[data] = count;\n    }while(s_offset[data] != count);\n\n\treturn (count & 0x07FFFFFFU) - 1;\n}\n\nkernel void\nbucketcount( read_only float *input, write_only int *indice, write_only unsigned int *d_prefixoffsets, int size, read_only float *l_pivotpoints)\n{\n\tlocal unsigned int s_offset[BUCKET_BLOCK_MEMORY]; \n\n    const unsigned int threadTag = get_local_id(0) << (32 - BUCKET_WARP_LOG_SIZE);\n    const int warpBase = (get_local_id(0) >> BUCKET_WARP_LOG_SIZE) * DIVISIONS; \n    const int numThreads = get_global_size(0);\n\tfor (int i = get_local_id(0); i < BUCKET_BLOCK_MEMORY; i += get_local_size(0))\n\t\ts_offset[i] = 0; \n\n\tbarrier(CLK_LOCAL_MEM_FENCE); \n\n\tfor (int tid = get_global_id(0); tid < size; tid += numThreads) {\n\t\tfloat elem = input[tid]; \n\n\t\tint idx  = DIVISIONS/2 - 1; \n\t\tint jump = DIVISIONS/4; \n\t\tfloat piv = l_pivotpoints[idx]; \n\n\t\twhile(jump >= 1){\n\t\t\tidx = (elem < piv) ? (idx - jump) : (idx + jump);\n\t\t\tpiv = l_pivotpoints[idx]; \n\t\t\tjump /= 2; \n\t\t}\n\t\tidx = (elem < piv) ? idx : (idx + 1); \n\n\t\tindice[tid] = (addOffset(s_offset + warpBase, idx, threadTag) << LOG_DIVISIONS) + idx;  \n\t}\n\n\tbarrier(CLK_LOCAL_MEM_FENCE); \n\n\tint prefixBase = get_group_id(0) * BUCKET_BLOCK_MEMORY; \n\n\tfor (int i = get_local_id(0); i < BUCKET_BLOCK_MEMORY; i += get_local_size(0))\n\t\td_prefixoffsets[prefixBase + i] = s_offset[i] & 0x07FFFFFFU; \n}\n\nkernel void bucketprefixoffset(read_only unsigned int *d_prefixoffsets, write_only unsigned int *d_offsets, int blocks) {\n\tint tid = get_global_id(0); \n\tint size = blocks * BUCKET_BLOCK_MEMORY; \n\tint sum = 0; \n\n\tfor (int i = tid; i < size; i += DIVISIONS) {\n\t\tint x = d_prefixoffsets[i]; \n\t\td_prefixoffsets[i] = sum; \n\t\tsum += x; \n\t}\n\n\td_offsets[tid] = sum; \n}\n\nkernel void\nbucketsort(read_only float *input, read_only int *indice, write_only float *output, int size, read_only unsigned int *d_prefixoffsets, \n\t\t   read_only unsigned int *l_offsets)\n{\n\tlocal unsigned int s_offset[BUCKET_BLOCK_MEMORY]; \n\n\tint prefixBase = get_group_id(0) * BUCKET_BLOCK_MEMORY; \n    const int warpBase = (get_local_id(0) >> BUCKET_WARP_LOG_SIZE) * DIVISIONS; \n    const int numThreads = get_global_size(0);\n\tfor (int i = get_local_id(0); i < BUCKET_BLOCK_MEMORY; i += get_local_size(0))\n\t\ts_offset[i] = l_offsets[i & (DIVISIONS - 1)] + d_prefixoffsets[prefixBase + i]; \n\n\tbarrier(CLK_LOCAL_MEM_FENCE); \n\n\tfor (int tid = get_global_id(0); tid < size; tid += numThreads) {\n\n\t\tfloat elem = input[tid]; \n\t\tint id = indice[tid]; \n\n\t\toutput[s_offset[warpBase + (id & (DIVISIONS - 1))] + (id >> LOG_DIVISIONS)] = elem;\n\t}\n}\n\n#endif\n",
+    "histogram1024.cl": "#define BIN_COUNT 1024 \n#define HISTOGRAM_SIZE (BIN_COUNT * sizeof(unsigned int))\n\n#define WARP_LOG_SIZE 5\n#define WARP_N 3\n\n#ifdef HISTO_WG_SIZE_0\n#define THREAD_N HISTO_WG_SIZE_0\n#else\n#define THREAD_N (WARP_N << WARP_LOG_SIZE)\n#endif\n\n#define BLOCK_MEMORY (WARP_N * BIN_COUNT)\n\nlocal void addData1024(local unsigned int *s_WarpHist, unsigned int data, unsigned int threadTag){\n    unsigned int count;\n    do{\n        count = s_WarpHist[data] & 0x07FFFFFFU;\n        count = threadTag | (count + 1);\n        s_WarpHist[data] = count;\n    }while(s_WarpHist[data] != count);\n}\n\nkernel void histogram1024Kernel(write_only unsigned int *d_Result, read_only float *d_Data, float minimum, float maximum, int dataN){\n\n    const int globalTid = get_global_id(0);\n    \n    const int numThreads = get_global_size(0);\n    \n    const unsigned int threadTag = get_local_id(0) << (32 - WARP_LOG_SIZE);\n    \n    local unsigned int s_Hist[BLOCK_MEMORY];\n    \n    const int warpBase = (get_local_id(0) >> WARP_LOG_SIZE) * BIN_COUNT;\n    \n    for(int pos = get_local_id(0); pos < BLOCK_MEMORY; pos += get_local_size(0))\n       s_Hist[pos] = 0;\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n    \n    for(int pos = globalTid; pos < dataN; pos += numThreads){\n        unsigned int data4 = ((d_Data[pos] - minimum)/(maximum - minimum)) * BIN_COUNT;\n\t\taddData1024(s_Hist + warpBase, data4 & 0x3FFU, threadTag);\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n    \n    for(int pos = get_local_id(0); pos < BIN_COUNT; pos += get_local_size(0)){\n        unsigned int sum = 0;\n\n        for(int base = 0; base < BLOCK_MEMORY; base += BIN_COUNT)\n            sum += s_Hist[base + pos] & 0x07FFFFFFU;\n         atomic_add(d_result + pos, sum);\n    }\n}\n",
+    "mergesort.cl": "#ifndef _MATRIXMUL_KERNEL_H_\n#define _MATRIXMUL_KERNEL_H_\n\n#define DIVISIONS (1 << 10)\n\nlocal float4 sortElem(float4 r) {\n\tfloat4 nr;\n\n\tnr.x = (r.x > r.y) ? r.y : r.x; \n\tnr.y = (r.y > r.x) ? r.y : r.x; \n\tnr.z = (r.z > r.w) ? r.w : r.z; \n\tnr.w = (r.w > r.z) ? r.w : r.z; \n\n\tr.x = (nr.x > nr.z) ? nr.z : nr.x; \n\tr.y = (nr.y > nr.w) ? nr.w : nr.y; \n\tr.z = (nr.z > nr.x) ? nr.z : nr.x; \n\tr.w = (nr.w > nr.y) ? nr.w : nr.y; \n\n\tnr.x = r.x; \n\tnr.y = (r.y > r.z) ? r.z : r.y; \n\tnr.z = (r.z > r.y) ? r.z : r.y; \n\tnr.w = r.w; \n\treturn nr; \n}\n\nlocal float4 getLowest(float4 a, float4 b)\n{\n\t\n\ta.x = (a.x < b.w) ? a.x : b.w; \n\ta.y = (a.y < b.z) ? a.y : b.z; \n\ta.z = (a.z < b.y) ? a.z : b.y; \n\ta.w = (a.w < b.x) ? a.w : b.x; \n\treturn a; \n}\n\nlocal float4 getHighest(float4 a, float4 b)\n{\n\tb.x = (a.w >= b.x) ? a.w : b.x; \n\tb.y = (a.z >= b.y) ? a.z : b.y; \n\tb.z = (a.y >= b.z) ? a.y : b.z; \n\tb.w = (a.x >= b.w) ? a.x : b.w; \n\treturn b; \n}\n\nkernel void\nmergeSortFirst(write_only float4 *result, read_only float4 *tex, int listsize) \n{\n    int tid = get_global_id(0);\n    \n\tif(tid < listsize/4){\n\t\tfloat4 r = tex[tid];\n\t\tresult[tid] = sortElem(r); \n\t}\n}\n\nkernel void\nmergeSortPass(write_only float4 *result, read_only float4 *tex, int nrElems, int threadsPerDiv, read_only int *constStartAddr, read_only int *finalStartAddr, read_only int *nullElems) \n{\n\tint tid = get_global_id(0); \n\t\n\tint division = tid / threadsPerDiv; \n\tif(division >= DIVISIONS) return; \n\t\n\tint int_tid = tid - division * threadsPerDiv; \n\tint Astart = constStartAddr[division] + int_tid * nrElems; \n\n\tint Bstart = Astart + nrElems/2;\n\tfloat4 *resStart = &(result[Astart]); \n\n\tif(Astart >= constStartAddr[division + 1]) \n\t\treturn; \n\tif(Bstart >= constStartAddr[division + 1]){\n\t\tfor(int i=0; i<(constStartAddr[division + 1] - Astart); i++)\n\t\t{\n\t\t\tresStart[i] = tex[Astart + i]; \n\t\t}\n\t\treturn; \n\t}\n\n\tint aidx = 0; \n\tint bidx = 0; \n\tint outidx = 0; \n\tfloat4 a, b;\n\ta = tex[Astart + aidx];  \n\tb = tex[Bstart + bidx]; \n\t\n\twhile(true)\n\t{\n\t\tfloat4 nextA = tex[Astart + aidx + 1]; \n\t\tfloat4 nextB = tex[Bstart + bidx + 1]; \n\n\t\tfloat4 na = getLowest(a,b); \n\t\tfloat4 nb = getHighest(a,b); \n\t\ta = sortElem(na); \n\t\tb = sortElem(nb); \n\t\t\n\t\tresStart[outidx++] = a; \n\n\t\tbool elemsLeftInA; \n\t\tbool elemsLeftInB;\n\n\t\telemsLeftInA = (aidx + 1 < nrElems/2); \n\t\telemsLeftInB = (bidx + 1 < nrElems/2) && (Bstart + bidx + 1 < constStartAddr[division + 1]); \n\n\t\tif(elemsLeftInA){\n\t\t\tif(elemsLeftInB){\n\t\t\t\tif(nextA.x < nextB.x) { aidx += 1; a = nextA; }  \n\t\t\t\telse { bidx += 1;  a = nextB; }\n\t\t\t}\n\t\t\telse {\n\t\t\t\taidx += 1; a = nextA;\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\tif(elemsLeftInB){\n\t\t\t\tbidx += 1;  a = nextB;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tbreak; \n\t\t\t}\n\t\t}\n\n\t}\n\tresStart[outidx++] = b;\n}\n\nkernel void\nmergepack(read_only float *orig, write_only float *result, read_only int *constStartAddr, read_only int *finalStartAddr, read_only int *nullElems) \n{\n\tint idx = get_global_id(0); \n\tint division = get_group_id(1); \n\n\tif((finalStartAddr[division] + idx) >= finalStartAddr[division + 1]) return; \n\tresult[finalStartAddr[division] + idx] = orig[constStartAddr[division]*4 + nullElems[division] + idx]; \n}\n\n#endif\n"
+  },
+  "target_files_expected": [
+    "bucketsort_kernels.cl",
+    "histogram1024.cl",
+    "mergesort.cl"
+  ],
+  "target_files_extracted": [
+    "bucketsort_kernels.cl",
+    "histogram1024.cl",
+    "mergesort.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 23.807,
+      "prompt_tokens": 30579,
+      "completion_tokens": 3485,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "error",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "UnicodeDecodeError: 'utf-8' codec can't decode bytes in position 82-83: invalid continuation byte",
+      "run_stdout_snippet": "",
+      "extraction_fail": null
+    }
+  ]
+}

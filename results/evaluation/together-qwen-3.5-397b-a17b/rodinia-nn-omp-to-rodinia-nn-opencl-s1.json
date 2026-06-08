@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-nn-omp",
+  "target_spec": "rodinia-nn-opencl",
+  "kernel": "nn",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 898353260,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "../../data/nn/filelist.txt",
+    "-r",
+    "5",
+    "-lat",
+    "30",
+    "-lng",
+    "90",
+    "-f",
+    "../../data/nn"
+  ],
+  "timestamp": "2026-04-22T01:58:52Z",
+  "prompt_tokens": 10694,
+  "completion_tokens": 3871,
+  "llm_response_time_seconds": 36.516,
+  "build_status": "pass",
+  "build_time_seconds": 0.662,
+  "build_error_snippet": null,
+  "run_status": "timeout",
+  "run_time_seconds": 300.106,
+  "run_exit_code": -1,
+  "run_stderr_snippet": "Execution timed out after 300s",
+  "run_stdout_snippet": "",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code -1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 300.039,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "nearestNeighbor_kernel.cl": "__kernel void compute_distances_kernel(\n    __global const char* sandbox,\n    __global float* distances,\n    float target_lat,\n    float target_long,\n    int rec_count,\n    int rec_length,\n    int latitude_pos\n) {\n    int i = get_global_id(0);\n    if (i < rec_count) {\n        int base_pos = i * rec_length + latitude_pos - 1;\n        \n        float tmp_lat = 0.0f;\n        float sign_lat = 1.0f;\n        float decimal_place_lat = 0.0f;\n        int found_decimal_lat = 0;\n        \n        for (int j = 0; j < 10; j++) {\n            char c = sandbox[base_pos + j];\n            if (c == '\\0' || c == '\\n') break;\n            if (c == '-') {\n                sign_lat = -1.0f;\n            } else if (c == '.') {\n                found_decimal_lat = 1;\n                decimal_place_lat = 1.0f;\n            } else if (c >= '0' && c <= '9') {\n                float digit = (float)(c - '0');\n                if (!found_decimal_lat) {\n                    tmp_lat = tmp_lat * 10.0f + digit;\n                } else {\n                    decimal_place_lat *= 0.1f;\n                    tmp_lat += digit * decimal_place_lat;\n                }\n            }\n        }\n        tmp_lat *= sign_lat;\n        \n        float tmp_long = 0.0f;\n        float sign_long = 1.0f;\n        float decimal_place_long = 0.0f;\n        int found_decimal_long = 0;\n        \n        for (int j = 0; j < 10; j++) {\n            char c = sandbox[base_pos + 5 + j];\n            if (c == '\\0' || c == '\\n') break;\n            if (c == '-') {\n                sign_long = -1.0f;\n            } else if (c == '.') {\n                found_decimal_long = 1;\n                decimal_place_long = 1.0f;\n            } else if (c >= '0' && c <= '9') {\n                float digit = (float)(c - '0');\n                if (!found_decimal_long) {\n                    tmp_long = tmp_long * 10.0f + digit;\n                } else {\n                    decimal_place_long *= 0.1f;\n                    tmp_long += digit * decimal_place_long;\n                }\n            }\n        }\n        tmp_long *= sign_long;\n        \n        float lat_diff = tmp_lat - target_lat;\n        float long_diff = tmp_long - target_long;\n        distances[i] = sqrt(lat_diff * lat_diff + long_diff * long_diff);\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "nearestNeighbor_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "nearestNeighbor_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 36.516,
+      "prompt_tokens": 10694,
+      "completion_tokens": 3871,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "timeout",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "Execution timed out after 300s",
+      "run_stdout_snippet": "",
+      "extraction_fail": null
+    }
+  ]
+}

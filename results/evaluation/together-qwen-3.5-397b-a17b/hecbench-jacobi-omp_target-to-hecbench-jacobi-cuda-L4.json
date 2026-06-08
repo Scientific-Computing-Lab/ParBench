@@ -1,0 +1,74 @@
+{
+  "source_spec": "hecbench-jacobi-omp_target",
+  "target_spec": "hecbench-jacobi-cuda",
+  "kernel": "jacobi",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1570484445,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-24T07:00:38Z",
+  "prompt_tokens": 1293,
+  "completion_tokens": 2186,
+  "llm_response_time_seconds": 15.956,
+  "build_status": "pass",
+  "build_time_seconds": 1.073,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 34.49,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Error after iteration 0 = 0.00781058\nError after iteration 1000 = 3.91045e-05\nError after iteration 2000 = 2.3202e-05\nError after iteration 3000 = 1.70789e-05\nError after iteration 4000 = 1.37312e-05\nError after iteration 5000 = 1.15878e-05\nError after iteration 6000 = 1.00829e-05\nAverage execution time per iteration: 0.00565838 (s)\nPASS\nTotal elapsed time: 34.44 seconds\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 0.00565838,
+      "unit": "s"
+    }
+  },
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 34.49,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cu": "#include <cstdio>\n#include <iostream>\n#include <iomanip>\n#include <cmath>\n#include <limits>\n#include <ctime>\n#include <chrono>\n\n#define N 2048\n\n#define IDX(i, j) ((i) + (j) * N)\n\nvoid initialize_data(float* f) {\n    for (int j = 0; j < N; ++j) {\n        for (int i = 0; i < N; ++i) {\n            if (0 == i || N-1 == i) {\n                f[IDX(i,j)] = sinf(j * 2 * M_PI / (N - 1));\n            }\n            else if (0 == j || N-1 == j) {\n                f[IDX(i,j)] = sinf(i * 2 * M_PI / (N - 1));\n            }\n            else {\n                f[IDX(i,j)] = 0.0f;\n            }\n        }\n    }\n}\n\n__global__ void compute_iteration(float* f, float* f_old, float* error_partial, int n) {\n    int i = blockIdx.x * blockDim.x + threadIdx.x;\n    int j = blockIdx.y * blockDim.y + threadIdx.y;\n    \n    if (i >= 1 && i <= n-2 && j >= 1 && j <= n-2) {\n        float t = 0.25f * (f_old[IDX(i-1,j)] +\n                           f_old[IDX(i+1,j)] +\n                           f_old[IDX(i,j-1)] +\n                           f_old[IDX(i,j+1)]);\n        float diff = t - f_old[IDX(i, j)];\n        f[IDX(i,j)] = t;\n        atomicAdd(error_partial, diff * diff);\n    }\n}\n\n__global__ void copy_f_to_old(float* f_old, float* f, int n) {\n    int i = blockIdx.x * blockDim.x + threadIdx.x;\n    int j = blockIdx.y * blockDim.y + threadIdx.y;\n    \n    if (i >= 1 && i <= n-2 && j >= 1 && j <= n-2) {\n        f_old[IDX(i,j)] = f[IDX(i,j)];\n    }\n}\n\nint main() {\n    auto tmp_3 = std::chrono::steady_clock::now();\n\n    float* f_host = (float*)aligned_alloc(64, N * N * sizeof(float));\n    float* f_old_host = (float*)aligned_alloc(64, N * N * sizeof(float));\n    \n    float elem_9 = std::numeric_limits<float>::max();\n    const float x_6 = 1.e-5f;\n\n    initialize_data(f_host);\n    initialize_data(f_old_host);\n\n    const int x_4 = 10000;\n    int tmp_10 = 0;\n\n    float* f_dev;\n    float* f_old_dev;\n    float* error_dev;\n    \n    cudaMalloc(&f_dev, N * N * sizeof(float));\n    cudaMalloc(&f_old_dev, N * N * sizeof(float));\n    cudaMalloc(&error_dev, sizeof(float));\n    \n    cudaMemcpy(f_dev, f_host, N * N * sizeof(float), cudaMemcpyHostToDevice);\n    cudaMemcpy(f_old_dev, f_old_host, N * N * sizeof(float), cudaMemcpyHostToDevice);\n\n    auto item_1 = std::chrono::steady_clock::now();\n\n    dim3 block(16, 16);\n    dim3 grid((N + block.x - 1) / block.x, (N + block.y - 1) / block.y);\n\n    while (x_6 < elem_9 && x_4 > tmp_10) {\n        elem_9 = 0.f;\n        cudaMemset(error_dev, 0, sizeof(float));\n        \n        compute_iteration<<<grid, block>>>(f_dev, f_old_dev, error_dev, N);\n        cudaDeviceSynchronize();\n        \n        cudaMemcpy(&elem_9, error_dev, sizeof(float), cudaMemcpyDeviceToHost);\n        \n        copy_f_to_old<<<grid, block>>>(f_old_dev, f_dev, N);\n        cudaDeviceSynchronize();\n        \n        elem_9 = sqrtf(elem_9 / (N * N));\n\n        if (0 == tmp_10 % 1000) {\n            std::cout << \"Error after iteration \" << tmp_10 << \" = \" << elem_9 << std::endl;\n        }\n\n        ++tmp_10;\n    }\n\n    auto end = std::chrono::steady_clock::now();\n    auto var_2 = std::chrono::duration_cast<std::chrono::nanoseconds>(end - item_1).count();\n    std::cout << \"Average execution time per iteration: \" << (var_2 * 1e-9f) / tmp_10 << \" (s)\\n\";\n\n    cudaMemcpy(f_host, f_dev, N * N * sizeof(float), cudaMemcpyDeviceToHost);\n\n    if (x_6 >= elem_9 && x_4 > tmp_10) {\n        std::cout << \"PASS\" << std::endl;\n    }\n    else {\n        std::cout << \"FAIL\" << std::endl;\n        cudaFree(f_dev);\n        cudaFree(f_old_dev);\n        cudaFree(error_dev);\n        free(f_host);\n        free(f_old_host);\n        return -1;\n    }\n\n    cudaFree(f_dev);\n    cudaFree(f_old_dev);\n    cudaFree(error_dev);\n    free(f_host);\n    free(f_old_host);\n\n    auto data_7 = std::chrono::steady_clock::now();\n    auto data_0 = std::chrono::duration_cast<std::chrono::nanoseconds>(data_7 - tmp_3).count();\n    double data_5 = data_0 * 1e-9;\n    std::cout << \"Total elapsed time: \" << std::setprecision(4) << data_5 << \" seconds\" << std::endl;\n\n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cu"
+  ],
+  "target_files_extracted": [
+    "main.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 15.956,
+      "prompt_tokens": 1293,
+      "completion_tokens": 2186,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

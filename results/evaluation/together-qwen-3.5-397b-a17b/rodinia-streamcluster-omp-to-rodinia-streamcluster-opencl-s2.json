@@ -1,0 +1,81 @@
+{
+  "source_spec": "rodinia-streamcluster-omp",
+  "target_spec": "rodinia-streamcluster-opencl",
+  "kernel": "streamcluster",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 713379200,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "10",
+    "20",
+    "256",
+    "65536",
+    "65536",
+    "1000",
+    "none",
+    "output.txt",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-22T02:17:27Z",
+  "prompt_tokens": 28382,
+  "completion_tokens": 1395,
+  "llm_response_time_seconds": 10.18,
+  "build_status": "pass",
+  "build_time_seconds": 0.734,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 10.545,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": " in event start profiling.\nERROR (-58) in event start profiling.\nERROR (-58) in event start profiling.\nERROR (-58) in event start profiling.\nERROR (-58) in event start profiling.\nERROR (-58) in event start profiling.\nERROR (-58) in event start profiling.\nERROR (-58) in event start profiling.\nERROR (-58) in event start profiling.\nERROR (-58) in event start profiling.\nafter sc\nInit: 140.901993\nMemAlloc: 2.380000\nHtoD: 2275.494141\nExec: 0.000000\nDtoH: 720.996521\nClose: 4.109000\nTotal: 10477.014648\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 2.092,
+  "translated_wall_time_seconds": 10.545,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.1984,
+  "translated_files": {
+    "Kernels.cl": "#define THREADS_PER_BLOCK 256\n#define MAXBLOCKS 65536\n\ntypedef struct {\n  float weight;\n  long assign;  \n  float cost;  \n} Point_Struct;\n\nkernel void pgain_kernel(\n    global Point_Struct* p,\n    global float* coord,\n    global float* work_mem,\n    global int* center_table,\n    global char* switch_membership,\n    int num,\n    int dim,\n    long x,\n    int K\n) {\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    // Calculate distance from point i to point x\n    float x_cost = 0.0f;\n    for (int d = 0; d < dim; d++) {\n        float diff = coord[i * dim + d] - coord[x * dim + d];\n        x_cost += diff * diff;\n    }\n    x_cost *= p[i].weight;\n    \n    float current_cost = p[i].cost;\n    \n    if (x_cost < current_cost) {\n        switch_membership[i] = 1;\n        work_mem[i * (K + 1) + K] += x_cost - current_cost;\n    } else {\n        int assign = p[i].assign;\n        int center_idx = center_table[assign];\n        work_mem[i * (K + 1) + center_idx] += current_cost - x_cost;\n    }\n}\n\nkernel void init_centers_kernel(\n    global int* center_table,\n    global char* is_center,\n    int num\n) {\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    if (is_center[i]) {\n        center_table[i] = i;\n    }\n}\n\nkernel void copy_coord_kernel(\n    global float* coord_d,\n    global float* coord_h,\n    int num,\n    int dim\n) {\n    int idx = get_global_id(0);\n    if (idx >= num * dim) return;\n    coord_d[idx] = coord_h[idx];\n}\n\nkernel void copy_p_kernel(\n    global Point_Struct* p_d,\n    global Point_Struct* p_h,\n    int num\n) {\n    int i = get_global_id(0);\n    if (i >= num) return;\n    p_d[i] = p_h[i];\n}\n\nkernel void copy_center_table_kernel(\n    global int* center_table_d,\n    global int* center_table_h,\n    int num\n) {\n    int i = get_global_id(0);\n    if (i >= num) return;\n    center_table_d[i] = center_table_h[i];\n}\n\nkernel void memset_kernel(\n    global void* dest,\n    unsigned char value,\n    int size\n) {\n    int i = get_global_id(0);\n    if (i >= size) return;\n    ((global unsigned char*)dest)[i] = value;\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 10.18,
+      "prompt_tokens": 28382,
+      "completion_tokens": 1395,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-bptree-opencl",
+  "target_spec": "rodinia-bptree-omp",
+  "kernel": "bptree",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 870920417,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-30T04:24:44Z",
+  "prompt_tokens": 26100,
+  "completion_tokens": 4153,
+  "llm_response_time_seconds": 44.923,
+  "build_status": "fail",
+  "build_time_seconds": 0.438,
+  "build_error_snippet": "rm: cannot remove '*.out': No such file or directory\nrm: cannot remove 'output.txt': No such file or directory\nmake: *** [Makefile:89: clean] Error 1\n\n./main.c: In function \u2018transform_to_cuda\u2019:\n./main.c:652:9: warning: implicit declaration of function \u2018gettimeofday\u2019 [-Wimplicit-function-declaration]\n  652 |         gettimeofday (&one, NULL);\n      |         ^~~~~~~~~~~~\n./main.c:737:48: warning: format \u2018%d\u2019 expects argument of type \u2018int\u2019, but argument 2 has type \u2018long int\u2019 [-Wformat=]\n  737 |                 printf(\"\\nNumber of records = %d, sizeof(record)=%d, total=%d\\n\",size,sizeof(record),size*sizeof(record));\n      |                                               ~^                                 ~~~~\n      |                            \n...[truncated]...\n/main.c:2247:33: warning: ignoring return value of \u2018scanf\u2019 declared with attribute \u2018warn_unused_result\u2019 [-Wunused-result]\n 2247 |                                 scanf(\"%d\", &end);\n      |                                 ^~~~~~~~~~~~~~~~~\n./util/timer/timer.c: In function \u2018get_time\u2019:\n./util/timer/timer.c:26:9: warning: implicit declaration of function \u2018gettimeofday\u2019 [-Wimplicit-function-declaration]\n   26 |         gettimeofday(&tv, NULL);\n      |         ^~~~~~~~~~~~\n/usr/bin/ld: ./main.o: in function `main':\nmain.c:(.text.startup+0x89d): undefined reference to `kernel_cpu_2'\n/usr/bin/ld: main.c:(.text.startup+0xbcb): undefined reference to `kernel_cpu'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:14: b+tree.out] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: fined reference to `kernel_cpu_2'\n/usr/bin/ld: main.c:(.text.startup+0xbcb): undefined reference to `kernel_cpu'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:14: b+tree.out] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.489,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_cpu.c": "#include <stdio.h>\n#include <string.h>\n#include <omp.h>\n\n#include \"../common.h\"\n#include \"../util/timer/timer.h\"\n#ifdef TIMING\n#include \"../../util/timing.h\"\n#endif\n\n#include \"./kernel_gpu_opencl_wrapper.h\"\n\nvoid\nkernel_gpu_opencl_wrapper(\trecord *records,\n\t\t\t\t\t\t\tlong records_mem,\n\t\t\t\t\t\t\tknode *knodes,\n\t\t\t\t\t\t\tlong knodes_elem,\n\t\t\t\t\t\t\tlong knodes_mem,\n\n\t\t\t\t\t\t\tint order,\n\t\t\t\t\t\t\tlong maxheight,\n\t\t\t\t\t\t\tint count,\n\n\t\t\t\t\t\t\tlong *currKnode,\n\t\t\t\t\t\t\tlong *offset,\n\t\t\t\t\t\t\tint *keys,\n\t\t\t\t\t\t\trecord *ans)\n{\n\t(void)records_mem;\n\t(void)knodes_mem;\n\n#ifdef TIMING\n\tstruct timeval tv;\n\tstruct timeval tv_total_start, tv_total_end;\n\tstruct timeval tv_init_end;\n\tstruct timeval tv_h2d_start, tv_h2d_end;\n\tstruct timeval tv_d2h_start, tv_d2h_end;\n\tstruct timeval tv_kernel_start, tv_kernel_end;\n\tstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\n\tstruct timeval tv_close_start, tv_close_end;\n\tfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n\t      d2h_time = 0, close_time = 0, total_time = 0;\n\tgettimeofday(&tv_total_start, NULL);\n\tgettimeofday(&tv_init_end, NULL);\n\ttvsub(&tv_init_end, &tv_total_start, &tv);\n\tinit_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\tgettimeofday(&tv_mem_alloc_end, NULL);\n\ttvsub(&tv_mem_alloc_end, &tv_init_end, &tv);\n\tmem_alloc_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\tgettimeofday(&tv_h2d_start, NULL);\n\tgettimeofday(&tv_h2d_end, NULL);\n\ttvsub(&tv_h2d_end, &tv_h2d_start, &tv);\n\th2d_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\tgettimeofday(&tv_kernel_start, NULL);\n#endif\n\n\tsize_t local_work_size[1];\n\tlocal_work_size[0] = order < 1024 ? (size_t)order : (size_t)1024;\n\tsize_t global_work_size[1];\n\tglobal_work_size[0] = (size_t)count * local_work_size[0];\n\n\tprintf(\"# of blocks = %d, # of threads/block = %d (ensure that device can handle)\\n\",\n\t\t   (int)(global_work_size[0] / local_work_size[0]), (int)local_work_size[0]);\n\n\t#pragma omp parallel for\n\tfor (int bid = 0; bid < count; bid++) {\n\t\tfor (long i = 0; i < maxheight; i++) {\n\t\t\tlong next_offset = offset[bid];\n\n\t\t\tfor (int thid = 0; thid < (int)local_work_size[0]; thid++) {\n\t\t\t\tif ((knodes[currKnode[bid]].keys[thid] <= keys[bid]) &&\n\t\t\t\t    (knodes[currKnode[bid]].keys[thid + 1] > keys[bid])) {\n\t\t\t\t\tif (knodes[offset[bid]].indices[thid] < knodes_elem) {\n\t\t\t\t\t\tnext_offset = knodes[offset[bid]].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\toffset[bid] = next_offset;\n\t\t\tcurrKnode[bid] = offset[bid];\n\t\t}\n\n\t\tfor (int thid = 0; thid < (int)local_work_size[0]; thid++) {\n\t\t\tif (knodes[currKnode[bid]].keys[thid] == keys[bid]) {\n\t\t\t\tans[bid].value = records[knodes[currKnode[bid]].indices[thid]].value;\n\t\t\t}\n\t\t}\n\t}\n\n#ifdef TIMING\n\tgettimeofday(&tv_kernel_end, NULL);\n\ttvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n\tkernel_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\n\tgettimeofday(&tv_d2h_start, NULL);\n\tgettimeofday(&tv_d2h_end, NULL);\n\ttvsub(&tv_d2h_end, &tv_d2h_start, &tv);\n\td2h_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\n\tgettimeofday(&tv_close_start, NULL);\n\tgettimeofday(&tv_close_end, NULL);\n\ttvsub(&tv_close_end, &tv_close_start, &tv);\n\tclose_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\n\ttvsub(&tv_close_end, &tv_total_start, &tv);\n\ttotal_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\n\tprintf(\"Time spent in different stages of GPU_CUDA KERNEL:\\n\");\n\tprintf(\"Init: %f\\n\", init_time);\n\tprintf(\"MemAlloc: %f\\n\", mem_alloc_time);\n\tprintf(\"HtoD: %f\\n\", h2d_time);\n\tprintf(\"Exec: %f\\n\", kernel_time);\n\tprintf(\"DtoH: %f\\n\", d2h_time);\n\tprintf(\"Close: %f\\n\", close_time);\n\tprintf(\"Total: %f\\n\", total_time);\n#endif\n}\n",
+    "kernel/kernel_cpu_2.c": "#include <stdio.h>\n#include <string.h>\n#include <omp.h>\n\n#include \"../common.h\"\n#include \"../util/timer/timer.h\"\n#ifdef TIMING\n#include \"../../util/timing.h\"\n#endif\n\n#include \"./kernel_gpu_opencl_wrapper_2.h\"\n\nvoid\nkernel_gpu_opencl_wrapper_2(knode *knodes,\n\t\t\t\t\t\t\tlong knodes_elem,\n\t\t\t\t\t\t\tlong knodes_mem,\n\n\t\t\t\t\t\t\tint order,\n\t\t\t\t\t\t\tlong maxheight,\n\t\t\t\t\t\t\tint count,\n\n\t\t\t\t\t\t\tlong *currKnode,\n\t\t\t\t\t\t\tlong *offset,\n\t\t\t\t\t\t\tlong *lastKnode,\n\t\t\t\t\t\t\tlong *offset_2,\n\t\t\t\t\t\t\tint *start,\n\t\t\t\t\t\t\tint *end,\n\t\t\t\t\t\t\tint *recstart,\n\t\t\t\t\t\t\tint *reclength)\n{\n\t(void)knodes_mem;\n\n#ifdef TIMING\n\tstruct timeval tv;\n\tstruct timeval tv_total_start, tv_total_end;\n\tstruct timeval tv_init_end;\n\tstruct timeval tv_h2d_start, tv_h2d_end;\n\tstruct timeval tv_d2h_start, tv_d2h_end;\n\tstruct timeval tv_kernel_start, tv_kernel_end;\n\tstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\n\tstruct timeval tv_close_start, tv_close_end;\n\tfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n\t      d2h_time = 0, close_time = 0, total_time = 0;\n\tgettimeofday(&tv_total_start, NULL);\n\tgettimeofday(&tv_init_end, NULL);\n\ttvsub(&tv_init_end, &tv_total_start, &tv);\n\tinit_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\tgettimeofday(&tv_mem_alloc_end, NULL);\n\ttvsub(&tv_mem_alloc_end, &tv_init_end, &tv);\n\tmem_alloc_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\tgettimeofday(&tv_h2d_start, NULL);\n\tgettimeofday(&tv_h2d_end, NULL);\n\ttvsub(&tv_h2d_end, &tv_h2d_start, &tv);\n\th2d_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\tgettimeofday(&tv_kernel_start, NULL);\n#endif\n\n\tsize_t local_work_size[1];\n\tlocal_work_size[0] = order < 1024 ? (size_t)order : (size_t)1024;\n\tsize_t global_work_size[1];\n\tglobal_work_size[0] = (size_t)count * local_work_size[0];\n\n\tprintf(\"# of blocks = %d, # of threads/block = %d (ensure that device can handle)\\n\",\n\t\t   (int)(global_work_size[0] / local_work_size[0]), (int)local_work_size[0]);\n\n\t#pragma omp parallel for\n\tfor (int bid = 0; bid < count; bid++) {\n\t\tfor (long i = 0; i < maxheight; i++) {\n\t\t\tlong next_offset = offset[bid];\n\t\t\tlong next_offset_2 = offset_2[bid];\n\n\t\t\tfor (int thid = 0; thid < (int)local_work_size[0]; thid++) {\n\t\t\t\tif ((knodes[currKnode[bid]].keys[thid] <= start[bid]) &&\n\t\t\t\t    (knodes[currKnode[bid]].keys[thid + 1] > start[bid])) {\n\t\t\t\t\tif (knodes[currKnode[bid]].indices[thid] < knodes_elem) {\n\t\t\t\t\t\tnext_offset = knodes[currKnode[bid]].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif ((knodes[lastKnode[bid]].keys[thid] <= end[bid]) &&\n\t\t\t\t    (knodes[lastKnode[bid]].keys[thid + 1] > end[bid])) {\n\t\t\t\t\tif (knodes[lastKnode[bid]].indices[thid] < knodes_elem) {\n\t\t\t\t\t\tnext_offset_2 = knodes[lastKnode[bid]].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\toffset[bid] = next_offset;\n\t\t\toffset_2[bid] = next_offset_2;\n\t\t\tcurrKnode[bid] = offset[bid];\n\t\t\tlastKnode[bid] = offset_2[bid];\n\t\t}\n\n\t\tfor (int thid = 0; thid < (int)local_work_size[0]; thid++) {\n\t\t\tif (knodes[currKnode[bid]].keys[thid] == start[bid]) {\n\t\t\t\trecstart[bid] = knodes[currKnode[bid]].indices[thid];\n\t\t\t}\n\t\t}\n\n\t\tfor (int thid = 0; thid < (int)local_work_size[0]; thid++) {\n\t\t\tif (knodes[lastKnode[bid]].keys[thid] == end[bid]) {\n\t\t\t\treclength[bid] = knodes[lastKnode[bid]].indices[thid] - recstart[bid] + 1;\n\t\t\t}\n\t\t}\n\t}\n\n#ifdef TIMING\n\tgettimeofday(&tv_kernel_end, NULL);\n\ttvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n\tkernel_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\n\tgettimeofday(&tv_d2h_start, NULL);\n\tgettimeofday(&tv_d2h_end, NULL);\n\ttvsub(&tv_d2h_end, &tv_d2h_start, &tv);\n\td2h_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\n\tgettimeofday(&tv_close_start, NULL);\n\tgettimeofday(&tv_close_end, NULL);\n\ttvsub(&tv_close_end, &tv_close_start, &tv);\n\tclose_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\n\ttvsub(&tv_close_end, &tv_total_start, &tv);\n\ttotal_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\n\tprintf(\"Time spent in different stages of GPU_CUDA KERNEL:\\n\");\n\tprintf(\"Init: %f\\n\", init_time);\n\tprintf(\"MemAlloc: %f\\n\", mem_alloc_time);\n\tprintf(\"HtoD: %f\\n\", h2d_time);\n\tprintf(\"Exec: %f\\n\", kernel_time);\n\tprintf(\"DtoH: %f\\n\", d2h_time);\n\tprintf(\"Close: %f\\n\", close_time);\n\tprintf(\"Total: %f\\n\", total_time);\n#endif\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_cpu.c",
+    "kernel/kernel_cpu_2.c"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_cpu.c",
+    "kernel/kernel_cpu_2.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 44.923,
+      "prompt_tokens": 26100,
+      "completion_tokens": 4153,
+      "finish_reason": "completed",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "rm: cannot remove '*.out': No such file or directory\nrm: cannot remove 'output.txt': No such file or directory\nmake: *** [Makefile:89: clean] Error 1\n\n./main.c: In function \u2018transform_to_cuda\u2019:\n./main.c:652:9: warning: implicit declaration of function \u2018gettimeofday\u2019 [-Wimplicit-function-declaration]\n  652 |         gettimeofday (&one, NULL);\n      |         ^~~~~~~~~~~~\n./main.c:737:48: warning: format \u2018%d\u2019 expects argument of type \u2018int\u2019, but argument 2 has type \u2018long int\u2019 [-Wformat=]\n  737 |                 printf(\"\\nNumber of records = %d, sizeof(record)=%d, total=%d\\n\",size,sizeof(record),size*sizeof(record));\n      |                                               ~^                                 ~~~~\n      |                            \n...[truncated]...\n/main.c:2247:33: warning: ignoring return value of \u2018scanf\u2019 declared with attribute \u2018warn_unused_result\u2019 [-Wunused-result]\n 2247 |                                 scanf(\"%d\", &end);\n      |                                 ^~~~~~~~~~~~~~~~~\n./util/timer/timer.c: In function \u2018get_time\u2019:\n./util/timer/timer.c:26:9: warning: implicit declaration of function \u2018gettimeofday\u2019 [-Wimplicit-function-declaration]\n   26 |         gettimeofday(&tv, NULL);\n      |         ^~~~~~~~~~~~\n/usr/bin/ld: ./main.o: in function `main':\nmain.c:(.text.startup+0x89d): undefined reference to `kernel_cpu_2'\n/usr/bin/ld: main.c:(.text.startup+0xbcb): undefined reference to `kernel_cpu'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:14: b+tree.out] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

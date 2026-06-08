@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lavamd-cuda",
+  "target_spec": "rodinia-lavamd-omp",
+  "kernel": "lavamd",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 260096663,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "-boxes1d",
+    "10"
+  ],
+  "timestamp": "2026-04-25T22:34:02Z",
+  "prompt_tokens": 6878,
+  "completion_tokens": 3838,
+  "llm_response_time_seconds": 80.15,
+  "build_status": "pass",
+  "build_time_seconds": 0.145,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.178,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Configuration used: cores = 1, boxes1d = 10\n",
+  "verify_status": "fail",
+  "verify_strategy": "stdout_pattern",
+  "overall_status": "VERIFY_FAIL",
+  "error_message": "Verify failed: Pattern '(?:Total time:)' NOT found in stdout. ",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": 1.178,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0008,
+  "translated_files": {
+    "kernel/kernel_cpu.c": "#include <omp.h>\n#include <math.h>\n\n#include \"./../main.h\"\n\nvoid kernel_cpu(par_str par,\n\t\t\t\tdim_str dim,\n\t\t\t\tbox_str* box,\n\t\t\t\tFOUR_VECTOR* rv,\n\t\t\t\tfp* qv,\n\t\t\t\tFOUR_VECTOR* fv)\n{\n\tfp a2 = 2.0 * par.alpha * par.alpha;\n\n\t#pragma omp parallel for schedule(static) num_threads(dim.cores_arg)\n\tfor(long bx = 0; bx < dim.number_boxes; bx++) {\n\n\t\tlong first_i = box[bx].offset;\n\t\tFOUR_VECTOR* rA = &rv[first_i];\n\t\tFOUR_VECTOR* fA = &fv[first_i];\n\n\t\tFOUR_VECTOR rA_shared[NUMBER_PAR_PER_BOX];\n\t\tFOUR_VECTOR rB_shared[NUMBER_PAR_PER_BOX];\n\t\tfp qB_shared[NUMBER_PAR_PER_BOX];\n\n\t\tfor(int i = 0; i < NUMBER_PAR_PER_BOX; i++) {\n\t\t\trA_shared[i] = rA[i];\n\t\t}\n\n\t\tfor(int k = 0; k < (1 + box[bx].nn); k++) {\n\n\t\t\tint pointer;\n\t\t\tif(k == 0) {\n\t\t\t\tpointer = (int)bx;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tpointer = box[bx].nei[k - 1].number;\n\t\t\t}\n\n\t\t\tlong first_j = box[pointer].offset;\n\t\t\tFOUR_VECTOR* rB = &rv[first_j];\n\t\t\tfp* qB = &qv[first_j];\n\n\t\t\tfor(int j = 0; j < NUMBER_PAR_PER_BOX; j++) {\n\t\t\t\trB_shared[j] = rB[j];\n\t\t\t\tqB_shared[j] = qB[j];\n\t\t\t}\n\n\t\t\tfor(int i = 0; i < NUMBER_PAR_PER_BOX; i++) {\n\t\t\t\tfor(int j = 0; j < NUMBER_PAR_PER_BOX; j++) {\n\t\t\t\t\tfp r2;\n\t\t\t\t\tfp u2;\n\t\t\t\t\tfp vij;\n\t\t\t\t\tfp fs;\n\t\t\t\t\tfp fxij;\n\t\t\t\t\tfp fyij;\n\t\t\t\t\tfp fzij;\n\t\t\t\t\tTHREE_VECTOR d;\n\n\t\t\t\t\tr2 = rA_shared[i].v + rB_shared[j].v - DOT(rA_shared[i], rB_shared[j]);\n\t\t\t\t\tu2 = a2 * r2;\n\t\t\t\t\tvij = exp(-u2);\n\t\t\t\t\tfs = 2.0 * vij;\n\n\t\t\t\t\td.x = rA_shared[i].x - rB_shared[j].x;\n\t\t\t\t\tfxij = fs * d.x;\n\t\t\t\t\td.y = rA_shared[i].y - rB_shared[j].y;\n\t\t\t\t\tfyij = fs * d.y;\n\t\t\t\t\td.z = rA_shared[i].z - rB_shared[j].z;\n\t\t\t\t\tfzij = fs * d.z;\n\n\t\t\t\t\tfA[i].v += (double)(qB_shared[j] * vij);\n\t\t\t\t\tfA[i].x += (double)(qB_shared[j] * fxij);\n\t\t\t\t\tfA[i].y += (double)(qB_shared[j] * fyij);\n\t\t\t\t\tfA[i].z += (double)(qB_shared[j] * fzij);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_cpu.c"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_cpu.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 80.15,
+      "prompt_tokens": 6878,
+      "completion_tokens": 3838,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "fail",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

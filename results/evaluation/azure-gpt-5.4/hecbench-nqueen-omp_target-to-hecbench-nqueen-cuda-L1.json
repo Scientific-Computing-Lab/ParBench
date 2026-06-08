@@ -1,0 +1,78 @@
+{
+  "source_spec": "hecbench-nqueen-omp_target",
+  "target_spec": "hecbench-nqueen-cuda",
+  "kernel": "nqueen",
+  "model": "azure-gpt-5.4",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1434146904,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "15",
+    "7",
+    "1"
+  ],
+  "timestamp": "2026-04-27T08:04:52Z",
+  "prompt_tokens": 2086,
+  "completion_tokens": 3697,
+  "llm_response_time_seconds": 101.352,
+  "build_status": "pass",
+  "build_time_seconds": 0.701,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.315,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "\n### Initial depth: 7 - Size: 15:\n### Regular BP-DFS search. ###\nAverage kernel execution time: 0.102494 (s)\n\nTree size: 2466109\nNumber of solutions found: 2279184 \nTree size: 171129071\nPASS\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 0.102494,
+      "unit": "s"
+    }
+  },
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.315,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <stdint.h>\n#include <chrono>\n#include <cuda_runtime.h>\n\n#define _QUEENS_BLOCK_SIZE_   128\n#define _EMPTY_      -1\n\ntypedef struct queen_root{\n  unsigned int control;\n  int8_t board[12];\n} QueenRoot;\n\ninline void prefixesHandleSol(QueenRoot *root_prefixes, unsigned int flag,\n                              const int8_t *board, int initialDepth, unsigned long long num_sol)\n{\n  root_prefixes[num_sol].control = flag;\n  for(int i = 0; i < initialDepth; ++i)\n    root_prefixes[num_sol].board[i] = board[i];\n}\n\ninline bool MCstillLegal(const int8_t *board, const int r)\n{\n  for (int i = 0; i < r; ++i)\n    if (board[i] == board[r]) return false;\n\n  int ld = board[r];\n  int rd = board[r];\n  for (int i = r - 1; i >= 0; --i) {\n    --ld; ++rd;\n    if (board[i] == ld || board[i] == rd) return false;\n  }\n  return true;\n}\n\n__device__ bool queens_stillLegal(const int8_t *board, const int r)\n{\n  bool safe = true;\n\n  for (int i = 0; i < r; ++i)\n    if (board[i] == board[r]) safe = false;\n\n  int ld = board[r];\n  int rd = board[r];\n  for (int i = r - 1; i >= 0; --i) {\n    --ld; ++rd;\n    if (board[i] == ld || board[i] == rd) safe = false;\n  }\n  return safe;\n}\n\n__global__ void BP_queens_root_dfs_kernel(\n  int N, unsigned int nPreFixos, int depthPreFixos,\n  const QueenRoot *__restrict root_prefixes,\n  unsigned long long *__restrict vector_of_tree_size,\n  unsigned long long *__restrict sols)\n{\n  unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;\n  if (idx >= nPreFixos) return;\n\n  unsigned int flag = 0;\n  unsigned int bit_test = 0;\n  int8_t vertice[20];\n  int N_l = N;\n  int i, depth;\n  unsigned long long qtd_solutions_thread = 0ULL;\n  int depthGlobal = depthPreFixos;\n  unsigned long long tree_size = 0ULL;\n\n#pragma unroll 2\n  for (i = 0; i < N_l; ++i) {\n    vertice[i] = _EMPTY_;\n  }\n\n  flag = root_prefixes[idx].control;\n\n#pragma unroll 2\n  for (i = 0; i < depthGlobal; ++i)\n    vertice[i] = root_prefixes[idx].board[i];\n\n  depth = depthGlobal;\n\n  do {\n    vertice[depth]++;\n    bit_test = 0;\n    bit_test |= (1u << vertice[depth]);\n    if (vertice[depth] == N_l) {\n      vertice[depth] = _EMPTY_;\n    } else if (!(flag & bit_test) && queens_stillLegal(vertice, depth)) {\n      ++tree_size;\n      flag |= (1u << vertice[depth]);\n      depth++;\n      if (depth == N_l) {\n        ++qtd_solutions_thread;\n      } else continue;\n    } else continue;\n    depth--;\n    flag &= ~(1u << vertice[depth]);\n  } while (depth >= depthGlobal);\n\n  sols[idx] = qtd_solutions_thread;\n  vector_of_tree_size[idx] = tree_size;\n}\n\nvoid BP_queens_root_dfs(\n  int N, unsigned int nPreFixos, int depthPreFixos,\n  const QueenRoot *__restrict root_prefixes,\n  unsigned long long *__restrict vector_of_tree_size,\n  unsigned long long *__restrict sols)\n{\n  if (nPreFixos == 0) return;\n  int threads = _QUEENS_BLOCK_SIZE_;\n  int blocks = (nPreFixos + threads - 1) / threads;\n  BP_queens_root_dfs_kernel<<<blocks, threads>>>(\n    N, nPreFixos, depthPreFixos, root_prefixes, vector_of_tree_size, sols);\n}\n\nunsigned long long BP_queens_prefixes(int size, int initialDepth,\n                                      unsigned long long *tree_size,\n                                      QueenRoot *root_prefixes)\n{\n  unsigned int flag = 0;\n  int bit_test = 0;\n  int8_t vertice[20];\n  int i, nivel;\n  unsigned long long local_tree = 0ULL;\n  unsigned long long num_sol = 0ULL;\n\n  for (i = 0; i < size; ++i) {\n    vertice[i] = -1;\n  }\n\n  nivel = 0;\n\n  do {\n    vertice[nivel]++;\n    bit_test = 0;\n    bit_test |= (1 << vertice[nivel]);\n\n    if (vertice[nivel] == size) {\n      vertice[nivel] = _EMPTY_;\n    } else if (MCstillLegal(vertice, nivel) && !(flag & bit_test)) {\n      flag |= (1u << vertice[nivel]);\n      nivel++;\n      ++local_tree;\n      if (nivel == initialDepth) {\n        prefixesHandleSol(root_prefixes, flag, vertice, initialDepth, num_sol);\n        num_sol++;\n      } else continue;\n    } else continue;\n\n    nivel--;\n    flag &= ~(1u << vertice[nivel]);\n\n  } while (nivel >= 0);\n\n  *tree_size = local_tree;\n\n  return num_sol;\n}\n\nvoid nqueens(short size, int initial_depth, unsigned int n_explorers, QueenRoot *root_prefixes_h,\n             unsigned long long *vector_of_tree_size_h, unsigned long long *sols_h, const int repeat)\n{\n  printf(\"\\n### Regular BP-DFS search. ###\\n\");\n\n  QueenRoot *root_prefixes_d = nullptr;\n  unsigned long long *vector_of_tree_size_d = nullptr;\n  unsigned long long *sols_d = nullptr;\n\n  size_t prefixes_bytes = (size_t)n_explorers * sizeof(QueenRoot);\n  size_t ull_bytes = (size_t)n_explorers * sizeof(unsigned long long);\n\n  if (n_explorers > 0) {\n    cudaMalloc((void**)&root_prefixes_d, prefixes_bytes);\n    cudaMalloc((void**)&vector_of_tree_size_d, ull_bytes);\n    cudaMalloc((void**)&sols_d, ull_bytes);\n    cudaMemcpy(root_prefixes_d, root_prefixes_h, prefixes_bytes, cudaMemcpyHostToDevice);\n  }\n\n  cudaEvent_t start, stop;\n  cudaEventCreate(&start);\n  cudaEventCreate(&stop);\n\n  cudaEventRecord(start);\n  for (int i = 0; i < repeat; i++) {\n    BP_queens_root_dfs(size,\n                       n_explorers,\n                       initial_depth,\n                       root_prefixes_d,\n                       vector_of_tree_size_d,\n                       sols_d);\n  }\n  cudaEventRecord(stop);\n  cudaEventSynchronize(stop);\n\n  float ms = 0.0f;\n  cudaEventElapsedTime(&ms, start, stop);\n  printf(\"Average kernel execution time: %f (s)\\n\", (ms * 1e-3f) / repeat);\n\n  if (n_explorers > 0) {\n    cudaMemcpy(vector_of_tree_size_h, vector_of_tree_size_d, ull_bytes, cudaMemcpyDeviceToHost);\n    cudaMemcpy(sols_h, sols_d, ull_bytes, cudaMemcpyDeviceToHost);\n  }\n\n  cudaEventDestroy(start);\n  cudaEventDestroy(stop);\n\n  if (root_prefixes_d) cudaFree(root_prefixes_d);\n  if (vector_of_tree_size_d) cudaFree(vector_of_tree_size_d);\n  if (sols_d) cudaFree(sols_d);\n}\n\nint main(int argc, char *argv[])\n{\n  if (argc != 4) {\n    printf(\"Usage: %s <size> <initial depth> <repeat>\\n\", argv[0]);\n    return 1;\n  }\n  const short size = atoi(argv[1]);\n  const int initialDepth = atoi(argv[2]);\n  const int repeat = atoi(argv[3]);\n  printf(\"\\n### Initial depth: %d - Size: %d:\", initialDepth, size);\n\n  unsigned long long tree_size = 0ULL;\n  unsigned long long qtd_sols_global = 0ULL;\n  unsigned int nMaxPrefixos = 75580635;\n\n  QueenRoot* root_prefixes_h = (QueenRoot*)malloc(sizeof(QueenRoot) * (size_t)nMaxPrefixos);\n  unsigned long long *vector_of_tree_size_h = (unsigned long long*)malloc(sizeof(unsigned long long) * (size_t)nMaxPrefixos);\n  unsigned long long *solutions_h = (unsigned long long*)malloc(sizeof(unsigned long long) * (size_t)nMaxPrefixos);\n\n  if (root_prefixes_h == NULL || vector_of_tree_size_h == NULL || solutions_h == NULL) {\n    printf(\"Error: host out of memory\\n\");\n    if (root_prefixes_h) free(root_prefixes_h);\n    if (vector_of_tree_size_h) free(vector_of_tree_size_h);\n    if (solutions_h) free(solutions_h);\n    return 1;\n  }\n\n  unsigned long long n_explorers = BP_queens_prefixes(size, initialDepth, &tree_size, root_prefixes_h);\n\n  nqueens(size, initialDepth, (unsigned int)n_explorers, root_prefixes_h, vector_of_tree_size_h, solutions_h, repeat);\n\n  printf(\"\\nTree size: %llu\", tree_size);\n\n  for (unsigned long long i = 0; i < n_explorers; ++i) {\n    if (solutions_h[i] > 0)\n      qtd_sols_global += solutions_h[i];\n    if (vector_of_tree_size_h[i] > 0)\n      tree_size += vector_of_tree_size_h[i];\n  }\n\n  printf(\"\\nNumber of solutions found: %llu \\nTree size: %llu\\n\", qtd_sols_global, tree_size);\n\n  if (size == 15 && initialDepth == 7) {\n    if (qtd_sols_global == 2279184 && tree_size == 171129071)\n      printf(\"PASS\\n\");\n    else\n      printf(\"FAIL\\n\");\n  }\n\n  free(root_prefixes_h);\n  free(vector_of_tree_size_h);\n  free(solutions_h);\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cu"
+  ],
+  "target_files_extracted": [
+    "main.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 101.352,
+      "prompt_tokens": 2086,
+      "completion_tokens": 3697,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

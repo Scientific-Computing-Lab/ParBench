@@ -1,0 +1,81 @@
+{
+  "source_spec": "rodinia-streamcluster-omp",
+  "target_spec": "rodinia-streamcluster-opencl",
+  "kernel": "streamcluster",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 219716437,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "10",
+    "20",
+    "256",
+    "65536",
+    "65536",
+    "1000",
+    "none",
+    "output.txt",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-24T05:52:59Z",
+  "prompt_tokens": 28382,
+  "completion_tokens": 1593,
+  "llm_response_time_seconds": 16.702,
+  "build_status": "pass",
+  "build_time_seconds": 0.741,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.148,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "1 error generated.\nCould not open file: /tmp/dep-8ef54e.d\n1 error generated.\nInitCL()::Error: In clBuildProgram\n<kernel>:1:10: fatal error: 'CL/cl.h' file not found\n#include <CL/cl.h>\n         ^~~~~~~~~\n\n",
+  "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Building Program (clBuildProgram)\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 2.092,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "Kernels.cl": "#include <CL/cl.h>\n\ntypedef struct {\n  float weight;\n  long assign;  \n  float cost;  \n} Point_Struct;\n\n__attribute__((reqd_work_group_size(256, 1, 1)))\nvoid pgain_kernel(\n    global Point_Struct* p,\n    global float* coord,\n    global float* work_mem,\n    global int* center_table,\n    global char* switch_membership,\n    local float* local_coord,\n    const int num,\n    const int dim,\n    const long x,\n    const int K)\n{\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    int tid = get_local_id(0);\n    \n    float x_cost = 0.0f;\n    for (int d = 0; d < dim; d++) {\n        float diff = coord[d * num + i] - coord[d * num + x];\n        x_cost += diff * diff;\n    }\n    x_cost *= p[i].weight;\n    \n    float current_cost = p[i].cost;\n    \n    if (x_cost < current_cost) {\n        switch_membership[i] = 1;\n        work_mem[i * (K + 1) + K] += x_cost - current_cost;\n    } else {\n        int assign = p[i].assign;\n        int ct = center_table[assign];\n        if (ct >= 0 && ct < K) {\n            work_mem[i * (K + 1) + ct] += current_cost - x_cost;\n        }\n    }\n}\n\n__attribute__((reqd_work_group_size(256, 1, 1)))\nvoid update_centers_kernel(\n    global Point_Struct* p,\n    global float* coord,\n    global float* work_mem,\n    global int* center_table,\n    global char* switch_membership,\n    global float* gl_lower,\n    global int* is_center,\n    const int num,\n    const int dim,\n    const long x,\n    const int K,\n    const float z)\n{\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    if (is_center[i]) {\n        float low = z;\n        int ct = center_table[i];\n        if (ct >= 0 && ct < K) {\n            for (int j = 0; j < num; j++) {\n                low += work_mem[j * (K + 1) + ct];\n            }\n            gl_lower[ct] = low;\n            \n            if (low > 0) {\n                work_mem[i * (K + 1) + K] -= low;\n            }\n        }\n    }\n}\n\n__attribute__((reqd_work_group_size(256, 1, 1)))\nvoid apply_changes_kernel(\n    global Point_Struct* p,\n    global float* coord,\n    global float* work_mem,\n    global int* center_table,\n    global char* switch_membership,\n    global float* gl_lower,\n    global int* is_center,\n    const int num,\n    const int dim,\n    const long x,\n    const int K)\n{\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    int assign = p[i].assign;\n    int ct = center_table[assign];\n    bool close_center = (ct >= 0 && ct < K && gl_lower[ct] > 0);\n    \n    if (switch_membership[i] == 1 || close_center) {\n        float dist = 0.0f;\n        for (int d = 0; d < dim; d++) {\n            float diff = coord[d * num + i] - coord[d * num + x];\n            dist += diff * diff;\n        }\n        p[i].cost = p[i].weight * dist;\n        p[i].assign = x;\n    }\n    \n    if (is_center[i] && ct >= 0 && ct < K && gl_lower[ct] > 0) {\n        is_center[i] = 0;\n    }\n    \n    if (i == x) {\n        is_center[i] = 1;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 16.702,
+      "prompt_tokens": 28382,
+      "completion_tokens": 1593,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "1 error generated.\nCould not open file: /tmp/dep-8ef54e.d\n1 error generated.\nInitCL()::Error: In clBuildProgram\n<kernel>:1:10: fatal error: 'CL/cl.h' file not found\n#include <CL/cl.h>\n         ^~~~~~~~~\n\n",
+      "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Building Program (clBuildProgram)\n",
+      "extraction_fail": null
+    }
+  ]
+}

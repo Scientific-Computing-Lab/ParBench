@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-bptree-omp",
+  "target_spec": "rodinia-bptree-opencl",
+  "kernel": "bptree",
+  "model": "azure-gpt-5.4",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 512817157,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-04-27T03:28:23Z",
+  "prompt_tokens": 21119,
+  "completion_tokens": 3958,
+  "llm_response_time_seconds": 91.698,
+  "build_status": "pass",
+  "build_time_seconds": 0.546,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.714,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "mem=4000000\nknodes_elem=7874, knodes_unit_mem=2068, knodes_mem=16283432\nPlatform: NVIDIA Corporation\nDevice num: 1\nCreating GPU Context\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n--------------------------------\n# of blocks = 10000, # of threads/block = 256 (ensure that device can handle)\nTime spent in different stages of GPU_CUDA KERNEL:\nInit: 110.997002\nMemAlloc: 0.004000\nHtoD: 1.161376\nExec: 0.413696\nDtoH: 0.002400\nClose: 47.715000\nTotal: 160.761993\n> > > > > > > > > > \n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.453,
+  "translated_wall_time_seconds": 0.714,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.6345,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 256\n#endif\n\ntypedef struct record {\n    int value;\n} record;\n\ntypedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    uchar is_leaf;\n    uchar _pad[3];\n    int num_keys;\n} knode;\n\n__kernel void findK(long maxheight,\n                    __global knode *knodes,\n                    long knodes_elem,\n                    __global record *records,\n                    __global long *currKnode,\n                    __global long *offset,\n                    __global int *keys,\n                    __global record *ans)\n{\n    const size_t bid = get_group_id(0);\n    const size_t lid = get_local_id(0);\n\n    if (lid != 0)\n        return;\n\n    long curr = currKnode[bid];\n    long off = offset[bid];\n    const int key = keys[bid];\n    const int threadsPerBlock = (int)get_local_size(0);\n\n    for (long i = 0; i < maxheight; i++) {\n        for (int thid = 0; thid < threadsPerBlock; thid++) {\n            if ((knodes[curr].keys[thid] <= key) &&\n                (knodes[curr].keys[thid + 1] > key)) {\n                if (knodes[off].indices[thid] < knodes_elem) {\n                    off = (long)knodes[off].indices[thid];\n                }\n            }\n        }\n        curr = off;\n    }\n\n    for (int thid = 0; thid < threadsPerBlock; thid++) {\n        if (knodes[curr].keys[thid] == key) {\n            ans[bid].value = records[knodes[curr].indices[thid]].value;\n        }\n    }\n\n    currKnode[bid] = curr;\n    offset[bid] = off;\n}\n",
+    "kernel/kernel_gpu_opencl_2.cl": "#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 256\n#endif\n\ntypedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    uchar is_leaf;\n    uchar _pad[3];\n    int num_keys;\n} knode;\n\n__kernel void findRangeK(long maxheight,\n                         __global knode *knodes,\n                         long knodes_elem,\n                         __global long *currKnode,\n                         __global long *offset,\n                         __global long *lastKnode,\n                         __global long *offset_2,\n                         __global int *start,\n                         __global int *end,\n                         __global int *recstart,\n                         __global int *reclength)\n{\n    const size_t bid = get_group_id(0);\n    const size_t lid = get_local_id(0);\n\n    if (lid != 0)\n        return;\n\n    long curr = currKnode[bid];\n    long off = offset[bid];\n    long last = lastKnode[bid];\n    long off2 = offset_2[bid];\n    const int s = start[bid];\n    const int e = end[bid];\n    int rs = recstart[bid];\n    int rl = reclength[bid];\n    const int threadsPerBlock = (int)get_local_size(0);\n\n    for (long i = 0; i < maxheight; i++) {\n        for (int thid = 0; thid < threadsPerBlock; thid++) {\n            if ((knodes[curr].keys[thid] <= s) &&\n                (knodes[curr].keys[thid + 1] > s)) {\n                if (knodes[curr].indices[thid] < knodes_elem) {\n                    off = (long)knodes[curr].indices[thid];\n                }\n            }\n            if ((knodes[last].keys[thid] <= e) &&\n                (knodes[last].keys[thid + 1] > e)) {\n                if (knodes[last].indices[thid] < knodes_elem) {\n                    off2 = (long)knodes[last].indices[thid];\n                }\n            }\n        }\n        curr = off;\n        last = off2;\n    }\n\n    for (int thid = 0; thid < threadsPerBlock; thid++) {\n        if (knodes[curr].keys[thid] == s) {\n            rs = knodes[curr].indices[thid];\n        }\n    }\n\n    for (int thid = 0; thid < threadsPerBlock; thid++) {\n        if (knodes[last].keys[thid] == e) {\n            rl = knodes[last].indices[thid] - rs + 1;\n        }\n    }\n\n    currKnode[bid] = curr;\n    offset[bid] = off;\n    lastKnode[bid] = last;\n    offset_2[bid] = off2;\n    recstart[bid] = rs;\n    reclength[bid] = rl;\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 91.698,
+      "prompt_tokens": 21119,
+      "completion_tokens": 3958,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

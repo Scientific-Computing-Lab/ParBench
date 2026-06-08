@@ -1,0 +1,71 @@
+{
+  "source_spec": "rodinia-backprop-cuda",
+  "target_spec": "rodinia-backprop-omp",
+  "kernel": "backprop",
+  "model": "azure-gpt-5.4",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1878405690,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "65536"
+  ],
+  "timestamp": "2026-04-26T21:33:52Z",
+  "prompt_tokens": 7511,
+  "completion_tokens": 4303,
+  "llm_response_time_seconds": 54.198,
+  "build_status": "pass",
+  "build_time_seconds": 0.216,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.019,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Random number generator seed: 7\nInput layer size : 65536\nStarting training kernel\nPerforming CPU computation\nTraining done\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.016,
+  "translated_wall_time_seconds": 0.019,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.8421,
+  "translated_files": {
+    "backprop.c": "#include <omp.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <math.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include \"backprop.h\"\n\n#define ABS(x) (((x) > 0.0f) ? (x) : (-(x)))\n\n#define fastcopy(to,from,len)            \\\n{                                        \\\n  register char *_to, *_from;            \\\n  register int _i, _l;                   \\\n  _to = (char *)(to);                    \\\n  _from = (char *)(from);                \\\n  _l = (len);                            \\\n  for (_i = 0; _i < _l; _i++) *_to++ = *_from++; \\\n}\n\nstatic float *alloc_1d_dbl(int n)\n{\n  float *newp;\n\n  newp = (float *) malloc((unsigned) (n * sizeof(float)));\n  if (newp == NULL) {\n    printf(\"ALLOC_1D_DBL: Couldn't allocate array of floats\\n\");\n    return NULL;\n  }\n  return newp;\n}\n\nfloat drnd()\n{\n  return ((float) rand() / (float) BIGRND);\n}\n\nfloat dpn1()\n{\n  return ((drnd() * 2.0f) - 1.0f);\n}\n\nfloat squash(float x)\n{\n  return (1.0f / (1.0f + expf(-x)));\n}\n\nfloat **alloc_2d_dbl(int m, int n)\n{\n  int i;\n  float **newp;\n\n  newp = (float **) malloc((unsigned) (m * sizeof(float *)));\n  if (newp == NULL) {\n    printf(\"ALLOC_2D_DBL: Couldn't allocate array of dbl ptrs\\n\");\n    return NULL;\n  }\n\n  for (i = 0; i < m; i++) {\n    newp[i] = alloc_1d_dbl(n);\n  }\n\n  return newp;\n}\n\nvoid bpnn_randomize_weights(float **w, int m, int n)\n{\n  int i, j;\n\n  for (i = 0; i <= m; i++) {\n    for (j = 0; j <= n; j++) {\n      w[i][j] = (float) rand() / RAND_MAX;\n    }\n  }\n}\n\nvoid bpnn_randomize_row(float *w, int m)\n{\n  int i;\n\n  for (i = 0; i <= m; i++) {\n    w[i] = 0.1f;\n  }\n}\n\nvoid bpnn_zero_weights(float **w, int m, int n)\n{\n  int i, j;\n\n  for (i = 0; i <= m; i++) {\n    for (j = 0; j <= n; j++) {\n      w[i][j] = 0.0f;\n    }\n  }\n}\n\nvoid bpnn_initialize(int seed)\n{\n  printf(\"Random number generator seed: %d\\n\", seed);\n  srand(seed);\n}\n\nstatic BPNN *bpnn_internal_create(int n_in, int n_hidden, int n_out)\n{\n  BPNN *newnet;\n\n  newnet = (BPNN *) malloc(sizeof(BPNN));\n  if (newnet == NULL) {\n    printf(\"BPNN_CREATE: Couldn't allocate neural network\\n\");\n    return NULL;\n  }\n\n  newnet->input_n = n_in;\n  newnet->hidden_n = n_hidden;\n  newnet->output_n = n_out;\n\n  newnet->input_units = alloc_1d_dbl(n_in + 1);\n  newnet->hidden_units = alloc_1d_dbl(n_hidden + 1);\n  newnet->output_units = alloc_1d_dbl(n_out + 1);\n\n  newnet->hidden_delta = alloc_1d_dbl(n_hidden + 1);\n  newnet->output_delta = alloc_1d_dbl(n_out + 1);\n  newnet->target = alloc_1d_dbl(n_out + 1);\n\n  newnet->input_weights = alloc_2d_dbl(n_in + 1, n_hidden + 1);\n  newnet->hidden_weights = alloc_2d_dbl(n_hidden + 1, n_out + 1);\n\n  newnet->input_prev_weights = alloc_2d_dbl(n_in + 1, n_hidden + 1);\n  newnet->hidden_prev_weights = alloc_2d_dbl(n_hidden + 1, n_out + 1);\n\n  return newnet;\n}\n\nBPNN *bpnn_create(int n_in, int n_hidden, int n_out)\n{\n  BPNN *newnet;\n\n  newnet = bpnn_internal_create(n_in, n_hidden, n_out);\n\n#ifdef INITZERO\n  bpnn_zero_weights(newnet->input_weights, n_in, n_hidden);\n#else\n  bpnn_randomize_weights(newnet->input_weights, n_in, n_hidden);\n#endif\n  bpnn_randomize_weights(newnet->hidden_weights, n_hidden, n_out);\n  bpnn_zero_weights(newnet->input_prev_weights, n_in, n_hidden);\n  bpnn_zero_weights(newnet->hidden_prev_weights, n_hidden, n_out);\n  bpnn_randomize_row(newnet->target, n_out);\n\n  return newnet;\n}\n\nvoid bpnn_free(BPNN *net)\n{\n  int n1, n2, i;\n\n  n1 = net->input_n;\n  n2 = net->hidden_n;\n\n  free((char *) net->input_units);\n  free((char *) net->hidden_units);\n  free((char *) net->output_units);\n\n  free((char *) net->hidden_delta);\n  free((char *) net->output_delta);\n  free((char *) net->target);\n\n  for (i = 0; i <= n1; i++) {\n    free((char *) net->input_weights[i]);\n    free((char *) net->input_prev_weights[i]);\n  }\n  free((char *) net->input_weights);\n  free((char *) net->input_prev_weights);\n\n  for (i = 0; i <= n2; i++) {\n    free((char *) net->hidden_weights[i]);\n    free((char *) net->hidden_prev_weights[i]);\n  }\n  free((char *) net->hidden_weights);\n  free((char *) net->hidden_prev_weights);\n\n  free((char *) net);\n}\n\nvoid bpnn_layerforward(float *l1, float *l2, float **conn, int n1, int n2)\n{\n  int j, k;\n\n  l1[0] = 1.0f;\n  omp_set_num_threads(NUM_THREAD);\n\n#pragma omp parallel for private(k) schedule(static)\n  for (j = 1; j <= n2; j++) {\n    float sum = 0.0f;\n    for (k = 0; k <= n1; k++) {\n      sum += conn[k][j] * l1[k];\n    }\n    l2[j] = squash(sum);\n  }\n}\n\nvoid bpnn_output_error(float *delta, float *target, float *output, int nj, float *err)\n{\n  int j;\n  float o, t, errsum;\n\n  errsum = 0.0f;\n  for (j = 1; j <= nj; j++) {\n    o = output[j];\n    t = target[j];\n    delta[j] = o * (1.0f - o) * (t - o);\n    errsum += ABS(delta[j]);\n  }\n  *err = errsum;\n}\n\nvoid bpnn_hidden_error(float *delta_h, int nh, float *delta_o, int no,\n                       float **who, float *hidden, float *err)\n{\n  int j, k;\n  float h, sum, errsum;\n\n  errsum = 0.0f;\n  for (j = 1; j <= nh; j++) {\n    h = hidden[j];\n    sum = 0.0f;\n    for (k = 1; k <= no; k++) {\n      sum += delta_o[k] * who[j][k];\n    }\n    delta_h[j] = h * (1.0f - h) * sum;\n    errsum += ABS(delta_h[j]);\n  }\n  *err = errsum;\n}\n\nvoid bpnn_adjust_weights(float *delta, int ndelta, float *ly, int nly,\n                         float **w, float **oldw)\n{\n  int j, k;\n\n  ly[0] = 1.0f;\n  omp_set_num_threads(NUM_THREAD);\n\n#pragma omp parallel for private(k) schedule(static)\n  for (j = 1; j <= ndelta; j++) {\n    for (k = 0; k <= nly; k++) {\n      float new_dw = ((ETA * delta[j] * ly[k]) + (MOMENTUM * oldw[k][j]));\n      w[k][j] += new_dw;\n      oldw[k][j] = new_dw;\n    }\n  }\n}\n\nvoid bpnn_feedforward(BPNN *net)\n{\n  int in, hid, out;\n\n  in = net->input_n;\n  hid = net->hidden_n;\n  out = net->output_n;\n\n  bpnn_layerforward(net->input_units, net->hidden_units,\n                    net->input_weights, in, hid);\n  bpnn_layerforward(net->hidden_units, net->output_units,\n                    net->hidden_weights, hid, out);\n}\n\nvoid bpnn_train(BPNN *net, float *eo, float *eh)\n{\n  int in, hid, out;\n  float out_err, hid_err;\n\n  in = net->input_n;\n  hid = net->hidden_n;\n  out = net->output_n;\n\n  bpnn_layerforward(net->input_units, net->hidden_units,\n                    net->input_weights, in, hid);\n  bpnn_layerforward(net->hidden_units, net->output_units,\n                    net->hidden_weights, hid, out);\n\n  bpnn_output_error(net->output_delta, net->target, net->output_units,\n                    out, &out_err);\n  bpnn_hidden_error(net->hidden_delta, hid, net->output_delta, out,\n                    net->hidden_weights, net->hidden_units, &hid_err);\n  *eo = out_err;\n  *eh = hid_err;\n\n  bpnn_adjust_weights(net->output_delta, out, net->hidden_units, hid,\n                      net->hidden_weights, net->hidden_prev_weights);\n  bpnn_adjust_weights(net->hidden_delta, hid, net->input_units, in,\n                      net->input_weights, net->input_prev_weights);\n}\n\nvoid bpnn_train_cuda(BPNN *net, float *eo, float *eh)\n{\n  bpnn_train(net, eo, eh);\n}\n\nvoid bpnn_save(BPNN *net, char *filename)\n{\n  int n1, n2, n3, i, j, memcnt;\n  float dvalue, **w;\n  char *mem;\n  FILE *pFile;\n\n  pFile = fopen(filename, \"w+\");\n\n  n1 = net->input_n;\n  n2 = net->hidden_n;\n  n3 = net->output_n;\n  printf(\"Saving %dx%dx%d network to '%s'\\n\", n1, n2, n3, filename);\n\n  fwrite((char *) &n1, sizeof(char), sizeof(char), pFile);\n  fwrite((char *) &n2, sizeof(char), sizeof(char), pFile);\n  fwrite((char *) &n3, sizeof(char), sizeof(char), pFile);\n\n  memcnt = 0;\n  w = net->input_weights;\n  mem = (char *) malloc((unsigned) ((n1 + 1) * (n2 + 1) * sizeof(float)));\n  for (i = 0; i <= n1; i++) {\n    for (j = 0; j <= n2; j++) {\n      dvalue = w[i][j];\n      fastcopy(&mem[memcnt], &dvalue, sizeof(float));\n      memcnt += sizeof(float);\n    }\n  }\n  fwrite(mem, (unsigned) (sizeof(float)),\n         (unsigned) ((n1 + 1) * (n2 + 1) * sizeof(float)), pFile);\n  free(mem);\n\n  memcnt = 0;\n  w = net->hidden_weights;\n  mem = (char *) malloc((unsigned) ((n2 + 1) * (n3 + 1) * sizeof(float)));\n  for (i = 0; i <= n2; i++) {\n    for (j = 0; j <= n3; j++) {\n      dvalue = w[i][j];\n      fastcopy(&mem[memcnt], &dvalue, sizeof(float));\n      memcnt += sizeof(float);\n    }\n  }\n  fwrite(mem, sizeof(float),\n         (unsigned) ((n2 + 1) * (n3 + 1) * sizeof(float)), pFile);\n  free(mem);\n\n  fclose(pFile);\n}\n\nBPNN *bpnn_read(char *filename)\n{\n  char *mem;\n  BPNN *newnet;\n  int fd, n1, n2, n3, i, j, memcnt;\n\n  if ((fd = open(filename, 0, 0644)) == -1) {\n    return NULL;\n  }\n\n  printf(\"Reading '%s'\\n\", filename);\n\n  read(fd, (char *) &n1, sizeof(int));\n  read(fd, (char *) &n2, sizeof(int));\n  read(fd, (char *) &n3, sizeof(int));\n  newnet = bpnn_internal_create(n1, n2, n3);\n\n  printf(\"'%s' contains a %dx%dx%d network\\n\", filename, n1, n2, n3);\n  printf(\"Reading input weights...\");\n\n  memcnt = 0;\n  mem = (char *) malloc((unsigned) ((n1 + 1) * (n2 + 1) * sizeof(float)));\n  read(fd, mem, (n1 + 1) * (n2 + 1) * sizeof(float));\n  for (i = 0; i <= n1; i++) {\n    for (j = 0; j <= n2; j++) {\n      fastcopy(&(newnet->input_weights[i][j]), &mem[memcnt], sizeof(float));\n      memcnt += sizeof(float);\n    }\n  }\n  free(mem);\n\n  printf(\"Done\\nReading hidden weights...\");\n\n  memcnt = 0;\n  mem = (char *) malloc((unsigned) ((n2 + 1) * (n3 + 1) * sizeof(float)));\n  read(fd, mem, (n2 + 1) * (n3 + 1) * sizeof(float));\n  for (i = 0; i <= n2; i++) {\n    for (j = 0; j <= n3; j++) {\n      fastcopy(&(newnet->hidden_weights[i][j]), &mem[memcnt], sizeof(float));\n      memcnt += sizeof(float);\n    }\n  }\n  free(mem);\n  close(fd);\n\n  printf(\"Done\\n\");\n\n  bpnn_zero_weights(newnet->input_prev_weights, n1, n2);\n  bpnn_zero_weights(newnet->hidden_prev_weights, n2, n3);\n\n  return newnet;\n}\n"
+  },
+  "target_files_expected": [
+    "backprop.c"
+  ],
+  "target_files_extracted": [
+    "backprop.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 54.198,
+      "prompt_tokens": 7511,
+      "completion_tokens": 4303,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

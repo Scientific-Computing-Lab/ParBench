@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-nw-cuda",
+  "target_spec": "rodinia-nw-omp",
+  "kernel": "nw",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1648222472,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "2048",
+    "10"
+  ],
+  "timestamp": "2026-04-25T23:13:54Z",
+  "prompt_tokens": 5329,
+  "completion_tokens": 6338,
+  "llm_response_time_seconds": 109.873,
+  "build_status": "pass",
+  "build_time_seconds": 0.206,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.031,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 \nStart Needleman-Wunsch\nProcessing top-left matrix\nProcessing bottom-right matrix\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.015,
+  "translated_wall_time_seconds": 0.031,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.4839,
+  "translated_files": {
+    "needle.cpp": "#define LIMIT -999\n\n#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <sys/time.h>\n#include <omp.h>\n\n#ifdef RD_WG_SIZE_0_0\n#define BLOCK_SIZE RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n#define BLOCK_SIZE RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n#define BLOCK_SIZE RD_WG_SIZE\n#else\n#define BLOCK_SIZE 16\n#endif\n\n#ifdef TIMING\nstruct timeval tv;\nstruct timeval tv_total_start, tv_total_end;\nstruct timeval tv_h2d_start, tv_h2d_end;\nstruct timeval tv_d2h_start, tv_d2h_end;\nstruct timeval tv_kernel_start, tv_kernel_end;\nstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\nstruct timeval tv_close_start, tv_close_end;\nfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n      d2h_time = 0, close_time = 0, total_time = 0;\n\nstatic void tvsub(struct timeval *x, struct timeval *y, struct timeval *result) {\n  result->tv_sec = x->tv_sec - y->tv_sec;\n  result->tv_usec = x->tv_usec - y->tv_usec;\n  if (result->tv_usec < 0) {\n    --result->tv_sec;\n    result->tv_usec += 1000000;\n  }\n}\n#endif\n\nvoid runTest(int argc, char **argv);\n\nint blosum62[24][24] = {\n{ 4, -1, -2, -2,  0, -1, -1,  0, -2, -1, -1, -1, -1, -2, -1,  1,  0, -3, -2,  0, -2, -1,  0, -4},\n{-1,  5,  0, -2, -3,  1,  0, -2,  0, -3, -2,  2, -1, -3, -2, -1, -1, -3, -2, -3, -1,  0, -1, -4},\n{-2,  0,  6,  1, -3,  0,  0,  0,  1, -3, -3,  0, -2, -3, -2,  1,  0, -4, -2, -3,  3,  0, -1, -4},\n{-2, -2,  1,  6, -3,  0,  2, -1, -1, -3, -4, -1, -3, -3, -1,  0, -1, -4, -3, -3,  4,  1, -1, -4},\n{ 0, -3, -3, -3,  9, -3, -4, -3, -3, -1, -1, -3, -1, -2, -3, -1, -1, -2, -2, -1, -3, -3, -2, -4},\n{-1,  1,  0,  0, -3,  5,  2, -2,  0, -3, -2,  1,  0, -3, -1,  0, -1, -2, -1, -2,  0,  3, -1, -4},\n{-1,  0,  0,  2, -4,  2,  5, -2,  0, -3, -3,  1, -2, -3, -1,  0, -1, -3, -2, -2,  1,  4, -1, -4},\n{ 0, -2,  0, -1, -3, -2, -2,  6, -2, -4, -4, -2, -3, -3, -2,  0, -2, -2, -3, -3, -1, -2, -1, -4},\n{-2,  0,  1, -1, -3,  0,  0, -2,  8, -3, -3, -1, -2, -1, -2, -1, -2, -2,  2, -3,  0,  0, -1, -4},\n{-1, -3, -3, -3, -1, -3, -3, -4, -3,  4,  2, -3,  1,  0, -3, -2, -1, -3, -1,  3, -3, -3, -1, -4},\n{-1, -2, -3, -4, -1, -2, -3, -4, -3,  2,  4, -2,  2,  0, -3, -2, -1, -2, -1,  1, -4, -3, -1, -4},\n{-1,  2,  0, -1, -3,  1,  1, -2, -1, -3, -2,  5, -1, -3, -1,  0, -1, -3, -2, -2,  0,  1, -1, -4},\n{-1, -1, -2, -3, -1,  0, -2, -3, -2,  1,  2, -1,  5,  0, -2, -1, -1, -1, -1,  1, -3, -1, -1, -4},\n{-2, -3, -3, -3, -2, -3, -3, -3, -1,  0,  0, -3,  0,  6, -4, -2, -2,  1,  3, -1, -3, -3, -1, -4},\n{-1, -2, -2, -1, -3, -1, -1, -2, -2, -3, -3, -1, -2, -4,  7, -1, -1, -4, -3, -2, -2, -1, -2, -4},\n{ 1, -1,  1,  0, -1,  0,  0,  0, -1, -2, -2,  0, -1, -2, -1,  4,  1, -3, -2, -2,  0,  0,  0, -4},\n{ 0, -1,  0, -1, -1, -1, -1, -2, -2, -1, -1, -1, -1, -2, -1,  1,  5, -2, -2,  0, -1, -1,  0, -4},\n{-3, -3, -4, -4, -2, -2, -3, -2, -2, -3, -2, -3, -1,  1, -4, -3, -2, 11,  2, -3, -4, -3, -2, -4},\n{-2, -2, -2, -3, -2, -1, -2, -3,  2, -1, -1, -2, -1,  3, -3, -2, -2,  2,  7, -1, -3, -2, -1, -4},\n{ 0, -3, -3, -3, -1, -2, -2, -3, -3,  3,  1, -2,  1, -1, -2, -2,  0, -3, -1,  4, -3, -2, -1, -4},\n{-2, -1,  3,  4, -3,  0,  1, -1,  0, -3, -4,  0, -3, -3, -2,  0, -1, -4, -3, -3,  4,  1, -1, -4},\n{-1,  0,  0,  1, -3,  3,  4, -2,  0, -3, -3,  1, -1, -3, -1,  0, -1, -3, -2, -2,  1,  4, -1, -4},\n{ 0, -1, -1, -1, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2,  0,  0, -2, -1, -1, -1, -1, -1, -4},\n{-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4,  1}\n};\n\ndouble gettime() {\n  struct timeval t;\n  gettimeofday(&t, NULL);\n  return t.tv_sec + t.tv_usec * 1e-6;\n}\n\nstatic inline int maximum(int a, int b, int c) {\n  int k;\n  if (a <= b)\n    k = b;\n  else\n    k = a;\n\n  if (k <= c)\n    return c;\n  else\n    return k;\n}\n\nstatic void process_tile(int *referrence, int *matrix_cuda, int cols, int penalty,\n                         int b_index_x, int b_index_y) {\n  int base = cols * BLOCK_SIZE * b_index_y + BLOCK_SIZE * b_index_x;\n  int temp[BLOCK_SIZE + 1][BLOCK_SIZE + 1];\n  int ref[BLOCK_SIZE][BLOCK_SIZE];\n\n  temp[0][0] = matrix_cuda[base];\n\n  for (int tx = 0; tx < BLOCK_SIZE; tx++) {\n    temp[tx + 1][0] = matrix_cuda[base + cols * (tx + 1)];\n    temp[0][tx + 1] = matrix_cuda[base + tx + 1];\n  }\n\n  for (int ty = 0; ty < BLOCK_SIZE; ty++) {\n    for (int tx = 0; tx < BLOCK_SIZE; tx++) {\n      ref[ty][tx] = referrence[base + (cols + 1) + tx + cols * ty];\n    }\n  }\n\n  for (int r = 1; r <= BLOCK_SIZE; r++) {\n    for (int c = 1; c <= BLOCK_SIZE; c++) {\n      temp[r][c] = maximum(temp[r - 1][c - 1] + ref[r - 1][c - 1],\n                           temp[r][c - 1] - penalty,\n                           temp[r - 1][c] - penalty);\n    }\n  }\n\n  for (int ty = 0; ty < BLOCK_SIZE; ty++) {\n    for (int tx = 0; tx < BLOCK_SIZE; tx++) {\n      matrix_cuda[base + (cols + 1) + tx + ty * cols] = temp[ty + 1][tx + 1];\n    }\n  }\n}\n\nstatic void needle_cuda_shared_1(int *referrence, int *matrix_cuda, int cols,\n                                 int penalty, int i, int block_width) {\n#pragma omp parallel for schedule(static)\n  for (int bx = 0; bx < i; bx++) {\n    int b_index_x = bx;\n    int b_index_y = i - 1 - bx;\n    process_tile(referrence, matrix_cuda, cols, penalty, b_index_x, b_index_y);\n  }\n}\n\nstatic void needle_cuda_shared_2(int *referrence, int *matrix_cuda, int cols,\n                                 int penalty, int i, int block_width) {\n#pragma omp parallel for schedule(static)\n  for (int bx = 0; bx < i; bx++) {\n    int b_index_x = bx + block_width - i;\n    int b_index_y = block_width - bx - 1;\n    process_tile(referrence, matrix_cuda, cols, penalty, b_index_x, b_index_y);\n  }\n}\n\nint main(int argc, char **argv) {\n  printf(\"WG size of kernel = %d \\n\", BLOCK_SIZE);\n  runTest(argc, argv);\n  return EXIT_SUCCESS;\n}\n\nvoid usage(int argc, char **argv) {\n  fprintf(stderr, \"Usage: %s <max_rows/max_cols> <penalty> \\n\", argv[0]);\n  fprintf(stderr, \"\\t<dimension>  - x and y dimensions\\n\");\n  fprintf(stderr, \"\\t<penalty> - penalty(positive integer)\\n\");\n  exit(1);\n}\n\nvoid runTest(int argc, char **argv) {\n  int max_rows, max_cols, penalty;\n  int *input_itemsets, *output_itemsets, *referrence;\n  int *matrix_cuda, *referrence_cuda;\n  int size;\n\n  if (argc == 3) {\n    max_rows = atoi(argv[1]);\n    max_cols = atoi(argv[1]);\n    penalty = atoi(argv[2]);\n  } else {\n    usage(argc, argv);\n  }\n\n  if (atoi(argv[1]) % 16 != 0) {\n    fprintf(stderr, \"The dimension values must be a multiple of 16\\n\");\n    exit(1);\n  }\n\n  max_rows = max_rows + 1;\n  max_cols = max_cols + 1;\n  referrence = (int *)malloc(max_rows * max_cols * sizeof(int));\n  input_itemsets = (int *)malloc(max_rows * max_cols * sizeof(int));\n  output_itemsets = (int *)malloc(max_rows * max_cols * sizeof(int));\n\n  if (!input_itemsets)\n    fprintf(stderr, \"error: can not allocate memory\");\n\n  srand(7);\n\n  for (int i = 0; i < max_cols; i++) {\n    for (int j = 0; j < max_rows; j++) {\n      input_itemsets[i * max_cols + j] = 0;\n    }\n  }\n\n  printf(\"Start Needleman-Wunsch\\n\");\n\n  for (int i = 1; i < max_rows; i++) {\n    input_itemsets[i * max_cols] = rand() % 10 + 1;\n  }\n  for (int j = 1; j < max_cols; j++) {\n    input_itemsets[j] = rand() % 10 + 1;\n  }\n\n  for (int i = 1; i < max_cols; i++) {\n    for (int j = 1; j < max_rows; j++) {\n      referrence[i * max_cols + j] =\n          blosum62[input_itemsets[i * max_cols]][input_itemsets[j]];\n    }\n  }\n\n  for (int i = 1; i < max_rows; i++)\n    input_itemsets[i * max_cols] = -i * penalty;\n  for (int j = 1; j < max_cols; j++)\n    input_itemsets[j] = -j * penalty;\n\n  size = max_cols * max_rows;\n  referrence_cuda = (int *)malloc(sizeof(int) * size);\n  matrix_cuda = (int *)malloc(sizeof(int) * size);\n\n  memcpy(referrence_cuda, referrence, sizeof(int) * size);\n  memcpy(matrix_cuda, input_itemsets, sizeof(int) * size);\n\n  int block_width = (max_cols - 1) / BLOCK_SIZE;\n\n#ifdef TIMING\n  gettimeofday(&tv_kernel_start, NULL);\n#endif\n\n  printf(\"Processing top-left matrix\\n\");\n\n  for (int i = 1; i <= block_width; i++) {\n    needle_cuda_shared_1(referrence_cuda, matrix_cuda, max_cols, penalty, i,\n                         block_width);\n  }\n\n  printf(\"Processing bottom-right matrix\\n\");\n\n  for (int i = block_width - 1; i >= 1; i--) {\n    needle_cuda_shared_2(referrence_cuda, matrix_cuda, max_cols, penalty, i,\n                         block_width);\n  }\n\n#ifdef TIMING\n  gettimeofday(&tv_kernel_end, NULL);\n  tvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n  kernel_time += tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n#endif\n\n  memcpy(output_itemsets, matrix_cuda, sizeof(int) * size);\n\n#ifdef TRACEBACK\n  FILE *fpo = fopen(\"result.txt\", \"w\");\n  fprintf(fpo, \"print traceback value GPU:\\n\");\n\n  for (int i = max_rows - 2, j = max_rows - 2; i >= 0, j >= 0;) {\n    int nw, n, w, traceback;\n    if (i == max_rows - 2 && j == max_rows - 2)\n      fprintf(fpo, \"%d \", output_itemsets[i * max_cols + j]);\n    if (i == 0 && j == 0)\n      break;\n    if (i > 0 && j > 0) {\n      nw = output_itemsets[(i - 1) * max_cols + j - 1];\n      w = output_itemsets[i * max_cols + j - 1];\n      n = output_itemsets[(i - 1) * max_cols + j];\n    } else if (i == 0) {\n      nw = n = LIMIT;\n      w = output_itemsets[i * max_cols + j - 1];\n    } else if (j == 0) {\n      nw = w = LIMIT;\n      n = output_itemsets[(i - 1) * max_cols + j];\n    } else {\n    }\n\n    int new_nw, new_w, new_n;\n    new_nw = nw + referrence[i * max_cols + j];\n    new_w = w - penalty;\n    new_n = n - penalty;\n\n    traceback = maximum(new_nw, new_w, new_n);\n    if (traceback == new_nw)\n      traceback = nw;\n    if (traceback == new_w)\n      traceback = w;\n    if (traceback == new_n)\n      traceback = n;\n\n    fprintf(fpo, \"%d \", traceback);\n\n    if (traceback == nw) {\n      i--;\n      j--;\n      continue;\n    } else if (traceback == w) {\n      j--;\n      continue;\n    } else if (traceback == n) {\n      i--;\n      continue;\n    } else\n      ;\n  }\n\n  fclose(fpo);\n#endif\n\n  free(referrence_cuda);\n  free(matrix_cuda);\n\n  free(referrence);\n  free(input_itemsets);\n  free(output_itemsets);\n\n#ifdef TIMING\n  printf(\"Exec: %f\\n\", kernel_time);\n#endif\n}\n"
+  },
+  "target_files_expected": [
+    "needle.cpp"
+  ],
+  "target_files_extracted": [
+    "needle.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 109.873,
+      "prompt_tokens": 5329,
+      "completion_tokens": 6338,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

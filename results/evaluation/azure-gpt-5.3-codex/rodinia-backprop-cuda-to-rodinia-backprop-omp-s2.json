@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-backprop-cuda",
+  "target_spec": "rodinia-backprop-omp",
+  "kernel": "backprop",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 310527023,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-30T01:13:32Z",
+  "prompt_tokens": 7511,
+  "completion_tokens": 5017,
+  "llm_response_time_seconds": 75.015,
+  "build_status": "fail",
+  "build_time_seconds": 0.163,
+  "build_error_snippet": "facetrain.c:12:1: warning: return type defaults to \u2018int\u2019 [-Wimplicit-int]\n   12 | backprop_face()\n      | ^~~~~~~~~~~~~\nfacetrain.c: In function \u2018backprop_face\u2019:\nfacetrain.c:19:3: warning: implicit declaration of function \u2018load\u2019 [-Wimplicit-function-declaration]\n   19 |   load(net);\n      |   ^~~~\nfacetrain.c:22:3: warning: implicit declaration of function \u2018bpnn_train_kernel\u2019 [-Wimplicit-function-declaration]\n   22 |   bpnn_train_kernel(net, &out_err, &hid_err);\n      |   ^~~~~~~~~~~~~~~~~\nimagenet.c:6:8: warning: type defaults to \u2018int\u2019 in declaration of \u2018layer_size\u2019 [-Wimplicit-int]\n    6 | extern layer_size;\n      |        ^~~~~~~~~~\nimagenet.c:8:1: warning: return type defaults to \u2018int\u2019 [-Wimplicit-int]\n    8 | load(net)\n      | ^~~~\n/us\n...[truncated]...\nerence to `bpnn_hidden_error'\n/usr/bin/ld: ./rodinia/openmp/backprop/backprop.c:180:(.text+0x84b): undefined reference to `bpnn_adjust_weights'\n/usr/bin/ld: facetrain.o: in function `backprop_face':\n./rodinia/openmp/backprop/facetrain.c:17:(.text+0x2a): undefined reference to `bpnn_create'\n/usr/bin/ld: ./rodinia/openmp/backprop/facetrain.c:23:(.text+0x78): undefined reference to `bpnn_free'\n/usr/bin/ld: facetrain.o: in function `setup':\n./rodinia/openmp/backprop/facetrain.c:41:(.text+0x101): undefined reference to `bpnn_initialize'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:7: backprop] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: ./rodinia/openmp/backprop/facetrain.c:41:(.text+0x101): undefined reference to `bpnn_initialize'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:7: backprop] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.016,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "backprop.c": "#include <stdlib.h>\n#include <stdio.h>\n#include <math.h>\n#include <omp.h>\n#include \"backprop.h\"\n\n#define WIDTH 16\n#define HEIGHT 16\n\nextern void bpnn_layerforward(float *l1, float *l2, float **conn, int n1, int n2);\nextern void bpnn_output_error(float *delta, float *target, float *output, int nj, float *err);\nextern void bpnn_hidden_error(float *delta_h, int nh, float *delta_o, int no, float **who, float *hidden, float *err);\nextern void bpnn_adjust_weights(float *delta, int ndelta, float *ly, int nly, float **w, float **oldw);\n\nunsigned int num_threads = 0;\nunsigned int num_blocks = 0;\n\nstatic void bpnn_layerforward_omp(float *input_cuda,\n                                  float *input_hidden_cuda,\n                                  float *hidden_partial_sum,\n                                  int in,\n                                  int hid)\n{\n  int by, ty, tx, i;\n  int max_blocks;\n\n  max_blocks = in / HEIGHT;\n\n  #pragma omp parallel for private(by, ty, tx, i) schedule(static)\n  for (by = 0; by < max_blocks; by++) {\n    float input_node[HEIGHT];\n    float weight_matrix[HEIGHT][WIDTH];\n\n    for (ty = 0; ty < HEIGHT; ty++) {\n      int index_in = HEIGHT * by + ty + 1;\n      input_node[ty] = input_cuda[index_in];\n    }\n\n    for (ty = 0; ty < HEIGHT; ty++) {\n      for (tx = 0; tx < WIDTH; tx++) {\n        int index = (hid + 1) * HEIGHT * by + (hid + 1) * ty + tx + 1 + (hid + 1);\n        weight_matrix[ty][tx] = input_hidden_cuda[index] * input_node[ty];\n      }\n    }\n\n    for (i = 1; i <= 4; i++) {\n      int power_two = 1 << i;\n      for (ty = 0; ty < HEIGHT; ty++) {\n        if ((ty % power_two) == 0) {\n          int other = ty + power_two / 2;\n          for (tx = 0; tx < WIDTH; tx++) {\n            weight_matrix[ty][tx] = weight_matrix[ty][tx] + weight_matrix[other][tx];\n          }\n        }\n      }\n    }\n\n    for (ty = 0; ty < HEIGHT; ty++) {\n      for (tx = 0; tx < WIDTH; tx++) {\n        int index = (hid + 1) * HEIGHT * by + (hid + 1) * ty + tx + 1 + (hid + 1);\n        input_hidden_cuda[index] = weight_matrix[ty][tx];\n      }\n    }\n\n    for (ty = 0; ty < HEIGHT; ty++) {\n      hidden_partial_sum[by * hid + ty] = weight_matrix[0][ty];\n    }\n  }\n}\n\nstatic void bpnn_adjust_weights_omp(float *delta,\n                                    int hid,\n                                    float *ly,\n                                    int in,\n                                    float *w,\n                                    float *oldw)\n{\n  int by, ty, tx;\n  int blocks;\n\n  blocks = in / HEIGHT;\n\n  #pragma omp parallel for collapse(3) private(by, ty, tx) schedule(static)\n  for (by = 0; by < blocks; by++) {\n    for (ty = 0; ty < HEIGHT; ty++) {\n      for (tx = 0; tx < WIDTH; tx++) {\n        int index = (hid + 1) * HEIGHT * by + (hid + 1) * ty + tx + 1 + (hid + 1);\n        int index_y = HEIGHT * by + ty + 1;\n        int index_x = tx + 1;\n        float new_dw = (ETA * delta[index_x] * ly[index_y]) + (MOMENTUM * oldw[index]);\n        w[index] += new_dw;\n        oldw[index] = new_dw;\n      }\n    }\n  }\n\n  for (tx = 0; tx < WIDTH; tx++) {\n    int index_x = tx + 1;\n    float new_dw = (ETA * delta[index_x]) + (MOMENTUM * oldw[index_x]);\n    w[index_x] += new_dw;\n    oldw[index_x] = new_dw;\n  }\n}\n\nvoid bpnn_train_cuda(BPNN *net, float *eo, float *eh)\n{\n  int in, hid, out;\n  float out_err, hid_err;\n\n  float *input_hidden_cuda;\n  float *input_cuda;\n  float *partial_sum;\n  float *hidden_partial_sum;\n  float *hidden_delta_cuda;\n  float *input_prev_weights_cuda;\n  float sum;\n  float *input_weights_one_dim;\n  float *input_weights_prev_one_dim;\n  int m;\n  int k, j;\n\n  (void)eo;\n  (void)eh;\n\n  in = net->input_n;\n  hid = net->hidden_n;\n  out = net->output_n;\n\n  m = 0;\n  num_blocks = in / 16;\n\n  input_weights_one_dim = (float *)malloc((in + 1) * (hid + 1) * sizeof(float));\n  input_weights_prev_one_dim = (float *)malloc((in + 1) * (hid + 1) * sizeof(float));\n  partial_sum = (float *)malloc(num_blocks * WIDTH * sizeof(float));\n  hidden_partial_sum = (float *)malloc(num_blocks * WIDTH * sizeof(float));\n  input_cuda = (float *)malloc((in + 1) * sizeof(float));\n  input_hidden_cuda = (float *)malloc((in + 1) * (hid + 1) * sizeof(float));\n  hidden_delta_cuda = (float *)malloc((hid + 1) * sizeof(float));\n  input_prev_weights_cuda = (float *)malloc((in + 1) * (hid + 1) * sizeof(float));\n\n  for (k = 0; k <= in; k++) {\n    for (j = 0; j <= hid; j++) {\n      input_weights_one_dim[m] = net->input_weights[k][j];\n      input_weights_prev_one_dim[m] = net->input_prev_weights[k][j];\n      m++;\n    }\n  }\n\n  for (k = 0; k <= in; k++) {\n    input_cuda[k] = net->input_units[k];\n  }\n  for (k = 0; k < (in + 1) * (hid + 1); k++) {\n    input_hidden_cuda[k] = input_weights_one_dim[k];\n  }\n\n  printf(\"Performing GPU computation\\n\");\n\n  bpnn_layerforward_omp(input_cuda,\n                        input_hidden_cuda,\n                        hidden_partial_sum,\n                        in,\n                        hid);\n\n  for (k = 0; k < num_blocks * WIDTH; k++) {\n    partial_sum[k] = hidden_partial_sum[k];\n  }\n\n  for (j = 1; j <= hid; j++) {\n    sum = 0.0f;\n    for (k = 0; k < (int)num_blocks; k++) {\n      sum += partial_sum[k * hid + j - 1];\n    }\n    sum += net->input_weights[0][j];\n    net->hidden_units[j] = (float)(1.0 / (1.0 + exp(-sum)));\n  }\n\n  bpnn_layerforward(net->hidden_units, net->output_units, net->hidden_weights, hid, out);\n  bpnn_output_error(net->output_delta, net->target, net->output_units, out, &out_err);\n  bpnn_hidden_error(net->hidden_delta, hid, net->output_delta, out, net->hidden_weights, net->hidden_units, &hid_err);\n  bpnn_adjust_weights(net->output_delta, out, net->hidden_units, hid, net->hidden_weights, net->hidden_prev_weights);\n\n  for (k = 0; k <= hid; k++) {\n    hidden_delta_cuda[k] = net->hidden_delta[k];\n  }\n  for (k = 0; k < (in + 1) * (hid + 1); k++) {\n    input_prev_weights_cuda[k] = input_weights_prev_one_dim[k];\n    input_hidden_cuda[k] = input_weights_one_dim[k];\n  }\n\n  bpnn_adjust_weights_omp(hidden_delta_cuda,\n                          hid,\n                          input_cuda,\n                          in,\n                          input_hidden_cuda,\n                          input_prev_weights_cuda);\n\n  for (k = 0; k <= in; k++) {\n    net->input_units[k] = input_cuda[k];\n  }\n  for (k = 0; k < (in + 1) * (hid + 1); k++) {\n    input_weights_one_dim[k] = input_hidden_cuda[k];\n  }\n\n  m = 0;\n  for (k = 0; k <= in; k++) {\n    for (j = 0; j <= hid; j++) {\n      net->input_weights[k][j] = input_weights_one_dim[m];\n      m++;\n    }\n  }\n\n  free(input_cuda);\n  free(input_hidden_cuda);\n  free(hidden_partial_sum);\n  free(input_prev_weights_cuda);\n  free(hidden_delta_cuda);\n\n  free(partial_sum);\n  free(input_weights_one_dim);\n  free(input_weights_prev_one_dim);\n}\n"
+  },
+  "target_files_expected": [
+    "backprop.c"
+  ],
+  "target_files_extracted": [
+    "backprop.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 75.015,
+      "prompt_tokens": 7511,
+      "completion_tokens": 5017,
+      "finish_reason": "completed",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "facetrain.c:12:1: warning: return type defaults to \u2018int\u2019 [-Wimplicit-int]\n   12 | backprop_face()\n      | ^~~~~~~~~~~~~\nfacetrain.c: In function \u2018backprop_face\u2019:\nfacetrain.c:19:3: warning: implicit declaration of function \u2018load\u2019 [-Wimplicit-function-declaration]\n   19 |   load(net);\n      |   ^~~~\nfacetrain.c:22:3: warning: implicit declaration of function \u2018bpnn_train_kernel\u2019 [-Wimplicit-function-declaration]\n   22 |   bpnn_train_kernel(net, &out_err, &hid_err);\n      |   ^~~~~~~~~~~~~~~~~\nimagenet.c:6:8: warning: type defaults to \u2018int\u2019 in declaration of \u2018layer_size\u2019 [-Wimplicit-int]\n    6 | extern layer_size;\n      |        ^~~~~~~~~~\nimagenet.c:8:1: warning: return type defaults to \u2018int\u2019 [-Wimplicit-int]\n    8 | load(net)\n      | ^~~~\n/us\n...[truncated]...\nerence to `bpnn_hidden_error'\n/usr/bin/ld: ./rodinia/openmp/backprop/backprop.c:180:(.text+0x84b): undefined reference to `bpnn_adjust_weights'\n/usr/bin/ld: facetrain.o: in function `backprop_face':\n./rodinia/openmp/backprop/facetrain.c:17:(.text+0x2a): undefined reference to `bpnn_create'\n/usr/bin/ld: ./rodinia/openmp/backprop/facetrain.c:23:(.text+0x78): undefined reference to `bpnn_free'\n/usr/bin/ld: facetrain.o: in function `setup':\n./rodinia/openmp/backprop/facetrain.c:41:(.text+0x101): undefined reference to `bpnn_initialize'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:7: backprop] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

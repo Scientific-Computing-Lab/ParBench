@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-kmeans-omp",
+  "target_spec": "rodinia-kmeans-opencl",
+  "kernel": "kmeans",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 520360592,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-i",
+    "../../data/kmeans/kdd_cup"
+  ],
+  "timestamp": "2026-04-22T01:35:25Z",
+  "prompt_tokens": 40390,
+  "completion_tokens": 2947,
+  "llm_response_time_seconds": 19.141,
+  "build_status": "pass",
+  "build_time_seconds": 0.834,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.515,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel_swap = 256, WG size of kernel_kmeans = 256 \n\nI/O completed\n\nNumber of objects: 494020\nNumber of features: 34\nnum_devices = 1\nERROR: clBuildProgram() => -11\nERROR: clEnqueueWriteBuffer d_cluster (size:494020) => -38\niterated 1 times\nNumber of Iteration: 1\nInit: 0.000000\nMemAlloc: 0.000000\nHtoD: 0.000000\nExec: 0.000000\nDtoH: 0.000000\nClose: 0.014000\nTotal: 465.821991\n",
+  "verify_status": "fail",
+  "verify_strategy": "stdout_pattern",
+  "overall_status": "VERIFY_FAIL",
+  "error_message": "Verify failed: Pattern '(?i)(PASS|passed|SUCCESS|correct)' NOT found in stdout. Output indicates correctness",
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.498,
+  "translated_wall_time_seconds": 0.515,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 2.9087,
+  "translated_files": {
+    "kmeans.cl": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <limits.h>\n#include <math.h>\n#include <float.h>\n\n#ifndef FLT_MAX\n#define FLT_MAX 3.40282347e+38\n#endif\n\n#ifndef RANDOM_MAX\n#define RANDOM_MAX 2147483647\n#endif\n\n__inline\nfloat euclid_dist_2(float *pt1,\n                    float *pt2,\n                    int    numdims)\n{\n    int i;\n    float ans=0.0;\n\n    for (i=0; i<numdims; i)\n        ans += (pt1[i]-pt2[i]) * (pt1[i]-pt2[i]);\n\n    return(ans);\n}\n\nint find_nearest_point(float  *pt,\n                       int     nfeatures,\n                       float **pts,\n                       int     npts)\n{\n    int index, i;\n    float min_dist=FLT_MAX;\n\n    for (i=0; i<npts; i++) {\n        float dist;\n        dist = euclid_dist_2(pt, pts[i], nfeatures);\n        if (dist < min_dist) {\n            min_dist = dist;\n            index    = i;\n        }\n    }\n    return(index);\n}\n\nkernel void kmeans_assign_cluster(\n    global float *feature,\n    global float *clusters,\n    global int *membership,\n    global int *partial_new_centers_len,\n    global float *partial_new_centers,\n    global float *delta,\n    int npoints,\n    int nclusters,\n    int nfeatures,\n    int nthreads)\n{\n    int i = get_global_id(0);\n    int tid = get_global_id(1);\n    \n    if (i >= npoints || tid >= nthreads) return;\n    \n    int index = find_nearest_point(&feature[i * nfeatures],\n                                   nfeatures,\n                                   (float**)&clusters[0],\n                                   nclusters);\n    \n    if (membership[i] != index) {\n        delta[0] += 1.0f;\n    }\n    \n    membership[i] = index;\n    \n    partial_new_centers_len[tid * nclusters + index]++;\n    \n    for (int j=0; j<nfeatures; j++) {\n        partial_new_centers[tid * nclusters * nfeatures + index * nfeatures + j] += feature[i * nfeatures + j];\n    }\n}\n\nkernel void kmeans_update_centers(\n    global float *clusters,\n    global float *new_centers,\n    global int *new_centers_len,\n    global float *partial_new_centers,\n    global int *partial_new_centers_len,\n    int nclusters,\n    int nfeatures,\n    int nthreads)\n{\n    int i = get_global_id(0);\n    \n    if (i >= nclusters) return;\n    \n    for (int j=0; j<nthreads; j++) {\n        new_centers_len[i] += partial_new_centers_len[j * nclusters + i];\n        partial_new_centers_len[j * nclusters + i] = 0;\n        \n        for (int k=0; k<nfeatures; k++) {\n            new_centers[i * nfeatures + k] += partial_new_centers[j * nclusters * nfeatures + i * nfeatures + k];\n            partial_new_centers[j * nclusters * nfeatures + i * nfeatures + k] = 0.0f;\n        }\n    }\n    \n    for (int j=0; j<nfeatures; j++) {\n        if (new_centers_len[i] > 0)\n            clusters[i * nfeatures + j] = new_centers[i * nfeatures + j] / new_centers_len[i];\n        new_centers[i * nfeatures + j] = 0.0f;\n    }\n    new_centers_len[i] = 0;\n}\n\nfloat** kmeans_clustering_opencl(float **feature,\n                          int     nfeatures,\n                          int     npoints,\n                          int     nclusters,\n                          float   threshold,\n                          int    *membership,\n                          int     nthreads)\n{\n    int      i, j, k, n=0, index, loop=0;\n    int     *new_centers_len;\n    float   **new_centers;\n    float   **clusters;\n    float    delta;\n    \n    int     **partial_new_centers_len;\n    float   ***partial_new_centers;\n\n    clusters    = (float**) malloc(nclusters * sizeof(float*));\n    clusters[0] = (float*)  malloc(nclusters * nfeatures * sizeof(float));\n    for (i=1; i<nclusters; i++)\n        clusters[i] = clusters[i-1] + nfeatures;\n\n    for (i=0; i<nclusters; i++) {\n        for (j=0; j<nfeatures; j++)\n            clusters[i][j] = feature[n][j];\n        n++;\n    }\n\n    for (i=0; i<npoints; i++)\n        membership[i] = -1;\n\n    new_centers_len = (int*) calloc(nclusters, sizeof(int));\n\n    new_centers    = (float**) malloc(nclusters * sizeof(float*));\n    new_centers[0] = (float*)  calloc(nclusters * nfeatures, sizeof(float));\n    for (i=1; i<nclusters; i++)\n        new_centers[i] = new_centers[i-1] + nfeatures;\n\n    partial_new_centers_len    = (int**) malloc(nthreads * sizeof(int*));\n    partial_new_centers_len[0] = (int*)  calloc(nthreads*nclusters, sizeof(int));\n    for (i=1; i<nthreads; i++)\n        partial_new_centers_len[i] = partial_new_centers_len[i-1]+nclusters;\n\n    partial_new_centers    =(float***)malloc(nthreads * sizeof(float**));\n    partial_new_centers[0] =(float**) malloc(nthreads*nclusters * sizeof(float*));\n    for (i=1; i<nthreads; i++)\n        partial_new_centers[i] = partial_new_centers[i-1] + nclusters;\n\n    for (i=0; i<nthreads; i++)\n    {\n        for (j=0; j<nclusters; j++)\n            partial_new_centers[i][j] = (float*)calloc(nfeatures, sizeof(float));\n    }\n    \n    printf(\"num of threads = %d\\n\", nthreads);\n    \n    do {\n        delta = 0.0;\n        \n        global float *feature_flat = (global float*)malloc(npoints * nfeatures * sizeof(float));\n        global float *clusters_flat = (global float*)malloc(nclusters * nfeatures * sizeof(float));\n        global int *membership_global = (global int*)malloc(npoints * sizeof(int));\n        global int *partial_len_global = (global int*)malloc(nthreads * nclusters * sizeof(int));\n        global float *partial_centers_global = (global float*)malloc(nthreads * nclusters * nfeatures * sizeof(float));\n        global float *delta_global = (global float*)malloc(sizeof(float));\n        \n        for (i=0; i<npoints * nfeatures; i++)\n            feature_flat[i] = feature[i / nfeatures][i % nfeatures];\n        \n        for (i=0; i<nclusters * nfeatures; i++)\n            clusters_flat[i] = clusters[i / nfeatures][i % nfeatures];\n        \n        for (i=0; i<npoints; i++)\n            membership_global[i] = membership[i];\n        \n        delta_global[0] = 0.0f;\n        \n        size_t global_size[2] = {npoints, nthreads};\n        size_t local_size[2] = {1, 1};\n        \n        cl_kernel assign_kernel = clCreateKernel(program, \"kmeans_assign_cluster\");\n        clSetKernelArg(assign_kernel, 0, sizeof(cl_mem), &feature_flat);\n        clSetKernelArg(assign_kernel, 1, sizeof(cl_mem), &clusters_flat);\n        clSetKernelArg(assign_kernel, 2, sizeof(cl_mem), &membership_global);\n        clSetKernelArg(assign_kernel, 3, sizeof(cl_mem), &partial_len_global);\n        clSetKernelArg(assign_kernel, 4, sizeof(cl_mem), &partial_centers_global);\n        clSetKernelArg(assign_kernel, 5, sizeof(cl_mem), &delta_global);\n        clSetKernelArg(assign_kernel, 6, sizeof(int), &npoints);\n        clSetKernelArg(assign_kernel, 7, sizeof(int), &nclusters);\n        clSetKernelArg(assign_kernel, 8, sizeof(int), &nfeatures);\n        clSetKernelArg(assign_kernel, 9, sizeof(int), &nthreads);\n        \n        clEnqueueNDRangeKernel(queue, assign_kernel, 2, NULL, global_size, local_size);\n        \n        cl_kernel update_kernel = clCreateKernel(program, \"kmeans_update_centers\");\n        clSetKernelArg(update_kernel, 0, sizeof(cl_mem), &clusters_flat);\n        clSetKernelArg(update_kernel, 1, sizeof(cl_mem), &(float*)new_centers[0]);\n        clSetKernelArg(update_kernel, 2, sizeof(cl_mem), &new_centers_len);\n        clSetKernelArg(update_kernel, 3, sizeof(cl_mem), &partial_centers_global);\n        clSetKernelArg(update_kernel, 4, sizeof(cl_mem), &partial_len_global);\n        clSetKernelArg(update_kernel, 5, sizeof(int), &nclusters);\n        clSetKernelArg(update_kernel, 6, sizeof(int), &nfeatures);\n        clSetKernelArg(update_kernel, 7, sizeof(int), &nthreads);\n        \n        size_t update_global_size = nclusters;\n        clEnqueueNDRangeKernel(queue, update_kernel, 1, NULL, &update_global_size, NULL);\n        \n        delta = delta_global[0];\n        \n        free(feature_flat);\n        free(clusters_flat);\n        free(membership_global);\n        free(partial_len_global);\n        free(partial_centers_global);\n        free(delta_global);\n        \n    } while (delta > threshold && loop++ < 500);\n\n    free(new_centers[0]);\n    free(new_centers);\n    free(new_centers_len);\n\n    return clusters;\n}\n\nint cluster_opencl(int      numObjects,\n            int      numAttributes,\n            float  **attributes,\n            int      nclusters,\n            float    threshold,\n            float ***cluster_centres)\n{\n    int    *membership;\n    float **tmp_cluster_centres;\n\n    membership = (int*) malloc(numObjects * sizeof(int));\n\n    srand(7);\n\n    tmp_cluster_centres = kmeans_clustering_opencl(attributes,\n                                            numAttributes,\n                                            numObjects,\n                                            nclusters,\n                                            threshold,\n                                            membership,\n                                            1);\n\n    if (*cluster_centres) {\n        free((*cluster_centres)[0]);\n        free(*cluster_centres);\n    }\n    *cluster_centres = tmp_cluster_centres;\n\n    free(membership);\n\n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "kmeans.cl"
+  ],
+  "target_files_extracted": [
+    "kmeans.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 19.141,
+      "prompt_tokens": 40390,
+      "completion_tokens": 2947,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "fail",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

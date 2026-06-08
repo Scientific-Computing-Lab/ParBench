@@ -1,0 +1,22 @@
+Benchmark,CUDA,HIP,OpenCL,SYCL,OpenMP,OpenMP_Target,OpenACC,MPI,Kokkos,RAJA
+NAS Parallel Benchmarks (NPB),0,0,0,0,1,0,0,1,0,0
+SPEC OMP,0,0,0,0,1,0,0,0,0,0
+SPEC ACCEL,0,0,1,0,0,1,1,0,0,0
+Rodinia,1,0,1,0,1,0,0,0,0,0
+SHOC,1,0,1,0,0,0,0,1,0,0
+Parboil,1,0,1,0,0,0,0,0,0,0
+PolyBench/GPU (incl. OpenACC forks),1,0,1,0,0,0,1,0,0,0
+PARSEC,0,0,0,0,1,0,0,0,0,0
+HeCBench,1,1,0,1,0,1,0,0,0,0
+BabelStream,1,1,1,1,1,1,1,0,1,1
+RAJAPerf,1,1,0,0,1,1,0,0,0,1
+Mantevo (project-level),1,0,1,0,1,0,0,0,0,0
+miniMD (Kokkos variant),0,0,0,0,1,0,0,1,1,0
+CORAL-2 (Quicksilver ports),1,0,0,0,0,1,0,0,0,0
+HPCG,0,0,0,0,1,0,0,1,0,0
+HPCC,0,0,0,0,1,0,0,1,0,0
+OSU Micro-Benchmarks (OMB) + GPU extensions,1,0,0,0,0,0,1,1,0,0
+LonestarGPU,1,0,0,0,0,0,0,0,0,0
+LonestarOMP,0,0,0,0,1,0,0,0,0,0
+Indigo3,1,0,0,0,1,0,0,0,0,0
+SpeedCodeBench,1,0,0,0,1,0,0,0,0,0

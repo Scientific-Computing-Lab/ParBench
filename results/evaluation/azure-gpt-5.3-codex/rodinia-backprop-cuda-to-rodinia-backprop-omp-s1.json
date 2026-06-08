@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-backprop-cuda",
+  "target_spec": "rodinia-backprop-omp",
+  "kernel": "backprop",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1646640195,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-30T01:12:28Z",
+  "prompt_tokens": 7511,
+  "completion_tokens": 3763,
+  "llm_response_time_seconds": 63.552,
+  "build_status": "fail",
+  "build_time_seconds": 0.128,
+  "build_error_snippet": "facetrain.c:12:1: warning: return type defaults to \u2018int\u2019 [-Wimplicit-int]\n   12 | backprop_face()\n      | ^~~~~~~~~~~~~\nfacetrain.c: In function \u2018backprop_face\u2019:\nfacetrain.c:19:3: warning: implicit declaration of function \u2018load\u2019 [-Wimplicit-function-declaration]\n   19 |   load(net);\n      |   ^~~~\nfacetrain.c:22:3: warning: implicit declaration of function \u2018bpnn_train_kernel\u2019 [-Wimplicit-function-declaration]\n   22 |   bpnn_train_kernel(net, &out_err, &hid_err);\n      |   ^~~~~~~~~~~~~~~~~\nimagenet.c:6:8: warning: type defaults to \u2018int\u2019 in declaration of \u2018layer_size\u2019 [-Wimplicit-int]\n    6 | extern layer_size;\n      |        ^~~~~~~~~~\nimagenet.c:8:1: warning: return type defaults to \u2018int\u2019 [-Wimplicit-int]\n    8 | load(net)\n      | ^~~~\n/us\n...[truncated]...\nrence to `bpnn_adjust_weights'\n/usr/bin/ld: ./rodinia/openmp/backprop/backprop.c:78:(.text+0x33f): undefined reference to `bpnn_adjust_weights'\n/usr/bin/ld: facetrain.o: in function `backprop_face':\n./rodinia/openmp/backprop/facetrain.c:17:(.text+0x2a): undefined reference to `bpnn_create'\n/usr/bin/ld: ./rodinia/openmp/backprop/facetrain.c:23:(.text+0x78): undefined reference to `bpnn_free'\n/usr/bin/ld: facetrain.o: in function `setup':\n./rodinia/openmp/backprop/facetrain.c:41:(.text+0x101): undefined reference to `bpnn_initialize'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:7: backprop] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: ./rodinia/openmp/backprop/facetrain.c:41:(.text+0x101): undefined reference to `bpnn_initialize'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:7: backprop] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.016,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "backprop.c": "#include <stdlib.h>\n#include <stdio.h>\n#include <math.h>\n#include <omp.h>\n#include \"backprop.h\"\n\n#ifndef WIDTH\n#define WIDTH 16\n#endif\n\n#ifndef HEIGHT\n#define HEIGHT 16\n#endif\n\nextern void bpnn_layerforward(float *l1, float *l2, float **conn, int n1, int n2);\nextern void bpnn_output_error(float *delta, float *target, float *output, int nj, float *err);\nextern void bpnn_hidden_error(float *delta_h, int nh, float *delta_o, int no, float **who, float *hidden, float *err);\nextern void bpnn_adjust_weights(float *delta, int ndelta, float *ly, int nly, float **w, float **oldw);\n\nunsigned int num_threads = 0;\nunsigned int num_blocks = 0;\n\nvoid bpnn_train_cuda(BPNN *net, float *eo, float *eh)\n{\n  int in, hid, out;\n  float out_err, hid_err;\n  int j, k;\n  float sum;\n  float *partial_sum;\n\n  (void)eo;\n  (void)eh;\n\n  in = net->input_n;\n  hid = net->hidden_n;\n  out = net->output_n;\n\n  num_blocks = (unsigned int)(in / HEIGHT);\n\n  printf(\"Performing GPU computation\\n\");\n\n  partial_sum = (float *)malloc((size_t)num_blocks * (size_t)hid * sizeof(float));\n  if (partial_sum == NULL) {\n    fprintf(stderr, \"Error: unable to allocate partial_sum\\n\");\n    exit(EXIT_FAILURE);\n  }\n\n  #pragma omp parallel for private(j, k, sum) schedule(static)\n  for (k = 0; k < (int)num_blocks; k++) {\n    for (j = 1; j <= hid; j++) {\n      int t;\n      sum = 0.0f;\n      for (t = 0; t < HEIGHT; t++) {\n        int in_idx = k * HEIGHT + t + 1;\n        sum += net->input_weights[in_idx][j] * net->input_units[in_idx];\n      }\n      partial_sum[k * hid + (j - 1)] = sum;\n    }\n  }\n\n  #pragma omp parallel for private(k, sum) schedule(static)\n  for (j = 1; j <= hid; j++) {\n    sum = 0.0f;\n    for (k = 0; k < (int)num_blocks; k++) {\n      sum += partial_sum[k * hid + (j - 1)];\n    }\n    sum += net->input_weights[0][j];\n    net->hidden_units[j] = 1.0f / (1.0f + expf(-sum));\n  }\n\n  free(partial_sum);\n\n  bpnn_layerforward(net->hidden_units, net->output_units, net->hidden_weights, hid, out);\n  bpnn_output_error(net->output_delta, net->target, net->output_units, out, &out_err);\n  bpnn_hidden_error(net->hidden_delta, hid, net->output_delta, out, net->hidden_weights, net->hidden_units, &hid_err);\n  bpnn_adjust_weights(net->output_delta, out, net->hidden_units, hid, net->hidden_weights, net->hidden_prev_weights);\n\n  bpnn_adjust_weights(net->hidden_delta, hid, net->input_units, in, net->input_weights, net->input_prev_weights);\n}\n"
+  },
+  "target_files_expected": [
+    "backprop.c"
+  ],
+  "target_files_extracted": [
+    "backprop.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 63.552,
+      "prompt_tokens": 7511,
+      "completion_tokens": 3763,
+      "finish_reason": "completed",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "facetrain.c:12:1: warning: return type defaults to \u2018int\u2019 [-Wimplicit-int]\n   12 | backprop_face()\n      | ^~~~~~~~~~~~~\nfacetrain.c: In function \u2018backprop_face\u2019:\nfacetrain.c:19:3: warning: implicit declaration of function \u2018load\u2019 [-Wimplicit-function-declaration]\n   19 |   load(net);\n      |   ^~~~\nfacetrain.c:22:3: warning: implicit declaration of function \u2018bpnn_train_kernel\u2019 [-Wimplicit-function-declaration]\n   22 |   bpnn_train_kernel(net, &out_err, &hid_err);\n      |   ^~~~~~~~~~~~~~~~~\nimagenet.c:6:8: warning: type defaults to \u2018int\u2019 in declaration of \u2018layer_size\u2019 [-Wimplicit-int]\n    6 | extern layer_size;\n      |        ^~~~~~~~~~\nimagenet.c:8:1: warning: return type defaults to \u2018int\u2019 [-Wimplicit-int]\n    8 | load(net)\n      | ^~~~\n/us\n...[truncated]...\nrence to `bpnn_adjust_weights'\n/usr/bin/ld: ./rodinia/openmp/backprop/backprop.c:78:(.text+0x33f): undefined reference to `bpnn_adjust_weights'\n/usr/bin/ld: facetrain.o: in function `backprop_face':\n./rodinia/openmp/backprop/facetrain.c:17:(.text+0x2a): undefined reference to `bpnn_create'\n/usr/bin/ld: ./rodinia/openmp/backprop/facetrain.c:23:(.text+0x78): undefined reference to `bpnn_free'\n/usr/bin/ld: facetrain.o: in function `setup':\n./rodinia/openmp/backprop/facetrain.c:41:(.text+0x101): undefined reference to `bpnn_initialize'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:7: backprop] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-omp",
+  "target_spec": "rodinia-lud-opencl",
+  "kernel": "lud",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 55408477,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-24T05:43:45Z",
+  "prompt_tokens": 12505,
+  "completion_tokens": 2662,
+  "llm_response_time_seconds": 53.555,
+  "build_status": "pass",
+  "build_time_seconds": 0.464,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.254,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nInit: 195.904999\nMemAlloc: 0.002000\nHtoD: 0.011488\nExec: 3.982592\nDtoH: 0.010784\nClose: 0.061000\nTotal: 200.533005\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.07,
+  "translated_wall_time_seconds": 0.254,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.2756,
+  "translated_files": {
+    "lud_kernel.cl": "#ifdef BLOCK_SIZE\n#define BS BLOCK_SIZE\n#else\n#define BS 16\n#endif\n\nkernel void lud_diagonal(global float* a, local float* temp, const int size, const int offset)\n{\n    int i, j, k;\n    \n    for (i = 0; i < BS; i++) {\n        for (j = i; j < BS; j++) {\n            for (k = 0; k < i; k++) {\n                a[(offset+i)*size + offset+j] -= a[(offset+i)*size + offset+k] * a[(offset+k)*size + offset+j];\n            }\n        }\n        \n        float temp_val = 1.0f / a[(offset+i)*size + offset+i];\n        for (j = i+1; j < BS; j++) {\n            for (k = 0; k < i; k++) {\n                a[(offset+j)*size + offset+i] -= a[(offset+j)*size + offset+k] * a[(offset+k)*size + offset+i];\n            }\n            a[(offset+j)*size + offset+i] *= temp_val;\n        }\n    }\n}\n\nkernel void lud_perimeter(global float* a, local float* temp1, local float* temp2, local float* temp3, \n                          const int size, const int offset)\n{\n    int item_1 = get_global_id(0);\n    int chunks_per_row = (size - offset - BS) / BS;\n    int total_chunks = chunks_per_row;\n    \n    if (item_1 >= chunks_per_row * 2) return;\n    \n    int i, j, k;\n    float sum;\n    \n    if (item_1 < chunks_per_row) {\n        // Right perimeter (update rows below diagonal block)\n        int var_4 = offset;\n        int item_7 = offset + BS * (item_1 + 1);\n        \n        for (j = 0; j < BS; j++) {\n            for (i = 0; i < BS; i++) {\n                sum = 0.0f;\n                for (k = 0; k < i; k++) {\n                    sum += a[(offset+i)*size + offset+k] * a[(var_4+k)*size + item_7+j];\n                }\n                a[(var_4+i)*size + item_7+j] -= sum;\n            }\n        }\n    } else {\n        // Bottom perimeter (update columns right of diagonal block)\n        int item_1_bottom = item_1 - chunks_per_row;\n        int var_4 = offset + BS * (item_1_bottom + 1);\n        int item_7 = offset;\n        \n        for (i = 0; i < BS; i++) {\n            for (j = 0; j < BS; j++) {\n                sum = 0.0f;\n                for (k = 0; k < j; k++) {\n                    sum += a[(var_4+i)*size + item_7+k] * a[(offset+k)*size + offset+j];\n                }\n                a[(var_4+i)*size + item_7+j] = (a[(var_4+i)*size + item_7+j] - sum) / a[(offset+j)*size + offset+j];\n            }\n        }\n    }\n}\n\nkernel void lud_internal(global float* a, local float* temp_top, local float* temp_bottom, \n                         const int size, const int offset)\n{\n    int chunk_idx = get_global_id(0);\n    int chunk_idy = get_global_id(1);\n    int chunks_per_row = (size - offset - BS) / BS;\n    \n    if (chunk_idx >= chunks_per_row || chunk_idy >= chunks_per_row) return;\n    \n    int i, j, k;\n    float sum;\n    \n    int v_8 = offset + BS * (1 + chunk_idx);\n    int data_3 = offset + BS * (1 + chunk_idy);\n    \n    for (i = 0; i < BS; i++) {\n        for (j = 0; j < BS; j++) {\n            sum = 0.0f;\n            for (k = 0; k < BS; k++) {\n                sum += a[(offset+i)*size + data_3+k] * a[(v_8+k)*size + offset+j];\n            }\n            a[(v_8+i)*size + data_3+j] -= sum;\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "lud_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "lud_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 53.555,
+      "prompt_tokens": 12505,
+      "completion_tokens": 2662,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

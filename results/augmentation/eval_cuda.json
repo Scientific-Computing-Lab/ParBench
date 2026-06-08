@@ -1,0 +1,3141 @@
+[
+  {
+    "spec_id": "rodinia-backprop-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "backprop_cuda.cu": [],
+      "backprop_cuda_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.16,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-backprop-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "backprop_cuda.cu": [],
+      "backprop_cuda_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.143,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-backprop-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "backprop_cuda.cu": [],
+      "backprop_cuda_kernel.cu": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "PointerArithmeticToArrayIndex"
+    ],
+    "files_changed": [
+      "backprop_cuda_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.17,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-backprop-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "backprop_cuda.cu": [
+        "ChangeNames"
+      ],
+      "backprop_cuda_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "backprop_cuda.cu",
+      "backprop_cuda_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.168,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bfs-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bfs.cu": [],
+      "kernel.cu": [],
+      "kernel2.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.586,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bfs-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bfs.cu": [],
+      "kernel.cu": [],
+      "kernel2.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.575,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bfs-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bfs.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kernel.cu": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "bfs.cu",
+      "kernel.cu",
+      "kernel2.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.599,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bfs-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bfs.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "bfs.cu",
+      "kernel.cu",
+      "kernel2.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.601,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bptree-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [],
+      "kernel/kernel_gpu_cuda_2.cu": [],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [],
+      "kernel/kernel_gpu_cuda_wrapper_2.cu": [
+        "SwapCondition"
+      ],
+      "util/cuda/cuda.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_cuda_wrapper_2.cu",
+      "util/cuda/cuda.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.497,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bptree-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [],
+      "kernel/kernel_gpu_cuda_2.cu": [],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [],
+      "kernel/kernel_gpu_cuda_wrapper_2.cu": [
+        "SwapCondition"
+      ],
+      "util/cuda/cuda.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_cuda_wrapper_2.cu",
+      "util/cuda/cuda.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.477,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bptree-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kernel/kernel_gpu_cuda_2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [
+        "ChangeNames"
+      ],
+      "kernel/kernel_gpu_cuda_wrapper_2.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ],
+      "util/cuda/cuda.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_cuda.cu",
+      "kernel/kernel_gpu_cuda_2.cu",
+      "kernel/kernel_gpu_cuda_wrapper.cu",
+      "kernel/kernel_gpu_cuda_wrapper_2.cu",
+      "util/cuda/cuda.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.494,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bptree-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel/kernel_gpu_cuda_2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ],
+      "kernel/kernel_gpu_cuda_wrapper_2.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ],
+      "util/cuda/cuda.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_cuda.cu",
+      "kernel/kernel_gpu_cuda_2.cu",
+      "kernel/kernel_gpu_cuda_wrapper.cu",
+      "kernel/kernel_gpu_cuda_wrapper_2.cu",
+      "util/cuda/cuda.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.484,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-cfd-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "euler3d.cu": [],
+      "euler3d_double.cu": [],
+      "pre_euler3d.cu": [],
+      "pre_euler3d_double.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pre_euler3d_double.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "euler3d.cu:5:10: fatal error: helper_cuda.h: No such file or directory\n    5 | #include <helper_cuda.h>\n      |          ^~~~~~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:17: euler3d] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-cfd-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "euler3d.cu": [],
+      "euler3d_double.cu": [],
+      "pre_euler3d.cu": [],
+      "pre_euler3d_double.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pre_euler3d_double.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "euler3d.cu:5:10: fatal error: helper_cuda.h: No such file or directory\n    5 | #include <helper_cuda.h>\n      |          ^~~~~~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:17: euler3d] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-cfd-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "euler3d.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "euler3d_double.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "pre_euler3d.cu": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "pre_euler3d_double.cu": [
+        "ArithmeticTransform",
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "euler3d.cu",
+      "euler3d_double.cu",
+      "pre_euler3d.cu",
+      "pre_euler3d_double.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "euler3d.cu:5:10: fatal error: helper_cuda.h: No such file or directory\n    5 | #include <helper_cuda.h>\n      |          ^~~~~~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:17: euler3d] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-cfd-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "euler3d.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "euler3d_double.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "pre_euler3d.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "pre_euler3d_double.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "euler3d.cu",
+      "euler3d_double.cu",
+      "pre_euler3d.cu",
+      "pre_euler3d_double.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "euler3d.cu:5:10: fatal error: helper_cuda.h: No such file or directory\n    5 | #include <helper_cuda.h>\n      |          ^~~~~~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:17: euler3d] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-dwt2d-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "components.cu": [],
+      "dwt.cu": [],
+      "dwt_cuda/common.cu": [],
+      "dwt_cuda/fdwt53.cu": [
+        "SwapCondition"
+      ],
+      "dwt_cuda/fdwt97.cu": [
+        "SwapCondition"
+      ],
+      "dwt_cuda/rdwt53.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "dwt_cuda/rdwt97.cu": [
+        "ChangeNames"
+      ],
+      "main.cu": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "dwt_cuda/fdwt53.cu",
+      "dwt_cuda/fdwt97.cu",
+      "dwt_cuda/rdwt53.cu",
+      "dwt_cuda/rdwt97.cu",
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.223,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-dwt2d-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "components.cu": [],
+      "dwt.cu": [],
+      "dwt_cuda/common.cu": [],
+      "dwt_cuda/fdwt53.cu": [
+        "SwapCondition"
+      ],
+      "dwt_cuda/fdwt97.cu": [
+        "SwapCondition"
+      ],
+      "dwt_cuda/rdwt53.cu": [
+        "ArithmeticTransform"
+      ],
+      "dwt_cuda/rdwt97.cu": [
+        "ArithmeticTransform"
+      ],
+      "main.cu": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "dwt_cuda/fdwt53.cu",
+      "dwt_cuda/fdwt97.cu",
+      "dwt_cuda/rdwt53.cu",
+      "dwt_cuda/rdwt97.cu",
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.199,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-dwt2d-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "components.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "dwt.cu": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "dwt_cuda/common.cu": [],
+      "dwt_cuda/fdwt53.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "TypedefExpansion"
+      ],
+      "dwt_cuda/fdwt97.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion"
+      ],
+      "dwt_cuda/rdwt53.cu": [
+        "SwapCondition",
+        "TypedefExpansion",
+        "ChangeNames"
+      ],
+      "dwt_cuda/rdwt97.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "main.cu": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "components.cu",
+      "dwt.cu",
+      "dwt_cuda/fdwt53.cu",
+      "dwt_cuda/fdwt97.cu",
+      "dwt_cuda/rdwt53.cu",
+      "dwt_cuda/rdwt97.cu",
+      "main.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "ove '*.bmp.dwt.*': No such file or directory\nmake: *** [Makefile:112: clean] Error 1\n\nmain.cu(55): warning #2464-D: conversion from a string literal to \"char *\" is deprecated\n      char *data_1 = \"../../data/dwt2d/\";\n                     ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nmain.cu(342): error: class \"dwt\" has no member \"val_5\"\n      d->val_5 = val_5;\n         ^\n\nmain.cu(343): error: class \"dwt\" has no member \"item_6\"\n      d->item_6 = item_6;\n         ^\n\n2 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:102: main.cu.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-dwt2d-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "components.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "dwt.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "dwt_cuda/common.cu": [],
+      "dwt_cuda/fdwt53.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ],
+      "dwt_cuda/fdwt97.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ],
+      "dwt_cuda/rdwt53.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ],
+      "dwt_cuda/rdwt97.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ],
+      "main.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "components.cu",
+      "dwt.cu",
+      "dwt_cuda/fdwt53.cu",
+      "dwt_cuda/fdwt97.cu",
+      "dwt_cuda/rdwt53.cu",
+      "dwt_cuda/rdwt97.cu",
+      "main.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "\nmain.cu(55): warning #2464-D: conversion from a string literal to \"char *\" is deprecated\n      char *v_3 = \"../../data/dwt2d/\";\n                  ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nmain.cu(342): error: class \"dwt\" has no member \"var_9\"\n      d->var_9 = var_9;\n         ^\n\nmain.cu(343): error: class \"dwt\" has no member \"data_10\"\n      d->data_10 = data_10;\n         ^\n\nmain.cu(345): error: class \"dwt\" has no member \"v_13\"\n      d->v_13 = v_13;\n         ^\n\n3 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:102: main.cu.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-gaussian-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "gaussian.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.146,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-gaussian-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "gaussian.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.134,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-gaussian-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "gaussian.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "gaussian.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "c[Size-i-1]/ a+Size*(Size-i-1)[Size-i-1];\n                                                   ^\n\ngaussian.cu(431): error: expression must have pointer-to-object type but it has type \"int\"\n    *((finalVec) + (Size-i-1))=finalVec[Size-i-1]/ a+Size*(Size-i-1)[Size-i-1];\n                                                                     ^\n\ngaussian.cu(456): error: expression must have pointer-to-object type but it has type \"int\"\n     printf(\"%8.2f \", ary+Size*i[j]);\n                                 ^\n\n4 errors detected in the compilation of \"gaussian.cu\".\nmake: *** [Makefile:11: release] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-gaussian-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "gaussian.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "gaussian.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "-1)[Size-j-1] * *((finalVec) + (Size-j-1));\n                                                                                 ^\n\ngaussian.cu(431): error: expression must have pointer-to-object type but it has type \"int\"\n    *((finalVec) + (Size-i-1)) /= a+Size*(Size-i-1)[Size-i-1];\n                                                    ^\n\ngaussian.cu(456): error: expression must have pointer-to-object type but it has type \"int\"\n     printf(\"%8.2f \", x_54+Size*i[j]);\n                                  ^\n\n4 errors detected in the compilation of \"gaussian.cu\".\nmake: *** [Makefile:11: release] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-heartwall-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel.cu": [],
+      "main.cu": [],
+      "setdevice.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.305,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-heartwall-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel.cu": [],
+      "main.cu": [],
+      "setdevice.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.223,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-heartwall-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "main.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "setdevice.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel.cu",
+      "main.cu",
+      "setdevice.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.366,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-heartwall-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "main.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "setdevice.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel.cu",
+      "main.cu",
+      "setdevice.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.392,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.21,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.207,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "hotspot.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.211,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "hotspot.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.212,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot3d-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "3D.cu": [],
+      "opt1.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.93,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot3d-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "3D.cu": [],
+      "opt1.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.971,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot3d-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "3D.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "opt1.cu": [
+        "ArithmeticTransform",
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "3D.cu",
+      "opt1.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.959,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot3d-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "3D.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "opt1.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "3D.cu",
+      "opt1.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.95,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-huffman-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hist.cu": [],
+      "main_test_cu.cu": [],
+      "pabio_kernels_v2.cu": [],
+      "pack_kernels.cu": [
+        "SwapCondition"
+      ],
+      "scan.cu": [
+        "SwapCondition"
+      ],
+      "scanLargeArray_kernel.cu": [
+        "ArithmeticTransform"
+      ],
+      "vlc_kernel_sm64huff.cu": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pack_kernels.cu",
+      "scan.cu",
+      "scanLargeArray_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.147,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-huffman-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hist.cu": [],
+      "main_test_cu.cu": [],
+      "pabio_kernels_v2.cu": [],
+      "pack_kernels.cu": [
+        "SwapCondition"
+      ],
+      "scan.cu": [
+        "SwapCondition"
+      ],
+      "scanLargeArray_kernel.cu": [
+        "ArithmeticTransform"
+      ],
+      "vlc_kernel_sm64huff.cu": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pack_kernels.cu",
+      "scan.cu",
+      "scanLargeArray_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.146,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-huffman-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hist.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "main_test_cu.cu": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "pabio_kernels_v2.cu": [
+        "ArithmeticTransform",
+        "ChangeNames"
+      ],
+      "pack_kernels.cu": [
+        "ArithmeticTransform",
+        "ChangeNames"
+      ],
+      "scan.cu": [
+        "ChangeNames"
+      ],
+      "scanLargeArray_kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "vlc_kernel_sm64huff.cu": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "hist.cu",
+      "main_test_cu.cu",
+      "pabio_kernels_v2.cu",
+      "pack_kernels.cu",
+      "scan.cu",
+      "scanLargeArray_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.14,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-huffman-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hist.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "main_test_cu.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "pabio_kernels_v2.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "pack_kernels.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "scan.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "scanLargeArray_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "vlc_kernel_sm64huff.cu": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "hist.cu",
+      "main_test_cu.cu",
+      "pabio_kernels_v2.cu",
+      "pack_kernels.cu",
+      "scan.cu",
+      "scanLargeArray_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.155,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hybridsort-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bucketsort.cu": [],
+      "bucketsort_kernel.cu": [],
+      "histogram1024_kernel.cu": [],
+      "main.cu": [
+        "SwapCondition"
+      ],
+      "mergesort.cu": [
+        "SwapCondition"
+      ],
+      "mergesort_kernel.cu": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu",
+      "mergesort.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "rm: cannot remove '*.o': No such file or directory\nrm: cannot remove 'hybridsort': No such file or directory\nmake: *** [Makefile:23: clean] Error 1\n\nbucketsort.cu:10:10: fatal error: GL/glew.h: No such file or directory\n   10 | #include <GL/glew.h>\n      |          ^~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:19: hybridsort] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-hybridsort-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bucketsort.cu": [],
+      "bucketsort_kernel.cu": [],
+      "histogram1024_kernel.cu": [],
+      "main.cu": [
+        "SwapCondition"
+      ],
+      "mergesort.cu": [
+        "SwapCondition"
+      ],
+      "mergesort_kernel.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu",
+      "mergesort.cu",
+      "mergesort_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "rm: cannot remove '*.o': No such file or directory\nrm: cannot remove 'hybridsort': No such file or directory\nmake: *** [Makefile:23: clean] Error 1\n\nbucketsort.cu:10:10: fatal error: GL/glew.h: No such file or directory\n   10 | #include <GL/glew.h>\n      |          ^~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:19: hybridsort] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-hybridsort-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bucketsort.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "bucketsort_kernel.cu": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "histogram1024_kernel.cu": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "main.cu": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "mergesort.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "mergesort_kernel.cu": [
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "bucketsort.cu",
+      "bucketsort_kernel.cu",
+      "histogram1024_kernel.cu",
+      "main.cu",
+      "mergesort.cu",
+      "mergesort_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "rm: cannot remove '*.o': No such file or directory\nrm: cannot remove 'hybridsort': No such file or directory\nmake: *** [Makefile:23: clean] Error 1\n\nbucketsort.cu:10:10: fatal error: GL/glew.h: No such file or directory\n   10 | #include <GL/glew.h>\n      |          ^~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:19: hybridsort] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-hybridsort-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bucketsort.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "bucketsort_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "histogram1024_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "main.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "mergesort.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "mergesort_kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "bucketsort.cu",
+      "bucketsort_kernel.cu",
+      "histogram1024_kernel.cu",
+      "main.cu",
+      "mergesort.cu",
+      "mergesort_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "rm: cannot remove '*.o': No such file or directory\nrm: cannot remove 'hybridsort': No such file or directory\nmake: *** [Makefile:23: clean] Error 1\n\nbucketsort.cu:10:10: fatal error: GL/glew.h: No such file or directory\n   10 | #include <GL/glew.h>\n      |          ^~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:19: hybridsort] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-kmeans-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kmeans_cuda.cu": [],
+      "kmeans_cuda_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "ElementType> t_features_flipped;\n  ^\n\nkmeans_cuda_kernel.cu(18): error: texture is not a template\n  texture<float, 1, cudaReadModeElementType> t_clusters;\n  ^\n\nkmeans_cuda_kernel.cu(89): error: no instance of overloaded function \"tex1Dfetch\" matches the argument list\n            argument types are: (<error-type>, int)\n      float diff = (tex1Dfetch(t_features,addr) -\n                    ^\n\nkmeans_cuda.cu(169): error: identifier \"cudaBindTexture\" is undefined\n   if(cudaBindTexture(\n      ^\n\n5 errors detected in the compilation of \"kmeans_cuda.cu\".\nmake: *** [Makefile:31: kmeans_cuda.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-kmeans-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kmeans_cuda.cu": [],
+      "kmeans_cuda_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "ElementType> t_features_flipped;\n  ^\n\nkmeans_cuda_kernel.cu(18): error: texture is not a template\n  texture<float, 1, cudaReadModeElementType> t_clusters;\n  ^\n\nkmeans_cuda_kernel.cu(89): error: no instance of overloaded function \"tex1Dfetch\" matches the argument list\n            argument types are: (<error-type>, int)\n      float diff = (tex1Dfetch(t_features,addr) -\n                    ^\n\nkmeans_cuda.cu(169): error: identifier \"cudaBindTexture\" is undefined\n   if(cudaBindTexture(\n      ^\n\n5 errors detected in the compilation of \"kmeans_cuda.cu\".\nmake: *** [Makefile:31: kmeans_cuda.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-kmeans-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kmeans_cuda.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kmeans_cuda_kernel.cu": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kmeans_cuda.cu",
+      "kmeans_cuda_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "ElementType> t_features_flipped;\n  ^\n\nkmeans_cuda_kernel.cu(18): error: texture is not a template\n  texture<float, 1, cudaReadModeElementType> t_clusters;\n  ^\n\nkmeans_cuda_kernel.cu(89): error: no instance of overloaded function \"tex1Dfetch\" matches the argument list\n            argument types are: (<error-type>, int)\n      float diff = (tex1Dfetch(t_features,addr) -\n                    ^\n\nkmeans_cuda.cu(169): error: identifier \"cudaBindTexture\" is undefined\n   if(cudaBindTexture(\n      ^\n\n5 errors detected in the compilation of \"kmeans_cuda.cu\".\nmake: *** [Makefile:31: kmeans_cuda.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-kmeans-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kmeans_cuda.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kmeans_cuda_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kmeans_cuda.cu",
+      "kmeans_cuda_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "loat, 1, cudaReadModeElementType> t_clusters;\n  ^\n\nkmeans_cuda_kernel.cu(89): error: no instance of overloaded function \"tex1Dfetch\" matches the argument list\n            argument types are: (<error-type>, int)\n      float x_21 = (tex1Dfetch(t_features,var_20) -\n                    ^\n\nkmeans_cuda.cu(169): error: identifier \"cudaBindTexture\" is undefined\n   if(cudaBindTexture(\n      ^\n\nkmeans_cuda.cu(240): error: expression must be a modifiable lvalue\n    *((elem_10) + (elem_18))++;\n     ^\n\n6 errors detected in the compilation of \"kmeans_cuda.cu\".\nmake: *** [Makefile:31: kmeans_cuda.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-lavamd-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [],
+      "util/device/device.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lavamd-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [],
+      "util/device/device.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lavamd-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [
+        "ChangeNames"
+      ],
+      "util/device/device.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_cuda.cu",
+      "kernel/kernel_gpu_cuda_wrapper.cu",
+      "util/device/device.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lavamd-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_cuda.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel/kernel_gpu_cuda_wrapper.cu": [
+        "ChangeNames"
+      ],
+      "util/device/device.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_cuda.cu",
+      "kernel/kernel_gpu_cuda_wrapper.cu",
+      "util/device/device.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": ")rA_shared[elem_8].z)*((double)rB_shared[j].z));\n                         ^\n\n./kernel/./kernel_gpu_cuda.cu(166): error: identifier \"rB_shared\" is undefined\n       data_19 = (double)rA_shared[elem_8].v + (double)rB_shared[j].v - (((double)rA_shared[elem_8].x)*((double)rB_shared[j].x)+((double)rA_shared[elem_8].y)*((double)rB_shared[j].y)+((double)rA_shared[elem_8].z)*((double)rB_shared[j].z));\n                                                       ^\n\n12 errors detected in the compilation of \"./kernel/kernel_gpu_cuda_wrapper.cu\".\nmake: *** [makefile:58: kernel/kernel_gpu_cuda_wrapper.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-lud-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "cuda/lud.cu": [],
+      "cuda/lud_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.14,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lud-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "cuda/lud.cu": [],
+      "cuda/lud_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.132,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lud-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "cuda/lud.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "cuda/lud_kernel.cu": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "cuda/lud.cu",
+      "cuda/lud_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.124,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lud-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "cuda/lud.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "cuda/lud_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "cuda/lud.cu",
+      "cuda/lud_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.139,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-mummergpu-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "src/common.cu": [],
+      "src/mummergpu.cu": [],
+      "src/mummergpu_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "int, TextureAddress, int, int, int, bool, bool)\u2019:\nsuffix-tree.cpp:2491:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2491 |   if (printParentId == matchNodeId)\n      |       ~~~~~~~~~~~~~~^~~~~~~~~~~~~~\nsuffix-tree.cpp:2631:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2631 |             if (cid == matchNodeId)\n      |                 ~~~~^~~~~~~~~~~~~~\nmake[1]: *** [Makefile:114: obj/release/suffix-tree.cpp_o] Error 1\nmake: *** [Makefile:4: mummer] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-mummergpu-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "src/common.cu": [],
+      "src/mummergpu.cu": [],
+      "src/mummergpu_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "int, TextureAddress, int, int, int, bool, bool)\u2019:\nsuffix-tree.cpp:2491:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2491 |   if (printParentId == matchNodeId)\n      |       ~~~~~~~~~~~~~~^~~~~~~~~~~~~~\nsuffix-tree.cpp:2631:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2631 |             if (cid == matchNodeId)\n      |                 ~~~~^~~~~~~~~~~~~~\nmake[1]: *** [Makefile:114: obj/release/suffix-tree.cpp_o] Error 1\nmake: *** [Makefile:4: mummer] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-mummergpu-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "src/common.cu": [],
+      "src/mummergpu.cu": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "src/mummergpu_kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "src/mummergpu.cu",
+      "src/mummergpu_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "int, TextureAddress, int, int, int, bool, bool)\u2019:\nsuffix-tree.cpp:2491:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2491 |   if (printParentId == matchNodeId)\n      |       ~~~~~~~~~~~~~~^~~~~~~~~~~~~~\nsuffix-tree.cpp:2631:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2631 |             if (cid == matchNodeId)\n      |                 ~~~~^~~~~~~~~~~~~~\nmake[1]: *** [Makefile:114: obj/release/suffix-tree.cpp_o] Error 1\nmake: *** [Makefile:4: mummer] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-mummergpu-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "src/common.cu": [],
+      "src/mummergpu.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "src/mummergpu_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "src/mummergpu.cu",
+      "src/mummergpu_kernel.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "int, TextureAddress, int, int, int, bool, bool)\u2019:\nsuffix-tree.cpp:2491:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2491 |   if (printParentId == matchNodeId)\n      |       ~~~~~~~~~~~~~~^~~~~~~~~~~~~~\nsuffix-tree.cpp:2631:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2631 |             if (cid == matchNodeId)\n      |                 ~~~~^~~~~~~~~~~~~~\nmake[1]: *** [Makefile:114: obj/release/suffix-tree.cpp_o] Error 1\nmake: *** [Makefile:4: mummer] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-myocyte-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "embedded_fehlberg_7_8.cu": [],
+      "embedded_fehlberg_7_8_2.cu": [],
+      "kernel.cu": [],
+      "kernel_2.cu": [
+        "SwapCondition"
+      ],
+      "kernel_cam.cu": [
+        "SwapCondition"
+      ],
+      "kernel_cam_2.cu": [],
+      "kernel_ecc.cu": [
+        "ChangeNames"
+      ],
+      "kernel_ecc_2.cu": [
+        "ChangeNames"
+      ],
+      "kernel_fin.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kernel_fin_2.cu": [],
+      "main.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "master.cu": [
+        "SwapCondition"
+      ],
+      "solver.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "solver_2.cu": [
+        "ChangeNames"
+      ],
+      "work.cu": [],
+      "work_2.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel_2.cu",
+      "kernel_cam.cu",
+      "kernel_ecc.cu",
+      "kernel_ecc_2.cu",
+      "kernel_fin.cu",
+      "main.cu",
+      "master.cu",
+      "solver.cu",
+      "solver_2.cu",
+      "work_2.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "tring literal to \"char *\" is deprecated\n    read(\"../../data/myocyte/params.txt\",\n         ^\n\nmain.cu(157): error: identifier \"gv\" is undefined\n    mode = atoi(*((gv[3) + ())));\n                   ^\n\nmain.cu(157): error: expected a \"]\"\n    mode = atoi(*((gv[3) + ())));\n                       ^\n\nmain.cu(157): error: expected an expression\n    mode = atoi(*((gv[3) + ())));\n                            ^\n\nmain.cu(157): error: expected a \";\"\n    mode = atoi(*((gv[3) + ())));\n                               ^\n\n4 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:38: main.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-myocyte-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "embedded_fehlberg_7_8.cu": [],
+      "embedded_fehlberg_7_8_2.cu": [],
+      "kernel.cu": [],
+      "kernel_2.cu": [
+        "SwapCondition"
+      ],
+      "kernel_cam.cu": [
+        "SwapCondition"
+      ],
+      "kernel_cam_2.cu": [],
+      "kernel_ecc.cu": [
+        "ChangeNames"
+      ],
+      "kernel_ecc_2.cu": [],
+      "kernel_fin.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kernel_fin_2.cu": [],
+      "main.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "master.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "solver.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "solver_2.cu": [
+        "ChangeNames"
+      ],
+      "work.cu": [
+        "SwapCondition"
+      ],
+      "work_2.cu": []
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel_2.cu",
+      "kernel_cam.cu",
+      "kernel_ecc.cu",
+      "kernel_fin.cu",
+      "main.cu",
+      "master.cu",
+      "solver.cu",
+      "solver_2.cu",
+      "work.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "tring literal to \"char *\" is deprecated\n    read(\"../../data/myocyte/params.txt\",\n         ^\n\nmain.cu(157): error: identifier \"gv\" is undefined\n    mode = atoi(*((gv[3) + ())));\n                   ^\n\nmain.cu(157): error: expected a \"]\"\n    mode = atoi(*((gv[3) + ())));\n                       ^\n\nmain.cu(157): error: expected an expression\n    mode = atoi(*((gv[3) + ())));\n                            ^\n\nmain.cu(157): error: expected a \";\"\n    mode = atoi(*((gv[3) + ())));\n                               ^\n\n4 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:38: main.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-myocyte-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "embedded_fehlberg_7_8.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "embedded_fehlberg_7_8_2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kernel.cu": [
+        "SwapCondition"
+      ],
+      "kernel_2.cu": [
+        "SwapCondition"
+      ],
+      "kernel_cam.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ],
+      "kernel_cam_2.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kernel_ecc.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ],
+      "kernel_ecc_2.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kernel_fin.cu": [
+        "ChangeNames"
+      ],
+      "kernel_fin_2.cu": [
+        "ArithmeticTransform",
+        "ChangeNames"
+      ],
+      "main.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "master.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "solver.cu": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "solver_2.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "work.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "work_2.cu": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "embedded_fehlberg_7_8.cu",
+      "embedded_fehlberg_7_8_2.cu",
+      "kernel.cu",
+      "kernel_2.cu",
+      "kernel_cam.cu",
+      "kernel_cam_2.cu",
+      "kernel_ecc.cu",
+      "kernel_ecc_2.cu",
+      "kernel_fin.cu",
+      "kernel_fin_2.cu",
+      "main.cu",
+      "master.cu",
+      "solver.cu",
+      "solver_2.cu",
+      "work.cu",
+      "work_2.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "tring literal to \"char *\" is deprecated\n    read(\"../../data/myocyte/params.txt\",\n         ^\n\nmain.cu(136): error: identifier \"gv\" is undefined\n    xmax = atoi(*((gv[1) + ())));\n                   ^\n\nmain.cu(136): error: expected a \"]\"\n    xmax = atoi(*((gv[1) + ())));\n                       ^\n\nmain.cu(136): error: expected an expression\n    xmax = atoi(*((gv[1) + ())));\n                            ^\n\nmain.cu(136): error: expected a \";\"\n    xmax = atoi(*((gv[1) + ())));\n                               ^\n\n4 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:38: main.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-myocyte-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "embedded_fehlberg_7_8.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "embedded_fehlberg_7_8_2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_cam.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_cam_2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_ecc.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_ecc_2.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_fin.cu": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel_fin_2.cu": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "main.cu": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "master.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "solver.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "solver_2.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "work.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "work_2.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "embedded_fehlberg_7_8.cu",
+      "embedded_fehlberg_7_8_2.cu",
+      "kernel.cu",
+      "kernel_2.cu",
+      "kernel_cam.cu",
+      "kernel_cam_2.cu",
+      "kernel_ecc.cu",
+      "kernel_ecc_2.cu",
+      "kernel_fin.cu",
+      "kernel_fin_2.cu",
+      "main.cu",
+      "master.cu",
+      "solver.cu",
+      "solver_2.cu",
+      "work.cu",
+      "work_2.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "d an expression\n    item_1 = atoi(*((gv[2) + ())));\n                              ^\n\nmain.cu(146): error: expected a \";\"\n    item_1 = atoi(*((gv[2) + ())));\n                                 ^\n\nmain.cu(157): error: expected a \"]\"\n    var_2 = atoi(*((gv[3) + ())));\n                        ^\n\nmain.cu(157): error: expected an expression\n    var_2 = atoi(*((gv[3) + ())));\n                             ^\n\nmain.cu(157): error: expected a \";\"\n    var_2 = atoi(*((gv[3) + ())));\n                                ^\n\n10 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:38: main.o] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-nn-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "nn_cuda.cu": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "nn_cuda.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "exit_code=-11 != expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.064,
+    "exit_code": -11,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nn-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "nn_cuda.cu": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "nn_cuda.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "exit_code=-11 != expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.064,
+    "exit_code": -11,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nn-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "nn_cuda.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "nn_cuda.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "     records[i] = *((records) + (minLoc));\n                               ^\n\nnn_cuda.cu(267): error: no operator \"+\" matches these operands\n            operand types are: std::vector<Record, std::allocator<Record>> + int\n      *((records) + (minLoc)) = *tempRec;\n                  ^\n\nnn_cuda.cu(274): error: no operator \"+\" matches these operands\n            operand types are: std::vector<Record, std::allocator<Record>> + int\n      (*((records) + (i))).distance = *((distances) + (i));\n                   ^\n\n6 errors detected in the compilation of \"nn_cuda.cu\".\nmake: *** [Makefile:12: nn] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-nn-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "nn_cuda.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "nn_cuda.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": ") + (i)) = *((elem_53) + (var_58));\n                                       ^\n\nnn_cuda.cu(267): error: no operator \"+\" matches these operands\n            operand types are: std::vector<Record, std::allocator<Record>> + int\n      *((elem_53) + (var_58)) = *data_59;\n                  ^\n\nnn_cuda.cu(274): error: no operator \"+\" matches these operands\n            operand types are: std::vector<Record, std::allocator<Record>> + int\n      (*((elem_53) + (i))).distance = *((item_54) + (i));\n                   ^\n\n17 errors detected in the compilation of \"nn_cuda.cu\".\nmake: *** [Makefile:12: nn] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-nw-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "needle.cu": [],
+      "needle_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.172,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nw-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "needle.cu": [],
+      "needle_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.158,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nw-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "needle.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "needle_kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "needle.cu",
+      "needle_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.199,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nw-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "needle.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "needle_kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "needle.cu",
+      "needle_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.203,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-particlefilter-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "ex_particle_CUDA_float_seq.cu": [],
+      "ex_particle_CUDA_naive_seq.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.153,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-particlefilter-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "ex_particle_CUDA_float_seq.cu": [],
+      "ex_particle_CUDA_naive_seq.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.158,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-particlefilter-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "ex_particle_CUDA_float_seq.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "ex_particle_CUDA_naive_seq.cu": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "ex_particle_CUDA_float_seq.cu",
+      "ex_particle_CUDA_naive_seq.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.161,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-particlefilter-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "ex_particle_CUDA_float_seq.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "ex_particle_CUDA_naive_seq.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "ex_particle_CUDA_float_seq.cu",
+      "ex_particle_CUDA_naive_seq.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.163,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-pathfinder-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "pathfinder.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.188,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-pathfinder-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "pathfinder.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.194,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-pathfinder-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "pathfinder.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pathfinder.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.19,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-pathfinder-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "pathfinder.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pathfinder.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "exit_code=-11 != expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.079,
+    "exit_code": -11,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-srad-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "srad.cu": [],
+      "srad_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.134,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-srad-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "srad.cu": [],
+      "srad_kernel.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.128,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-srad-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "srad.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "srad_kernel.cu": [
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "srad.cu",
+      "srad_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.163,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-srad-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "srad.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "srad_kernel.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "srad.cu",
+      "srad_kernel.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.143,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-streamcluster-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "streamcluster_cuda.cu": [],
+      "streamcluster_header.cu": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "streamcluster_header.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": " %lu\nstreamcluster_cuda_cpu.cpp: In function \u2018void streamCluster(PStream*, long int, long int, int, long int, long int, char*)\u2019:\nstreamcluster_cuda_cpu.cpp:793:27: warning: format \u2018%d\u2019 expects argument of type \u2018int\u2019, but argument 3 has type \u2018size_t\u2019 {aka \u2018long unsigned int\u2019} [-Wformat=]\n  793 |     fprintf(stderr,\"read %d points\\n\",numRead);\n      |                          ~^           ~~~~~~~\n      |                           |           |\n      |                           int         size_t {aka long unsigned int}\n      |                          %ld\nmake: *** [Makefile:29: sc_gpu] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-streamcluster-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "streamcluster_cuda.cu": [],
+      "streamcluster_header.cu": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "streamcluster_header.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "e_t\u2019 {aka \u2018long unsigned int\u2019} [-Wformat=]\n  793 |     fprintf(stderr,\"read %d points\\n\",numRead);\n      |                          ~^           ~~~~~~~\n      |                           |           |\n      |                           int         size_t {aka long unsigned int}\n      |                          %ld\nstreamcluster_cuda_cpu.cpp:802:19: error: request for member \u2018weight\u2019 in \u2018*(points.Points::p + ((sizetype)(((long unsigned int)i) * 4)))\u2019, which is of non-class type \u2018int\u2019\n  802 |       points.p[i].weight = 1.0;\n      |                   ^~~~~~\nmake: *** [Makefile:29: sc_gpu] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-streamcluster-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "streamcluster_cuda.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "streamcluster_header.cu": [
+        "SwapCondition",
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "streamcluster_cuda.cu",
+      "streamcluster_header.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "e_t\u2019 {aka \u2018long unsigned int\u2019} [-Wformat=]\n  793 |     fprintf(stderr,\"read %d points\\n\",numRead);\n      |                          ~^           ~~~~~~~\n      |                           |           |\n      |                           int         size_t {aka long unsigned int}\n      |                          %ld\nstreamcluster_cuda_cpu.cpp:802:19: error: request for member \u2018weight\u2019 in \u2018*(points.Points::p + ((sizetype)(((long unsigned int)i) * 4)))\u2019, which is of non-class type \u2018int\u2019\n  802 |       points.p[i].weight = 1.0;\n      |                   ^~~~~~\nmake: *** [Makefile:29: sc_gpu] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-streamcluster-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "streamcluster_cuda.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "streamcluster_header.cu": [
+        "SwapCondition",
+        "TypedefExpansion",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "streamcluster_cuda.cu",
+      "streamcluster_header.cu"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "e_t\u2019 {aka \u2018long unsigned int\u2019} [-Wformat=]\n  793 |     fprintf(stderr,\"read %d points\\n\",numRead);\n      |                          ~^           ~~~~~~~\n      |                           |           |\n      |                           int         size_t {aka long unsigned int}\n      |                          %ld\nstreamcluster_cuda_cpu.cpp:802:19: error: request for member \u2018weight\u2019 in \u2018*(points.Points::p + ((sizetype)(((long unsigned int)i) * 4)))\u2019, which is of non-class type \u2018int\u2019\n  802 |       points.p[i].weight = 1.0;\n      |                   ^~~~~~\nmake: *** [Makefile:29: sc_gpu] Error 1\n"
+  }
+]

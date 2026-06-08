@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-hotspot-omp",
+  "target_spec": "rodinia-hotspot-cuda",
+  "kernel": "hotspot",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1247271380,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "512",
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-04-21T22:03:46Z",
+  "prompt_tokens": 3375,
+  "completion_tokens": 16131,
+  "llm_response_time_seconds": 109.068,
+  "build_status": "pass",
+  "build_time_seconds": 0.547,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.241,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Start computing the transient temperature\nEnding simulation\nTotal time: 0.107 seconds\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.149,
+  "translated_wall_time_seconds": 0.241,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.6183,
+  "translated_files": {
+    "hotspot.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <cuda_runtime.h>\n#include <sys/time.h>\n\n// Error checking macro\n#define cudaCheckError(ans) { gpuAssert((ans), __FILE__, __LINE__); }\ninline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)\n{\n    if (code != cudaSuccess) \n    {\n        fprintf(stderr, \"GPUassert: %s %s %d\\n\", cudaGetErrorString(code), file, line);\n        if (abort) exit(code);\n    }\n}\n\nlong long get_time()\n{\n    struct timeval tv;\n    gettimeofday(&tv, NULL);\n    return (tv.tv_sec * 1000000) + tv.tv_usec;\n}\n\nusing namespace std;\n\n#define BLOCK_SIZE 16\n#define BLOCK_SIZE_C BLOCK_SIZE\n#define BLOCK_SIZE_R BLOCK_SIZE\n\n#define STR_SIZE\t256\n\n\n#define MAX_PD\t(3.0e6)\n\n#define PRECISION\t0.001\n#define SPEC_HEAT_SI 1.75e6\n#define K_SI 100\n\n#define FACTOR_CHIP\t0.5\n#define OPEN\n\n\ntypedef float FLOAT;\n\n\nconst FLOAT t_chip = 0.0005;\nconst FLOAT chip_height = 0.016;\nconst FLOAT chip_width = 0.016;\n\nconst FLOAT amb_temp = 80.0;\n\nint num_omp_threads;\n\n// CUDA Kernel for single_iteration\n__global__ void single_iteration_kernel(FLOAT *result, FLOAT *temp, FLOAT *power, int row, int col,\n\t\t\t\t\t  FLOAT Cap_1, FLOAT Rx_1, FLOAT Ry_1, FLOAT Rz_1, \n\t\t\t\t\t  FLOAT step)\n{\n    int c = blockIdx.x * BLOCK_SIZE + threadIdx.x;\n    int r = blockIdx.y * BLOCK_SIZE + threadIdx.y;\n\n    if (r >= row || c >= col) return;\n\n    FLOAT delta;\n    int idx = r * col + c;\n\n    // Boundary conditions logic preserved from source\n    if ( (r == 0) && (c == 0) ) {\n        delta = (Cap_1) * (power[0] +\n            (temp[1] - temp[0]) * Rx_1 +\n            (temp[col] - temp[0]) * Ry_1 +\n            (amb_temp - temp[0]) * Rz_1);\n    }\t\n    else if ((r == 0) && (c == col-1)) {\n        delta = (Cap_1) * (power[c] +\n            (temp[c-1] - temp[c]) * Rx_1 +\n            (temp[c+col] - temp[c]) * Ry_1 +\n        (   amb_temp - temp[c]) * Rz_1);\n    }\t\n    else if ((r == row-1) && (c == col-1)) {\n        delta = (Cap_1) * (power[r*col+c] + \n            (temp[r*col+c-1] - temp[r*col+c]) * Rx_1 + \n            (temp[(r-1)*col+c] - temp[r*col+c]) * Ry_1 + \n        (   amb_temp - temp[r*col+c]) * Rz_1);\t\t\t\t\t\n    }\t\n    else if ((r == row-1) && (c == 0)) {\n        delta = (Cap_1) * (power[r*col] + \n            (temp[r*col+1] - temp[r*col]) * Rx_1 + \n            (temp[(r-1)*col] - temp[r*col]) * Ry_1 + \n            (amb_temp - temp[r*col]) * Rz_1);\n    }\t\n    else if (r == 0) {\n        delta = (Cap_1) * (power[c] + \n            (temp[c+1] + temp[c-1] - 2.0*temp[c]) * Rx_1 + \n            (temp[col+c] - temp[c]) * Ry_1 + \n            (amb_temp - temp[c]) * Rz_1);\n    }\t\n    else if (c == col-1) {\n        delta = (Cap_1) * (power[r*col+c] + \n            (temp[(r+1)*col+c] + temp[(r-1)*col+c] - 2.0*temp[r*col+c]) * Ry_1 + \n            (temp[r*col+c-1] - temp[r*col+c]) * Rx_1 + \n            (amb_temp - temp[r*col+c]) * Rz_1);\n    }\t\n    else if (r == row-1) {\n        delta = (Cap_1) * (power[r*col+c] + \n            (temp[r*col+c+1] + temp[r*col+c-1] - 2.0*temp[r*col+c]) * Rx_1 + \n            (temp[(r-1)*col+c] - temp[r*col+c]) * Ry_1 + \n            (amb_temp - temp[r*col+c]) * Rz_1);\n    }\t\n    else if (c == 0) {\n        delta = (Cap_1) * (power[r*col] + \n            (temp[(r+1)*col] + temp[(r-1)*col] - 2.0*temp[r*col]) * Ry_1 + \n            (temp[r*col+1] - temp[r*col]) * Rx_1 + \n            (amb_temp - temp[r*col]) * Rz_1);\n    }\n    else {\n        // Interior\n        delta = (Cap_1) * (power[r*col+c] + \n            (temp[(r+1)*col+c] + temp[(r-1)*col+c] - 2.f*temp[r*col+c]) * Ry_1 + \n            (temp[r*col+c+1] + temp[r*col+c-1] - 2.f*temp[r*col+c]) * Rx_1 + \n            (amb_temp - temp[r*col+c]) * Rz_1);\n    }\n\n    result[idx] = temp[idx] + delta;\n}\n\n// Host wrapper to launch kernel\nvoid single_iteration(FLOAT *result, FLOAT *temp, FLOAT *power, int row, int col,\n\t\t\t\t\t  FLOAT Cap_1, FLOAT Rx_1, FLOAT Ry_1, FLOAT Rz_1, \n\t\t\t\t\t  FLOAT step)\n{\n    dim3 block(BLOCK_SIZE, BLOCK_SIZE);\n    dim3 grid((col + BLOCK_SIZE - 1) / BLOCK_SIZE, (row + BLOCK_SIZE - 1) / BLOCK_SIZE);\n\n    single_iteration_kernel<<<grid, block>>>(result, temp, power, row, col, Cap_1, Rx_1, Ry_1, Rz_1, step);\n    cudaCheckError(cudaDeviceSynchronize());\n}\n\nvoid compute_tran_temp(FLOAT *result, int num_iterations, FLOAT *temp, FLOAT *power, int row, int col) \n{\n\t#ifdef VERBOSE\n\tint i = 0;\n\t#endif\n\n\tFLOAT grid_height = chip_height / row;\n\tFLOAT grid_width = chip_width / col;\n\n\tFLOAT Cap = FACTOR_CHIP * SPEC_HEAT_SI * t_chip * grid_width * grid_height;\n\tFLOAT Rx = grid_width / (2.0 * K_SI * t_chip * grid_height);\n\tFLOAT Ry = grid_height / (2.0 * K_SI * t_chip * grid_width);\n\tFLOAT Rz = t_chip / (K_SI * grid_height * grid_width);\n\n\tFLOAT max_slope = MAX_PD / (FACTOR_CHIP * t_chip * SPEC_HEAT_SI);\n    FLOAT step = PRECISION / max_slope / 1000.0;\n\n    FLOAT Rx_1=1.f/Rx;\n    FLOAT Ry_1=1.f/Ry;\n    FLOAT Rz_1=1.f/Rz;\n    FLOAT Cap_1 = step/Cap;\n\t#ifdef VERBOSE\n\tfprintf(stdout, \"total iterations: %d s\\tstep size: %g s\\n\", num_iterations, step);\n\tfprintf(stdout, \"Rx: %g\\tRy: %g\\tRz: %g\\tCap: %g\\n\", Rx, Ry, Rz, Cap);\n\t#endif\n\n    // Allocate device memory\n    int array_size = row * col;\n    FLOAT *d_result, *d_temp, *d_power;\n    cudaCheckError(cudaMalloc((void**)&d_result, array_size * sizeof(FLOAT)));\n    cudaCheckError(cudaMalloc((void**)&d_temp, array_size * sizeof(FLOAT)));\n    cudaCheckError(cudaMalloc((void**)&d_power, array_size * sizeof(FLOAT)));\n\n    // Copy input data to device\n    cudaCheckError(cudaMemcpy(d_temp, temp, array_size * sizeof(FLOAT), cudaMemcpyHostToDevice));\n    cudaCheckError(cudaMemcpy(d_power, power, array_size * sizeof(FLOAT), cudaMemcpyHostToDevice));\n\n    FLOAT* r = d_result;\n    FLOAT* t = d_temp;\n    for (int i = 0; i < num_iterations ; i++)\n    {\n        #ifdef VERBOSE\n        fprintf(stdout, \"iteration %d\\n\", i++);\n        #endif\n        single_iteration(r, t, d_power, row, col, Cap_1, Rx_1, Ry_1, Rz_1, step);\n        FLOAT* tmp = t;\n        t = r;\n        r = tmp;\n    }\t\n\n    // Copy result back to host\n    // t holds the final data. \n    // If num_iterations is odd, t == d_result. If even, t == d_temp.\n    // We need to copy to the corresponding host pointer.\n    \n    if (num_iterations & 1) {\n        cudaCheckError(cudaMemcpy(result, d_result, array_size * sizeof(FLOAT), cudaMemcpyDeviceToHost));\n    } else {\n        cudaCheckError(cudaMemcpy(temp, d_temp, array_size * sizeof(FLOAT), cudaMemcpyDeviceToHost));\n    }\n\n    cudaCheckError(cudaFree(d_result));\n    cudaCheckError(cudaFree(d_temp));\n    cudaCheckError(cudaFree(d_power));\n\n\t#ifdef VERBOSE\n\tfprintf(stdout, \"iteration %d\\n\", i++);\n\t#endif\n}\n\nvoid fatal(char *s)\n{\n\tfprintf(stderr, \"error: %s\\n\", s);\n\texit(1);\n}\n\nvoid writeoutput(FLOAT *vect, int grid_rows, int grid_cols, char *file) {\n\n    int i,j, index=0;\n    FILE *fp;\n    char str[STR_SIZE];\n\n    if( (fp = fopen(file, \"w\" )) == 0 )\n        printf( \"The file was not opened\\n\" );\n\n\n    for (i=0; i < grid_rows; i++) \n        for (j=0; j < grid_cols; j++)\n        {\n\n            sprintf(str, \"%d\\t%g\\n\", index, vect[i*grid_cols+j]);\n            fputs(str,fp);\n            index++;\n        }\n\n    fclose(fp);\t\n}\n\nvoid read_input(FLOAT *vect, int grid_rows, int grid_cols, char *file)\n{\n  \tint i, index;\n\tFILE *fp;\n\tchar str[STR_SIZE];\n\tFLOAT val;\n\n\tfp = fopen (file, \"r\");\n\tif (!fp)\n\t\tfatal (\"file could not be opened for reading\");\n\n\tfor (i=0; i < grid_rows * grid_cols; i++) {\n\t\tfgets(str, STR_SIZE, fp);\n\t\tif (feof(fp))\n\t\t\tfatal(\"not enough lines in file\");\n\t\tif ((sscanf(str, \"%f\", &val) != 1) )\n\t\t\tfatal(\"invalid file format\");\n\t\tvect[i] = val;\n\t}\n\n\tfclose(fp);\t\n}\n\nvoid usage(int argc, char **argv)\n{\n\tfprintf(stderr, \"Usage: %s <grid_rows> <grid_cols> <sim_time> <no. of threads><temp_file> <power_file>\\n\", argv[0]);\n\tfprintf(stderr, \"\\t<grid_rows>  - number of rows in the grid (positive integer)\\n\");\n\tfprintf(stderr, \"\\t<grid_cols>  - number of columns in the grid (positive integer)\\n\");\n\tfprintf(stderr, \"\\t<sim_time>   - number of iterations\\n\");\n\tfprintf(stderr, \"\\t<no. of threads>   - number of threads\\n\");\n\tfprintf(stderr, \"\\t<temp_file>  - name of the file containing the initial temperature values of each cell\\n\");\n\tfprintf(stderr, \"\\t<power_file> - name of the file containing the dissipated power values of each cell\\n\");\n        fprintf(stderr, \"\\t<output_file> - name of the output file\\n\");\n\texit(1);\n}\n\nint main(int argc, char **argv)\n{\n\tint grid_rows, grid_cols, sim_time, i;\n\tFLOAT *temp, *power, *result;\n\tchar *tfile, *pfile, *ofile;\n\t\n\t\n\tif (argc != 8)\n\t\tusage(argc, argv);\n\tif ((grid_rows = atoi(argv[1])) <= 0 ||\n\t\t(grid_cols = atoi(argv[2])) <= 0 ||\n\t\t(sim_time = atoi(argv[3])) <= 0 || \n\t\t(num_omp_threads = atoi(argv[4])) <= 0\n\t\t)\n\t\tusage(argc, argv);\n\n\t\n\ttemp = (FLOAT *) calloc (grid_rows * grid_cols, sizeof(FLOAT));\n\tpower = (FLOAT *) calloc (grid_rows * grid_cols, sizeof(FLOAT));\n\tresult = (FLOAT *) calloc (grid_rows * grid_cols, sizeof(FLOAT));\n\tif(!temp || !power)\n\t\tfatal(\"unable to allocate memory\");\n\n\t\n\ttfile = argv[5];\n\tpfile = argv[6];\n    ofile = argv[7];\n\n\tread_input(temp, grid_rows, grid_cols, tfile);\n\tread_input(power, grid_rows, grid_cols, pfile);\n\n\tprintf(\"Start computing the transient temperature\\n\");\n\t\n    long long start_time = get_time();\n\n    compute_tran_temp(result,sim_time, temp, power, grid_rows, grid_cols);\n\n    long long end_time = get_time();\n\n    printf(\"Ending simulation\\n\");\n    printf(\"Total time: %.3f seconds\\n\", ((float) (end_time - start_time)) / (1000*1000));\n\n    writeoutput((1&sim_time) ? result : temp, grid_rows, grid_cols, ofile);\n\n\t\n#ifdef VERBOSE\n\tfprintf(stdout, \"Final Temperatures:\\n\");\n#endif\n\n#ifdef OUTPUT\n\tfor(i=0; i < grid_rows * grid_cols; i++)\n\tfprintf(stdout, \"%d\\t%g\\n\", i, temp[i]);\n#endif\n\t\n\tfree(temp);\n\tfree(power);\n\n\treturn 0;\n}\n"
+  },
+  "target_files_expected": [
+    "hotspot.cu"
+  ],
+  "target_files_extracted": [
+    "hotspot.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 109.068,
+      "prompt_tokens": 3375,
+      "completion_tokens": 16131,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

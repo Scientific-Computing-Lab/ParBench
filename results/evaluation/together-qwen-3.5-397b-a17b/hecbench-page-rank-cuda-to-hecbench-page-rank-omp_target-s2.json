@@ -1,0 +1,69 @@
+{
+  "source_spec": "hecbench-page-rank-cuda",
+  "target_spec": "hecbench-page-rank-omp_target",
+  "kernel": "page-rank",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 732890643,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T06:00:36Z",
+  "prompt_tokens": 2645,
+  "completion_tokens": 6385,
+  "llm_response_time_seconds": 61.01,
+  "build_status": "fail",
+  "build_time_seconds": 0.154,
+  "build_error_snippet": "\"main.cpp\", line 188: error: invalid text in pragma\n      #pragma omp target update(d_pages)\n                               ^\n\n\"main.cpp\", line 188: error: extra text after expected end of preprocessing directive\n      #pragma omp target update(d_pages)\n                                ^\n\n\"main.cpp\", line 190: error: invalid text in pragma\n      #pragma omp target update(d_page_ranks)\n                               ^\n\n\"main.cpp\", line 190: error: extra text after expected end of preprocessing directive\n      #pragma omp target update(d_page_ranks)\n                                ^\n\n\"main.cpp\", line 192: error: invalid text in pragma\n      #pragma omp target update(d_noutlinks)\n                               ^\n\n\"main.cpp\", line 192: error: ex\n...[truncated]...\nain.cpp\", line 213: error: a structured block must follow this OMP pragma\n      #pragma omp target barrier\n                         ^\n\n\"main.cpp\", line 217: error: invalid text in pragma\n      #pragma omp target update(d_diffs) nowait\n                               ^\n\n\"main.cpp\", line 217: error: extra text after expected end of preprocessing directive\n      #pragma omp target update(d_diffs) nowait\n                                ^\n\n\"main.cpp\", line 127: warning: variable \"j\" was declared but never referenced [declared_but_not_referenced]\n    int j;\n        ^\n\nRemark: individual warnings can be suppressed with \"--diag_suppress <warning-name>\"\n\n12 errors detected in the compilation of \"main.cpp\".\nmake: *** [Makefile.nvc:57: main.o] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: int j;\n        ^\n\nRemark: individual warnings can be suppressed with \"--diag_suppress <warning-name>\"\n\n12 errors detected in the compilation of \"main.cpp\".\nmake: *** [Makefile.nvc:57: main.o] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cpp": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <time.h>\n#include <math.h>\n#include <getopt.h>\n#include <chrono>\n#include <omp.h>\n#include \"reference.h\"\n\n#define D_FACTOR (0.85f)\n#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 256\n#endif\n\nconst int max_iter = 1000;\nconst float threshold= 1e-16f;\n\nvoid map(const int *__restrict__ pages,\n         const float *__restrict__ page_ranks,\n         float *__restrict__ maps,\n         const unsigned int *__restrict__ noutlinks,\n         const int n)\n{\n  #pragma omp target\n  {\n    #pragma omp parallel for\n    for (int i = 0; i < n; i++) {\n      float outbound_rank = page_ranks[i]/(float)noutlinks[i];\n      for(int j=0; j<n; ++j){\n        maps[(size_t)i*n+j] = pages[(size_t)i*n+j]*outbound_rank;\n      }\n    }\n  }\n}\n\nvoid reduce(float *__restrict__ page_ranks,\n            const float *__restrict__ maps,\n            const int n,\n            float *__restrict__ dif)\n{\n  #pragma omp target\n  {\n    #pragma omp parallel for\n    for (int j = 0; j < n; j++) {\n      float old_rank = page_ranks[j];\n      float new_rank = 0.0f;\n      for(int i=0; i< n; ++i){\n        new_rank += maps[(size_t)i*n + j];\n      }\n\n      new_rank = ((1.f-D_FACTOR)/n)+(D_FACTOR*new_rank);\n      dif[j] = fmaxf(fabsf(new_rank - old_rank), dif[j]);\n      page_ranks[j] = new_rank;\n    }\n  }\n}\n\nint *random_pages(int n, unsigned int *noutlinks, int divisor){\n  int i, j, k;\n  int *pages = (int*) malloc((size_t)n * n * sizeof(int)); \n\n  if (divisor <= 0) {\n    fprintf(stderr, \"ERROR: Invalid divisor '%d' for random initialization, divisor should be greater or equal to 1\\n\", divisor);\n    exit(1);\n  }\n\n  for(i=0; i<n; ++i){\n    noutlinks[i] = 0;\n    for(j=0; j<n; ++j){\n      if(i!=j && (abs(rand())%divisor == 0)){\n        pages[(size_t)i*n+j] = 1;\n        noutlinks[i] += 1;\n      }\n    }\n\n    \n    if(noutlinks[i] == 0){\n      do { k = abs(rand()) % n; } while ( k == i);\n      pages[(size_t)i*n + k] = 1;\n      noutlinks[i] = 1;\n    }\n  }\n  return pages;\n}\n\nvoid init_array(float *a, int n, float val){\n  int i;\n  for(i=0; i<n; ++i){\n    a[i] = val;\n  }\n}\n\nvoid usage(char *argv[]){\n  fprintf(stderr, \"Usage: %s [-n number of pages] [-i max iterations]\"\n                  \" [-t threshold] [-q divisor for zero density]\\n\", argv[0]);\n}\n\nstatic struct option size_opts[] =\n{\n  \n  {\"number of pages\", 1, NULL, 'n'},\n  {\"max number of iterations\", 1, NULL, 'i'},\n  {\"minimum threshold\", 1, NULL, 't'},\n  {\"divisor for zero density\", 1, NULL, 'q'},\n  { 0, 0, 0}\n};\n\nfloat maximum_dif(float *difs, int n){\n  int i;\n  float max = 0.0f;\n  for(i=0; i<n; ++i){\n    max = difs[i] > max ? difs[i] : max;\n  }\n  return max;\n}\n\nint main(int argc, char *argv[]) {\n  int *pages;\n  float *maps;\n  float *page_ranks;\n  unsigned int *noutlinks;\n  int t;\n  float max_diff, max_diff_ref;\n\n  int i = 0;\n  int j;\n  int n = 1000;\n  int iter = max_iter;\n  float thresh = threshold;\n  int divisor = 2;\n\n  int opt, opt_index = 0;\n  while((opt = getopt_long(argc, argv, \"::n:i:t:q:\", size_opts, &opt_index)) != -1){\n    switch(opt){\n      case 'n':\n        n = atoi(optarg);\n        break;\n      case 'i':\n        iter = atoi(optarg);\n        break;\n      case 't':\n        thresh = atof(optarg);\n        break;\n      case 'q':\n        divisor = atoi(optarg);\n        break;\n      default:\n        usage(argv);\n        exit(EXIT_FAILURE);\n    }\n  }\n  \n  size_t rank_size = (size_t)n * sizeof(float);\n  size_t map_size = (size_t)n * n * sizeof(float);\n  size_t page_size = (size_t)n * n * sizeof(int);\n  size_t link_size = (size_t)n * sizeof(unsigned int);\n\n  page_ranks = (float*)malloc(rank_size);\n  maps = (float*)malloc(map_size);\n  noutlinks = (unsigned int*)malloc(link_size);\n\n  max_diff=max_diff_ref=99.0f;\n\n  for (i=0; i<n; ++i) {\n    noutlinks[i] = 0;\n  }\n  pages = random_pages(n,noutlinks,divisor);\n  init_array(page_ranks, n, 1.0f / (float) n);\n\n  float *diffs;\n  diffs = (float*) malloc(rank_size);\n\n  int *d_pages;\n  float *d_maps;\n  float *d_page_ranks;\n  float *d_diffs;\n  unsigned int *d_noutlinks;\n\n  d_pages = (int*)omp_target_alloc(page_size, omp_get_device_num());\n  d_page_ranks = (float*)omp_target_alloc(rank_size, omp_get_device_num());\n  d_maps = (float*)omp_target_alloc(map_size, omp_get_device_num());\n  d_noutlinks = (unsigned int*)omp_target_alloc(link_size, omp_get_device_num());\n  d_diffs = (float*)omp_target_alloc(rank_size, omp_get_device_num());\n\n  #pragma omp target data use_device_addr(d_pages, d_page_ranks, d_maps, d_noutlinks, d_diffs)\n  {\n    #pragma omp target update(d_pages)\n    memcpy(d_pages, pages, page_size);\n    #pragma omp target update(d_page_ranks)\n    memcpy(d_page_ranks, page_ranks, rank_size);\n    #pragma omp target update(d_noutlinks)\n    memcpy(d_noutlinks, noutlinks, link_size);\n  }\n\n  double ktime = 0.0;\n  printf(\"Threshold: %f\\n\", thresh);\n \n  for (t=1; t<=iter && max_diff>=thresh; ++t) {\n    #pragma omp target barrier\n    auto start = std::chrono::high_resolution_clock::now();\n\n    #pragma omp target data use_device_addr(d_pages, d_page_ranks, d_maps, d_noutlinks)\n    {\n      map(d_pages, d_page_ranks, d_maps, d_noutlinks, n);\n    }\n\n    #pragma omp target data use_device_addr(d_page_ranks, d_maps, d_diffs)\n    {\n      reduce(d_page_ranks, d_maps, n, d_diffs);\n    }\n    \n    #pragma omp target barrier\n    auto end = std::chrono::high_resolution_clock::now();\n    ktime += std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();\n\n    #pragma omp target update(d_diffs) nowait\n    memcpy(diffs, d_diffs, rank_size);\n    max_diff = maximum_dif(diffs, n);\n  }\n  \n  \n\n  omp_target_free(d_pages, omp_get_device_num());\n  omp_target_free(d_maps, omp_get_device_num());\n  omp_target_free(d_page_ranks, omp_get_device_num());\n  omp_target_free(d_noutlinks, omp_get_device_num());\n  omp_target_free(d_diffs, omp_get_device_num());\n\n  fprintf(stderr, \"Max difference %f is reached at iteration %d\\n\", max_diff, t);\n  printf(\"\\\"Options\\\": \\\"-n %d -i %d -t %f\\\". Total kernel execution time: %lf (s)\\n\",\n         n, iter, thresh, ktime);\n\n  memset(diffs, 0, rank_size);\n  for (t=1; t<=iter && max_diff_ref>=thresh; ++t) {\n    map_ref(pages, page_ranks, maps, noutlinks, n);\n    reduce_ref(page_ranks, maps, n, diffs);\n    max_diff_ref = maximum_dif(diffs, n);\n  }\n  bool ok = fabsf(max_diff - max_diff_ref) < 1e-3f;\n  printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");\n\n  free(pages);\n  free(maps);\n  free(page_ranks);\n  free(noutlinks);\n  free(diffs);\n\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cpp"
+  ],
+  "target_files_extracted": [
+    "main.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 61.01,
+      "prompt_tokens": 2645,
+      "completion_tokens": 6385,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "\"main.cpp\", line 188: error: invalid text in pragma\n      #pragma omp target update(d_pages)\n                               ^\n\n\"main.cpp\", line 188: error: extra text after expected end of preprocessing directive\n      #pragma omp target update(d_pages)\n                                ^\n\n\"main.cpp\", line 190: error: invalid text in pragma\n      #pragma omp target update(d_page_ranks)\n                               ^\n\n\"main.cpp\", line 190: error: extra text after expected end of preprocessing directive\n      #pragma omp target update(d_page_ranks)\n                                ^\n\n\"main.cpp\", line 192: error: invalid text in pragma\n      #pragma omp target update(d_noutlinks)\n                               ^\n\n\"main.cpp\", line 192: error: ex\n...[truncated]...\nain.cpp\", line 213: error: a structured block must follow this OMP pragma\n      #pragma omp target barrier\n                         ^\n\n\"main.cpp\", line 217: error: invalid text in pragma\n      #pragma omp target update(d_diffs) nowait\n                               ^\n\n\"main.cpp\", line 217: error: extra text after expected end of preprocessing directive\n      #pragma omp target update(d_diffs) nowait\n                                ^\n\n\"main.cpp\", line 127: warning: variable \"j\" was declared but never referenced [declared_but_not_referenced]\n    int j;\n        ^\n\nRemark: individual warnings can be suppressed with \"--diag_suppress <warning-name>\"\n\n12 errors detected in the compilation of \"main.cpp\".\nmake: *** [Makefile.nvc:57: main.o] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

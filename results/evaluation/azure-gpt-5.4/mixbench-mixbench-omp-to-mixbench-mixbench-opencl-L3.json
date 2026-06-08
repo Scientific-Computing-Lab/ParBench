@@ -1,0 +1,74 @@
+{
+  "source_spec": "mixbench-mixbench-omp",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "azure-gpt-5.4",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1825021715,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-27T03:18:34Z",
+  "prompt_tokens": 10184,
+  "completion_tokens": 6268,
+  "llm_response_time_seconds": 147.422,
+  "build_status": "pass",
+  "build_time_seconds": 0.476,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 4.146,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "9.65\n          192,     96.250,    0.45,28680.15, 297.98,     48.125,   26.76,  482.75,  10.03,    192.500,    0.00,     inf,    inf,    96.250,    0.83,15652.21, 162.62\n          256,    128.250,    0.59,29407.36, 229.30,     64.125,   35.23,  488.55,   7.62,    256.500,    0.00,     inf,    inf,   128.250,    1.11,15450.35, 120.47\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "single_precision_gflops": {
+      "value": 111.46,
+      "unit": "GFLOPS"
+    }
+  },
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": 4.146,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 7.2359,
+  "translated_files": {
+    "mix_kernels.cl": "#ifdef ENABLE_DP\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n\n#ifdef ENABLE_HP\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n\n#define COMPUTE_STEP(t, f) ((t) = (t) * (t) + (f))\n\nstatic inline size_t logical_index(const size_t linear_idx,\n                                   const size_t gid,\n                                   const size_t lid,\n                                   const size_t group_id,\n                                   const size_t global_size,\n                                   const size_t local_size) {\n#ifdef BLOCK_STRIDED\n  return group_id * local_size * (size_t)(ELEMENTS_PER_THREAD * FUSION_DEGREE) +\n         lid + linear_idx * local_size;\n#else\n  (void)lid;\n  (void)group_id;\n  (void)local_size;\n  return gid + linear_idx * global_size;\n#endif\n}\n\n__kernel __attribute__((reqd_work_group_size(blockdim, 1, 1)))\nvoid benchmark_func(const class_T seed, __global class_T* data) {\n  const size_t gid = get_global_id(0);\n  const size_t lid = get_local_id(0);\n  const size_t group_id = get_group_id(0);\n  const size_t global_size = get_global_size(0);\n  const size_t local_size = get_local_size(0);\n  const size_t total_linear = (size_t)(ELEMENTS_PER_THREAD * FUSION_DEGREE);\n\n  const size_t out_idx =\n      logical_index(0, gid, lid, group_id, global_size, local_size);\n\n  class_T f0 = data[out_idx];\n#if (ELEMENTS_PER_THREAD * FUSION_DEGREE) > 1\n  class_T f1 = data[logical_index(1, gid, lid, group_id, global_size, local_size)];\n#else\n  class_T f1 = f0;\n#endif\n#if (ELEMENTS_PER_THREAD * FUSION_DEGREE) > 2\n  class_T f2 = data[logical_index(2, gid, lid, group_id, global_size, local_size)];\n#else\n  class_T f2 = f0;\n#endif\n#if (ELEMENTS_PER_THREAD * FUSION_DEGREE) > 3\n  class_T f3 = data[logical_index(3, gid, lid, group_id, global_size, local_size)];\n#else\n  class_T f3 = f0;\n#endif\n#if (ELEMENTS_PER_THREAD * FUSION_DEGREE) > 4\n  class_T f4 = data[logical_index(4, gid, lid, group_id, global_size, local_size)];\n#else\n  class_T f4 = f0;\n#endif\n#if (ELEMENTS_PER_THREAD * FUSION_DEGREE) > 5\n  class_T f5 = data[logical_index(5, gid, lid, group_id, global_size, local_size)];\n#else\n  class_T f5 = f0;\n#endif\n#if (ELEMENTS_PER_THREAD * FUSION_DEGREE) > 6\n  class_T f6 = data[logical_index(6, gid, lid, group_id, global_size, local_size)];\n#else\n  class_T f6 = f0;\n#endif\n#if (ELEMENTS_PER_THREAD * FUSION_DEGREE) > 7\n  class_T f7 = data[logical_index(7, gid, lid, group_id, global_size, local_size)];\n#else\n  class_T f7 = f0;\n#endif\n\n  f0 = f0 + seed - seed;\n  f1 = f1 + seed - seed;\n  f2 = f2 + seed - seed;\n  f3 = f3 + seed - seed;\n  f4 = f4 + seed - seed;\n  f5 = f5 + seed - seed;\n  f6 = f6 + seed - seed;\n  f7 = f7 + seed - seed;\n\n  class_T sum = (class_T)(0);\n\n  for (size_t i = 0; i < total_linear; ++i) {\n    const size_t idx = logical_index(i, gid, lid, group_id, global_size, local_size);\n    const class_T x = data[idx];\n\n    class_T t0 = x;\n    class_T t1 = x;\n    class_T t2 = x;\n    class_T t3 = x;\n    class_T t4 = x;\n    class_T t5 = x;\n    class_T t6 = x;\n    class_T t7 = x;\n\n    for (int j = 0; j < (COMPUTE_ITERATIONS / 8); ++j) {\n      COMPUTE_STEP(t0, f0);\n      COMPUTE_STEP(t1, f1);\n      COMPUTE_STEP(t2, f2);\n      COMPUTE_STEP(t3, f3);\n      COMPUTE_STEP(t4, f4);\n      COMPUTE_STEP(t5, f5);\n      COMPUTE_STEP(t6, f6);\n      COMPUTE_STEP(t7, f7);\n    }\n\n#if (COMPUTE_ITERATIONS % 8) > 0\n    COMPUTE_STEP(t0, f0);\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 1\n    COMPUTE_STEP(t1, f1);\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 2\n    COMPUTE_STEP(t2, f2);\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 3\n    COMPUTE_STEP(t3, f3);\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 4\n    COMPUTE_STEP(t4, f4);\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 5\n    COMPUTE_STEP(t5, f5);\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 6\n    COMPUTE_STEP(t6, f6);\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 7\n    COMPUTE_STEP(t7, f7);\n#endif\n\n    sum = sum + t0 + t1 + t2 + t3 + t4 + t5 + t6 + t7;\n  }\n\n  data[out_idx] = sum;\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 147.422,
+      "prompt_tokens": 10184,
+      "completion_tokens": 6268,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lavamd-opencl",
+  "target_spec": "rodinia-lavamd-omp",
+  "kernel": "lavamd",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1037227613,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "-boxes1d",
+    "10"
+  ],
+  "timestamp": "2026-04-22T02:44:06Z",
+  "prompt_tokens": 11048,
+  "completion_tokens": 1673,
+  "llm_response_time_seconds": 21.628,
+  "build_status": "pass",
+  "build_time_seconds": 0.153,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 6.952,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Configuration used: cores = 1, boxes1d = 10\n",
+  "verify_status": "fail",
+  "verify_strategy": "stdout_pattern",
+  "overall_status": "VERIFY_FAIL",
+  "error_message": "Verify failed: Pattern '(?:Total:)|(?:Total time:)' NOT found in stdout. ",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": 6.952,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0001,
+  "translated_files": {
+    "kernel/kernel_cpu.c": "#ifdef __cplusplus\nextern \"C\" {\n#endif\n\n#include <stdio.h>\n#include <stdlib.h>\n#include <math.h>\n#include <omp.h>\n\n#define fp float\n\n#define NUMBER_PAR_PER_BOX 100\n#define NUMBER_THREADS 128\n#define DOT(A,B) ((A.x)*(B.x)+(A.y)*(B.y)+(A.z)*(B.z))\n\ntypedef struct\n{\n\tfp x, y, z;\n} THREE_VECTOR;\n\ntypedef struct\n{\n\tfp v, x, y, z;\n} FOUR_VECTOR;\n\ntypedef struct nei_str\n{\n\tint x, y, z;\n\tint number;\n\tlong offset;\n} nei_str;\n\ntypedef struct box_str\n{\n\tint x, y, z;\n\tint number;\n\tlong offset;\n\tint nn;\n\tnei_str nei[26];\n} box_str;\n\ntypedef struct par_str\n{\n\tfp alpha;\n} par_str;\n\ntypedef struct dim_str\n{\n\tint cur_arg;\n\tint arch_arg;\n\tint cores_arg;\n\tint boxes1d_arg;\n\tlong number_boxes;\n\tlong box_mem;\n\tlong space_elem;\n\tlong space_mem;\n\tlong space_mem2;\n} dim_str;\n\nvoid kernel_cpu(par_str par_cpu,\n\t\t\t\tdim_str dim_cpu,\n\t\t\t\tbox_str* box_cpu,\n\t\t\t\tFOUR_VECTOR* rv_cpu,\n\t\t\t\tfp* qv_cpu,\n\t\t\t\tFOUR_VECTOR* fv_cpu)\n{\n\tint bx, tx, k, j, pointer, first_i, first_j;\n\tfp a2, r2, u2, vij, fs, fxij, fyij, fzij;\n\tTHREE_VECTOR d;\n\n\tFOUR_VECTOR rA_shared[NUMBER_PAR_PER_BOX];\n\tFOUR_VECTOR rB_shared[NUMBER_PAR_PER_BOX];\n\tfp qB_shared[NUMBER_PAR_PER_BOX];\n\n#pragma omp parallel for schedule(static)\n\tfor(bx = 0; bx < dim_cpu.number_boxes; bx++) {\n\n\t\ta2 = 2.0 * par_cpu.alpha * par_cpu.alpha;\n\t\tfirst_i = box_cpu[bx].offset;\n\n\t\tfor(tx = 0; tx < NUMBER_PAR_PER_BOX; tx++) {\n\t\t\trA_shared[tx] = rv_cpu[first_i + tx];\n\t\t}\n\n\t\tfor(k = 0; k < (1 + box_cpu[bx].nn); k++) {\n\n\t\t\tif(k == 0) {\n\t\t\t\tpointer = bx;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tpointer = box_cpu[bx].nei[k - 1].number;\n\t\t\t}\n\n\t\t\tfirst_j = box_cpu[pointer].offset;\n\n\t\t\tfor(tx = 0; tx < NUMBER_PAR_PER_BOX; tx++) {\n\t\t\t\trB_shared[tx] = rv_cpu[first_j + tx];\n\t\t\t\tqB_shared[tx] = qv_cpu[first_j + tx];\n\t\t\t}\n\n\t\t\tfor(tx = 0; tx < NUMBER_PAR_PER_BOX; tx++) {\n\n\t\t\t\tfor(j = 0; j < NUMBER_PAR_PER_BOX; j++) {\n\n\t\t\t\t\tr2 = rA_shared[tx].v + rB_shared[j].v - DOT(rA_shared[tx], rB_shared[j]);\n\t\t\t\t\tu2 = a2 * r2;\n\t\t\t\t\tvij = exp(-u2);\n\t\t\t\t\tfs = 2.0 * vij;\n\t\t\t\t\td.x = rA_shared[tx].x - rB_shared[j].x;\n\t\t\t\t\tfxij = fs * d.x;\n\t\t\t\t\td.y = rA_shared[tx].y - rB_shared[j].y;\n\t\t\t\t\tfyij = fs * d.y;\n\t\t\t\t\td.z = rA_shared[tx].z - rB_shared[j].z;\n\t\t\t\t\tfzij = fs * d.z;\n\n\t\t\t\t\tfv_cpu[first_i + tx].v += qB_shared[j] * vij;\n\t\t\t\t\tfv_cpu[first_i + tx].x += qB_shared[j] * fxij;\n\t\t\t\t\tfv_cpu[first_i + tx].y += qB_shared[j] * fyij;\n\t\t\t\t\tfv_cpu[first_i + tx].z += qB_shared[j] * fzij;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}\n\n#ifdef __cplusplus\n}\n#endif\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_cpu.c"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_cpu.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 21.628,
+      "prompt_tokens": 11048,
+      "completion_tokens": 1673,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "fail",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

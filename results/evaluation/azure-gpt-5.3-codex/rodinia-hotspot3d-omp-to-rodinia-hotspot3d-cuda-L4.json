@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-hotspot3d-omp",
+  "target_spec": "rodinia-hotspot3d-cuda",
+  "kernel": "hotspot3d",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 2133933020,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "512",
+    "8",
+    "100",
+    "../../data/hotspot3D/power_512x8",
+    "../../data/hotspot3D/temp_512x8",
+    "output.out"
+  ],
+  "timestamp": "2026-04-30T23:31:11Z",
+  "prompt_tokens": 3051,
+  "completion_tokens": 4950,
+  "llm_response_time_seconds": 45.127,
+  "build_status": "pass",
+  "build_time_seconds": 0.559,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 2.001,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "1 threads running\nTime: 0.000 (s)\nAccuracy: 4.110550e-05\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+numeric_comparison+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.869,
+  "translated_wall_time_seconds": 2.001,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.934,
+  "translated_files": {
+    "3D.cu": "#include <stdio.h>\n#include <time.h>\n#include <assert.h>\n#include <stdlib.h>\n#include <math.h>\n#include <sys/time.h>\n#include <string.h>\n#include <cuda_runtime.h>\n\n#define STR_SIZE (256)\n#define MAX_PD (3.0e6)\n\n#define PRECISION 0.001\n#define SPEC_HEAT_SI 1.75e6\n#define K_SI 100\n\n#define FACTOR_CHIP 0.5\n\nfloat t_chip = 0.0005f;\nfloat chip_height = 0.016f;\nfloat chip_width = 0.016f;\n\nfloat amb_temp = 80.0f;\n\nstatic inline void cuda_check(cudaError_t err, const char *msg) {\n    if (err != cudaSuccess) {\n        fprintf(stderr, \"CUDA Error: %s: %s\\n\", msg, cudaGetErrorString(err));\n        exit(1);\n    }\n}\n\nvoid fatal(char *s)\n{\n    fprintf(stderr, \"Error: %s\\n\", s);\n}\n\nvoid readinput(float *elem_42, int v_37, int tmp_35, int data_9, char *val_48) {\n    int i, j, k;\n    FILE *x_31;\n    char tmp_46[STR_SIZE];\n    float v_6;\n\n    if ((x_31 = fopen(val_48, \"r\")) == 0)\n        fatal((char *)\"The file was not opened\");\n\n    for (i = 0; v_37 - 1 >= i; i++)\n        for (j = 0; tmp_35 - 1 >= j; j++)\n            for (k = 0; data_9 - 1 >= k; k++)\n            {\n                if (fgets(tmp_46, STR_SIZE, x_31) == NULL) fatal((char *)\"Error reading file\\n\");\n                if (feof(x_31))\n                    fatal((char *)\"not enough lines in file\");\n                if ((sscanf(tmp_46, \"%f\", &v_6) != 1))\n                    fatal((char *)\"invalid file format\");\n                elem_42[i * tmp_35 + j + k * v_37 * tmp_35] = v_6;\n            }\n\n    fclose(x_31);\n}\n\nvoid writeoutput(float *val_78, int var_16, int data_52, int elem_60, char *var_49) {\n    int i, j, k, item_81 = 0;\n    FILE *x_68;\n    char v_33[STR_SIZE];\n\n    if ((x_68 = fopen(var_49, \"w\")) == 0)\n        printf(\"The file was not opened\\n\");\n\n    for (i = 0; var_16 > i; i++)\n        for (j = 0; data_52 > j; j++)\n            for (k = 0; elem_60 > k; k++)\n            {\n                sprintf(v_33, \"%d\\t%g\\n\", item_81, val_78[i * data_52 + j + k * var_16 * data_52]);\n                fputs(v_33, x_68);\n                item_81++;\n            }\n\n    fclose(x_68);\n}\n\nvoid computeTempCPU(float *val_0, float *v_22, float *item_3,\n                    int var_82, int v_27, int x_45, float data_15,\n                    float val_73, float var_24, float data_47,\n                    float elem_69, int elem_10)\n{\n    float data_87, data_23, v_14, tmp_67, x_19, elem_58, var_50;\n    float elem_83 = elem_69 / data_15;\n    data_87 = data_23 = elem_83 / val_73;\n    v_14 = tmp_67 = elem_83 / var_24;\n    x_19 = elem_58 = elem_83 / data_47;\n\n    var_50 = 1.0f - (2.0f * data_87 + 2.0f * v_14 + 3.0f * x_19);\n\n    int c, w, e, n, s, b, t;\n    int x, y, z;\n    int i = 0;\n    do {\n        for (z = 0; x_45 > z; z++)\n            for (y = 0; v_27 > y; y++)\n                for (x = 0; var_82 > x; x++)\n                {\n                    c = x + y * var_82 + z * var_82 * v_27;\n\n                    w = (0 == x) ? c : c - 1;\n                    e = (var_82 - 1 == x) ? c : c + 1;\n                    n = (0 == y) ? c : c - var_82;\n                    s = (v_27 - 1 == y) ? c : c + var_82;\n                    b = (0 == z) ? c : c - var_82 * v_27;\n                    t = (x_45 - 1 == z) ? c : c + var_82 * v_27;\n\n                    item_3[c] = v_22[c] * var_50 + v_22[n] * v_14 + v_22[s] * tmp_67 + v_22[e] * data_87 + v_22[w] * data_23 + v_22[t] * x_19 + v_22[b] * elem_58 + (elem_69 / data_15) * val_0[c] + x_19 * amb_temp;\n                }\n        float *val_64 = v_22;\n        v_22 = item_3;\n        item_3 = val_64;\n        i++;\n    } while (elem_10 > i);\n}\n\nfloat accuracy(float *x_53, float *data_71, int v_18)\n{\n    float tmp_66 = 0.0f;\n    int i;\n    for (i = 0; v_18 > i; i++)\n    {\n        tmp_66 = tmp_66 + ((x_53[i] - data_71[i]) * (x_53[i] - data_71[i]));\n    }\n\n    return (float)sqrt(tmp_66 / v_18);\n}\n\n__global__ void computeTempKernel(const float *v_8, const float *item_59, float *elem_28,\n                                  int var_41, int var_79, int data_51,\n                                  float data_32, float elem_17, float var_11,\n                                  float item_84, float var_88, float x_75, float tmp_25,\n                                  float coeff_p, float amb)\n{\n    int c = blockIdx.x * blockDim.x + threadIdx.x;\n    int total = var_41 * var_79 * data_51;\n    if (c >= total) return;\n\n    int plane = var_41 * var_79;\n    int z = c / plane;\n    int rem = c - z * plane;\n    int y = rem / var_41;\n    int x = rem - y * var_41;\n\n    int w = (0 == x) ? c : c - 1;\n    int e = (var_41 - 1 == x) ? c : c + 1;\n    int n = (0 == y) ? c : c - var_41;\n    int s = (var_79 - 1 == y) ? c : c + var_41;\n    int b = (0 == z) ? c : c - plane;\n    int t = (data_51 - 1 == z) ? c : c + plane;\n\n    elem_28[c] = data_32 * item_59[c] + elem_17 * item_59[w] + var_11 * item_59[e]\n               + item_84 * item_59[s] + var_88 * item_59[n] + x_75 * item_59[b]\n               + tmp_25 * item_59[t] + coeff_p * v_8[c] + tmp_25 * amb;\n}\n\nvoid computeTempOMP(float *v_8, float *v_76, float *val_86,\n                    int var_41, int var_79, int data_51, float tmp_39,\n                    float val_57, float x_72, float x_29,\n                    float data_74, int elem_2)\n{\n    float var_11, elem_17, var_88, item_84, tmp_25, x_75, data_32;\n\n    float var_44 = data_74 / tmp_39;\n    var_11 = elem_17 = var_44 / val_57;\n    var_88 = item_84 = var_44 / x_72;\n    tmp_25 = x_75 = var_44 / x_29;\n\n    data_32 = 1.0f - (2.0f * var_11 + 2.0f * var_88 + 3.0f * tmp_25);\n\n    int total = var_41 * var_79 * data_51;\n    size_t bytes = (size_t)total * sizeof(float);\n\n    float *d_v8 = NULL, *d_v76 = NULL, *d_val86 = NULL;\n    cuda_check(cudaMalloc((void **)&d_v8, bytes), \"cudaMalloc d_v8\");\n    cuda_check(cudaMalloc((void **)&d_v76, bytes), \"cudaMalloc d_v76\");\n    cuda_check(cudaMalloc((void **)&d_val86, bytes), \"cudaMalloc d_val86\");\n\n    cuda_check(cudaMemcpy(d_v8, v_8, bytes, cudaMemcpyHostToDevice), \"memcpy v_8\");\n    cuda_check(cudaMemcpy(d_v76, v_76, bytes, cudaMemcpyHostToDevice), \"memcpy v_76\");\n    cuda_check(cudaMemcpy(d_val86, val_86, bytes, cudaMemcpyHostToDevice), \"memcpy val_86\");\n\n    printf(\"%d threads running\\n\", 1);\n\n    int val_30 = 0;\n    float *item_59 = d_v76;\n    float *elem_28 = d_val86;\n\n    int block = 256;\n    int grid = (total + block - 1) / block;\n    float coeff_p = (data_74 / tmp_39);\n\n    do {\n        computeTempKernel<<<grid, block>>>(d_v8, item_59, elem_28, var_41, var_79, data_51,\n                                           data_32, elem_17, var_11, item_84, var_88, x_75, tmp_25,\n                                           coeff_p, amb_temp);\n        cuda_check(cudaGetLastError(), \"kernel launch\");\n\n        float *t = item_59;\n        item_59 = elem_28;\n        elem_28 = t;\n        val_30++;\n    } while (elem_2 > val_30);\n\n    cuda_check(cudaDeviceSynchronize(), \"device sync\");\n\n    cuda_check(cudaMemcpy(v_76, d_v76, bytes, cudaMemcpyDeviceToHost), \"copy back v_76\");\n    cuda_check(cudaMemcpy(val_86, d_val86, bytes, cudaMemcpyDeviceToHost), \"copy back val_86\");\n\n    cudaFree(d_v8);\n    cudaFree(d_v76);\n    cudaFree(d_val86);\n    return;\n}\n\nvoid usage(int argc, char **argv)\n{\n    fprintf(stderr, \"Usage: %s <rows/cols> <layers> <iterations> <powerFile> <tempFile> <outputFile>\\n\", argv[0]);\n    fprintf(stderr, \"\\t<rows/cols>  - number of rows/cols in the grid (positive integer)\\n\");\n    fprintf(stderr, \"\\t<layers>  - number of layers in the grid (positive integer)\\n\");\n\n    fprintf(stderr, \"\\t<iteration> - number of iterations\\n\");\n    fprintf(stderr, \"\\t<powerFile>  - name of the file containing the initial power values of each cell\\n\");\n    fprintf(stderr, \"\\t<tempFile>  - name of the file containing the initial temperature values of each cell\\n\");\n    fprintf(stderr, \"\\t<outputFile - output file\\n\");\n    exit(1);\n}\n\nint main(int argc, char **argv)\n{\n    if (7 != argc)\n    {\n        usage(argc, argv);\n    }\n\n    char *tmp_85, *val_21, *item_54;\n    int v_26 = atoi(argv[3]);\n\n    tmp_85 = argv[4];\n    val_21 = argv[5];\n    item_54 = argv[6];\n\n    int x_63 = atoi(argv[1]);\n    int var_4 = atoi(argv[1]);\n    int var_1 = atoi(argv[2]);\n\n    float tmp_20 = chip_height / var_4;\n    float elem_34 = chip_width / x_63;\n    float tmp_62 = t_chip / var_1;\n\n    float item_13 = FACTOR_CHIP * SPEC_HEAT_SI * t_chip * tmp_20 * elem_34;\n    float val_36 = elem_34 / (2.0f * K_SI * t_chip * tmp_20);\n    float data_80 = tmp_20 / (2.0f * K_SI * t_chip * elem_34);\n    float tmp_77 = tmp_62 / (K_SI * tmp_20 * elem_34);\n\n    float elem_65 = MAX_PD / (FACTOR_CHIP * t_chip * SPEC_HEAT_SI);\n    float v_70 = PRECISION / elem_65;\n\n    float *var_56, *val_7, *item_40, *elem_61;\n\n    int size = x_63 * var_4 * var_1;\n\n    var_56 = (float *)calloc(size, sizeof(float));\n    elem_61 = (float *)malloc(size * sizeof(float));\n    item_40 = (float *)calloc(size, sizeof(float));\n    val_7 = (float *)calloc(size, sizeof(float));\n\n    float *v_12 = (float *)calloc(size, sizeof(float));\n\n    readinput(var_56, var_4, x_63, var_1, tmp_85);\n    readinput(item_40, var_4, x_63, var_1, val_21);\n\n    memcpy(elem_61, item_40, size * sizeof(float));\n\n    struct timeval item_55, data_38;\n    float var_5;\n    gettimeofday(&item_55, NULL);\n    computeTempOMP(var_56, item_40, val_7, x_63, var_4, var_1, item_13, val_36, data_80, tmp_77, v_70, v_26);\n    gettimeofday(&data_38, NULL);\n    var_5 = (data_38.tv_usec - item_55.tv_usec) * 1.0e-6f + data_38.tv_sec - item_55.tv_sec;\n    computeTempCPU(var_56, elem_61, v_12, x_63, var_4, var_1, item_13, val_36, data_80, tmp_77, v_70, v_26);\n\n    float tmp_43 = accuracy(val_7, v_12, var_4 * x_63 * var_1);\n    printf(\"Time: %.3f (s)\\n\", var_5);\n    printf(\"Accuracy: %e\\n\", tmp_43);\n    writeoutput(val_7, var_4, x_63, var_1, item_54);\n    free(item_40);\n    free(val_7);\n    free(var_56);\n    free(elem_61);\n    free(v_12);\n    return 0;\n}\n",
+    "opt1.cu": "// Intentionally empty translation unit.\n"
+  },
+  "target_files_expected": [
+    "3D.cu",
+    "opt1.cu"
+  ],
+  "target_files_extracted": [
+    "3D.cu",
+    "opt1.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 45.127,
+      "prompt_tokens": 3051,
+      "completion_tokens": 4950,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

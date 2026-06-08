@@ -1,0 +1,81 @@
+{
+  "source_spec": "rodinia-streamcluster-omp",
+  "target_spec": "rodinia-streamcluster-opencl",
+  "kernel": "streamcluster",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 219716437,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "10",
+    "20",
+    "256",
+    "65536",
+    "65536",
+    "1000",
+    "none",
+    "output.txt",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-24T05:53:22Z",
+  "prompt_tokens": 28449,
+  "completion_tokens": 2260,
+  "llm_response_time_seconds": 16.658,
+  "build_status": "pass",
+  "build_time_seconds": 0.742,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.228,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "",
+  "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Creating Kernel (clCreateKernel) \"memset_kernel\"\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 2.092,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "Kernels.cl": "/*\n * OpenCL kernel for streamcluster pgain computation\n * Translated from OpenMP source\n */\n\n#define CACHE_LINE 512\n\ntypedef struct {\n  float weight;\n  long assign;  \n  float cost;  \n} Point_Struct;\n\n/*\n * Kernel: pgain_kernel\n * Computes the gain of opening a new facility at point x\n * \n * Arguments:\n * - p: Point data (weight, assign, cost)\n * - coord: Coordinate data (flattened: num * dim)\n * - work_mem: Working memory for accumulation (num * (K+1))\n * - center_table: Mapping from point index to center index\n * - switch_membership: Boolean flag for each point\n * - num: Number of points\n * - dim: Dimension of each point\n * - x: Index of candidate point to open\n * - K: Number of centers\n */\n\n__kernel void pgain_kernel(\n    __global const Point_Struct* p,\n    __global const float* coord,\n    __global float* work_mem,\n    __global const int* center_table,\n    __global char* switch_membership,\n    __local float* local_coord,\n    int num,\n    int dim,\n    long x,\n    int K)\n{\n    int i = get_global_id(0);\n    \n    if (i >= num) return;\n    \n    // Load coordinates of point x into local memory\n    // Each threadblock caches the coordinates of point x\n    int tid = get_local_id(0);\n    int stride = get_local_size(0);\n    \n    for (int d = tid; d < dim; d += stride) {\n        local_coord[d] = coord[x * dim + d];\n    }\n    \n    barrier(CLK_LOCAL_MEM_FENCE);\n    \n    // Compute distance from point i to point x\n    float x_cost = 0.0f;\n    for (int d = 0; d < dim; d++) {\n        float diff = coord[i * dim + d] - local_coord[d];\n        x_cost += diff * diff;\n    }\n    x_cost *= p[i].weight;\n    \n    float current_cost = p[i].cost;\n    \n    if (x_cost < current_cost) {\n        // Point i should switch to center x\n        switch_membership[i] = 1;\n        work_mem[i * (K + 1) + K] += (x_cost - current_cost);\n    } else {\n        // Accumulate savings for current center\n        int assign = (int)p[i].assign;\n        int center_idx = center_table[assign];\n        if (center_idx >= 0 && center_idx < K) {\n            work_mem[center_idx + i * (K + 1)] += (current_cost - x_cost);\n        }\n    }\n}\n\n/*\n * Kernel: init_centers_kernel\n * Initializes center table and counts centers\n */\n\n__kernel void init_centers_kernel(\n    __global const char* is_center,\n    __global int* center_table,\n    __global int* work_mem,\n    int num,\n    int stride,\n    int pid)\n{\n    int i = get_global_id(0);\n    \n    if (i >= num) return;\n    \n    if (is_center[i]) {\n        center_table[i] = 1;\n    } else {\n        center_table[i] = 0;\n    }\n    \n    work_mem[pid * stride] += center_table[i];\n}\n\n/*\n * Kernel: compute_hiz_kernel\n * Computes initial hiz value for each thread\n */\n\n__kernel void compute_hiz_kernel(\n    __global const Point_Struct* p,\n    __global const float* coord,\n    __global float* hizs,\n    int num,\n    int dim,\n    int pid,\n    long k1,\n    long k2)\n{\n    int idx = get_global_id(0);\n    long kk = k1 + idx;\n    \n    if (kk >= k2) return;\n    \n    float myhiz = 0.0f;\n    for (int d = 0; d < dim; d++) {\n        float diff = coord[kk * dim + d] - coord[0 * dim + d];\n        myhiz += diff * diff;\n    }\n    myhiz *= p[kk].weight;\n    \n    hizs[pid] += myhiz;\n}\n\n/*\n * Kernel: speedy_init_kernel\n * Initializes costs for speedy algorithm\n */\n\n__kernel void speedy_init_kernel(\n    __global Point_Struct* p,\n    __global const float* coord,\n    int num,\n    int dim,\n    long k1,\n    long k2)\n{\n    int idx = get_global_id(0);\n    long k = k1 + idx;\n    \n    if (k >= k2) return;\n    \n    float distance = 0.0f;\n    for (int d = 0; d < dim; d++) {\n        float diff = coord[k * dim + d] - coord[0 * dim + d];\n        distance += diff * diff;\n    }\n    \n    p[k].cost = distance * p[k].weight;\n    p[k].assign = 0;\n}\n\n/*\n * Kernel: contcenters_kernel\n * Consolidates centers by computing weighted averages\n */\n\n__kernel void contcenters_kernel(\n    __global Point_Struct* p,\n    __global float* coord,\n    int num,\n    int dim)\n{\n    int i = get_global_id(0);\n    \n    if (i >= num) return;\n    \n    long assign = p[i].assign;\n    \n    if (assign != i) {\n        float relweight = p[assign].weight + p[i].weight;\n        relweight = p[i].weight / relweight;\n        \n        for (int ii = 0; ii < dim; ii++) {\n            coord[assign * dim + ii] *= (1.0f - relweight);\n            coord[assign * dim + ii] += coord[i * dim + ii] * relweight;\n        }\n        p[assign].weight += p[i].weight;\n    }\n}\n\n/*\n * Kernel: update_assign_kernel\n * Updates point assignments after pgain computation\n */\n\n__kernel void update_assign_kernel(\n    __global Point_Struct* p,\n    __global const float* coord,\n    __global const char* switch_membership,\n    __global const float* gl_lower,\n    __global const int* center_table,\n    __global char* is_center,\n    int num,\n    int dim,\n    long x,\n    int K)\n{\n    int i = get_global_id(0);\n    \n    if (i >= num) return;\n    \n    long assign = p[i].assign;\n    int center_idx = center_table[assign];\n    \n    bool close_center = (center_idx >= 0 && center_idx < K && gl_lower[center_idx] > 0);\n    \n    if (switch_membership[i] == 1 || close_center) {\n        float new_cost = 0.0f;\n        for (int d = 0; d < dim; d++) {\n            float diff = coord[i * dim + d] - coord[x * dim + d];\n            new_cost += diff * diff;\n        }\n        p[i].cost = new_cost * p[i].weight;\n        p[i].assign = x;\n    }\n    \n    if (is_center[i] && center_idx >= 0 && center_idx < K && gl_lower[center_idx] > 0) {\n        is_center[i] = 0;\n    }\n    \n    if (i == x) {\n        is_center[i] = 1;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 16.658,
+      "prompt_tokens": 28449,
+      "completion_tokens": 2260,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "",
+      "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Creating Kernel (clCreateKernel) \"memset_kernel\"\n",
+      "extraction_fail": null
+    }
+  ]
+}

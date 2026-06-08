@@ -1,0 +1,81 @@
+{
+  "source_spec": "rodinia-streamcluster-cuda",
+  "target_spec": "rodinia-streamcluster-opencl",
+  "kernel": "streamcluster",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 451758301,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "10",
+    "20",
+    "256",
+    "65536",
+    "65536",
+    "1000",
+    "none",
+    "output.txt",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-26T03:37:46Z",
+  "prompt_tokens": 19815,
+  "completion_tokens": 2206,
+  "llm_response_time_seconds": 48.522,
+  "build_status": "pass",
+  "build_time_seconds": 0.74,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.206,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "",
+  "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Creating Kernel (clCreateKernel) \"memset_kernel\"\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 2.092,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "Kernels.cl": "typedef struct {\n    float weight;\n    long assign;\n    float cost;\n} Point_Struct;\n\ninline float d_dist_to_x(int p1,\n                         int num,\n                         int dim,\n                         __global const float *coord_d,\n                         __local const float *x_coord)\n{\n    float retval = 0.0f;\n    for (int i = 0; i < dim; i++) {\n        float tmp = coord_d[i * num + p1] - x_coord[i];\n        retval += tmp * tmp;\n    }\n    return retval;\n}\n\ninline void compute_cost_body(__global const Point_Struct *p,\n                              __global const float *coord_d,\n                              __global float *work_mem_d,\n                              __global const int *center_table_d,\n                              __global char *switch_membership_d,\n                              __local float *x_coord,\n                              int num,\n                              int dim,\n                              long x,\n                              int K)\n{\n    int gid = (int)get_global_id(0);\n    int lid = (int)get_local_id(0);\n    int lsize = (int)get_local_size(0);\n    int x_idx = (int)x;\n\n    for (int i = lid; i < dim; i += lsize) {\n        x_coord[i] = coord_d[i * num + x_idx];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (gid < num) {\n        int stride = K + 1;\n        __global float *lower = work_mem_d + gid * stride;\n\n        float x_cost = d_dist_to_x(gid, num, dim, coord_d, x_coord) * p[gid].weight;\n\n        if (x_cost < p[gid].cost) {\n            switch_membership_d[gid] = '1';\n            lower[K] += x_cost - p[gid].cost;\n        } else {\n            int assign = (int)p[gid].assign;\n            lower[center_table_d[assign]] += p[gid].cost - x_cost;\n        }\n    }\n}\n\n__kernel void dummy_compute_cost(__global const Point_Struct *p,\n                                 __global const float *coord_d,\n                                 __global float *work_mem_d,\n                                 __global const int *center_table_d,\n                                 __global char *switch_membership_d,\n                                 __local float *x_coord,\n                                 int num,\n                                 int dim,\n                                 long x,\n                                 int K)\n{\n    compute_cost_body(p, coord_d, work_mem_d, center_table_d,\n                      switch_membership_d, x_coord, num, dim, x, K);\n}\n\n__kernel void kernel_compute_cost(__global const Point_Struct *p,\n                                  __global const float *coord_d,\n                                  __global float *work_mem_d,\n                                  __global const int *center_table_d,\n                                  __global char *switch_membership_d,\n                                  __local float *x_coord,\n                                  int num,\n                                  int dim,\n                                  long x,\n                                  int K)\n{\n    compute_cost_body(p, coord_d, work_mem_d, center_table_d,\n                      switch_membership_d, x_coord, num, dim, x, K);\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 48.522,
+      "prompt_tokens": 19815,
+      "completion_tokens": 2206,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "",
+      "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Creating Kernel (clCreateKernel) \"memset_kernel\"\n",
+      "extraction_fail": null
+    }
+  ]
+}

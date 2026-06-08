@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-pathfinder-cuda",
+  "target_spec": "rodinia-pathfinder-opencl",
+  "kernel": "pathfinder",
+  "model": "azure-gpt-5.4",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 505251691,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-c",
+    "100000",
+    "-r",
+    "100",
+    "-h",
+    "20"
+  ],
+  "timestamp": "2026-04-27T01:45:33Z",
+  "prompt_tokens": 4830,
+  "completion_tokens": 3138,
+  "llm_response_time_seconds": 57.872,
+  "build_status": "pass",
+  "build_time_seconds": 0.478,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.256,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Init: 138.524994\nMemAlloc: 0.004000\nHtoD: 2.268576\nExec: 0.300352\nDtoH: 0.017664\nClose: 0.864000\nTotal: 144.436996\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.256,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernels.cl": "#define IN_RANGE(x, min, max) ((x) >= (min) && (x) <= (max))\n#define MIN(a, b)             ((a) <= (b) ? (a) : (b))\n\n__kernel void dynproc_kernel(\n    int iteration,\n    __global int* gpuWall,\n    __global int* gpuSrc,\n    __global int* gpuDst,\n    int cols,\n    int rows,\n    int startStep,\n    int borderCols,\n    int halo,\n    __local int* prev,\n    __local int* curr,\n    __global int* outputBuffer)\n{\n    int bx = get_group_id(0);\n    int tx = get_local_id(0);\n    int blockSize = (int)get_local_size(0);\n\n    int baseBlockCols = blockSize - borderCols * 2;\n    int maxGroups = cols / baseBlockCols + ((cols % baseBlockCols) == 0 ? 0 : 1);\n    if (bx >= maxGroups) {\n        return;\n    }\n\n    int smallBlockCols = blockSize - iteration * halo * 2;\n    int blkX = smallBlockCols * bx - borderCols;\n    int blkXmax = blkX + blockSize - 1;\n    int xidx = blkX + tx;\n\n    int validXmin = (0 > blkX) ? -blkX : 0;\n    int validXmax = (cols - 1 < blkXmax) ? blockSize - 1 - (blkXmax - cols + 1) : blockSize - 1;\n\n    int W = tx - 1;\n    int E = tx + 1;\n\n    W = (validXmin > W) ? validXmin : W;\n    E = (validXmax < E) ? validXmax : E;\n\n    int isValid = IN_RANGE(tx, validXmin, validXmax);\n\n    if (IN_RANGE(xidx, 0, cols - 1)) {\n        prev[tx] = gpuSrc[xidx];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    int computed = 0;\n    for (int i = 0; i < iteration; i++) {\n        computed = 0;\n\n        if (IN_RANGE(tx, i + 1, blockSize - i - 2) && isValid) {\n            computed = 1;\n            int left = prev[W];\n            int up = prev[tx];\n            int right = prev[E];\n            int shortest = MIN(left, up);\n            shortest = MIN(shortest, right);\n            int index = cols * (startStep + i) + xidx;\n            curr[tx] = shortest + gpuWall[index];\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n\n        if (iteration - 1 == i) {\n            break;\n        }\n\n        if (computed) {\n            prev[tx] = curr[tx];\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    if (computed) {\n        gpuDst[xidx] = curr[tx];\n    }\n\n    (void)rows;\n    (void)outputBuffer;\n}\n"
+  },
+  "target_files_expected": [
+    "kernels.cl"
+  ],
+  "target_files_extracted": [
+    "kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 57.872,
+      "prompt_tokens": 4830,
+      "completion_tokens": 3138,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

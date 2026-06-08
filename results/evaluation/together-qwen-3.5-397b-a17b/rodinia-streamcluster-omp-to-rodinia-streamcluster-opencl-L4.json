@@ -1,0 +1,81 @@
+{
+  "source_spec": "rodinia-streamcluster-omp",
+  "target_spec": "rodinia-streamcluster-opencl",
+  "kernel": "streamcluster",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 219716437,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "10",
+    "20",
+    "256",
+    "65536",
+    "65536",
+    "1000",
+    "none",
+    "output.txt",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-24T05:55:03Z",
+  "prompt_tokens": 30560,
+  "completion_tokens": 3622,
+  "llm_response_time_seconds": 26.345,
+  "build_status": "pass",
+  "build_time_seconds": 0.735,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.214,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "",
+  "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Creating Kernel (clCreateKernel) \"memset_kernel\"\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 2.092,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "Kernels.cl": "// translated_0.cl - OpenCL kernels for streamcluster pgain computation\n\ntypedef struct {\n    float weight;\n    long assign;\n    float cost;\n} Point_Struct;\n\n// Main pgain kernel - computes distances and updates work_mem and switch_membership\nkernel void pgain_kernel(\n    global Point_Struct* p,\n    global float* coord,\n    global float* work_mem,\n    global int* center_table,\n    global char* switch_membership,\n    int num,\n    int dim,\n    long x,\n    int K\n) {\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    // Calculate squared Euclidean distance from point i to point x\n    float dist_sq = 0.0f;\n    for (int d = 0; d < dim; d++) {\n        float diff = coord[d * num + i] - coord[d * num + x];\n        dist_sq += diff * diff;\n    }\n    \n    float x_cost = dist_sq * p[i].weight;\n    float current_cost = p[i].cost;\n    \n    if (x_cost < current_cost) {\n        // Point i would benefit from switching to center x\n        switch_membership[i] = 1;\n        work_mem[i * (K + 1) + K] += x_cost - current_cost;\n    } else {\n        // Point i stays with current center\n        int assign = p[i].assign;\n        int ct = center_table[assign];\n        work_mem[ct * (K + 1) + i] += current_cost - x_cost;\n    }\n}\n\n// Kernel to initialize work_mem to zero\nkernel void init_work_mem(\n    global float* work_mem,\n    int size\n) {\n    int i = get_global_id(0);\n    if (i < size) {\n        work_mem[i] = 0.0f;\n    }\n}\n\n// Kernel to initialize switch_membership to zero\nkernel void init_switch_membership(\n    global char* switch_membership,\n    int size\n) {\n    int i = get_global_id(0);\n    if (i < size) {\n        switch_membership[i] = 0;\n    }\n}\n\n// Kernel to compute center_table from is_center\nkernel void compute_center_table(\n    global char* is_center,\n    global int* center_table,\n    int num\n) {\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    if (is_center[i] == 1) {\n        int count = 0;\n        for (int j = 0; j < i; j++) {\n            if (is_center[j] == 1) {\n                count++;\n            }\n        }\n        center_table[i] = count;\n    }\n}\n\n// Kernel to copy point data to Point_Struct format\nkernel void copy_point_data(\n    global Point_Struct* p_out,\n    global float* weights,\n    global long* assigns,\n    global float* costs,\n    int num\n) {\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    p_out[i].weight = weights[i];\n    p_out[i].assign = assigns[i];\n    p_out[i].cost = costs[i];\n}\n\n// Kernel to transpose coordinate data (row to column format for OpenCL)\nkernel void transpose_coords(\n    global float* coord_out,\n    global float* coord_in,\n    int num,\n    int dim\n) {\n    int i = get_global_id(0);\n    int d = get_global_id(1);\n    \n    if (i >= num || d >= dim) return;\n    \n    coord_out[d * num + i] = coord_in[i * dim + d];\n}\n\n// Kernel to update point costs and assignments after gain computation\nkernel void update_points(\n    global Point_Struct* p,\n    global float* coord,\n    global char* switch_membership,\n    global float* gl_lower,\n    global int* center_table,\n    global char* is_center,\n    long x,\n    int num,\n    int dim\n) {\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    int assign = p[i].assign;\n    char close_center = gl_lower[center_table[assign]] > 0 ? 1 : 0;\n    \n    if (switch_membership[i] == 1 || close_center == 1) {\n        // Calculate new cost\n        float dist_sq = 0.0f;\n        for (int d = 0; d < dim; d++) {\n            float diff = coord[d * num + i] - coord[d * num + x];\n            dist_sq += diff * diff;\n        }\n        p[i].cost = dist_sq * p[i].weight;\n        p[i].assign = x;\n    }\n    \n    if (is_center[i] == 1 && gl_lower[center_table[i]] > 0) {\n        is_center[i] = 0;\n    }\n    \n    if (i == x) {\n        is_center[i] = 1;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 26.345,
+      "prompt_tokens": 30560,
+      "completion_tokens": 3622,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "",
+      "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Creating Kernel (clCreateKernel) \"memset_kernel\"\n",
+      "extraction_fail": null
+    }
+  ]
+}

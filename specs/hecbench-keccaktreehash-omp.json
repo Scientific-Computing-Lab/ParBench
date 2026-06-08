@@ -1,0 +1,182 @@
+{
+  "spec_version": "1.0.0",
+  "identity": {
+    "kernel_name": "keccaktreehash",
+    "parallel_api": "omp",
+    "unique_id": "hecbench-keccaktreehash-omp",
+    "source_suite": "hecbench"
+  },
+  "provenance": {
+    "repository": {
+      "url": "https://github.com/zjin-lcf/HeCBench",
+      "commit": "archive-download",
+      "branch": "master"
+    },
+    "repo_root": "HeCBench-master/",
+    "source_path": "src/keccaktreehash-omp",
+    "license": "MIT"
+  },
+  "files": {
+    "prompt_payload": [
+      "main.cpp",
+      "KeccakTreeGPU.cpp",
+      "KeccakF.cpp",
+      "Test.cpp"
+    ],
+    "support_files": [
+      "Makefile",
+      "Makefile.aomp",
+      "Makefile.nvc",
+      "CMakeLists.txt",
+      "KeccakTree.h",
+      "KeccakTypes.h",
+      "KeccakF.h",
+      "KeccakTreeGPU.h",
+      "Test.h"
+    ],
+    "verification_only": [
+      "KeccakTreeCPU.cpp",
+      "KeccakTreeCPU.h"
+    ],
+    "translation_targets": [
+      "KeccakTreeGPU.cpp",
+      "Test.cpp"
+    ]
+  },
+  "implementation": {
+    "api": "omp",
+    "api_version": null,
+    "language": "C++",
+    "language_standard": "C++17"
+  },
+  "build": {
+    "environment": {
+      "preferred": "system",
+      "conda": null,
+      "system": {
+        "dependencies": [
+          "GCC >= 9.0 with OpenMP support"
+        ]
+      }
+    },
+    "build_system": "make",
+    "working_directory": "src/keccaktreehash-omp",
+    "commands": {
+      "configure": null,
+      "build": "make -f Makefile.aomp CC=g++ DEVICE=cpu",
+      "clean": "make -f Makefile.aomp clean"
+    },
+    "variables": null,
+    "outputs": {
+      "executable": "main"
+    }
+  },
+  "run": {
+    "executable": "./main",
+    "default_arguments": [],
+    "timeout_seconds": 300,
+    "environment_variables": null,
+    "input_configurations": {
+      "correctness": {
+        "arguments": [],
+        "description": "Run Keccak tree hash; compares GPU hash state against CPU reference",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      },
+      "performance": {
+        "arguments": [],
+        "description": "Default run for performance measurement",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      }
+    }
+  },
+  "verification": {
+    "method": "self_checking",
+    "strategies": [
+      {
+        "type": "stdout_pattern",
+        "pattern": "PASS",
+        "description": "isEqual_KS() compares GPU Keccak state vs CPU reference; prints PASS or FAIL"
+      },
+      {
+        "type": "exit_code",
+        "expected": 0,
+        "description": "Process exits cleanly"
+      }
+    ],
+    "floating_point": null
+  },
+  "performance": {
+    "metrics": [
+      {
+        "name": "kernel_time",
+        "extraction": {
+          "type": "regex",
+          "pattern": "Total kernel execution time\\s+([\\d.eE+-]+)\\s+\\(s\\)",
+          "capture_group": 1
+        },
+        "unit": "s"
+      }
+    ],
+    "warmup_runs": 1,
+    "measurement_runs": 5
+  },
+  "hardware": {
+    "target": "cpu",
+    "requirements": null,
+    "reference_platform": {
+      "platform_id": "rtx4070-r9-7900x",
+      "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+      },
+      "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+      },
+      "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+      }
+    }
+  },
+  "baseline_results": {
+    "reference_platform": "rtx4070-r9-7900x",
+    "timestamp": "2026-03-03T00:25:08Z",
+    "configurations": {
+      "correctness": {
+        "status": "pass",
+        "exit_code": 0,
+        "stdout_snippet": "\nNumber of threads per block             NB_THREADS           64 \nNumber of thread blocks                 NB_THREADS_BLOCKS    64 \n\nInput block size of Keccak (in Byte)    INPUT_BLOCK_SIZE_B   32 \nOutput block size of Keccak (in Byte)   OUTPUT_BLOCK_SIZE_B  32 \n\nNumber of input blocks                  NB_INPUT_BLOCK       1024 \n\nCPU speed test started \n\n506f1eca ab60120a b402f830 ea46f6c2 75d8b317 0f7944a5 60b36a16 64d38a43 \nCPU speed : 146407.17 kB/s \n\nCPU time : 7.33394 s \n\nGPU speed test star",
+        "wall_time_seconds": 8.215
+      }
+    }
+  },
+  "metadata": {
+    "description": "GPU-accelerated Keccak (SHA-3) tree hashing. Computes Keccak-f[1600] permutation in parallel across tree nodes on GPU, then compares final hash state against sequential CPU reference.",
+    "domain": "cryptographic hashing",
+    "complexity": "O(tree_nodes \u00d7 rounds)",
+    "tags": [
+      "keccak",
+      "sha3",
+      "tree-hash",
+      "cryptography",
+      "permutation"
+    ],
+    "multi_file": true,
+    "translation_complexity": "multi_to_multi"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "source_spec": "mixbench-mixbench-omp",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1825021715,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-05-01T00:37:06Z",
+  "prompt_tokens": 10182,
+  "completion_tokens": 2179,
+  "llm_response_time_seconds": 26.89,
+  "build_status": "pass",
+  "build_time_seconds": 0.471,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 4.055,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "3.26\n          192,     96.250,    2.13, 6059.40,  62.95,     48.125,   30.18,  428.10,   8.90,    192.500,    0.00,     inf,    inf,    96.250,    2.13, 6065.60,  63.02\n          256,    128.250,    2.14, 8054.62,  62.80,     64.125,   40.23,  427.84,   6.67,    256.500,    0.00,     inf,    inf,   128.250,    2.14, 8046.90,  62.74\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": 4.055,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 7.3983,
+  "translated_files": {
+    "mix_kernels.cl": "#ifdef ENABLE_DP\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n\n#ifdef ENABLE_HP\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n\ninline class_T mix_op(class_T x, class_T seed) {\n  return x * x + seed;\n}\n\n__kernel void benchmark_func(const class_T seed, __global class_T* data) {\n  const size_t gid = get_global_id(0);\n\n#ifndef BLOCK_STRIDED\n  const size_t base = gid * (size_t)(ELEMENTS_PER_THREAD * FUSION_DEGREE);\n\n  for (uint f = 0; f < (uint)FUSION_DEGREE; ++f) {\n    const size_t fbase = base + (size_t)f * (size_t)ELEMENTS_PER_THREAD;\n    for (uint e = 0; e < (uint)ELEMENTS_PER_THREAD; ++e) {\n      const size_t idx = fbase + (size_t)e;\n      class_T t = data[idx];\n      for (uint it = 0; it < (uint)COMPUTE_ITERATIONS; ++it) {\n        t = mix_op(t, seed);\n      }\n      data[idx] = t;\n    }\n  }\n\n#else\n  const size_t lid = get_local_id(0);\n  const size_t lsz = get_local_size(0);\n  const size_t group = get_group_id(0);\n  const size_t group_span = lsz * (size_t)(ELEMENTS_PER_THREAD * FUSION_DEGREE);\n  const size_t group_base = group * group_span;\n\n  for (uint f = 0; f < (uint)FUSION_DEGREE; ++f) {\n    const size_t fbase = group_base + (size_t)f * lsz * (size_t)ELEMENTS_PER_THREAD;\n    for (uint e = 0; e < (uint)ELEMENTS_PER_THREAD; ++e) {\n      const size_t idx = fbase + (size_t)e * lsz + lid;\n      class_T t = data[idx];\n      for (uint it = 0; it < (uint)COMPUTE_ITERATIONS; ++it) {\n        t = mix_op(t, seed);\n      }\n      data[idx] = t;\n    }\n  }\n#endif\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 26.89,
+      "prompt_tokens": 10182,
+      "completion_tokens": 2179,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

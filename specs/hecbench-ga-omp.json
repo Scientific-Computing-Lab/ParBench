@@ -1,0 +1,193 @@
+{
+  "spec_version": "1.0.0",
+  "identity": {
+    "kernel_name": "ga",
+    "parallel_api": "omp",
+    "unique_id": "hecbench-ga-omp",
+    "source_suite": "hecbench"
+  },
+  "provenance": {
+    "repository": {
+      "url": "https://github.com/zjin-lcf/HeCBench",
+      "commit": "archive-download",
+      "branch": "master"
+    },
+    "repo_root": "HeCBench-master/",
+    "source_path": "src/ga-omp",
+    "license": "MIT"
+  },
+  "files": {
+    "prompt_payload": [
+      "main.cpp"
+    ],
+    "support_files": [
+      "Makefile",
+      "Makefile.aomp",
+      "Makefile.nvc",
+      "CMakeLists.txt",
+      "COPYRIGHT"
+    ],
+    "verification_only": [],
+    "translation_targets": [
+      "main.cpp"
+    ]
+  },
+  "implementation": {
+    "api": "omp",
+    "api_version": null,
+    "language": "C++",
+    "language_standard": "C++17"
+  },
+  "build": {
+    "environment": {
+      "preferred": "system",
+      "conda": null,
+      "system": {
+        "dependencies": [
+          "GCC >= 9.0 with OpenMP support"
+        ]
+      }
+    },
+    "build_system": "make",
+    "working_directory": "src/ga-omp",
+    "commands": {
+      "configure": null,
+      "build": "make -f Makefile.aomp CC=g++ DEVICE=cpu",
+      "clean": "make -f Makefile.aomp clean"
+    },
+    "variables": null,
+    "outputs": {
+      "executable": "main"
+    }
+  },
+  "run": {
+    "executable": "./main",
+    "default_arguments": [
+      "1000000",
+      "1000",
+      "11",
+      "1"
+    ],
+    "timeout_seconds": 600,
+    "environment_variables": null,
+    "input_configurations": {
+      "correctness": {
+        "arguments": [
+          "10000",
+          "100",
+          "11",
+          "1"
+        ],
+        "description": "Small sequences (target=10000, query=100) for quick correctness verification",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      },
+      "performance": {
+        "arguments": [
+          "1000000",
+          "1000",
+          "11",
+          "1"
+        ],
+        "description": "Full-size alignment (target=1M, query=1000) for performance measurement",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      }
+    }
+  },
+  "verification": {
+    "method": "self_checking",
+    "strategies": [
+      {
+        "type": "stdout_pattern",
+        "pattern": "PASS",
+        "description": "Compares GPU alignment results against CPU reference; prints PASS or FAIL"
+      },
+      {
+        "type": "exit_code",
+        "expected": 0,
+        "description": "Process exits cleanly"
+      }
+    ],
+    "floating_point": null
+  },
+  "performance": {
+    "metrics": [
+      {
+        "name": "kernel_time",
+        "extraction": {
+          "type": "regex",
+          "pattern": "Total kernel execution time\\s+([\\d.eE+-]+)\\s+\\(s\\)",
+          "capture_group": 1
+        },
+        "unit": "s"
+      }
+    ],
+    "warmup_runs": 1,
+    "measurement_runs": 5
+  },
+  "hardware": {
+    "target": "cpu",
+    "requirements": null,
+    "reference_platform": {
+      "platform_id": "rtx4070-r9-7900x",
+      "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+      },
+      "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+      },
+      "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+      }
+    }
+  },
+  "baseline_results": {
+    "reference_platform": "rtx4070-r9-7900x",
+    "timestamp": "2026-03-03T00:25:08Z",
+    "configurations": {
+      "correctness": {
+        "status": "pass",
+        "exit_code": 0,
+        "stdout_snippet": "Total kernel execution time 0.015048 (s)\nPASS\n",
+        "wall_time_seconds": 0.039
+      },
+      "performance": {
+        "status": "pass",
+        "wall_time_seconds": 0.039,
+        "metrics": {
+          "kernel_time_s": 0.015048
+        }
+      }
+    }
+  },
+  "metadata": {
+    "description": "GPU-Accelerated Genomic Alignment using coarse-grained plus fine-grained approach. Performs parallel sequence alignment with coarse matching followed by fine-grained scoring on GPU.",
+    "domain": "bioinformatics / sequence alignment",
+    "complexity": "O(target \u00d7 query)",
+    "tags": [
+      "genomic-alignment",
+      "sequence-alignment",
+      "coarse-matching",
+      "bioinformatics",
+      "ga"
+    ],
+    "multi_file": false,
+    "translation_complexity": "single_file"
+  }
+}

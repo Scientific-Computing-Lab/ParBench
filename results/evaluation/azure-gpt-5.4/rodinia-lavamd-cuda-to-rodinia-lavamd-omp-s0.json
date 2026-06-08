@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lavamd-cuda",
+  "target_spec": "rodinia-lavamd-omp",
+  "kernel": "lavamd",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1465385016,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "-boxes1d",
+    "10"
+  ],
+  "timestamp": "2026-04-25T22:32:07Z",
+  "prompt_tokens": 6878,
+  "completion_tokens": 5793,
+  "llm_response_time_seconds": 113.306,
+  "build_status": "pass",
+  "build_time_seconds": 0.16,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.153,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Configuration used: cores = 1, boxes1d = 10\nTime spent in different stages of GPU_CUDA KERNEL:\n 0.000001000000 s,  0.000087127133 % : GPU: SET DEVICE / DRIVER INIT\n 0.000013000000 s,  0.001132652746 % : GPU MEM: ALO\n 0.002374999924 s,  0.206926956773 % : GPU MEM: COPY IN\n 1.144979953766 s, 99.758834838867 % : GPU: KERNEL\n 0.000070000002 s,  0.006098899990 % : GPU MEM: COPY OUT\n 0.000308999995 s,  0.026922285557 % : GPU MEM: FRE\nTotal time:\n1.147747993469 s\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": 1.153,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0009,
+  "translated_files": {
+    "kernel/kernel_cpu.c": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <math.h>\n#include <omp.h>\n\n#include \"./../main.h\"\n#include \"./../util/timer/timer.h\"\n#include \"./kernel_cpu.h\"\n\nvoid kernel_cpu(par_str par_cpu,\n                dim_str dim_cpu,\n                box_str* box_cpu,\n                FOUR_VECTOR* rv_cpu,\n                fp* qv_cpu,\n                FOUR_VECTOR* fv_cpu)\n{\n\tlong long time0;\n\tlong long time1;\n\tlong long time2;\n\tlong long time3;\n\tlong long time4;\n\tlong long time5;\n\tlong long time6;\n\n\tbox_str* d_box_gpu;\n\tFOUR_VECTOR* d_rv_gpu;\n\tfp* d_qv_gpu;\n\tFOUR_VECTOR* d_fv_gpu;\n\n\tint bx;\n\n\ttime0 = get_time();\n\n\tif (dim_cpu.cores_arg > 0) {\n\t\tomp_set_num_threads(dim_cpu.cores_arg);\n\t}\n\n\ttime1 = get_time();\n\n\td_box_gpu = (box_str*)malloc(dim_cpu.box_mem);\n\td_rv_gpu = (FOUR_VECTOR*)malloc(dim_cpu.space_mem);\n\td_qv_gpu = (fp*)malloc(dim_cpu.space_mem2);\n\td_fv_gpu = (FOUR_VECTOR*)malloc(dim_cpu.space_mem);\n\n\ttime2 = get_time();\n\n\tmemcpy(d_box_gpu, box_cpu, dim_cpu.box_mem);\n\tmemcpy(d_rv_gpu, rv_cpu, dim_cpu.space_mem);\n\tmemcpy(d_qv_gpu, qv_cpu, dim_cpu.space_mem2);\n\tmemcpy(d_fv_gpu, fv_cpu, dim_cpu.space_mem);\n\n\ttime3 = get_time();\n\n\t#pragma omp parallel for schedule(static)\n\tfor (bx = 0; bx < dim_cpu.number_boxes; bx++) {\n\n\t\tfp a2;\n\t\tlong first_i;\n\t\tFOUR_VECTOR* rA;\n\t\tFOUR_VECTOR* fA;\n\t\tFOUR_VECTOR rA_shared[NUMBER_PAR_PER_BOX];\n\n\t\tint k;\n\t\tint pointer;\n\t\tlong first_j;\n\t\tFOUR_VECTOR* rB;\n\t\tfp* qB;\n\t\tFOUR_VECTOR rB_shared[NUMBER_PAR_PER_BOX];\n\t\tfp qB_shared[NUMBER_PAR_PER_BOX];\n\n\t\tint wtx;\n\t\tint j;\n\n\t\ta2 = 2.0 * par_cpu.alpha * par_cpu.alpha;\n\n\t\tfirst_i = d_box_gpu[bx].offset;\n\t\trA = &d_rv_gpu[first_i];\n\t\tfA = &d_fv_gpu[first_i];\n\n\t\tfor (wtx = 0; wtx < NUMBER_PAR_PER_BOX; wtx++) {\n\t\t\trA_shared[wtx] = rA[wtx];\n\t\t}\n\n\t\tfor (k = 0; k < (1 + d_box_gpu[bx].nn); k++) {\n\n\t\t\tif (k == 0) {\n\t\t\t\tpointer = bx;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tpointer = d_box_gpu[bx].nei[k - 1].number;\n\t\t\t}\n\n\t\t\tfirst_j = d_box_gpu[pointer].offset;\n\t\t\trB = &d_rv_gpu[first_j];\n\t\t\tqB = &d_qv_gpu[first_j];\n\n\t\t\tfor (wtx = 0; wtx < NUMBER_PAR_PER_BOX; wtx++) {\n\t\t\t\trB_shared[wtx] = rB[wtx];\n\t\t\t\tqB_shared[wtx] = qB[wtx];\n\t\t\t}\n\n\t\t\tfor (wtx = 0; wtx < NUMBER_PAR_PER_BOX; wtx++) {\n\t\t\t\tfor (j = 0; j < NUMBER_PAR_PER_BOX; j++) {\n\t\t\t\t\tfp r2;\n\t\t\t\t\tfp u2;\n\t\t\t\t\tfp vij;\n\t\t\t\t\tfp fs;\n\t\t\t\t\tfp fxij;\n\t\t\t\t\tfp fyij;\n\t\t\t\t\tfp fzij;\n\t\t\t\t\tTHREE_VECTOR d;\n\n\t\t\t\t\tr2 = (fp)rA_shared[wtx].v + (fp)rB_shared[j].v -\n\t\t\t\t\t\t (((fp)rA_shared[wtx].x * (fp)rB_shared[j].x) +\n\t\t\t\t\t\t  ((fp)rA_shared[wtx].y * (fp)rB_shared[j].y) +\n\t\t\t\t\t\t  ((fp)rA_shared[wtx].z * (fp)rB_shared[j].z));\n\t\t\t\t\tu2 = a2 * r2;\n\t\t\t\t\tvij = exp(-u2);\n\t\t\t\t\tfs = 2 * vij;\n\n\t\t\t\t\td.x = (fp)rA_shared[wtx].x - (fp)rB_shared[j].x;\n\t\t\t\t\tfxij = fs * d.x;\n\t\t\t\t\td.y = (fp)rA_shared[wtx].y - (fp)rB_shared[j].y;\n\t\t\t\t\tfyij = fs * d.y;\n\t\t\t\t\td.z = (fp)rA_shared[wtx].z - (fp)rB_shared[j].z;\n\t\t\t\t\tfzij = fs * d.z;\n\n\t\t\t\t\tfA[wtx].v += (double)((fp)qB_shared[j] * vij);\n\t\t\t\t\tfA[wtx].x += (double)((fp)qB_shared[j] * fxij);\n\t\t\t\t\tfA[wtx].y += (double)((fp)qB_shared[j] * fyij);\n\t\t\t\t\tfA[wtx].z += (double)((fp)qB_shared[j] * fzij);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\n\ttime4 = get_time();\n\n\tmemcpy(fv_cpu, d_fv_gpu, dim_cpu.space_mem);\n\n\ttime5 = get_time();\n\n\tfree(d_rv_gpu);\n\tfree(d_qv_gpu);\n\tfree(d_fv_gpu);\n\tfree(d_box_gpu);\n\n\ttime6 = get_time();\n\n\tprintf(\"Time spent in different stages of GPU_CUDA KERNEL:\\n\");\n\n\tprintf(\"%15.12f s, %15.12f % : GPU: SET DEVICE / DRIVER INIT\\n\",\t(float) (time1-time0) / 1000000, (float) (time1-time0) / (float) (time6-time0) * 100);\n\tprintf(\"%15.12f s, %15.12f % : GPU MEM: ALO\\n\", \t\t\t\t\t(float) (time2-time1) / 1000000, (float) (time2-time1) / (float) (time6-time0) * 100);\n\tprintf(\"%15.12f s, %15.12f % : GPU MEM: COPY IN\\n\",\t\t\t\t\t(float) (time3-time2) / 1000000, (float) (time3-time2) / (float) (time6-time0) * 100);\n\n\tprintf(\"%15.12f s, %15.12f % : GPU: KERNEL\\n\",\t\t\t\t\t\t(float) (time4-time3) / 1000000, (float) (time4-time3) / (float) (time6-time0) * 100);\n\n\tprintf(\"%15.12f s, %15.12f % : GPU MEM: COPY OUT\\n\",\t\t\t\t(float) (time5-time4) / 1000000, (float) (time5-time4) / (float) (time6-time0) * 100);\n\tprintf(\"%15.12f s, %15.12f % : GPU MEM: FRE\\n\", \t\t\t\t\t(float) (time6-time5) / 1000000, (float) (time6-time5) / (float) (time6-time0) * 100);\n\n\tprintf(\"Total time:\\n\");\n\tprintf(\"%.12f s\\n\", \t\t\t\t\t\t\t\t\t\t\t\t(float) (time6-time0) / 1000000);\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_cpu.c"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_cpu.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 113.306,
+      "prompt_tokens": 6878,
+      "completion_tokens": 5793,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

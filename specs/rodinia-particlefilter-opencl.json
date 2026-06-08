@@ -1,0 +1,202 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "particlefilter",
+        "parallel_api": "opencl",
+        "unique_id": "rodinia-particlefilter-opencl",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "opencl/particlefilter",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "particle_double.cl",
+            "particle_naive.cl",
+            "particle_single.cl",
+            "ex_particle_OCL_double_seq.cpp",
+            "ex_particle_OCL_naive_seq.cpp",
+            "ex_particle_OCL_single_seq.cpp"
+        ],
+        "support_files": [
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "particle_double.cl",
+            "particle_naive.cl",
+            "particle_single.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl>=2.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl/particlefilter",
+        "commands": {
+            "configure": null,
+            "build": "make OPENCL_INC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include OPENCL_LIB=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+            "clean": "make clean"
+        },
+        "variables": {
+            "OPENCL_INC": {
+                "description": "Path to OpenCL headers",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include",
+                "detection": "find /usr -name 'cl.h' -path '*/CL/cl.h' | head -1 | xargs dirname | xargs dirname"
+            },
+            "OPENCL_LIB": {
+                "description": "Path to OpenCL libraries",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+                "detection": "find /usr -name 'libOpenCL.so' | head -1 | xargs dirname"
+            }
+        },
+        "outputs": {
+            "executable": "./OCL_particlefilter_single.out"
+        }
+    },
+    "run": {
+        "executable": "./OCL_particlefilter_single.out",
+        "default_arguments": [
+            "-x",
+            "128",
+            "-y",
+            "128",
+            "-z",
+            "10",
+            "-np",
+            "1000"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-x",
+                    "128",
+                    "-y",
+                    "128",
+                    "-z",
+                    "10",
+                    "-np",
+                    "1000"
+                ],
+                "description": "Small input for correctness verification of particlefilter (OPENCL)",
+                "input_files": [],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "-x",
+                    "128",
+                    "-y",
+                    "128",
+                    "-z",
+                    "10",
+                    "-np",
+                    "10000"
+                ],
+                "description": "Large input for performance measurement of particlefilter (OPENCL)",
+                "input_files": [],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Total:",
+                "description": "Particle filter computation completed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.280998+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "VIDEO SEQUENCE TOOK 0.004329\nnumber of available platforms:1.\nclGetPlatformInfo: NVIDIA Corporation\nTIME TO SEND TO GPU: 0.000143\nthreads_per_block=512 \ntotal weight: 1.000000\nXE: 64.576401\nYE: 64.448219\n0.730163\ntotal weight: 1.000000\nXE: 62.304356\nYE: 65.388130\n2.191373\ntotal weight: 1.000000\nXE: 60.343636\nYE: 66.324608\n4.332759\ntotal weight: 1.000000\nXE: 58.547482\nYE: 67.482300\n6.469650\ntotal weight: 1.000000\nXE: 56.631798\nYE: 68.509109\n8.638430\ntotal weight: 1.000000\nXE: 54.727516\nYE: 69.813171\n10.944036\ntotal weight: 1.000000\nXE: 52.258442\nYE: 70.306625\n13.328080\ntotal weight: 1.000000\nXE: 50.623497\nYE: 71.474678\n15.323238\ntotal weight: 1.000000\nXE: 48.587318\nYE: 72.740685\n17.718643\nGPU Execution: 0.001877\nFREE TIME: 0.000015\nSEND TO SEND BACK: 0.000044\nSEND ARRAY X BACK: 0.000009\nSEND ARRAY Y BACK: 0.000009\nSEND WEIGHTS BACK: 0.000011\nInit: 45.277000\nMemAlloc: 0.003000\nHtoD: 0.011616\nExec: 1.306112\nDtoH: 0.026560\nClose: 0.067000\nTotal: 47.445000\nERROR: clEnqueueNDRangeKernel(kern",
+                "wall_time_seconds": 0.073,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Particle filter for Bayesian state estimation on GPU",
+        "domain": "signal processing",
+        "complexity": "particle filter (Bayesian estimation)",
+        "tags": [
+            "bayesian",
+            "opencl",
+            "particle-filter",
+            "particlefilter",
+            "rodinia",
+            "state-estimation"
+        ],
+        "multi_file": true,
+        "translation_complexity": "single_to_multi"
+    }
+}

@@ -1,0 +1,81 @@
+{
+  "source_spec": "rodinia-streamcluster-omp",
+  "target_spec": "rodinia-streamcluster-opencl",
+  "kernel": "streamcluster",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 872407046,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "10",
+    "20",
+    "256",
+    "65536",
+    "65536",
+    "1000",
+    "none",
+    "output.txt",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-26T07:59:34Z",
+  "prompt_tokens": 26083,
+  "completion_tokens": 2397,
+  "llm_response_time_seconds": 45.642,
+  "build_status": "pass",
+  "build_time_seconds": 0.679,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.187,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "",
+  "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Creating Kernel (clCreateKernel) \"memset_kernel\"\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 2.092,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "Kernels.cl": "typedef struct {\n    float weight;\n    long assign;\n    float cost;\n} Point_Struct;\n\n__kernel void dummy_kernel()\n{\n}\n\n__kernel void pgain_kernel(__global const Point_Struct *p,\n                           __global const float *coord,\n                           __global float *work_mem,\n                           __global const int *center_table,\n                           __global char *switch_membership,\n                           __local float *x_coord,\n                           const int num,\n                           const int dim,\n                           const long x,\n                           const int K)\n{\n    const int lid = (int)get_local_id(0);\n    const int lsize = (int)get_local_size(0);\n    const int gid = (int)get_global_id(0);\n\n    for (int d = lid; d < dim; d += lsize) {\n        x_coord[d] = coord[d * num + (int)x];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (gid >= num) return;\n\n    Point_Struct pt = p[gid];\n\n    float dist = 0.0f;\n    for (int d = 0; d < dim; d++) {\n        float diff = coord[d * num + gid] - x_coord[d];\n        dist += diff * diff;\n    }\n\n    float x_cost = dist * pt.weight;\n    float current_cost = pt.cost;\n    int base = gid * (K + 1);\n\n    if (x_cost < current_cost) {\n        switch_membership[gid] = '1';\n        work_mem[base + K] = x_cost - current_cost;\n    } else {\n        int assign = (int)pt.assign;\n        int cidx = center_table[assign];\n        work_mem[base + cidx] = current_cost - x_cost;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 45.642,
+      "prompt_tokens": 26083,
+      "completion_tokens": 2397,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "",
+      "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Creating Kernel (clCreateKernel) \"memset_kernel\"\n",
+      "extraction_fail": null
+    }
+  ]
+}

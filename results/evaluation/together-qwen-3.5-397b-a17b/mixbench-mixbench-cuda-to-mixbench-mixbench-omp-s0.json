@@ -1,0 +1,69 @@
+{
+  "source_spec": "mixbench-mixbench-cuda",
+  "target_spec": "mixbench-mixbench-omp",
+  "kernel": "mixbench",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 2112962740,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T04:06:36Z",
+  "prompt_tokens": 5447,
+  "completion_tokens": 3317,
+  "llm_response_time_seconds": 30.014,
+  "build_status": "fail",
+  "build_time_seconds": 0.493,
+  "build_error_snippet": "./mixbench/mixbench-src/mixbench-cpu/mix_kernels_cpu.cpp:8:10: fatal error: lcutil.h: No such file or directory\n    8 | #include \"lcutil.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\ngmake[2]: *** [CMakeFiles/mixbench-cpu.dir/build.make:90: CMakeFiles/mixbench-cpu.dir/mix_kernels_cpu.cpp.o] Error 1\ngmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/mixbench-cpu.dir/all] Error 2\ngmake: *** [Makefile:91: all] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: pu.dir/build.make:90: CMakeFiles/mixbench-cpu.dir/mix_kernels_cpu.cpp.o] Error 1\ngmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/mixbench-cpu.dir/all] Error 2\ngmake: *** [Makefile:91: all] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": 120.0,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "mix_kernels_cpu.cpp": "#include <stdio.h>\n#include <stdlib.h>\n#include <math.h>\n#include <omp.h>\n#include <stdint.h>\n#include <string.h>\n#include <chrono>\n#include \"lcutil.h\"\n#include \"mix_kernels_cpu.h\"\n#include \"version_info.h\"\n\n#define ELEMENTS_PER_THREAD (8)\n#define FUSION_DEGREE (4)\n#define BLOCK_SIZE (256)\n\ntemplate<class T>\ninline T conv_int(const int i){ return static_cast<T>(i); }\n\ntemplate<class T>\ninline T mad(const T a, const T b, const T c){ return a*b+c; }\n\ntemplate<class T>\ninline bool equal(const T a, const T b){ return a==b; }\n\ntemplate <class T, unsigned int granularity, unsigned int fusion_degree, unsigned int compute_iterations, bool TemperateUnroll>\nvoid benchmark_func_cpu(T seed, T *data, size_t total_elements, int num_threads){\n\tconst int stride = BLOCK_SIZE;\n\tconst size_t total_work = total_elements / sizeof(T);\n\tconst size_t per_thread = total_work / num_threads;\n\n\t#pragma omp parallel for\n\tfor(int t=0; t<num_threads; t++){\n\t\tsize_t idx = t * per_thread;\n\t\tsize_t thread_end = (t == num_threads-1) ? total_work : (t+1) * per_thread;\n\t\t\n\t\tT tmps[granularity];\n\t\tfor(size_t k=0; k<fusion_degree; k++){\n\t\t\tfor(size_t j=0; j<granularity; j++){\n\t\t\t\tsize_t access_idx = idx + j*stride + k*total_work;\n\t\t\t\tif(access_idx < total_work){\n\t\t\t\t\ttmps[j] = data[access_idx];\n\t\t\t\t\t\n\t\t\t\t\tfor(unsigned int i=0; i<compute_iterations; i++){\n\t\t\t\t\t\ttmps[j] = mad(tmps[j], tmps[j], seed);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\t\n\t\t\tT sum = conv_int<T>(0);\n\t\t\tfor(size_t j=0; j<granularity; j+=2){\n\t\t\t\tif(j+1 < granularity){\n\t\t\t\t\tsum = mad(tmps[j], tmps[j+1], sum);\n\t\t\t\t}\n\t\t\t}\n\t\t\t\n\t\t\tif(equal(sum, conv_int<T>(-1))){\n\t\t\t\tsize_t store_idx = idx + k*total_work;\n\t\t\t\tif(store_idx < total_work){\n\t\t\t\t\tdata[store_idx] = sum;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}\n\ndouble get_time_ms(){\n\tauto now = std::chrono::high_resolution_clock::now();\n\tauto ms = std::chrono::duration<double, std::milli>(now.time_since_epoch()).count();\n\treturn ms;\n}\n\nvoid runbench_warmup_cpu(double *cd, size_t size){\n\tconst size_t reduced_grid_size = size/(ELEMENTS_PER_THREAD)/128;\n\tconst int TOTAL_REDUCED_BLOCKS = reduced_grid_size/BLOCK_SIZE;\n\tconst int num_threads = omp_get_max_threads();\n\n\tbenchmark_func_cpu< short, ELEMENTS_PER_THREAD, FUSION_DEGREE, 0, true >(1, (short*)cd, size, num_threads);\n}\n\nint out_config = 1;\n\ntemplate<unsigned int compute_iterations>\nvoid runbench_cpu(double *cd, size_t size, bool doHalfs){\n\tconst size_t compute_grid_size = size/ELEMENTS_PER_THREAD/FUSION_DEGREE;\n\tconst int TOTAL_BLOCKS = compute_grid_size/BLOCK_SIZE;\n\tconst long long computations = (ELEMENTS_PER_THREAD*(long long)compute_grid_size+(2*ELEMENTS_PER_THREAD*compute_iterations)*(long long)compute_grid_size)*FUSION_DEGREE;\n\tconst long long memoryoperations = size;\n\tconst int num_threads = omp_get_max_threads();\n\n\tdouble start_time, end_time;\n\tdouble kernel_time_mad_sp, kernel_time_mad_dp, kernel_time_mad_hp, kernel_time_mad_int;\n\n\tstart_time = omp_get_wtime();\n\tbenchmark_func_cpu< float, ELEMENTS_PER_THREAD, FUSION_DEGREE, compute_iterations, false >(1.0f, (float*)cd, size, num_threads);\n\tend_time = omp_get_wtime();\n\tkernel_time_mad_sp = (end_time - start_time) * 1000.0;\n\n\tstart_time = omp_get_wtime();\n\tbenchmark_func_cpu< double, ELEMENTS_PER_THREAD, FUSION_DEGREE, compute_iterations, false >(1.0, cd, size, num_threads);\n\tend_time = omp_get_wtime();\n\tkernel_time_mad_dp = (end_time - start_time) * 1000.0;\n\n\tkernel_time_mad_hp = 0.0;\n\tif(doHalfs){\n\t\tstart_time = omp_get_wtime();\n\t\tbenchmark_func_cpu< uint16_t, ELEMENTS_PER_THREAD, FUSION_DEGREE, compute_iterations, false >(15360, (uint16_t*)cd, size, num_threads);\n\t\tend_time = omp_get_wtime();\n\t\tkernel_time_mad_hp = (end_time - start_time) * 1000.0;\n\t}\n\n\tstart_time = omp_get_wtime();\n\tbenchmark_func_cpu< int, ELEMENTS_PER_THREAD, FUSION_DEGREE, compute_iterations, true >(1, (int*)cd, size, num_threads);\n\tend_time = omp_get_wtime();\n\tkernel_time_mad_int = (end_time - start_time) * 1000.0;\n\n\tprintf(\"         %4d,   %8.3f,%8.2f,%8.2f,%7.2f,   %8.3f,%8.2f,%8.2f,%7.2f,   %8.3f,%8.2f,%8.2f,%7.2f,  %8.3f,%8.2f,%8.2f,%7.2f\\n\",\n\t\tcompute_iterations,\n\t\t((double)computations)/((double)memoryoperations*sizeof(float)),\n\t\tkernel_time_mad_sp,\n\t\t((double)computations)/kernel_time_mad_sp*1000./(double)(1000*1000*1000),\n\t\t((double)memoryoperations*sizeof(float))/kernel_time_mad_sp*1000./(1000.*1000.*1000.),\n\t\t((double)computations)/((double)memoryoperations*sizeof(double)),\n\t\tkernel_time_mad_dp,\n\t\t((double)computations)/kernel_time_mad_dp*1000./(double)(1000*1000*1000),\n\t\t((double)memoryoperations*sizeof(double))/kernel_time_mad_dp*1000./(1000.*1000.*1000.),\n\t\t((double)2*computations)/((double)memoryoperations*sizeof(uint16_t)),\n\t\tkernel_time_mad_hp,\n\t\t((double)2*computations)/kernel_time_mad_hp*1000./(double)(1000*1000*1000),\n\t\t((double)memoryoperations*sizeof(uint16_t))/kernel_time_mad_hp*1000./(1000.*1000.*1000.),\n\t\t((double)computations)/((double)memoryoperations*sizeof(int)),\n\t\tkernel_time_mad_int,\n\t\t((double)computations)/kernel_time_mad_int*1000./(double)(1000*1000*1000),\n\t\t((double)memoryoperations*sizeof(int))/kernel_time_mad_int*1000./(1000.*1000.*1000.) );\n}\n\nextern \"C\" void mixbenchCPU(double *c, size_t size){\n\tconst char *benchtype = \"compute with global memory (block strided)\";\n\n\tprintf(\"mixbench-cpu (%s)\\n\", VERSION_INFO);\n\tprintf(\"Trade-off type:       %s\\n\", benchtype);\n\tprintf(\"Elements per thread:  %d\\n\", ELEMENTS_PER_THREAD);\n\tprintf(\"Thread fusion degree: %d\\n\", FUSION_DEGREE);\n\t\n\tconst int hardware_concurrency = omp_get_max_threads();\n\tprintf(\"Total threads:        %d\\n\", hardware_concurrency);\n\t\n\tbool doHalfs = true;\n\n\tprintf(\"Buffer size:          %luMB\\n\", size / (1024 * 1024));\n\n\tprintf(\"----------------------------------------------------------------------------- CSV data -----------------------------------------------------------------------------\\n\");\n\tprintf(\"Experiment ID, Single Precision ops,,,,              Double precision ops,,,,              Half precision ops,,,,                Integer operations,,, \\n\");\n\tprintf(\"Compute iters, Flops/byte, ex.time,  GFLOPS, GB/sec, Flops/byte, ex.time,  GFLOPS, GB/sec, Flops/byte, ex.time,  GFLOPS, GB/sec, Iops/byte, ex.time,   GIOPS, GB/sec\\n\");\n\n\trunbench_warmup_cpu(c, size);\n\n\trunbench_cpu<0>(c, size, doHalfs);\n\trunbench_cpu<1>(c, size, doHalfs);\n\trunbench_cpu<2>(c, size, doHalfs);\n\trunbench_cpu<3>(c, size, doHalfs);\n\trunbench_cpu<4>(c, size, doHalfs);\n\trunbench_cpu<5>(c, size, doHalfs);\n\trunbench_cpu<6>(c, size, doHalfs);\n\trunbench_cpu<7>(c, size, doHalfs);\n\trunbench_cpu<8>(c, size, doHalfs);\n\trunbench_cpu<9>(c, size, doHalfs);\n\trunbench_cpu<10>(c, size, doHalfs);\n\trunbench_cpu<11>(c, size, doHalfs);\n\trunbench_cpu<12>(c, size, doHalfs);\n\trunbench_cpu<13>(c, size, doHalfs);\n\trunbench_cpu<14>(c, size, doHalfs);\n\trunbench_cpu<15>(c, size, doHalfs);\n\trunbench_cpu<16>(c, size, doHalfs);\n\trunbench_cpu<17>(c, size, doHalfs);\n\trunbench_cpu<18>(c, size, doHalfs);\n\trunbench_cpu<20>(c, size, doHalfs);\n\trunbench_cpu<22>(c, size, doHalfs);\n\trunbench_cpu<24>(c, size, doHalfs);\n\trunbench_cpu<28>(c, size, doHalfs);\n\trunbench_cpu<32>(c, size, doHalfs);\n\trunbench_cpu<40>(c, size, doHalfs);\n\trunbench_cpu<48>(c, size, doHalfs);\n\trunbench_cpu<56>(c, size, doHalfs);\n\trunbench_cpu<64>(c, size, doHalfs);\n\trunbench_cpu<80>(c, size, doHalfs);\n\trunbench_cpu<96>(c, size, doHalfs);\n\trunbench_cpu<128>(c, size, doHalfs);\n\trunbench_cpu<192>(c, size, doHalfs);\n\trunbench_cpu<256>(c, size, doHalfs);\n\trunbench_cpu<512>(c, size, doHalfs);\n\trunbench_cpu<1024>(c, size, doHalfs);\n\n\tprintf(\"--------------------------------------------------------------------------------------------------------------------------------------------------------------------\\n\");\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels_cpu.cpp"
+  ],
+  "target_files_extracted": [
+    "mix_kernels_cpu.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 30.014,
+      "prompt_tokens": 5447,
+      "completion_tokens": 3317,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "./mixbench/mixbench-src/mixbench-cpu/mix_kernels_cpu.cpp:8:10: fatal error: lcutil.h: No such file or directory\n    8 | #include \"lcutil.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\ngmake[2]: *** [CMakeFiles/mixbench-cpu.dir/build.make:90: CMakeFiles/mixbench-cpu.dir/mix_kernels_cpu.cpp.o] Error 1\ngmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/mixbench-cpu.dir/all] Error 2\ngmake: *** [Makefile:91: all] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

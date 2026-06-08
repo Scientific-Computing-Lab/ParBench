@@ -1,0 +1,82 @@
+{
+  "source_spec": "rodinia-srad-omp",
+  "target_spec": "rodinia-srad-cuda",
+  "kernel": "srad",
+  "model": "azure-gpt-5.4",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 473203659,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "512",
+    "512",
+    "0",
+    "127",
+    "0",
+    "127",
+    "2",
+    "0.5",
+    "2"
+  ],
+  "timestamp": "2026-04-27T01:01:13Z",
+  "prompt_tokens": 2392,
+  "completion_tokens": 4747,
+  "llm_response_time_seconds": 72.69,
+  "build_status": "pass",
+  "build_time_seconds": 0.557,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.166,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Randomizing the input matrix\nStart the SRAD main loop\nComputation Done\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.068,
+  "translated_wall_time_seconds": 0.166,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.4096,
+  "translated_files": {
+    "srad.cu": "#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <cuda_runtime.h>\n\n#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\nstatic inline void cuda_check(cudaError_t err, const char *file, int line) {\n    if (err != cudaSuccess) {\n        fprintf(stderr, \"CUDA error at %s:%d: %s\\n\", file, line, cudaGetErrorString(err));\n        exit(1);\n    }\n}\n\n#define CUDA_CHECK(x) cuda_check((x), __FILE__, __LINE__)\n\nvoid random_matrix(float *I, int data_3, int tmp_4);\n\nvoid usage(int argc, char **argv)\n{\n    fprintf(stderr, \"Usage: %s <rows> <cols> <y1> <y2> <x1> <x2> <no. of threads><lamda> <no. of iter>\\n\", argv[0]);\n    fprintf(stderr, \"\\t<rows>   - number of rows\\n\");\n    fprintf(stderr, \"\\t<cols>    - number of cols\\n\");\n    fprintf(stderr, \"\\t<y1> \\t - y1 value of the speckle\\n\");\n    fprintf(stderr, \"\\t<y2>      - y2 value of the speckle\\n\");\n    fprintf(stderr, \"\\t<x1>       - x1 value of the speckle\\n\");\n    fprintf(stderr, \"\\t<x2>       - x2 value of the speckle\\n\");\n    fprintf(stderr, \"\\t<no. of threads>  - no. of threads\\n\");\n    fprintf(stderr, \"\\t<lamda>   - lambda (0,1)\\n\");\n    fprintf(stderr, \"\\t<no. of iter>   - number of iterations\\n\");\n\n    exit(1);\n}\n\n__global__ void compute_coeff_kernel(const float *J, float *dN, float *dS, float *dW, float *dE,\n                                     float *c, int rows, int cols, float elem_9)\n{\n    int j = blockIdx.x * blockDim.x + threadIdx.x;\n    int i = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (i < rows && j < cols) {\n        int k = i * cols + j;\n        float Jc = J[k];\n\n        int iN = (i == 0) ? 0 : (i - 1);\n        int iS = (i == rows - 1) ? (rows - 1) : (i + 1);\n        int jW = (j == 0) ? 0 : (j - 1);\n        int jE = (j == cols - 1) ? (cols - 1) : (j + 1);\n\n        float dn = J[iN * cols + j] - Jc;\n        float ds = J[iS * cols + j] - Jc;\n        float dw = J[i * cols + jW] - Jc;\n        float de = J[i * cols + jE] - Jc;\n\n        dN[k] = dn;\n        dS[k] = ds;\n        dW[k] = dw;\n        dE[k] = de;\n\n        float G2 = (dn * dn + ds * ds + dw * dw + de * de) / (Jc * Jc);\n        float L = (dn + ds + dw + de) / Jc;\n\n        float num = (0.5f * G2) - ((1.0f / 16.0f) * (L * L));\n        float den = 1.0f + (0.25f * L);\n        float qsqr = num / (den * den);\n\n        den = (qsqr - elem_9) / (elem_9 * (1.0f + elem_9));\n        float ck = 1.0f / (1.0f + den);\n\n        if (0.0f > ck) {\n            ck = 0.0f;\n        } else if (1.0f < ck) {\n            ck = 1.0f;\n        }\n\n        c[k] = ck;\n    }\n}\n\n__global__ void update_kernel(float *J, const float *c, const float *dN, const float *dS,\n                              const float *dW, const float *dE, int rows, int cols, float lambda)\n{\n    int j = blockIdx.x * blockDim.x + threadIdx.x;\n    int i = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if (i < rows && j < cols) {\n        int k = i * cols + j;\n\n        int iS = (i == rows - 1) ? (rows - 1) : (i + 1);\n        int jE = (j == cols - 1) ? (cols - 1) : (j + 1);\n\n        float cN = c[k];\n        float cS = c[iS * cols + j];\n        float cW = c[k];\n        float cE = c[i * cols + jE];\n\n        float D = cN * dN[k] + cS * dS[k] + cW * dW[k] + cE * dE[k];\n\n        J[k] = J[k] + 0.25f * lambda * D;\n    }\n}\n\nint main(int argc, char* argv[])\n{\n    int rows, cols, v_13, v_18, data_5 = 10, data_11, k;\n    float *I, *J, elem_9, elem_16, x_10, val_7, x_2, tmp_12;\n    int x_0, var_1, tmp_14, v_17;\n    float lambda;\n    int i, j;\n    int var_15;\n\n    float *d_J = NULL, *d_c = NULL, *d_dN = NULL, *d_dS = NULL, *d_dW = NULL, *d_dE = NULL;\n\n    if (10 == argc)\n    {\n        rows = atoi(argv[1]);\n        cols = atoi(argv[2]);\n        if ((0 != rows % 16) || (0 != cols % 16)) {\n            fprintf(stderr, \"rows and cols must be multiples of 16\\n\");\n            exit(1);\n        }\n        x_0 = atoi(argv[3]);\n        var_1 = atoi(argv[4]);\n        tmp_14 = atoi(argv[5]);\n        v_17 = atoi(argv[6]);\n        var_15 = atoi(argv[7]);\n        lambda = (float)atof(argv[8]);\n        data_5 = atoi(argv[9]);\n    }\n    else {\n        usage(argc, argv);\n    }\n\n    (void)var_15;\n\n    v_13 = cols * rows;\n    v_18 = (var_1 - x_0 + 1) * (v_17 - tmp_14 + 1);\n\n    I = (float *)malloc(v_13 * sizeof(float));\n    J = (float *)malloc(v_13 * sizeof(float));\n\n    if (I == NULL || J == NULL) {\n        fprintf(stderr, \"memory allocation error\\n\");\n        free(I);\n        free(J);\n        return 1;\n    }\n\n    CUDA_CHECK(cudaMalloc((void **)&d_J,  v_13 * sizeof(float)));\n    CUDA_CHECK(cudaMalloc((void **)&d_c,  v_13 * sizeof(float)));\n    CUDA_CHECK(cudaMalloc((void **)&d_dN, v_13 * sizeof(float)));\n    CUDA_CHECK(cudaMalloc((void **)&d_dS, v_13 * sizeof(float)));\n    CUDA_CHECK(cudaMalloc((void **)&d_dW, v_13 * sizeof(float)));\n    CUDA_CHECK(cudaMalloc((void **)&d_dE, v_13 * sizeof(float)));\n\n    printf(\"Randomizing the input matrix\\n\");\n\n    random_matrix(I, rows, cols);\n\n    for (k = 0; v_13 > k; k++) {\n        J[k] = expf(I[k]);\n    }\n\n    CUDA_CHECK(cudaMemcpy(d_J, J, v_13 * sizeof(float), cudaMemcpyHostToDevice));\n\n    printf(\"Start the SRAD main loop\\n\");\n\n    dim3 block(BLOCK_SIZE, BLOCK_SIZE);\n    dim3 grid((cols + block.x - 1) / block.x, (rows + block.y - 1) / block.y);\n\n    for (data_11 = 0; data_5 > data_11; data_11++) {\n        elem_16 = 0.0f;\n        x_10 = 0.0f;\n        for (i = x_0; var_1 >= i; i++) {\n            for (j = tmp_14; v_17 >= j; j++) {\n                val_7 = J[i * cols + j];\n                elem_16 = elem_16 + val_7;\n                x_10 = x_10 + (val_7 * val_7);\n            }\n        }\n        x_2 = elem_16 / (float)v_18;\n        tmp_12 = (x_10 / (float)v_18) - x_2 * x_2;\n        elem_9 = tmp_12 / (x_2 * x_2);\n\n        compute_coeff_kernel<<<grid, block>>>(d_J, d_dN, d_dS, d_dW, d_dE, d_c, rows, cols, elem_9);\n        CUDA_CHECK(cudaGetLastError());\n\n        update_kernel<<<grid, block>>>(d_J, d_c, d_dN, d_dS, d_dW, d_dE, rows, cols, lambda);\n        CUDA_CHECK(cudaGetLastError());\n\n        CUDA_CHECK(cudaMemcpy(J, d_J, v_13 * sizeof(float), cudaMemcpyDeviceToHost));\n    }\n\n#ifdef OUTPUT\n    for (int i = 0; i < rows; i++) {\n        for (int j = 0; j < cols; j++) {\n            printf(\"%.5f \", J[i * cols + j]);\n        }\n        printf(\"\\n\");\n    }\n#endif\n\n    printf(\"Computation Done\\n\");\n\n    free(I);\n    free(J);\n\n    CUDA_CHECK(cudaFree(d_J));\n    CUDA_CHECK(cudaFree(d_c));\n    CUDA_CHECK(cudaFree(d_dN));\n    CUDA_CHECK(cudaFree(d_dS));\n    CUDA_CHECK(cudaFree(d_dW));\n    CUDA_CHECK(cudaFree(d_dE));\n\n    return 0;\n}\n\nvoid random_matrix(float *I, int x_8, int tmp_6)\n{\n    srand(7);\n\n    for (int i = 0; x_8 > i; i++) {\n        for (int j = 0; tmp_6 > j; j++) {\n            I[i * tmp_6 + j] = rand() / (float)RAND_MAX;\n#ifdef OUTPUT\n#endif\n        }\n#ifdef OUTPUT\n#endif\n    }\n}\n",
+    "srad_kernel.cu": "// empty translation unit\n"
+  },
+  "target_files_expected": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "target_files_extracted": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 72.69,
+      "prompt_tokens": 2392,
+      "completion_tokens": 4747,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

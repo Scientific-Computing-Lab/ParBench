@@ -1,0 +1,3852 @@
+[
+  {
+    "spec_id": "hecbench-convolution1d-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.239,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-convolution1d-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.22,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-convolution1d-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.228,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-convolution1d-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.228,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-convolution1d-omp_target",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.945,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-convolution1d-omp_target",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.94,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-convolution1d-omp_target",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.925,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-convolution1d-omp_target",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.933,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.768,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.797,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.789,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.793,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 1.602,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 1.545,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 1.58,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 1.504,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-omp_target",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.754,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-omp_target",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.725,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-omp_target",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "Pattern 'PASS' NOT found in stdout. GPU Floyd-Warshall results compared against CPU reference via memcmp",
+    "wall_time_seconds": 0.747,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-floydwarshall-omp_target",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "Pattern 'PASS' NOT found in stdout. GPU Floyd-Warshall results compared against CPU reference via memcmp",
+    "wall_time_seconds": 0.731,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-heat2d-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.295,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-heat2d-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.297,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-heat2d-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.296,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-heat2d-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.297,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-heat2d-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.273,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-heat2d-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.278,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-heat2d-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.271,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-heat2d-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.278,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-heat2d-omp_target",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.184,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-heat2d-omp_target",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.199,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-heat2d-omp_target",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "Pattern 'PASS' NOT found in stdout. GPU Laplacian result compared against CPU reference with periodic boundary conditions",
+    "wall_time_seconds": 0.134,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-heat2d-omp_target",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "Pattern 'PASS' NOT found in stdout. GPU Laplacian result compared against CPU reference with periodic boundary conditions",
+    "wall_time_seconds": 1.069,
+    "exit_code": -11,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "iso2dfd.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.17,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "iso2dfd.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.169,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "iso2dfd.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "iso2dfd.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.172,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "iso2dfd.cu": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "iso2dfd.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.172,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "iso2dfd.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.075,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "iso2dfd.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.114,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "iso2dfd.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "iso2dfd.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.098,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "iso2dfd.cpp": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "iso2dfd.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.079,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-omp_target",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "iso2dfd.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.166,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-omp_target",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "iso2dfd.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.161,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-omp_target",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "iso2dfd.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "iso2dfd.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "Pattern 'PASS' NOT found in stdout. GPU wavefield compared to CPU reference via within_epsilon (tolerance 0.1); prints PASS or FAIL",
+    "wall_time_seconds": 0.163,
+    "exit_code": 1,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-iso2dfd-omp_target",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "iso2dfd.cpp": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "iso2dfd.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.165,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-jacobi-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.545,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-jacobi-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.546,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-jacobi-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.546,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-jacobi-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.555,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-jacobi-omp_target",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 2.402,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-jacobi-omp_target",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 2.4,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-jacobi-omp_target",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.15,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-jacobi-omp_target",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.153,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-md-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 3 strategies passed: stdout_pattern, numeric_comparison, exit_code",
+    "wall_time_seconds": 2.871,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-md-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 3 strategies passed: stdout_pattern, numeric_comparison, exit_code",
+    "wall_time_seconds": 2.863,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-md-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 3 strategies passed: stdout_pattern, numeric_comparison, exit_code",
+    "wall_time_seconds": 2.849,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-md-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 3 strategies passed: stdout_pattern, numeric_comparison, exit_code",
+    "wall_time_seconds": 2.786,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-md-omp_target",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 3 strategies passed: stdout_pattern, numeric_comparison, exit_code",
+    "wall_time_seconds": 2.613,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-md-omp_target",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 3 strategies passed: stdout_pattern, numeric_comparison, exit_code",
+    "wall_time_seconds": 2.617,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-md-omp_target",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "actual=7.76111 differs from expected=0.0 by more than tolerance 1e-09",
+    "wall_time_seconds": 2.519,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-md-omp_target",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "actual=7.76111 differs from expected=0.0 by more than tolerance 1e-09",
+    "wall_time_seconds": 2.558,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-nqueen-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.297,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-nqueen-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.278,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-nqueen-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.303,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-nqueen-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.304,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-nqueen-omp_target",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.311,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-nqueen-omp_target",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.31,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-nqueen-omp_target",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "Pattern 'PASS' NOT found in stdout. Verifies qtd_sols_global==2279184 and tree_size==171129071 for size=15, depth=7",
+    "wall_time_seconds": 0.196,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-nqueen-omp_target",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "Pattern 'PASS' NOT found in stdout. Verifies qtd_sols_global==2279184 and tree_size==171129071 for size=15, depth=7",
+    "wall_time_seconds": 0.195,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-page-rank-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [],
+      "reference.h": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 3.887,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-page-rank-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [],
+      "reference.h": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 3.827,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-page-rank-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition"
+      ],
+      "reference.h": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu",
+      "reference.h"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 4.047,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-page-rank-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "reference.h": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu",
+      "reference.h"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 3.826,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-page-rank-omp_target",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 3.881,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-page-rank-omp_target",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 3.898,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-page-rank-omp_target",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 3.76,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-page-rank-omp_target",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 3.535,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-scan-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.484,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-scan-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.474,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-scan-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.483,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-scan-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.489,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-scan-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 6.061,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-scan-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 6.098,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-scan-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 6.105,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-scan-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 6.118,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-stencil1d-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "stencil_1d.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.757,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-stencil1d-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "stencil_1d.cu": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.669,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-stencil1d-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "stencil_1d.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "stencil_1d.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.651,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-stencil1d-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "stencil_1d.cu": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "stencil_1d.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.658,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-stencil1d-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "stencil_1d.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 5.504,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-stencil1d-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "stencil_1d.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 5.413,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-stencil1d-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "stencil_1d.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "stencil_1d.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 5.322,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "hecbench-stencil1d-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "stencil_1d.cpp": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "stencil_1d.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 5.248,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "mixbench-mixbench-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main-cuda.cpp": [],
+      "mix_kernels_cuda.cu": [],
+      "mix_kernels_cuda.h": [],
+      "lcutil.h": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "lcutil.h"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.767,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "mixbench-mixbench-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main-cuda.cpp": [],
+      "mix_kernels_cuda.cu": [],
+      "mix_kernels_cuda.h": [],
+      "lcutil.h": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "lcutil.h"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.76,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "mixbench-mixbench-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main-cuda.cpp": [],
+      "mix_kernels_cuda.cu": [
+        "ArithmeticTransform"
+      ],
+      "mix_kernels_cuda.h": [],
+      "lcutil.h": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "mix_kernels_cuda.cu",
+      "lcutil.h"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.762,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "mixbench-mixbench-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main-cuda.cpp": [],
+      "mix_kernels_cuda.cu": [
+        "ArithmeticTransform",
+        "SwapCondition"
+      ],
+      "mix_kernels_cuda.h": [
+        "ChangeNames"
+      ],
+      "lcutil.h": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "mix_kernels_cuda.cu",
+      "mix_kernels_cuda.h",
+      "lcutil.h"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.754,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "mixbench-mixbench-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [],
+      "mix_kernels_cpu.cpp": [],
+      "mix_kernels_cpu.h": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 18.845,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "mixbench-mixbench-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [],
+      "mix_kernels_cpu.cpp": [],
+      "mix_kernels_cpu.h": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 18.875,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "mixbench-mixbench-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition"
+      ],
+      "mix_kernels_cpu.cpp": [],
+      "mix_kernels_cpu.h": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 18.971,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "mixbench-mixbench-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cpp": [
+        "SwapCondition",
+        "ChangeNames"
+      ],
+      "mix_kernels_cpu.cpp": [
+        "SwapCondition"
+      ],
+      "mix_kernels_cpu.h": []
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp",
+      "mix_kernels_cpu.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 19.259,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "mixbench-mixbench-opencl",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main-ocl.cpp": [],
+      "mix_kernels_ocl.cpp": [],
+      "mix_kernels_ocl.h": [],
+      "loclutil.h": [
+        "SwapCondition"
+      ],
+      "mix_kernels.cl": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "loclutil.h"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 1.158,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "mixbench-mixbench-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main-ocl.cpp": [],
+      "mix_kernels_ocl.cpp": [],
+      "mix_kernels_ocl.h": [],
+      "loclutil.h": [
+        "SwapCondition"
+      ],
+      "mix_kernels.cl": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "loclutil.h"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 1.146,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "mixbench-mixbench-opencl",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main-ocl.cpp": [
+        "SwapCondition"
+      ],
+      "mix_kernels_ocl.cpp": [],
+      "mix_kernels_ocl.h": [],
+      "loclutil.h": [],
+      "mix_kernels.cl": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main-ocl.cpp",
+      "mix_kernels.cl"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 1.14,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "mixbench-mixbench-opencl",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main-ocl.cpp": [
+        "SwapCondition"
+      ],
+      "mix_kernels_ocl.cpp": [
+        "SwapCondition"
+      ],
+      "mix_kernels_ocl.h": [],
+      "loclutil.h": [
+        "SwapCondition"
+      ],
+      "mix_kernels.cl": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main-ocl.cpp",
+      "mix_kernels_ocl.cpp",
+      "loclutil.h",
+      "mix_kernels.cl"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 1.156,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [],
+      "io.cu": [],
+      "simulation.cu": [],
+      "init.cu": [
+        "SwapCondition"
+      ],
+      "material.cu": [],
+      "utils.cu": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "init.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 2.679,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [],
+      "io.cu": [],
+      "simulation.cu": [],
+      "init.cu": [
+        "SwapCondition"
+      ],
+      "material.cu": [],
+      "utils.cu": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "init.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 2.661,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition"
+      ],
+      "io.cu": [
+        "SwapCondition"
+      ],
+      "simulation.cu": [
+        "SwapCondition"
+      ],
+      "init.cu": [
+        "ArithmeticTransform"
+      ],
+      "material.cu": [],
+      "utils.cu": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu",
+      "io.cu",
+      "simulation.cu",
+      "init.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 2.67,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.cu": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "io.cu": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "simulation.cu": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "init.cu": [
+        "ArithmeticTransform",
+        "SwapCondition"
+      ],
+      "material.cu": [
+        "SwapCondition"
+      ],
+      "utils.cu": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cu",
+      "io.cu",
+      "simulation.cu",
+      "init.cu",
+      "material.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 2.67,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.c": [],
+      "io.c": [],
+      "simulation.c": [],
+      "init.c": [
+        "SwapCondition"
+      ],
+      "material.c": [
+        "ChangeNames"
+      ],
+      "utils.c": []
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "init.c",
+      "material.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 1.635,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.c": [],
+      "io.c": [],
+      "simulation.c": [],
+      "init.c": [
+        "SwapCondition"
+      ],
+      "material.c": [
+        "ChangeNames"
+      ],
+      "utils.c": []
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "init.c",
+      "material.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 1.638,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.c": [
+        "SwapCondition"
+      ],
+      "io.c": [
+        "SwapCondition"
+      ],
+      "simulation.c": [
+        "SwapCondition"
+      ],
+      "init.c": [
+        "ChangeNames",
+        "SwapCondition"
+      ],
+      "material.c": [
+        "SwapCondition"
+      ],
+      "utils.c": []
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.c",
+      "io.c",
+      "simulation.c",
+      "init.c",
+      "material.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 1.632,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.c": [
+        "SwapCondition",
+        "ChangeNames",
+        "ArithmeticTransform"
+      ],
+      "io.c": [
+        "SwapCondition",
+        "ArithmeticTransform",
+        "ChangeNames"
+      ],
+      "simulation.c": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "init.c": [
+        "ChangeNames",
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "material.c": [
+        "SwapCondition",
+        "ChangeNames",
+        "ArithmeticTransform"
+      ],
+      "utils.c": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.c",
+      "io.c",
+      "simulation.c",
+      "init.c",
+      "material.c",
+      "utils.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 1.635,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-omp_target",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.c": [],
+      "io.c": [],
+      "simulation.c": [],
+      "init.c": [
+        "SwapCondition"
+      ],
+      "material.c": [
+        "ChangeNames"
+      ],
+      "utils.c": []
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "init.c",
+      "material.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 2.195,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-omp_target",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.c": [],
+      "io.c": [],
+      "simulation.c": [],
+      "init.c": [
+        "SwapCondition"
+      ],
+      "material.c": [
+        "ChangeNames"
+      ],
+      "utils.c": []
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "init.c",
+      "material.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 2.193,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-omp_target",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.c": [
+        "SwapCondition"
+      ],
+      "io.c": [],
+      "simulation.c": [
+        "SwapCondition"
+      ],
+      "init.c": [
+        "SwapCondition"
+      ],
+      "material.c": [
+        "SwapCondition"
+      ],
+      "utils.c": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.c",
+      "simulation.c",
+      "init.c",
+      "material.c",
+      "utils.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 2.195,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-omp_target",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.c": [
+        "SwapCondition",
+        "ChangeNames",
+        "ArithmeticTransform"
+      ],
+      "io.c": [
+        "SwapCondition",
+        "ArithmeticTransform",
+        "ChangeNames"
+      ],
+      "simulation.c": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "init.c": [
+        "ChangeNames",
+        "ArithmeticTransform",
+        "SwapCondition"
+      ],
+      "material.c": [
+        "ChangeNames",
+        "SwapCondition"
+      ],
+      "utils.c": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.c",
+      "io.c",
+      "simulation.c",
+      "init.c",
+      "material.c",
+      "utils.c"
+    ],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "Pattern 'Verification checksum: \\d+ \\(Valid\\)' NOT found in stdout. RSBench self-verification reports valid checksum",
+    "wall_time_seconds": 0.24,
+    "exit_code": 1,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-opencl",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.c": [],
+      "io.c": [],
+      "simulation.c": [],
+      "init.c": [
+        "SwapCondition"
+      ],
+      "material.c": [],
+      "utils.c": [],
+      "cl_utils.c": [],
+      "kernel.cl": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "init.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 2.702,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.c": [],
+      "io.c": [],
+      "simulation.c": [],
+      "init.c": [
+        "SwapCondition"
+      ],
+      "material.c": [],
+      "utils.c": [],
+      "cl_utils.c": [],
+      "kernel.cl": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "init.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 2.711,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-opencl",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.c": [
+        "SwapCondition"
+      ],
+      "io.c": [],
+      "simulation.c": [
+        "SwapCondition"
+      ],
+      "init.c": [
+        "ArithmeticTransform"
+      ],
+      "material.c": [
+        "SwapCondition"
+      ],
+      "utils.c": [],
+      "cl_utils.c": [
+        "SwapCondition"
+      ],
+      "kernel.cl": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.c",
+      "simulation.c",
+      "init.c",
+      "material.c",
+      "cl_utils.c",
+      "kernel.cl"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 2.704,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rsbench-rsbench-opencl",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "main.c": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "io.c": [
+        "ArithmeticTransform",
+        "SwapCondition"
+      ],
+      "simulation.c": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "init.c": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "material.c": [
+        "SwapCondition"
+      ],
+      "utils.c": [],
+      "cl_utils.c": [
+        "SwapCondition"
+      ],
+      "kernel.cl": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.c",
+      "io.c",
+      "simulation.c",
+      "init.c",
+      "material.c",
+      "cl_utils.c",
+      "kernel.cl"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 2.721,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-cuda",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.cu": [],
+      "io.cu": [],
+      "Simulation.cu": [],
+      "GridInit.cu": [
+        "SwapCondition"
+      ],
+      "XSutils.cu": [],
+      "Materials.cu": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "GridInit.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.452,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-cuda",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.cu": [],
+      "io.cu": [],
+      "Simulation.cu": [],
+      "GridInit.cu": [
+        "SwapCondition"
+      ],
+      "XSutils.cu": [],
+      "Materials.cu": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "GridInit.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.453,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-cuda",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.cu": [
+        "SwapCondition"
+      ],
+      "io.cu": [],
+      "Simulation.cu": [
+        "SwapCondition"
+      ],
+      "GridInit.cu": [],
+      "XSutils.cu": [],
+      "Materials.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "Main.cu",
+      "Simulation.cu",
+      "Materials.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.467,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-cuda",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.cu": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "io.cu": [
+        "SwapCondition"
+      ],
+      "Simulation.cu": [
+        "ArithmeticTransform",
+        "SwapCondition"
+      ],
+      "GridInit.cu": [
+        "SwapCondition"
+      ],
+      "XSutils.cu": [
+        "SwapCondition"
+      ],
+      "Materials.cu": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "Main.cu",
+      "io.cu",
+      "Simulation.cu",
+      "GridInit.cu",
+      "XSutils.cu",
+      "Materials.cu"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.456,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [],
+      "io.c": [],
+      "Simulation.c": [],
+      "GridInit.c": [
+        "SwapCondition"
+      ],
+      "XSutils.c": [
+        "ChangeNames"
+      ],
+      "Materials.c": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "GridInit.c",
+      "XSutils.c",
+      "Materials.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.779,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [],
+      "io.c": [],
+      "Simulation.c": [],
+      "GridInit.c": [
+        "SwapCondition"
+      ],
+      "XSutils.c": [
+        "ChangeNames"
+      ],
+      "Materials.c": []
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "GridInit.c",
+      "XSutils.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.766,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [
+        "SwapCondition"
+      ],
+      "io.c": [
+        "SwapCondition"
+      ],
+      "Simulation.c": [
+        "SwapCondition"
+      ],
+      "GridInit.c": [],
+      "XSutils.c": [
+        "ChangeNames"
+      ],
+      "Materials.c": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "Main.c",
+      "io.c",
+      "Simulation.c",
+      "XSutils.c",
+      "Materials.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.757,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [
+        "SwapCondition",
+        "ChangeNames",
+        "ArithmeticTransform"
+      ],
+      "io.c": [
+        "ChangeNames",
+        "SwapCondition"
+      ],
+      "Simulation.c": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "GridInit.c": [
+        "SwapCondition"
+      ],
+      "XSutils.c": [
+        "ChangeNames",
+        "SwapCondition"
+      ],
+      "Materials.c": [
+        "SwapCondition",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "Main.c",
+      "io.c",
+      "Simulation.c",
+      "GridInit.c",
+      "XSutils.c",
+      "Materials.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.762,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-omp_target",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [],
+      "io.c": [],
+      "Simulation.c": [],
+      "GridInit.c": [
+        "SwapCondition"
+      ],
+      "XSutils.c": [
+        "ChangeNames"
+      ],
+      "Materials.c": []
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "GridInit.c",
+      "XSutils.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.557,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-omp_target",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [],
+      "io.c": [],
+      "Simulation.c": [],
+      "GridInit.c": [
+        "SwapCondition"
+      ],
+      "XSutils.c": [
+        "ChangeNames"
+      ],
+      "Materials.c": []
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "GridInit.c",
+      "XSutils.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.55,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-omp_target",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [
+        "SwapCondition"
+      ],
+      "io.c": [
+        "SwapCondition"
+      ],
+      "Simulation.c": [
+        "SwapCondition"
+      ],
+      "GridInit.c": [],
+      "XSutils.c": [],
+      "Materials.c": [
+        "SwapCondition",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "Main.c",
+      "io.c",
+      "Simulation.c",
+      "Materials.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.567,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-omp_target",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [
+        "SwapCondition",
+        "ChangeNames",
+        "ArithmeticTransform"
+      ],
+      "io.c": [
+        "ChangeNames",
+        "SwapCondition"
+      ],
+      "Simulation.c": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "GridInit.c": [
+        "SwapCondition"
+      ],
+      "XSutils.c": [
+        "ChangeNames",
+        "SwapCondition"
+      ],
+      "Materials.c": [
+        "SwapCondition",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "Main.c",
+      "io.c",
+      "Simulation.c",
+      "GridInit.c",
+      "XSutils.c",
+      "Materials.c"
+    ],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "Pattern 'Verification checksum: \\d+ \\(Valid\\)' NOT found in stdout. XSBench self-verification reports valid checksum",
+    "wall_time_seconds": 0.475,
+    "exit_code": 1,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-opencl",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [],
+      "io.c": [],
+      "Simulation.c": [],
+      "GridInit.c": [
+        "SwapCondition"
+      ],
+      "XSutils.c": [],
+      "CLutils.c": [],
+      "Materials.c": [],
+      "kernel.cl": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "GridInit.c",
+      "kernel.cl"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.366,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [],
+      "io.c": [],
+      "Simulation.c": [],
+      "GridInit.c": [
+        "SwapCondition"
+      ],
+      "XSutils.c": [],
+      "CLutils.c": [],
+      "Materials.c": [],
+      "kernel.cl": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "GridInit.c",
+      "kernel.cl"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.371,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-opencl",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [
+        "SwapCondition"
+      ],
+      "io.c": [
+        "SwapCondition"
+      ],
+      "Simulation.c": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "GridInit.c": [],
+      "XSutils.c": [],
+      "CLutils.c": [],
+      "Materials.c": [],
+      "kernel.cl": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "Main.c",
+      "io.c",
+      "Simulation.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.371,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "xsbench-xsbench-opencl",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Main.c": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "io.c": [
+        "SwapCondition"
+      ],
+      "Simulation.c": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ],
+      "GridInit.c": [
+        "SwapCondition"
+      ],
+      "XSutils.c": [
+        "SwapCondition"
+      ],
+      "CLutils.c": [
+        "SwapCondition"
+      ],
+      "Materials.c": [
+        "SwapCondition"
+      ],
+      "kernel.cl": [
+        "SwapCondition",
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "Main.c",
+      "io.c",
+      "Simulation.c",
+      "GridInit.c",
+      "XSutils.c",
+      "CLutils.c",
+      "Materials.c",
+      "kernel.cl"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "All 2 strategies passed: stdout_pattern, exit_code",
+    "wall_time_seconds": 0.371,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  }
+]

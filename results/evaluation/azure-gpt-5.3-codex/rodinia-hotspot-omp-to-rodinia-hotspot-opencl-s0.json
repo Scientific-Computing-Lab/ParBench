@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-hotspot-omp",
+  "target_spec": "rodinia-hotspot-opencl",
+  "kernel": "hotspot",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 325865020,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-04-30T04:01:51Z",
+  "prompt_tokens": 7314,
+  "completion_tokens": 3922,
+  "llm_response_time_seconds": 54.001,
+  "build_status": "pass",
+  "build_time_seconds": 0.179,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.286,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nPlatform: NVIDIA Corporation\nnum_devices = 1\nDevice: NVIDIA GeForce RTX 4070\nUse GPU device\nInit: 148.307999\nMemAlloc: 0.003000\nHtoD: 0.449000\nExec: 0.024576\nDtoH: 0.039840\nClose: 0.317000\nTotal: 191.009003\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.159,
+  "translated_wall_time_seconds": 0.286,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.5559,
+  "translated_files": {
+    "hotspot_kernel.cl": "#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\n__kernel void hotspot(const int iteration,\n                      __global const float *power,\n                      __global const float *temp_src,\n                      __global float *temp_dst,\n                      const int cols,\n                      const int rows,\n                      const int borderCols,\n                      const int borderRows,\n                      const float Cap,\n                      const float Rx,\n                      const float Ry,\n                      const float Rz,\n                      const float step)\n{\n    const int tx = get_local_id(0);\n    const int ty = get_local_id(1);\n    const int bx = get_group_id(0);\n    const int by = get_group_id(1);\n\n    const int small_block_cols = BLOCK_SIZE - iteration * 2;\n    const int small_block_rows = BLOCK_SIZE - iteration * 2;\n\n    const int blkX = bx * small_block_cols - borderCols;\n    const int blkY = by * small_block_rows - borderRows;\n\n    const int xidx = blkX + tx;\n    const int yidx = blkY + ty;\n\n    const int lidx = ty * BLOCK_SIZE + tx;\n\n    __local float temp_tile[BLOCK_SIZE * BLOCK_SIZE];\n    __local float power_tile[BLOCK_SIZE * BLOCK_SIZE];\n\n    const int in_range = (xidx >= 0 && xidx < cols && yidx >= 0 && yidx < rows);\n    if (in_range) {\n        const int gidx = yidx * cols + xidx;\n        temp_tile[lidx] = temp_src[gidx];\n        power_tile[lidx] = power[gidx];\n    } else {\n        temp_tile[lidx] = 0.0f;\n        power_tile[lidx] = 0.0f;\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    const float step_div_Cap = step / Cap;\n    const float invRx = 1.0f / Rx;\n    const float invRy = 1.0f / Ry;\n    const float invRz = 1.0f / Rz;\n\n    for (int i = 0; i < iteration; i++) {\n        float new_temp = temp_tile[lidx];\n\n        const int compute_inner =\n            (tx >= (i + 1)) && (tx < (BLOCK_SIZE - i - 1)) &&\n            (ty >= (i + 1)) && (ty < (BLOCK_SIZE - i - 1)) &&\n            in_range;\n\n        if (compute_inner) {\n            const float center = temp_tile[lidx];\n\n            const float north = (yidx == 0)        ? center : temp_tile[(ty - 1) * BLOCK_SIZE + tx];\n            const float south = (yidx == rows - 1) ? center : temp_tile[(ty + 1) * BLOCK_SIZE + tx];\n            const float west  = (xidx == 0)        ? center : temp_tile[ty * BLOCK_SIZE + (tx - 1)];\n            const float east  = (xidx == cols - 1) ? center : temp_tile[ty * BLOCK_SIZE + (tx + 1)];\n\n            const float delta = step_div_Cap *\n                                (power_tile[lidx] +\n                                 (east + west - 2.0f * center) * invRx +\n                                 (south + north - 2.0f * center) * invRy +\n                                 (80.0f - center) * invRz);\n\n            new_temp = center + delta;\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n\n        if (compute_inner) {\n            temp_tile[lidx] = new_temp;\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    const int write_back =\n        (tx >= iteration) && (tx < (BLOCK_SIZE - iteration)) &&\n        (ty >= iteration) && (ty < (BLOCK_SIZE - iteration)) &&\n        in_range;\n\n    if (write_back) {\n        temp_dst[yidx * cols + xidx] = temp_tile[lidx];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "hotspot_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspot_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 54.001,
+      "prompt_tokens": 7314,
+      "completion_tokens": 3922,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

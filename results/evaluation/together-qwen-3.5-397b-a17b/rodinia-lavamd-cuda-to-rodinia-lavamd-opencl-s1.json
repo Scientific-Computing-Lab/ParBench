@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lavamd-cuda",
+  "target_spec": "rodinia-lavamd-opencl",
+  "kernel": "lavamd",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 691969389,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-boxes1d",
+    "10"
+  ],
+  "timestamp": "2026-04-21T23:12:33Z",
+  "prompt_tokens": 10693,
+  "completion_tokens": 1484,
+  "llm_response_time_seconds": 10.548,
+  "build_status": "pass",
+  "build_time_seconds": 0.22,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.164,
+  "run_exit_code": 245,
+  "run_stderr_snippet": "57 errors generated.\n",
+  "run_stdout_snippet": "clared identifier 'fp'\n                    fA[wtx].y += (double)((fp)qB_shared[j] * fyij);\n                                           ^\n<kernel>:96:44: error: use of undeclared identifier 'fp'\n                    fA[wtx].z += (double)((fp)qB_shared[j] * fzij);\n                                           ^\n<kernel>:100:29: error: use of undeclared identifier 'NUMBER_THREADS'\n                wtx = wtx + NUMBER_THREADS;\n                            ^\n\n>>>>\nError at line 238: CL_BUILD_PROGRAM_FAILURE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 245)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "kernel void kernel_gpu_opencl(par_str d_par_gpu,\n                              dim_str d_dim_gpu,\n                              __global box_str* d_box_gpu,\n                              __global FOUR_VECTOR* d_rv_gpu,\n                              __global fp* d_qv_gpu,\n                              __global FOUR_VECTOR* d_fv_gpu)\n{\n\n    int bx = get_group_id(0);\n    int tx = get_local_id(0);\n\n    int wtx = tx;\n\n    if(bx < d_dim_gpu.number_boxes){\n\n        fp a2 = 2.0f * d_par_gpu.alpha * d_par_gpu.alpha;\n\n        int first_i;\n        __global FOUR_VECTOR* rA;\n        __global FOUR_VECTOR* fA;\n        __local FOUR_VECTOR rA_shared[100];\n\n        int pointer;\n        int k = 0;\n        int first_j;\n        __global FOUR_VECTOR* rB;\n        __global fp* qB;\n        int j = 0;\n        __local FOUR_VECTOR rB_shared[100];\n        __local double qB_shared[100];\n\n        fp r2;\n        fp u2;\n        fp vij;\n        fp fs;\n        fp fxij;\n        fp fyij;\n        fp fzij;\n        THREE_VECTOR d;\n\n        first_i = d_box_gpu[bx].offset;\n\n        rA = &d_rv_gpu[first_i];\n        fA = &d_fv_gpu[first_i];\n\n        while(wtx < NUMBER_PAR_PER_BOX){\n            rA_shared[wtx] = rA[wtx];\n            wtx = wtx + NUMBER_THREADS;\n        }\n        wtx = tx;\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n\n        for (k = 0; k < (1 + d_box_gpu[bx].nn); k++){\n\n            if(k == 0){\n                pointer = bx;\n            }\n            else{\n                pointer = d_box_gpu[bx].nei[k-1].number;\n            }\n\n            first_j = d_box_gpu[pointer].offset;\n\n            rB = &d_rv_gpu[first_j];\n            qB = &d_qv_gpu[first_j];\n\n            while(wtx < NUMBER_PAR_PER_BOX){\n                rB_shared[wtx] = rB[wtx];\n                qB_shared[wtx] = qB[wtx];\n                wtx = wtx + NUMBER_THREADS;\n            }\n            wtx = tx;\n\n            barrier(CLK_LOCAL_MEM_FENCE);\n\n            while(wtx < NUMBER_PAR_PER_BOX){\n\n                for (j = 0; j < NUMBER_PAR_PER_BOX; j++){\n\n                    r2 = (fp)rA_shared[wtx].v + (fp)rB_shared[j].v - DOT((fp)rA_shared[wtx], (fp)rB_shared[j]);\n                    u2 = a2 * r2;\n                    vij = exp(-u2);\n                    fs = 2.0f * vij;\n\n                    d.x = (fp)rA_shared[wtx].x - (fp)rB_shared[j].x;\n                    fxij = fs * d.x;\n                    d.y = (fp)rA_shared[wtx].y - (fp)rB_shared[j].y;\n                    fyij = fs * d.y;\n                    d.z = (fp)rA_shared[wtx].z - (fp)rB_shared[j].z;\n                    fzij = fs * d.z;\n\n                    fA[wtx].v += (double)((fp)qB_shared[j] * vij);\n                    fA[wtx].x += (double)((fp)qB_shared[j] * fxij);\n                    fA[wtx].y += (double)((fp)qB_shared[j] * fyij);\n                    fA[wtx].z += (double)((fp)qB_shared[j] * fzij);\n\n                }\n\n                wtx = wtx + NUMBER_THREADS;\n\n            }\n\n            wtx = tx;\n\n            barrier(CLK_LOCAL_MEM_FENCE);\n\n        }\n\n    }\n\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 10.548,
+      "prompt_tokens": 10693,
+      "completion_tokens": 1484,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "57 errors generated.\n",
+      "run_stdout_snippet": "clared identifier 'fp'\n                    fA[wtx].y += (double)((fp)qB_shared[j] * fyij);\n                                           ^\n<kernel>:96:44: error: use of undeclared identifier 'fp'\n                    fA[wtx].z += (double)((fp)qB_shared[j] * fzij);\n                                           ^\n<kernel>:100:29: error: use of undeclared identifier 'NUMBER_THREADS'\n                wtx = wtx + NUMBER_THREADS;\n                            ^\n\n>>>>\nError at line 238: CL_BUILD_PROGRAM_FAILURE\n",
+      "extraction_fail": null
+    }
+  ]
+}

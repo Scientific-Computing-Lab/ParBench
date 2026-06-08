@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-hotspot-cuda",
+  "target_spec": "rodinia-hotspot-opencl",
+  "kernel": "hotspot",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1768788105,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-04-30T03:27:44Z",
+  "prompt_tokens": 7192,
+  "completion_tokens": 1760,
+  "llm_response_time_seconds": 20.755,
+  "build_status": "pass",
+  "build_time_seconds": 0.181,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.267,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nPlatform: NVIDIA Corporation\nnum_devices = 1\nDevice: NVIDIA GeForce RTX 4070\nUse GPU device\nInit: 129.041000\nMemAlloc: 0.002000\nHtoD: 0.431000\nExec: 0.025216\nDtoH: 0.039936\nClose: 0.314000\nTotal: 172.270996\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.159,
+  "translated_wall_time_seconds": 0.267,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.5955,
+  "translated_files": {
+    "hotspot_kernel.cl": "#ifdef cl_khr_fp64\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n\n#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\n#define IN_RANGE(x, min, max)   ((x) >= (min) && (x) <= (max))\n\n__kernel void hotspot(int iteration,\n                      __global float *power,\n                      __global float *temp_src,\n                      __global float *temp_dst,\n                      int grid_cols,\n                      int grid_rows,\n                      int border_cols,\n                      int border_rows,\n                      float Cap,\n                      float Rx,\n                      float Ry,\n                      float Rz,\n                      float step) {\n    __local float temp_on_cuda[BLOCK_SIZE][BLOCK_SIZE];\n    __local float power_on_cuda[BLOCK_SIZE][BLOCK_SIZE];\n    __local float temp_t[BLOCK_SIZE][BLOCK_SIZE];\n\n    float amb_temp = 80.0f;\n    float step_div_Cap = step / Cap;\n    float Rx_1 = 1.0f / Rx;\n    float Ry_1 = 1.0f / Ry;\n    float Rz_1 = 1.0f / Rz;\n\n    int bx = (int)get_group_id(0);\n    int by = (int)get_group_id(1);\n\n    int tx = (int)get_local_id(0);\n    int ty = (int)get_local_id(1);\n\n    int small_block_rows = BLOCK_SIZE - iteration * 2;\n    int small_block_cols = BLOCK_SIZE - iteration * 2;\n\n    int blkY = small_block_rows * by - border_rows;\n    int blkX = small_block_cols * bx - border_cols;\n    int blkYmax = blkY + BLOCK_SIZE - 1;\n    int blkXmax = blkX + BLOCK_SIZE - 1;\n\n    int yidx = blkY + ty;\n    int xidx = blkX + tx;\n\n    int loadYidx = yidx, loadXidx = xidx;\n    int index = grid_cols * loadYidx + loadXidx;\n\n    if (IN_RANGE(loadYidx, 0, grid_rows - 1) && IN_RANGE(loadXidx, 0, grid_cols - 1)) {\n        temp_on_cuda[ty][tx] = temp_src[index];\n        power_on_cuda[ty][tx] = power[index];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    int validYmin = (blkY < 0) ? -blkY : 0;\n    int validYmax = (blkYmax > grid_rows - 1) ? BLOCK_SIZE - 1 - (blkYmax - grid_rows + 1) : BLOCK_SIZE - 1;\n    int validXmin = (blkX < 0) ? -blkX : 0;\n    int validXmax = (blkXmax > grid_cols - 1) ? BLOCK_SIZE - 1 - (blkXmax - grid_cols + 1) : BLOCK_SIZE - 1;\n\n    int N = ty - 1;\n    int S = ty + 1;\n    int W = tx - 1;\n    int E = tx + 1;\n\n    N = (N < validYmin) ? validYmin : N;\n    S = (S > validYmax) ? validYmax : S;\n    W = (W < validXmin) ? validXmin : W;\n    E = (E > validXmax) ? validXmax : E;\n\n    int computed = 0;\n    for (int i = 0; i < iteration; i++) {\n        computed = 0;\n        if (IN_RANGE(tx, i + 1, BLOCK_SIZE - i - 2) &&\n            IN_RANGE(ty, i + 1, BLOCK_SIZE - i - 2) &&\n            IN_RANGE(tx, validXmin, validXmax) &&\n            IN_RANGE(ty, validYmin, validYmax)) {\n            computed = 1;\n            temp_t[ty][tx] =\n                temp_on_cuda[ty][tx] +\n                step_div_Cap * (power_on_cuda[ty][tx] +\n                                (temp_on_cuda[S][tx] + temp_on_cuda[N][tx] - 2.0f * temp_on_cuda[ty][tx]) * Ry_1 +\n                                (temp_on_cuda[ty][E] + temp_on_cuda[ty][W] - 2.0f * temp_on_cuda[ty][tx]) * Rx_1 +\n                                (amb_temp - temp_on_cuda[ty][tx]) * Rz_1);\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n        if (i == iteration - 1)\n            break;\n        if (computed)\n            temp_on_cuda[ty][tx] = temp_t[ty][tx];\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    if (computed) {\n        temp_dst[index] = temp_t[ty][tx];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "hotspot_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspot_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 20.755,
+      "prompt_tokens": 7192,
+      "completion_tokens": 1760,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

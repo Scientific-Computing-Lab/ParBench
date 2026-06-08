@@ -1,0 +1,605 @@
+[
+  {
+    "spec_id": "rodinia-backprop-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "backprop_kernel.cl": [],
+      "backprop.c": [],
+      "backprop_ocl.cpp": [],
+      "facetrain.c": [
+        "SwapCondition"
+      ],
+      "imagenet.c": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "facetrain.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.004,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bfs-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Kernels.cl": [],
+      "bfs.cpp": [],
+      "timer.cc": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.881,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bptree-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_opencl.cl": [],
+      "kernel/kernel_gpu_opencl_2.cl": [],
+      "kernel/kernel_gpu_opencl_wrapper.c": [],
+      "kernel/kernel_gpu_opencl_wrapper_2.c": [
+        "SwapCondition"
+      ],
+      "main.c": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_opencl_wrapper_2.c",
+      "main.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.901,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-cfd-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Kernels.cl": [
+        "TypedefExpansion"
+      ],
+      "euler3d.cpp": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "Kernels.cl",
+      "euler3d.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "ode& __rhs) noexcept\n      |              ~~~~~~~~~~~~~~~~~~~~~~~^~~~~\nIn file included from ../util/timing.h:5,\n                 from ../util/timing.c:3:\n/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include/CL/cl.h:26:104: note: \u2018#pragma message: cl_version.h: CL_TARGET_OPENCL_VERSION is not defined. Defaulting to 300 (OpenCL 3.0)\u2019\n   26 | #pragma message(\"cl_version.h: CL_TARGET_OPENCL_VERSION is not defined. Defaulting to 300 (OpenCL 3.0)\")\n      |                                                                                                        ^\nmake: *** [Makefile:24: release] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-dwt2d-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "com_dwt.cl": [],
+      "components.cpp": [],
+      "dwt.cpp": [],
+      "main.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "d:p:c:b:l:i:D:fr95wh\", longopts, &optindex))\n      |            ~~~^~~~~\nIn file included from ../util/timing.h:5,\n                 from ../util/timing.c:3:\n/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include/CL/cl.h:26:104: note: \u2018#pragma message: cl_version.h: CL_TARGET_OPENCL_VERSION is not defined. Defaulting to 300 (OpenCL 3.0)\u2019\n   26 | #pragma message(\"cl_version.h: CL_TARGET_OPENCL_VERSION is not defined. Defaulting to 300 (OpenCL 3.0)\")\n      |                                                                                                        ^\nmake: *** [Makefile:36: dwt2d] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-gaussian-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "gaussianElim_kernels.cl": [],
+      "OriginalParallel.c": [],
+      "clutils.cpp": [],
+      "gaussianElim.cpp": [
+        "SwapCondition"
+      ],
+      "gettimeofday.cpp": [],
+      "utils.cpp": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "gaussianElim.cpp",
+      "utils.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.203,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-heartwall-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_opencl.cl": [],
+      "kernel/kernel_gpu_opencl_wrapper.c": [],
+      "main.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.004,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot_kernel.cl": [],
+      "OpenCL_helper_library.c": [],
+      "hotspot.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.337,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot3d-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspotKernel.cl": [],
+      "3D.c": [],
+      "CL_helper.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.916,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hybridsort-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bucketsort_kernels.cl": [],
+      "histogram1024.cl": [],
+      "mergesort.cl": [],
+      "bucketsort.c": [
+        "SwapCondition"
+      ],
+      "hybridsort.c": [
+        "ArithmeticTransform"
+      ],
+      "mergesort.c": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "bucketsort.c",
+      "hybridsort.c",
+      "mergesort.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.724,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-kmeans-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kmeans.cl": [],
+      "cluster.c": [],
+      "getopt.c": [],
+      "kmeans.cpp": [
+        "SwapCondition"
+      ],
+      "kmeans_clustering.c": [
+        "SwapCondition"
+      ],
+      "read_input.c": [],
+      "rmse.c": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kmeans.cpp",
+      "kmeans_clustering.c",
+      "rmse.c"
+    ],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "exit_code=-11 != expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.999,
+    "exit_code": -11,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lavamd-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_opencl.cl": [
+        "TypedefExpansion"
+      ],
+      "kernel/kernel_gpu_opencl_wrapper.c": [],
+      "main.c": []
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_opencl.cl"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.002,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lud-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "lud_kernel.cl": [],
+      "base/lud.c": [],
+      "base/lud_base.c": [],
+      "common/common.c": [
+        "SwapCondition"
+      ],
+      "ocl/lud.cpp": [
+        "ArithmeticTransform"
+      ],
+      "tools/gen_input.c": [
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "common/common.c",
+      "ocl/lud.cpp",
+      "tools/gen_input.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.347,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-myocyte-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_opencl.cl": [],
+      "kernel/embedded_fehlberg_7_8.c": [],
+      "kernel/kernel_fin.c": [],
+      "kernel/kernel_gpu_opencl_wrapper.c": [
+        "SwapCondition"
+      ],
+      "kernel/master.c": [
+        "SwapCondition"
+      ],
+      "kernel/solver.c": [
+        "ArithmeticTransform"
+      ],
+      "main.c": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_opencl_wrapper.c",
+      "kernel/master.c",
+      "kernel/solver.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nn-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "nearestNeighbor_kernel.cl": [],
+      "clutils.cpp": [],
+      "gettimeofday.cpp": [],
+      "nearestNeighbor.cpp": [
+        "SwapCondition"
+      ],
+      "utils.cpp": []
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "nearestNeighbor.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "timeout",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "exit_code=-1 != expected 0. Process exits cleanly",
+    "wall_time_seconds": 300.105,
+    "exit_code": -1,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nw-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "nw.cl": [],
+      "nw.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.173,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-particlefilter-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "particle_double.cl": [],
+      "particle_naive.cl": [],
+      "particle_single.cl": [],
+      "ex_particle_OCL_double_seq.cpp": [
+        "SwapCondition"
+      ],
+      "ex_particle_OCL_naive_seq.cpp": [
+        "SwapCondition"
+      ],
+      "ex_particle_OCL_single_seq.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "ex_particle_OCL_double_seq.cpp",
+      "ex_particle_OCL_naive_seq.cpp",
+      "ex_particle_OCL_single_seq.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.234,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-pathfinder-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernels.cl": [],
+      "OpenCL.cpp": [],
+      "main.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "ue(cl_context                     context,\n      | ^~~~~~~~~~~~~~~~~~~~\nIn file included from ../util/timing.h:5,\n                 from ../util/timing.c:3:\n/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include/CL/cl.h:26:104: note: \u2018#pragma message: cl_version.h: CL_TARGET_OPENCL_VERSION is not defined. Defaulting to 300 (OpenCL 3.0)\u2019\n   26 | #pragma message(\"cl_version.h: CL_TARGET_OPENCL_VERSION is not defined. Defaulting to 300 (OpenCL 3.0)\")\n      |                                                                                                        ^\nmake: *** [Makefile:32: main.o] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-srad-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_gpu_opencl.cl": [],
+      "kernel/compress_kernel.c": [],
+      "kernel/extract_kernel.c": [],
+      "kernel/kernel_gpu_opencl_wrapper.c": [
+        "SwapCondition"
+      ],
+      "kernel/prepare_kernel.c": [
+        "SwapCondition"
+      ],
+      "kernel/reduce_kernel.c": [],
+      "kernel/srad2_kernel.c": [
+        "ChangeNames"
+      ],
+      "kernel/srad_kernel.c": [
+        "ArithmeticTransform"
+      ],
+      "main.c": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_gpu_opencl_wrapper.c",
+      "kernel/prepare_kernel.c",
+      "kernel/srad2_kernel.c",
+      "kernel/srad_kernel.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.222,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-streamcluster-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Kernels.cl": [],
+      "streamcluster.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 2.22,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  }
+]

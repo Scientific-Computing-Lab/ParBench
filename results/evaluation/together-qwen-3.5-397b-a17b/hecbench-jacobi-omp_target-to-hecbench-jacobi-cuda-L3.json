@@ -1,0 +1,69 @@
+{
+  "source_spec": "hecbench-jacobi-omp_target",
+  "target_spec": "hecbench-jacobi-cuda",
+  "kernel": "jacobi",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1570484445,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-24T06:59:56Z",
+  "prompt_tokens": 1234,
+  "completion_tokens": 5723,
+  "llm_response_time_seconds": 33.072,
+  "build_status": "fail",
+  "build_time_seconds": 0.353,
+  "build_error_snippet": "main.cu(28): error: expected a \")\"\n  __attribute__((global)) void compute_step(float* f, float* f_old, float* error_ptr, int 2048) {\n                                                                                          ^\n\nmain.cu(52): error: expected a \")\"\n  __attribute__((global)) void copy_f_to_f_old(float* f, float* f_old, int 2048) {\n                                                                           ^\n\n2 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:52: main.o] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: * f, float* f_old, int 2048) {\n                                                                           ^\n\n2 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:52: main.o] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cu": "#include <cstdio>\n#include <iostream>\n#include <iomanip>\n#include <cmath>\n#include <limits>\n#include <ctime>\n#include <chrono>\n\n#define N 2048\n#define IDX(i, j) ((i) + (j) * N)\n\nvoid initialize_data(float* f) {\n    for (int j = 0; j < N; ++j) {\n        for (int i = 0; i < N; ++i) {\n            if (i == 0 || N-1 == i) {\n                f[IDX(i,j)] = sinf(j * 2 * M_PI / (N - 1));\n            }\n            else if (0 == j || N-1 == j) {\n                f[IDX(i,j)] = sinf(i * 2 * M_PI / (N - 1));\n            }\n            else {\n                f[IDX(i,j)] = 0.0f;\n            }\n        }\n    }\n}\n\n__global__ void compute_step(float* f, float* f_old, float* error_ptr, int N) {\n    float local_error = 0.0f;\n    \n    int tid = blockIdx.x * blockDim.x + threadIdx.x;\n    int total_threads = blockDim.x * gridDim.x;\n    \n    int interior_size = (N-2) * (N-2);\n    \n    for (int idx = tid; idx < interior_size; idx += total_threads) {\n        int i = idx % (N-2) + 1;\n        int j = idx / (N-2) + 1;\n        \n        float t = 0.25f * (f_old[IDX(i-1,j)] +\n                           f_old[IDX(i+1,j)] +\n                           f_old[IDX(i,j-1)] +\n                           f_old[IDX(i,j+1)]);\n        float df = t - f_old[IDX(i, j)];\n        f[IDX(i,j)] = t;\n        local_error += df * df;\n    }\n    \n    atomicAdd(error_ptr, local_error);\n}\n\n__global__ void copy_f_to_f_old(float* f, float* f_old, int N) {\n    int tid = blockIdx.x * blockDim.x + threadIdx.x;\n    int total_threads = blockDim.x * gridDim.x;\n    \n    int interior_size = (N-2) * (N-2);\n    \n    for (int idx = tid; idx < interior_size; idx += total_threads) {\n        int i = idx % (N-2) + 1;\n        int j = idx / (N-2) + 1;\n        f_old[IDX(i,j)] = f[IDX(i,j)];\n    }\n}\n\nint main() {\n    auto start_time = std::chrono::steady_clock::now();\n    \n    float* f_host = (float*)malloc(N * N * sizeof(float));\n    float* f_old_host = (float*)malloc(N * N * sizeof(float));\n    \n    float* f;\n    float* f_old;\n    cudaMalloc(&f, N * N * sizeof(float));\n    cudaMalloc(&f_old, N * N * sizeof(float));\n    \n    float error = std::numeric_limits<float>::max();\n    const float tolerance = 1.e-5f;\n    \n    initialize_data(f_host);\n    initialize_data(f_old_host);\n    \n    cudaMemcpy(f, f_host, N * N * sizeof(float), cudaMemcpyHostToDevice);\n    cudaMemcpy(f_old, f_old_host, N * N * sizeof(float), cudaMemcpyHostToDevice);\n    \n    const int max_iters = 10000;\n    int num_iters = 0;\n    \n    auto start = std::chrono::steady_clock::now();\n    \n    float* error_ptr;\n    cudaMalloc(&error_ptr, sizeof(float));\n    \n    int num_teams = N * N / 256;\n    int thread_limit = 256;\n    \n    while (tolerance < error && num_iters < max_iters) {\n        error = 0.f;\n        cudaMemcpy(error_ptr, &error, sizeof(float), cudaMemcpyHostToDevice);\n        \n        compute_step<<<num_teams, thread_limit>>>(f, f_old, error_ptr, N);\n        \n        float temp_error;\n        cudaMemcpy(&temp_error, error_ptr, sizeof(float), cudaMemcpyDeviceToHost);\n        error = sqrtf(temp_error / (N * N));\n        \n        copy_f_to_f_old<<<num_teams, thread_limit>>>(f, f_old, N);\n        \n        if (num_iters % 1000 == 0) {\n            std::cout << \"Error after iteration \" << num_iters << \" = \" << error << std::endl;\n        }\n        \n        ++num_iters;\n    }\n    \n    auto end = std::chrono::steady_clock::now();\n    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n    std::cout << \"Average execution time per iteration: \" << (time * 1e-9f) / num_iters << \" (s)\\n\";\n    \n    if (tolerance >= error && max_iters > num_iters) {\n        std::cout << \"PASS\" << std::endl;\n    }\n    else {\n        std::cout << \"FAIL\" << std::endl;\n        cudaFree(f);\n        cudaFree(f_old);\n        cudaFree(error_ptr);\n        free(f_host);\n        free(f_old_host);\n        return -1;\n    }\n    \n    cudaFree(f);\n    cudaFree(f_old);\n    cudaFree(error_ptr);\n    free(f_host);\n    free(f_old_host);\n    \n    auto end_time = std::chrono::steady_clock::now();\n    auto total_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();\n    double duration = total_time * 1e-9;\n    std::cout << \"Total elapsed time: \" << std::setprecision(4) << duration << \" seconds\" << std::endl;\n    \n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cu"
+  ],
+  "target_files_extracted": [
+    "main.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 33.072,
+      "prompt_tokens": 1234,
+      "completion_tokens": 5723,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "main.cu(28): error: expected a \")\"\n  __attribute__((global)) void compute_step(float* f, float* f_old, float* error_ptr, int 2048) {\n                                                                                          ^\n\nmain.cu(52): error: expected a \")\"\n  __attribute__((global)) void copy_f_to_f_old(float* f, float* f_old, int 2048) {\n                                                                           ^\n\n2 errors detected in the compilation of \"main.cu\".\nmake: *** [Makefile:52: main.o] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+[
+  {
+    "spec_id": "rodinia-bfs-opencl",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Kernels.cl": [],
+      "bfs.cpp": [],
+      "timer.cc": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.612,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bfs-opencl",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Kernels.cl": [],
+      "bfs.cpp": [],
+      "timer.cc": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.579,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bfs-opencl",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "Kernels.cl": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "bfs.cpp": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "timer.cc": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "Kernels.cl",
+      "bfs.cpp",
+      "timer.cc"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "_1 &data_1)\n      |                                             ^~~~~~\nIn file included from ../util/timing.h:5,\n                 from ../util/timing.c:3:\n/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include/CL/cl.h:26:104: note: \u2018#pragma message: cl_version.h: CL_TARGET_OPENCL_VERSION is not defined. Defaulting to 300 (OpenCL 3.0)\u2019\n   26 | #pragma message(\"cl_version.h: CL_TARGET_OPENCL_VERSION is not defined. Defaulting to 300 (OpenCL 3.0)\")\n      |                                                                                                        ^\nmake: *** [Makefile:27: release] Error 1\n"
+  }
+]

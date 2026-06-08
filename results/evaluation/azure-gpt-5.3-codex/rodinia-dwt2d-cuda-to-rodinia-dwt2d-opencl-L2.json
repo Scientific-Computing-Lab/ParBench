@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-dwt2d-cuda",
+  "target_spec": "rodinia-dwt2d-opencl",
+  "kernel": "dwt2d",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 59059947,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "rgb.bmp",
+    "-i",
+    "../../data/dwt2d",
+    "-D",
+    "1024x1024",
+    "-f",
+    "-5",
+    "-l",
+    "3"
+  ],
+  "timestamp": "2026-04-30T23:51:04Z",
+  "prompt_tokens": 30827,
+  "completion_tokens": 6112,
+  "llm_response_time_seconds": 94.757,
+  "build_status": "pass",
+  "build_time_seconds": 0.312,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.274,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "\nsliding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 3 , gx = 4 , gy = 11 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\n\nWriting to rgb.bmp.dwt.r (1024 x 1024)\n\nWriting to rgb.bmp.dwt.g (1024 x 1024)\n\nWriting to rgb.bmp.dwt.b (1024 x 1024)\nInit: 198.597000\nMemAlloc: 9.651000\nHtoD: 0.000000\nExec: 0.021600\nDtoH: 0.933000\nClose: 0.648000\nTotal: 218.729996\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.1,
+  "translated_wall_time_seconds": 0.274,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.365,
+  "translated_files": {
+    "com_dwt.cl": "#define THREADS 256\n\ninline int mirror_index(int d, int sizeD)\n{\n    if (sizeD <= 1) return 0;\n    if (d >= sizeD) {\n        d = 2 * sizeD - 2 - d;\n    } else if (d < 0) {\n        d = -d;\n    }\n    if (d < 0) d = 0;\n    if (d >= sizeD) d = sizeD - 1;\n    return d;\n}\n\ninline int src_at(__global const int *in, int sx, int sy, int x, int y)\n{\n    x = mirror_index(x, sx);\n    y = mirror_index(y, sy);\n    return in[y * sx + x];\n}\n\ninline int h_odd(__global const int *in, int sx, int sy, int y, int x_odd)\n{\n    int c = src_at(in, sx, sy, x_odd, y);\n    int p = src_at(in, sx, sy, x_odd - 1, y);\n    int n = src_at(in, sx, sy, x_odd + 1, y);\n    return c - ((p + n) / 2);\n}\n\ninline int h_even(__global const int *in, int sx, int sy, int y, int x_even)\n{\n    int c = src_at(in, sx, sy, x_even, y);\n    int p = h_odd(in, sx, sy, y, x_even - 1);\n    int n = h_odd(in, sx, sy, y, x_even + 1);\n    return c + ((p + n + 2) / 4);\n}\n\ninline int h_val(__global const int *in, int sx, int sy, int y, int x)\n{\n    return (x & 1) ? h_odd(in, sx, sy, y, x) : h_even(in, sx, sy, y, x);\n}\n\ninline int v_odd(__global const int *in, int sx, int sy, int y_odd, int x)\n{\n    int c = h_val(in, sx, sy, y_odd, x);\n    int p = h_val(in, sx, sy, y_odd - 1, x);\n    int n = h_val(in, sx, sy, y_odd + 1, x);\n    return c - ((p + n) / 2);\n}\n\ninline int v_even(__global const int *in, int sx, int sy, int y_even, int x)\n{\n    int c = h_val(in, sx, sy, y_even, x);\n    int p = v_odd(in, sx, sy, y_even - 1, x);\n    int n = v_odd(in, sx, sy, y_even + 1, x);\n    return c + ((p + n + 2) / 4);\n}\n\ninline int v_val(__global const int *in, int sx, int sy, int y, int x)\n{\n    return (y & 1) ? v_odd(in, sx, sy, y, x) : v_even(in, sx, sy, y, x);\n}\n\n__kernel void c_CopySrcToComponents(__global int *d_r,\n                                    __global int *d_g,\n                                    __global int *d_b,\n                                    __global const uchar *d_src,\n                                    const int pixels)\n{\n    int gid = (int)get_global_id(0);\n    if (gid < pixels) {\n        int o = gid * 3;\n        d_r[gid] = ((int)d_src[o + 0]) - 128;\n        d_g[gid] = ((int)d_src[o + 1]) - 128;\n        d_b[gid] = ((int)d_src[o + 2]) - 128;\n    }\n}\n\n__kernel void c_CopySrcToComponent(__global int *d_c,\n                                   __global const uchar *d_src,\n                                   const int pixels)\n{\n    int gid = (int)get_global_id(0);\n    if (gid < pixels) {\n        d_c[gid] = ((int)d_src[gid]) - 128;\n    }\n}\n\n__kernel void cl_fdwt53Kernel(__global const int *input,\n                              __global int *output,\n                              const int sizeX,\n                              const int sizeY,\n                              const int winSteps,\n                              const int WIN_SX,\n                              const int WIN_SY)\n{\n    (void)winSteps;\n    (void)WIN_SX;\n    (void)WIN_SY;\n\n    const int g0 = (int)get_global_id(0);\n    const int g1 = (int)get_global_id(1);\n    const int gs0 = (int)get_global_size(0);\n    const int gs1 = (int)get_global_size(1);\n\n    const int totalThreads = gs0 * gs1;\n    const int tid = g1 * gs0 + g0;\n    const int total = sizeX * sizeY;\n\n    const int llX = (sizeX + 1) >> 1;\n    const int llY = (sizeY + 1) >> 1;\n    const int hlX = sizeX - llX;\n    const int lhY = sizeY - llY;\n\n    const int offLL = 0;\n    const int offHL = llX * llY;\n    const int offLH = offHL + hlX * llY;\n    const int offHH = offLH + llX * lhY;\n\n    for (int idx = tid; idx < total; idx += totalThreads) {\n        int x = idx % sizeX;\n        int y = idx / sizeX;\n\n        int coeff = v_val(input, sizeX, sizeY, y, x);\n\n        int ox = x >> 1;\n        int oy = y >> 1;\n        int outIdx;\n\n        if ((y & 1) == 0) {\n            if ((x & 1) == 0) {\n                outIdx = offLL + oy * llX + ox; // LL\n            } else {\n                outIdx = offHL + oy * hlX + ox; // HL\n            }\n        } else {\n            if ((x & 1) == 0) {\n                outIdx = offLH + oy * llX + ox; // LH\n            } else {\n                outIdx = offHH + oy * hlX + ox; // HH\n            }\n        }\n\n        output[outIdx] = coeff;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "com_dwt.cl"
+  ],
+  "target_files_extracted": [
+    "com_dwt.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 94.757,
+      "prompt_tokens": 30827,
+      "completion_tokens": 6112,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

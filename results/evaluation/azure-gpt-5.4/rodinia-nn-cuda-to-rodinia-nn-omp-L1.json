@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-nn-cuda",
+  "target_spec": "rodinia-nn-omp",
+  "kernel": "nn",
+  "model": "azure-gpt-5.4",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 293429682,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "filelist_4",
+    "-r",
+    "5",
+    "-lat",
+    "30",
+    "-lng",
+    "90"
+  ],
+  "timestamp": "2026-04-26T22:20:52Z",
+  "prompt_tokens": 3175,
+  "completion_tokens": 4760,
+  "llm_response_time_seconds": 75.532,
+  "build_status": "pass",
+  "build_time_seconds": 0.043,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.007,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "1988 12 27  0 18 TONY       30.0  89.8  113   39 --> Distance=0.199997\n1980 10 22 18  3 ISAAC      30.1  90.4  110  778 --> Distance=0.412312\n1997 11 14 12 24 HELENE     30.5  89.8  134  529 --> Distance=0.538515\n2003  8 27 12 10 TONY       29.9  89.4  160  286 --> Distance=0.608275\n1974 12 22 18 24 JOYCE      30.6  89.9   80  593 --> Distance=0.608276\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.016,
+  "translated_wall_time_seconds": 0.007,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 2.2857,
+  "translated_files": {
+    "nn_openmp.c": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <omp.h>\n\n#ifdef TIMING\n#include <sys/time.h>\n\nstruct timeval tv;\nstruct timeval tv_total_start, tv_total_end;\nstruct timeval tv_h2d_start, tv_h2d_end;\nstruct timeval tv_d2h_start, tv_d2h_end;\nstruct timeval tv_kernel_start, tv_kernel_end;\nstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\nstruct timeval tv_close_start, tv_close_end;\nfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n      d2h_time = 0, close_time = 0, total_time = 0;\n\nstatic void tvsub(struct timeval *x, struct timeval *y, struct timeval *result)\n{\n    result->tv_sec = x->tv_sec - y->tv_sec;\n    result->tv_usec = x->tv_usec - y->tv_usec;\n    if (result->tv_usec < 0) {\n        result->tv_sec--;\n        result->tv_usec += 1000000;\n    }\n}\n#endif\n\n#define min(a, b) a > b ? b : a\n#define ceilDiv(a, b) (a + b - 1) / b\n#define print(x) printf(#x \": %lu\\n\", (unsigned long)x)\n#define DEBUG false\n\n#define DEFAULT_THREADS_PER_BLOCK 256\n\n#define MAX_ARGS 10\n#define REC_LENGTH 53\n#define LATITUDE_POS 28\n#define OPEN 10000\n\ntypedef int bool;\n#define false 0\n#define true 1\n\ntypedef struct latLong\n{\n    float lat;\n    float lng;\n} LatLong;\n\ntypedef struct record\n{\n    char recString[REC_LENGTH];\n    float distance;\n} Record;\n\nstatic float my_sqrtf(float x)\n{\n    return __builtin_sqrtf(x);\n}\n\nint loadData(char *filename, Record **records, LatLong **locations);\nvoid findLowest(Record *records, float *distances, int numRecords, int topN);\nvoid printUsage();\nint parseCommandline(int argc, char *argv[], char *filename, int *r, float *lat, float *lng,\n                     int *q, int *t, int *p, int *d);\n\nint main(int argc, char *argv[])\n{\n    int i = 0;\n    float lat, lng;\n    int quiet = 0, timing = 0, platform = 0, device = 0;\n\n    Record *records = NULL;\n    LatLong *locations = NULL;\n    char filename[100];\n    int resultsCount = 10;\n\n    if (parseCommandline(argc, argv, filename, &resultsCount, &lat, &lng,\n                         &quiet, &timing, &platform, &device)) {\n        printUsage();\n        return 0;\n    }\n\n    int numRecords = loadData(filename, &records, &locations);\n    if (resultsCount > numRecords)\n        resultsCount = numRecords;\n\n    float *distances = (float *)malloc(sizeof(float) * (size_t)numRecords);\n    if (numRecords > 0 && distances == NULL) {\n        free(records);\n        free(locations);\n        return 1;\n    }\n\n#ifdef TIMING\n    gettimeofday(&tv_kernel_start, NULL);\n#endif\n\n#pragma omp parallel for\n    for (i = 0; i < numRecords; i++) {\n        LatLong *latLong = locations + i;\n        float *dist = distances + i;\n        *dist = my_sqrtf((lat - latLong->lat) * (lat - latLong->lat) +\n                         (lng - latLong->lng) * (lng - latLong->lng));\n    }\n\n#ifdef TIMING\n    gettimeofday(&tv_kernel_end, NULL);\n    tvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n    kernel_time += tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n#endif\n\n    findLowest(records, distances, numRecords, resultsCount);\n\n    if (!quiet)\n        for (i = 0; i < resultsCount; i++) {\n            printf(\"%s --> Distance=%f\\n\", records[i].recString, records[i].distance);\n        }\n\n    free(distances);\n    free(records);\n    free(locations);\n\n#ifdef TIMING\n    printf(\"Exec: %f\\n\", kernel_time);\n#endif\n\n    return 0;\n}\n\nint loadData(char *filename, Record **records, LatLong **locations)\n{\n    FILE *flist, *fp;\n    int i = 0;\n    char dbname[64];\n    int recNum = 0;\n    int capacity = 0;\n\n    flist = fopen(filename, \"r\");\n    while (!feof(flist)) {\n        if (fscanf(flist, \"%s\\n\", dbname) != 1) {\n            fprintf(stderr, \"error reading filelist\\n\");\n            exit(0);\n        }\n        fp = fopen(dbname, \"r\");\n        if (!fp) {\n            printf(\"error opening a db\\n\");\n            exit(1);\n        }\n\n        while (!feof(fp)) {\n            Record record;\n            LatLong latLong;\n            if (fgets(record.recString, 49, fp) == NULL) {\n                fgetc(fp);\n                if (feof(fp))\n                    break;\n                break;\n            }\n            fgetc(fp);\n            if (feof(fp))\n                break;\n\n            {\n                char substr[6];\n\n                for (i = 0; i < 5; i++)\n                    substr[i] = *(record.recString + i + 28);\n                substr[5] = '\\0';\n                latLong.lat = (float)atof(substr);\n\n                for (i = 0; i < 5; i++)\n                    substr[i] = *(record.recString + i + 33);\n                substr[5] = '\\0';\n                latLong.lng = (float)atof(substr);\n            }\n\n            if (recNum >= capacity) {\n                int newCapacity = (capacity == 0) ? 1024 : capacity * 2;\n                Record *newRecords = (Record *)realloc(*records, sizeof(Record) * (size_t)newCapacity);\n                LatLong *newLocations = (LatLong *)realloc(*locations, sizeof(LatLong) * (size_t)newCapacity);\n                if (newRecords == NULL || newLocations == NULL) {\n                    free(newRecords);\n                    free(newLocations);\n                    fclose(fp);\n                    fclose(flist);\n                    free(*records);\n                    free(*locations);\n                    exit(1);\n                }\n                *records = newRecords;\n                *locations = newLocations;\n                capacity = newCapacity;\n            }\n\n            (*locations)[recNum] = latLong;\n            (*records)[recNum] = record;\n            recNum++;\n        }\n        fclose(fp);\n    }\n    fclose(flist);\n\n    return recNum;\n}\n\nvoid findLowest(Record *records, float *distances, int numRecords, int topN)\n{\n    int i, j;\n    float val;\n    int minLoc;\n    Record *tempRec;\n    float tempDist;\n\n    for (i = 0; i < topN; i++) {\n        minLoc = i;\n        for (j = i; j < numRecords; j++) {\n            val = distances[j];\n            if (val < distances[minLoc])\n                minLoc = j;\n        }\n\n        tempRec = &records[i];\n        records[i] = records[minLoc];\n        records[minLoc] = *tempRec;\n\n        tempDist = distances[i];\n        distances[i] = distances[minLoc];\n        distances[minLoc] = tempDist;\n\n        records[i].distance = distances[i];\n    }\n}\n\nint parseCommandline(int argc, char *argv[], char *filename, int *r, float *lat, float *lng,\n                     int *q, int *t, int *p, int *d)\n{\n    int i;\n    if (argc < 2)\n        return 1;\n    strncpy(filename, argv[1], 100);\n    char flag;\n\n    for (i = 1; i < argc; i++) {\n        if (argv[i][0] == '-') {\n            flag = argv[i][1];\n            switch (flag) {\n            case 'r':\n                i++;\n                *r = atoi(argv[i]);\n                break;\n            case 'l':\n                if (argv[i][2] == 'a') {\n                    *lat = (float)atof(argv[i + 1]);\n                } else {\n                    *lng = (float)atof(argv[i + 1]);\n                }\n                i++;\n                break;\n            case 'h':\n                return 1;\n            case 'q':\n                *q = 1;\n                break;\n            case 't':\n                *t = 1;\n                break;\n            case 'p':\n                i++;\n                *p = atoi(argv[i]);\n                break;\n            case 'd':\n                i++;\n                *d = atoi(argv[i]);\n                break;\n            }\n        }\n    }\n    if ((*d >= 0 && *p < 0) || (*p >= 0 && *d < 0))\n        return 1;\n    return 0;\n}\n\nvoid printUsage()\n{\n    printf(\"Nearest Neighbor Usage\\n\");\n    printf(\"\\n\");\n    printf(\"nearestNeighbor [filename] -r [int] -lat [float] -lng [float] [-hqt] [-p [int] -d [int]]\\n\");\n    printf(\"\\n\");\n    printf(\"example:\\n\");\n    printf(\"$ ./nearestNeighbor filelist.txt -r 5 -lat 30 -lng 90\\n\");\n    printf(\"\\n\");\n    printf(\"filename     the filename that lists the data input files\\n\");\n    printf(\"-r [int]     the number of records to return (default: 10)\\n\");\n    printf(\"-lat [float] the latitude for nearest neighbors (default: 0)\\n\");\n    printf(\"-lng [float] the longitude for nearest neighbors (default: 0)\\n\");\n    printf(\"\\n\");\n    printf(\"-h, --help   Display the help file\\n\");\n    printf(\"-q           Quiet mode. Suppress all text output.\\n\");\n    printf(\"-t           Print timing information.\\n\");\n    printf(\"\\n\");\n    printf(\"-p [int]     Choose the platform (must choose both platform and device)\\n\");\n    printf(\"-d [int]     Choose the device (must choose both platform and device)\\n\");\n    printf(\"\\n\");\n    printf(\"\\n\");\n    printf(\"Notes: 1. The filename is required as the first parameter.\\n\");\n    printf(\"       2. If you declare either the device or the platform,\\n\");\n    printf(\"          you must declare both.\\n\\n\");\n}\n"
+  },
+  "target_files_expected": [
+    "nn_openmp.c"
+  ],
+  "target_files_extracted": [
+    "nn_openmp.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 75.532,
+      "prompt_tokens": 3175,
+      "completion_tokens": 4760,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-lud-opencl",
+  "target_spec": "rodinia-lud-omp",
+  "kernel": "lud",
+  "model": "azure-gpt-5.4",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 637290608,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-27T05:38:57Z",
+  "prompt_tokens": 11410,
+  "completion_tokens": 6025,
+  "llm_response_time_seconds": 107.659,
+  "build_status": "fail",
+  "build_time_seconds": 0.044,
+  "build_error_snippet": "lud_omp.c: In function \u2018lud_omp\u2019:\nlud_omp.c:113:21: error: \u2018offset\u2019 not specified in enclosing \u2018parallel\u2019\n  113 |         for (offset = 0; offset < matrix_dim; offset += BLOCK_SIZE) {\n      |              ~~~~~~~^~~\nlud_omp.c:111:9: note: enclosing \u2018parallel\u2019\n  111 | #pragma omp parallel num_threads(omp_num_threads) default(none) shared(m, matrix_dim)\n      |         ^~~\nmake[1]: *** [Makefile:101: lud_omp.o] Error 1\nmake: *** [Makefile:4: lud_omp] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: 111 | #pragma omp parallel num_threads(omp_num_threads) default(none) shared(m, matrix_dim)\n      |         ^~~\nmake[1]: *** [Makefile:101: lud_omp.o] Error 1\nmake: *** [Makefile:4: lud_omp] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.004,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "omp/lud_omp.c": "#include <omp.h>\n#include \"common.h\"\n\n#ifdef RD_WG_SIZE_0_0\n#define BLOCK_SIZE RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n#define BLOCK_SIZE RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n#define BLOCK_SIZE RD_WG_SIZE\n#else\n#define BLOCK_SIZE 16\n#endif\n\nextern int omp_num_threads;\n\nstatic void lud_diagonal_block(float *m, int matrix_dim, int offset, int block_size)\n{\n    int i, j, tx;\n    float shadow[BLOCK_SIZE * BLOCK_SIZE];\n\n    for (i = 0; i < block_size; i++) {\n        for (tx = 0; tx < block_size; tx++) {\n            shadow[i * BLOCK_SIZE + tx] = m[(offset + i) * matrix_dim + offset + tx];\n        }\n    }\n\n    for (i = 0; i < block_size - 1; i++) {\n        for (tx = i + 1; tx < block_size; tx++) {\n            for (j = 0; j < i; j++) {\n                shadow[tx * BLOCK_SIZE + i] -=\n                    shadow[tx * BLOCK_SIZE + j] * shadow[j * BLOCK_SIZE + i];\n            }\n            shadow[tx * BLOCK_SIZE + i] /= shadow[i * BLOCK_SIZE + i];\n        }\n\n        for (tx = i + 1; tx < block_size; tx++) {\n            for (j = 0; j < i + 1; j++) {\n                shadow[(i + 1) * BLOCK_SIZE + tx] -=\n                    shadow[(i + 1) * BLOCK_SIZE + j] * shadow[j * BLOCK_SIZE + tx];\n            }\n        }\n    }\n\n    for (i = 0; i < block_size; i++) {\n        for (tx = 0; tx < block_size; tx++) {\n            m[(offset + i) * matrix_dim + offset + tx] = shadow[i * BLOCK_SIZE + tx];\n        }\n    }\n}\n\nstatic void lud_perimeter_row(float *m, int matrix_dim, int offset, int block_size,\n                              int col_start, int col_block_size)\n{\n    int i, j, idx;\n\n    for (idx = 0; idx < col_block_size; idx++) {\n        for (i = 1; i < block_size; i++) {\n            for (j = 0; j < i; j++) {\n                m[(offset + i) * matrix_dim + col_start + idx] -=\n                    m[(offset + i) * matrix_dim + offset + j] *\n                    m[(offset + j) * matrix_dim + col_start + idx];\n            }\n        }\n    }\n}\n\nstatic void lud_perimeter_col(float *m, int matrix_dim, int offset, int block_size,\n                              int row_start, int row_block_size)\n{\n    int i, j, idx;\n\n    for (idx = 0; idx < row_block_size; idx++) {\n        for (i = 0; i < block_size; i++) {\n            for (j = 0; j < i; j++) {\n                m[(row_start + idx) * matrix_dim + offset + i] -=\n                    m[(row_start + idx) * matrix_dim + offset + j] *\n                    m[(offset + j) * matrix_dim + offset + i];\n            }\n            m[(row_start + idx) * matrix_dim + offset + i] /=\n                m[(offset + i) * matrix_dim + offset + i];\n        }\n    }\n}\n\nstatic void lud_internal_block(float *m, int matrix_dim,\n                               int row_start, int row_block_size,\n                               int col_start, int col_block_size,\n                               int offset, int block_size)\n{\n    int ty, tx, i;\n\n    for (ty = 0; ty < row_block_size; ty++) {\n        for (tx = 0; tx < col_block_size; tx++) {\n            float sum = 0.0f;\n            for (i = 0; i < block_size; i++) {\n                sum += m[(row_start + ty) * matrix_dim + offset + i] *\n                       m[(offset + i) * matrix_dim + col_start + tx];\n            }\n            m[(row_start + ty) * matrix_dim + col_start + tx] -= sum;\n        }\n    }\n}\n\nvoid lud_omp(float *m, int matrix_dim)\n{\n    int offset;\n\n    if (m == 0 || matrix_dim <= 0)\n        return;\n\n#pragma omp parallel num_threads(omp_num_threads) default(none) shared(m, matrix_dim)\n    {\n        for (offset = 0; offset < matrix_dim; offset += BLOCK_SIZE) {\n            int block_size = BLOCK_SIZE;\n            int remain, num_tiles;\n\n            if (offset + block_size > matrix_dim)\n                block_size = matrix_dim - offset;\n\n#pragma omp single\n            {\n                lud_diagonal_block(m, matrix_dim, offset, block_size);\n            }\n\n#pragma omp barrier\n\n            remain = matrix_dim - (offset + block_size);\n            num_tiles = (remain > 0) ? ((remain + BLOCK_SIZE - 1) / BLOCK_SIZE) : 0;\n\n#pragma omp for schedule(static)\n            for (int t = 0; t < num_tiles; t++) {\n                int start = offset + block_size + t * BLOCK_SIZE;\n                int tile_size = BLOCK_SIZE;\n\n                if (start + tile_size > matrix_dim)\n                    tile_size = matrix_dim - start;\n\n                lud_perimeter_row(m, matrix_dim, offset, block_size, start, tile_size);\n                lud_perimeter_col(m, matrix_dim, offset, block_size, start, tile_size);\n            }\n\n#pragma omp barrier\n\n#pragma omp for collapse(2) schedule(static)\n            for (int by = 0; by < num_tiles; by++) {\n                for (int bx = 0; bx < num_tiles; bx++) {\n                    int row_start = offset + block_size + by * BLOCK_SIZE;\n                    int col_start = offset + block_size + bx * BLOCK_SIZE;\n                    int row_block_size = BLOCK_SIZE;\n                    int col_block_size = BLOCK_SIZE;\n\n                    if (row_start + row_block_size > matrix_dim)\n                        row_block_size = matrix_dim - row_start;\n                    if (col_start + col_block_size > matrix_dim)\n                        col_block_size = matrix_dim - col_start;\n\n                    lud_internal_block(m, matrix_dim,\n                                       row_start, row_block_size,\n                                       col_start, col_block_size,\n                                       offset, block_size);\n                }\n            }\n\n#pragma omp barrier\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "omp/lud_omp.c"
+  ],
+  "target_files_extracted": [
+    "omp/lud_omp.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 107.659,
+      "prompt_tokens": 11410,
+      "completion_tokens": 6025,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "lud_omp.c: In function \u2018lud_omp\u2019:\nlud_omp.c:113:21: error: \u2018offset\u2019 not specified in enclosing \u2018parallel\u2019\n  113 |         for (offset = 0; offset < matrix_dim; offset += BLOCK_SIZE) {\n      |              ~~~~~~~^~~\nlud_omp.c:111:9: note: enclosing \u2018parallel\u2019\n  111 | #pragma omp parallel num_threads(omp_num_threads) default(none) shared(m, matrix_dim)\n      |         ^~~\nmake[1]: *** [Makefile:101: lud_omp.o] Error 1\nmake: *** [Makefile:4: lud_omp] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

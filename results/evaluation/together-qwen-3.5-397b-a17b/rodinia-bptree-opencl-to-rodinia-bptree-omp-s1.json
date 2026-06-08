@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-bptree-opencl",
+  "target_spec": "rodinia-bptree-omp",
+  "kernel": "bptree",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1283970668,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-04-22T02:18:12Z",
+  "prompt_tokens": 28420,
+  "completion_tokens": 5158,
+  "llm_response_time_seconds": 59.302,
+  "build_status": "pass",
+  "build_time_seconds": 0.433,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.496,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Input File: ../../data/b+tree/mil.txt \nCommand File: ../../data/b+tree/command.txt \nCommand Buffer: \nj 6000 3000\nk 10000\n\n\nGetting input from file file...\nTransforming data to a GPU suitable structure...\nTree transformation took 0.021886\nWaiting for command\n> \n******command: j count=6000, rSize=6000 \n> > > > > > > > > > > > \n ******command: k count=10000 \n> > > > > > > > > > \n",
+  "verify_status": "fail",
+  "verify_strategy": "stdout_pattern",
+  "overall_status": "VERIFY_FAIL",
+  "error_message": "Verify failed: Pattern '(?:Total:)' NOT found in stdout. ",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.489,
+  "translated_wall_time_seconds": 0.496,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.9859,
+  "translated_files": {
+    "kernel/kernel_cpu.c": "#include <stdint.h>\n#include <stdbool.h>\n#include <stdlib.h>\n#include <omp.h>\n\n#define fp float\n\n#define Version \"1.5\"\n\n#ifdef WINDOWS\n\t#define bool char\n\t#define false 0\n\t#define true 1\n#endif\n\n#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 508\n#endif\n\n#ifndef DEFAULT_ORDER_2\n#define DEFAULT_ORDER_2 508\n#endif\n\ntypedef struct record {\n\tint value;\n} record;\n\ntypedef struct knode {\n\tint location;\n\tint indices [DEFAULT_ORDER + 1];\n\tint  keys [DEFAULT_ORDER + 1];\n\tbool is_leaf;\n\tint num_keys;\n} knode;\n\nvoid findK_kernel(\n\tlong height,\n\tknode *knodesD,\n\tlong knodes_elem,\n\trecord *recordsD,\n\tlong *currKnodeD,\n\tlong *offsetD,\n\tint *keysD,\n\trecord *ansD,\n\tint count,\n\tint order)\n{\n\t#pragma omp parallel for\n\tfor(int bid = 0; bid < count; bid++) {\n\t\tlong currKnode = currKnodeD[bid];\n\t\tlong offset = offsetD[bid];\n\t\t\n\t\tint i;\n\t\tfor(i = 0; i < height; i++){\n\t\t\tint thid;\n\t\t\tfor(thid = 0; thid < order; thid++){\n\t\t\t\tif((knodesD[currKnode].keys[thid]) <= keysD[bid] && \n\t\t\t\t   (knodesD[currKnode].keys[thid+1] > keysD[bid])){\n\t\t\t\t\tif(knodesD[offset].indices[thid] < knodes_elem){\n\t\t\t\t\t\toffset = knodesD[offset].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tcurrKnode = offset;\n\t\t}\n\n\t\tint thid;\n\t\tfor(thid = 0; thid < order; thid++){\n\t\t\tif(knodesD[currKnode].keys[thid] == keysD[bid]){\n\t\t\t\tansD[bid].value = recordsD[knodesD[currKnode].indices[thid]].value;\n\t\t\t}\n\t\t}\n\t}\n}\n\nvoid findRangeK_kernel(\n\tlong height,\n\tknode *knodesD,\n\tlong knodes_elem,\n\tlong *currKnodeD,\n\tlong *offsetD,\n\tlong *lastKnodeD,\n\tlong *offset_2D,\n\tint *startD,\n\tint *endD,\n\tint *RecstartD,\n\tint *ReclenD,\n\tint count,\n\tint order)\n{\n\t#pragma omp parallel for\n\tfor(int bid = 0; bid < count; bid++) {\n\t\tlong currKnode = currKnodeD[bid];\n\t\tlong offset = offsetD[bid];\n\t\tlong lastKnode = lastKnodeD[bid];\n\t\tlong offset_2 = offset_2D[bid];\n\t\t\n\t\tint i;\n\t\tfor(i = 0; i < height; i++){\n\t\t\tint thid;\n\t\t\tfor(thid = 0; thid < order; thid++){\n\t\t\t\tif((knodesD[currKnode].keys[thid] <= startD[bid]) && \n\t\t\t\t   (knodesD[currKnode].keys[thid+1] > startD[bid])){\n\t\t\t\t\tif(knodesD[currKnode].indices[thid] < knodes_elem){\n\t\t\t\t\t\toffset = knodesD[currKnode].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif((knodesD[lastKnode].keys[thid] <= endD[bid]) && \n\t\t\t\t   (knodesD[lastKnode].keys[thid+1] > endD[bid])){\n\t\t\t\t\tif(knodesD[lastKnode].indices[thid] < knodes_elem){\n\t\t\t\t\t\toffset_2 = knodesD[lastKnode].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tcurrKnode = offset;\n\t\t\tlastKnode = offset_2;\n\t\t}\n\n\t\tint thid;\n\t\tfor(thid = 0; thid < order; thid++){\n\t\t\tif(knodesD[currKnode].keys[thid] == startD[bid]){\n\t\t\t\tRecstartD[bid] = knodesD[currKnode].indices[thid];\n\t\t\t}\n\t\t}\n\n\t\tfor(thid = 0; thid < order; thid++){\n\t\t\tif(knodesD[lastKnode].keys[thid] == endD[bid]){\n\t\t\t\tReclenD[bid] = knodesD[lastKnode].indices[thid] - RecstartD[bid] + 1;\n\t\t\t}\n\t\t}\n\t}\n}\n",
+    "kernel/kernel_cpu_2.c": "#include <stdint.h>\n#include <stdbool.h>\n#include <stdlib.h>\n#include <stdio.h>\n#include <omp.h>\n#include <sys/time.h>\n\n#define fp float\n\n#define Version \"1.5\"\n\n#ifdef WINDOWS\n\t#define bool char\n\t#define false 0\n\t#define true 1\n#endif\n\n#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 508\n#endif\n\n#ifndef DEFAULT_ORDER_2\n#define DEFAULT_ORDER_2 508\n#endif\n\ntypedef struct record {\n\tint value;\n} record;\n\ntypedef struct knode {\n\tint location;\n\tint indices [DEFAULT_ORDER + 1];\n\tint  keys [DEFAULT_ORDER + 1];\n\tbool is_leaf;\n\tint num_keys;\n} knode;\n\nvoid findK_kernel(\n\tlong height,\n\tknode *knodesD,\n\tlong knodes_elem,\n\trecord *recordsD,\n\tlong *currKnodeD,\n\tlong *offsetD,\n\tint *keysD,\n\trecord *ansD,\n\tint count,\n\tint order);\n\nvoid findRangeK_kernel(\n\tlong height,\n\tknode *knodesD,\n\tlong knodes_elem,\n\tlong *currKnodeD,\n\tlong *offsetD,\n\tlong *lastKnodeD,\n\tlong *offset_2D,\n\tint *startD,\n\tint *endD,\n\tint *RecstartD,\n\tint *ReclenD,\n\tint count,\n\tint order);\n\nvoid \nkernel_cpu(\tint cores_arg,\n\t\t\trecord *records,\n\t\t\tknode *knodes,\n\t\t\tlong knodes_elem,\n\t\t\tint order,\n\t\t\tlong maxheight,\n\t\t\tint count,\n\t\t\tlong *currKnode,\n\t\t\tlong *offset,\n\t\t\tint *keys,\n\t\t\trecord *ans)\n{\n#ifdef TIMING\n\tstruct timeval tv;\n\tstruct timeval tv_total_start, tv_total_end;\n\tstruct timeval tv_init_end;\n\tstruct timeval tv_kernel_start, tv_kernel_end;\n\tstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\n\tstruct timeval tv_close_start, tv_close_end;\n\tfloat init_time = 0, mem_alloc_time = 0, kernel_time= 0,\n\t\t  close_time = 0, total_time = 0;\n#endif\n\n#ifdef TIMING\n\tgettimeofday(&tv_total_start, NULL);\n#endif\n\n#ifdef TIMING\n\tgettimeofday(&tv_init_end, NULL);\n#endif\n\n#ifdef TIMING\n\tgettimeofday(&tv_mem_alloc_start, NULL);\n\tgettimeofday(&tv_mem_alloc_end, NULL);\n\ttvsub(&tv_mem_alloc_end, &tv_mem_alloc_start, &tv);\n\tmem_alloc_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n#ifdef TIMING\n\tgettimeofday(&tv_kernel_start, NULL);\n#endif\n\n\tfindK_kernel(\n\t\tmaxheight,\n\t\tknodes,\n\t\tknodes_elem,\n\t\trecords,\n\t\tcurrKnode,\n\t\toffset,\n\t\tkeys,\n\t\tans,\n\t\tcount,\n\t\torder);\n\n#ifdef TIMING\n\tgettimeofday(&tv_kernel_end, NULL);\n\ttvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n/kernel_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n#ifdef TIMING\n\tgettimeofday(&tv_close_start, NULL);\n#endif\n\n#ifdef TIMING\n\tgettimeofday(&tv_close_end, NULL);\n\ttvsub(&tv_close_end, &tv_close_start, &tv);\n\tclose_time += tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n\ttvsub(&tv_close_end, &tv_total_start, &tv);\n\ttotal_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n#ifdef TIMING\n\tprintf(\"Time spent in different stages of CPU KERNEL:\\n\");\n\tprintf(\"Init: %f\\n\", init_time);\n\tprintf(\"MemAlloc: %f\\n\", mem_alloc_time);\n\tprintf(\"Exec: %f\\n\", kernel_time);\n\tprintf(\"Close: %f\\n\", close_time);\n\tprintf(\"Total: %f\\n\", total_time);\n#endif\n}\n\nvoid \nkernel_cpu_2(\tint cores_arg,\n\t\t\t\tknode *knodes,\n\t\t\t\tlong knodes_elem,\n\t\t\t\tint order,\n\t\t\t\tlong maxheight,\n\t\t\t\tint count,\n\t\t\t\tlong *currKnode,\n\t\t\t\tlong *offset,\n\t\t\t\tlong *lastKnode,\n\t\t\t\tlong *offset_2,\n\t\t\t\tint *start,\n\t\t\t\tint *end,\n\t\t\t\tint *recstart,\n\t\t\t\tint *reclength)\n{\n#ifdef TIMING\n\tstruct timeval tv;\n\tstruct timeval tv_total_start, tv_total_end;\n\tstruct timeval tv_init_end;\n\tstruct timeval tv_kernel_start, tv_kernel_end;\n\tstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\n\tstruct timeval tv_close_start, tv_close_end;\n\tfloat init_time = 0, mem_alloc_time = 0, kernel_time= 0,\n\t\t  close_time = 0, total_time = 0;\n#endif\n\n#ifdef TIMING\n\tgettimeofday(&tv_total_start, NULL);\n#endif\n\n#ifdef TIMING\n\tgettimeofday(&tv_init_end, NULL);\n#endif\n\n#ifdef TIMING\n\tgettimeofday(&tv_mem_alloc_start, NULL);\n\tgettimeofday(&tv_mem_alloc_end, NULL);\n\ttvsub(&tv_mem_alloc_end, &tv_mem_alloc_start, &tv);\n\tmem_alloc_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n#ifdef TIMING\n\tgettimeofday(&tv_kernel_start, NULL);\n#endif\n\n\tfindRangeK_kernel(\n\t\tmaxheight,\n\t\tknodes,\n\t\tknodes_elem,\n\t\tcurrKnode,\n\t\toffset,\n\t\tlastKnode,\n\t\toffset_2,\n\t\tstart,\n\t\tend,\n\t\trecstart,\n\t\treclength,\n\t\tcount,\n\t\torder);\n\n#ifdef TIMING\n\tgettimeofday(&tv_kernel_end, NULL);\n\ttvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n/kernel_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n#ifdef TIMING\n\tgettimeofday(&tv_close_start, NULL);\n#endif\n\n#ifdef TIMING\n\tgettimeofday(&tv_close_end, NULL);\n\ttvsub(&tv_close_end, &tv_close_start, &tv);\n\tclose_time += tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n\ttvsub(&tv_close_end, &tv_total_start, &tv);\n\ttotal_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n#ifdef TIMING\n\tprintf(\"Time spent in different stages of CPU KERNEL:\\n\");\n\tprintf(\"Init: %f\\n\", init_time);\n\tprintf(\"MemAlloc: %f\\n\", mem_alloc_time);\n\tprintf(\"Exec: %f\\n\", kernel_time);\n\tprintf(\"Close: %f\\n\", close_time);\n\tprintf(\"Total: %f\\n\", total_time);\n#endif\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_cpu.c",
+    "kernel/kernel_cpu_2.c"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_cpu.c",
+    "kernel/kernel_cpu_2.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 59.302,
+      "prompt_tokens": 28420,
+      "completion_tokens": 5158,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "fail",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

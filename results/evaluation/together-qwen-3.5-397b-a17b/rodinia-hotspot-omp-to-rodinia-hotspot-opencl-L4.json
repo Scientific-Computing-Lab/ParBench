@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-hotspot-omp",
+  "target_spec": "rodinia-hotspot-opencl",
+  "kernel": "hotspot",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 325865020,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-04-24T05:31:44Z",
+  "prompt_tokens": 8163,
+  "completion_tokens": 2022,
+  "llm_response_time_seconds": 184.44,
+  "build_status": "pass",
+  "build_time_seconds": 0.177,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.202,
+  "run_exit_code": 245,
+  "run_stderr_snippet": "1 error generated.\n",
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nPlatform: NVIDIA Corporation\nnum_devices = 1\nDevice: NVIDIA GeForce RTX 4070\nUse GPU device\n<<<<\n<kernel>:139:31: error: read-only variable is not assignable\n                    temp[idx] = result[idx];\n                    ~~~~~~~~~ ^\n\n>>>>\nError at line 306: CL_BUILD_PROGRAM_FAILURE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 245)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.159,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "hotspot_kernel.cl": "#define BLOCK_SIZE 16\n\n#define MAX_PD\t(3.0e6)\n#define PRECISION\t0.001\n#define SPEC_HEAT_SI 1.75e6\n#define K_SI 100\n#define FACTOR_CHIP\t0.5\n\nconst float t_chip = 0.0005f;\nconst float chip_height = 0.016f;\nconst float chip_width = 0.016f;\nconst float amb_temp = 80.0f;\n\n__kernel void hotspot(\n    int iter,\n    __global const float *power,\n    __global const float *temp,\n    __global float *result,\n    int col,\n    int row,\n    int borderCols,\n    int borderRows,\n    float Cap,\n    float Rx,\n    float Ry,\n    float Rz,\n    float step)\n{\n    int blockCols = (col + BLOCK_SIZE - 1) / BLOCK_SIZE;\n    int blockRows = (row + BLOCK_SIZE - 1) / BLOCK_SIZE;\n    \n    int block_id = get_global_id(0) / BLOCK_SIZE;\n    int block_j = get_global_id(1) / BLOCK_SIZE;\n    \n    int item_30 = block_id * BLOCK_SIZE;\n    int var_51 = block_j * BLOCK_SIZE;\n    \n    int v_45 = item_30 + BLOCK_SIZE;\n    int elem_21 = var_51 + BLOCK_SIZE;\n    \n    if (item_30 >= col || var_51 >= row)\n        return;\n    \n    if (v_45 > col)\n        v_45 = col;\n    if (elem_21 > row)\n        elem_21 = row;\n    \n    float elem_44 = Ry;\n    float var_23 = Rx;\n    float var_32 = Rz;\n    float v_41 = step / Cap;\n    float elem_2 = step;\n    \n    for (int iteration = 0; iteration < iter; iteration++)\n    {\n        for (int r = var_51; r < elem_21; r++)\n        {\n            for (int c = item_30; c < v_45; c++)\n            {\n                float delta;\n                int idx = r * col + c;\n                \n                if ((0 == r) && (0 == c))\n                {\n                    delta = v_41 * (power[0] +\n                        (temp[1] - temp[0]) * var_23 +\n                        (temp[col] - temp[0]) * elem_44 +\n                        (amb_temp - temp[0]) * var_32);\n                }\n                else if ((0 == r) && (col - 1 == c))\n                {\n                    delta = v_41 * (power[c] +\n                        (temp[c - 1] - temp[c]) * var_23 +\n                        (temp[c + col] - temp[c]) * elem_44 +\n                        (amb_temp - temp[c]) * var_32);\n                }\n                else if ((row - 1 == r) && (col - 1 == c))\n                {\n                    delta = v_41 * (power[idx] +\n                        (temp[idx - 1] - temp[idx]) * var_23 +\n                        (temp[(r - 1) * col + c] - temp[idx]) * elem_44 +\n                        (amb_temp - temp[idx]) * var_32);\n                }\n                else if ((row - 1 == r) && (0 == c))\n                {\n                    delta = v_41 * (power[idx] +\n                        (temp[idx + 1] - temp[idx]) * var_23 +\n                        (temp[(r - 1) * col] - temp[idx]) * elem_44 +\n                        (amb_temp - temp[idx]) * var_32);\n                }\n                else if (0 == r)\n                {\n                    delta = v_41 * (power[c] +\n                        (temp[c + 1] + temp[c - 1] - 2.0f * temp[c]) * var_23 +\n                        (temp[col + c] - temp[c]) * elem_44 +\n                        (amb_temp - temp[c]) * var_32);\n                }\n                else if (col - 1 == c)\n                {\n                    delta = v_41 * (power[idx] +\n                        (temp[(r + 1) * col + c] + temp[(r - 1) * col + c] - 2.0f * temp[idx]) * elem_44 +\n                        (temp[idx - 1] - temp[idx]) * var_23 +\n                        (amb_temp - temp[idx]) * var_32);\n                }\n                else if (row - 1 == r)\n                {\n                    delta = v_41 * (power[idx] +\n                        (temp[idx + 1] + temp[idx - 1] - 2.0f * temp[idx]) * var_23 +\n                        (temp[(r - 1) * col + c] - temp[idx]) * elem_44 +\n                        (amb_temp - temp[idx]) * var_32);\n                }\n                else if (0 == c)\n                {\n                    delta = v_41 * (power[idx] +\n                        (temp[(r + 1) * col] + temp[(r - 1) * col] - 2.0f * temp[idx]) * elem_44 +\n                        (temp[idx + 1] - temp[idx]) * var_23 +\n                        (amb_temp - temp[idx]) * var_32);\n                }\n                else\n                {\n                    delta = v_41 * (power[idx] +\n                        (temp[(r + 1) * col + c] + temp[(r - 1) * col + c] - 2.0f * temp[idx]) * elem_44 +\n                        (temp[idx + 1] + temp[idx - 1] - 2.0f * temp[idx]) * var_23 +\n                        (amb_temp - temp[idx]) * var_32);\n                }\n                \n                result[idx] = temp[idx] + delta;\n            }\n        }\n        \n        if (iteration < iter - 1)\n        {\n            for (int r = var_51; r < elem_21; r++)\n            {\n                for (int c = item_30; c < v_45; c++)\n                {\n                    int idx = r * col + c;\n                    temp[idx] = result[idx];\n                }\n            }\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "hotspot_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspot_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 184.44,
+      "prompt_tokens": 8163,
+      "completion_tokens": 2022,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "1 error generated.\n",
+      "run_stdout_snippet": "WG size of kernel = 16 X 16\nPlatform: NVIDIA Corporation\nnum_devices = 1\nDevice: NVIDIA GeForce RTX 4070\nUse GPU device\n<<<<\n<kernel>:139:31: error: read-only variable is not assignable\n                    temp[idx] = result[idx];\n                    ~~~~~~~~~ ^\n\n>>>>\nError at line 306: CL_BUILD_PROGRAM_FAILURE\n",
+      "extraction_fail": null
+    }
+  ]
+}

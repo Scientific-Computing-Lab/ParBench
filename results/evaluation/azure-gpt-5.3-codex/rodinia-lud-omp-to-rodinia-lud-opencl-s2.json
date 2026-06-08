@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-omp",
+  "target_spec": "rodinia-lud-opencl",
+  "kernel": "lud",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 2080490303,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-30T04:07:37Z",
+  "prompt_tokens": 11428,
+  "completion_tokens": 3371,
+  "llm_response_time_seconds": 42.815,
+  "build_status": "pass",
+  "build_time_seconds": 0.461,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.243,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nInit: 186.445007\nMemAlloc: 0.003000\nHtoD: 0.011328\nExec: 2.616832\nDtoH: 0.010688\nClose: 0.058000\nTotal: 189.705994\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.07,
+  "translated_wall_time_seconds": 0.243,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.2881,
+  "translated_files": {
+    "lud_kernel.cl": "#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\n#define IDX(r, c, n) ((r) * (n) + (c))\n\n__kernel void lud_diagonal(__global float *m,\n                           __local float *shadow,\n                           const int matrix_dim,\n                           const int offset)\n{\n    (void)shadow;\n\n    if (get_local_id(0) != 0) return;\n\n    for (int i = 0; i < BLOCK_SIZE; i++) {\n        for (int j = i; j < BLOCK_SIZE; j++) {\n            float sum = m[IDX(offset + i, offset + j, matrix_dim)];\n            for (int k = 0; k < i; k++) {\n                sum -= m[IDX(offset + i, offset + k, matrix_dim)] *\n                       m[IDX(offset + k, offset + j, matrix_dim)];\n            }\n            m[IDX(offset + i, offset + j, matrix_dim)] = sum;\n        }\n\n        float temp = 1.0f / m[IDX(offset + i, offset + i, matrix_dim)];\n        for (int j = i + 1; j < BLOCK_SIZE; j++) {\n            float sum = m[IDX(offset + j, offset + i, matrix_dim)];\n            for (int k = 0; k < i; k++) {\n                sum -= m[IDX(offset + j, offset + k, matrix_dim)] *\n                       m[IDX(offset + k, offset + i, matrix_dim)];\n            }\n            m[IDX(offset + j, offset + i, matrix_dim)] = sum * temp;\n        }\n    }\n}\n\n__kernel void lud_perimeter(__global float *m,\n                            __local float *dia,\n                            __local float *peri_row,\n                            __local float *peri_col,\n                            const int matrix_dim,\n                            const int offset)\n{\n    (void)dia;\n    (void)peri_row;\n    (void)peri_col;\n\n    if (get_local_id(0) != 0) return;\n\n    int chunks = (matrix_dim - offset) / BLOCK_SIZE - 1;\n    int chunk_idx = (int)get_group_id(0);\n    if (chunk_idx >= chunks) return;\n\n    int i_global = offset;\n    int j_global = offset + BLOCK_SIZE * (chunk_idx + 1);\n\n    for (int j = 0; j < BLOCK_SIZE; j++) {\n        for (int i = 0; i < BLOCK_SIZE; i++) {\n            float sum = 0.0f;\n            for (int k = 0; k < i; k++) {\n                sum += m[IDX(i_global + i, offset + k, matrix_dim)] *\n                       m[IDX(offset + k, j_global + j, matrix_dim)];\n            }\n            m[IDX(i_global + i, j_global + j, matrix_dim)] -= sum;\n        }\n    }\n\n    i_global = offset + BLOCK_SIZE * (chunk_idx + 1);\n    j_global = offset;\n\n    for (int i = 0; i < BLOCK_SIZE; i++) {\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            float sum = 0.0f;\n            for (int k = 0; k < j; k++) {\n                sum += m[IDX(i_global + i, j_global + k, matrix_dim)] *\n                       m[IDX(offset + k, offset + j, matrix_dim)];\n            }\n            float v = m[IDX(i_global + i, j_global + j, matrix_dim)];\n            m[IDX(i_global + i, j_global + j, matrix_dim)] =\n                (v - sum) / m[IDX(offset + j, offset + j, matrix_dim)];\n        }\n    }\n}\n\n__kernel void lud_internal(__global float *m,\n                           __local float *peri_row,\n                           __local float *peri_col,\n                           const int matrix_dim,\n                           const int offset)\n{\n    (void)peri_row;\n    (void)peri_col;\n\n    if (get_local_id(0) != 0 || get_local_id(1) != 0) return;\n\n    int chunks = (matrix_dim - offset) / BLOCK_SIZE - 1;\n    int bx = (int)get_group_id(0);\n    int by = (int)get_group_id(1);\n    if (bx >= chunks || by >= chunks) return;\n\n    int i_global = offset + BLOCK_SIZE * (by + 1);\n    int j_global = offset + BLOCK_SIZE * (bx + 1);\n\n    for (int i = 0; i < BLOCK_SIZE; i++) {\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            float sum = 0.0f;\n            for (int k = 0; k < BLOCK_SIZE; k++) {\n                sum += m[IDX(i_global + i, offset + k, matrix_dim)] *\n                       m[IDX(offset + k, j_global + j, matrix_dim)];\n            }\n            m[IDX(i_global + i, j_global + j, matrix_dim)] -= sum;\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "lud_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "lud_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 42.815,
+      "prompt_tokens": 11428,
+      "completion_tokens": 3371,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

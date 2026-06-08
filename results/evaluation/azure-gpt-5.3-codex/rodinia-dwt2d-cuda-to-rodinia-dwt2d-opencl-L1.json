@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-dwt2d-cuda",
+  "target_spec": "rodinia-dwt2d-opencl",
+  "kernel": "dwt2d",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 59059947,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "rgb.bmp",
+    "-i",
+    "../../data/dwt2d",
+    "-D",
+    "1024x1024",
+    "-f",
+    "-5",
+    "-l",
+    "3"
+  ],
+  "timestamp": "2026-04-30T23:49:45Z",
+  "prompt_tokens": 30828,
+  "completion_tokens": 4960,
+  "llm_response_time_seconds": 78.043,
+  "build_status": "pass",
+  "build_time_seconds": 0.311,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.011,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "liding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 3 , gx = 4 , gy = 11 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\n\nWriting to rgb.bmp.dwt.r (1024 x 1024)\n\nWriting to rgb.bmp.dwt.g (1024 x 1024)\n\nWriting to rgb.bmp.dwt.b (1024 x 1024)\nInit: 241.143997\nMemAlloc: 9.296000\nHtoD: 0.000000\nExec: 0.021504\nDtoH: 229.287994\nClose: 0.608000\nTotal: 957.471985\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.1,
+  "translated_wall_time_seconds": 1.011,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0989,
+  "translated_files": {
+    "com_dwt.cl": "#define THREADS 256\n\ninline int divRndUpInt(const int n, const int d) {\n    return (n / d) + ((n % d) ? 1 : 0);\n}\n\n__kernel void c_CopySrcToComponents(__global int *d_r,\n                                    __global int *d_g,\n                                    __global int *d_b,\n                                    __global const uchar *d_src,\n                                    const int pixels)\n{\n    const int i = (int)get_global_id(0);\n    if (i < pixels) {\n        const int o = i * 3;\n        d_r[i] = (int)d_src[o + 0] - 128;\n        d_g[i] = (int)d_src[o + 1] - 128;\n        d_b[i] = (int)d_src[o + 2] - 128;\n    }\n}\n\n__kernel void c_CopySrcToComponent(__global int *d_c,\n                                   __global const uchar *d_src,\n                                   const int pixels)\n{\n    const int i = (int)get_global_id(0);\n    if (i < pixels) {\n        d_c[i] = (int)d_src[i] - 128;\n    }\n}\n\n__kernel void cl_fdwt53Kernel(__global int *input,\n                              __global int *output,\n                              const int sizeX,\n                              const int sizeY,\n                              const int winSteps,\n                              const int WIN_SX,\n                              const int WIN_SY)\n{\n    (void)winSteps;\n    (void)WIN_SX;\n    (void)WIN_SY;\n\n    if (get_global_id(0) != 0 || get_global_id(1) != 0) {\n        return;\n    }\n\n    const int sx = sizeX;\n    const int sy = sizeY;\n\n    if (sx <= 0 || sy <= 0) {\n        return;\n    }\n\n    const int llx = divRndUpInt(sx, 2);\n    const int hlx = sx - llx;\n    const int lly = divRndUpInt(sy, 2);\n    const int hly = lly;\n    const int lhy = sy - lly;\n    const int hhy = lhy;\n\n    const int offsetLL = 0;\n    const int offsetHL = llx * lly;\n    const int offsetLH = offsetHL + hlx * hly;\n    const int offsetHH = offsetLH + llx * lhy;\n\n    /* Horizontal forward 5/3: input -> output (temporary row-wise packed) */\n    for (int y = 0; y < sy; y++) {\n        const int rowIn = y * sx;\n        const int rowTmp = y * sx;\n\n        /* Predict (odd samples -> high) */\n        for (int k = 0; k < hlx; k++) {\n            const int idx = 2 * k + 1;\n            const int left = input[rowIn + idx - 1];\n            const int right = (idx + 1 < sx) ? input[rowIn + idx + 1] : left;\n            const int d = input[rowIn + idx] - (left + right) / 2;\n            output[rowTmp + llx + k] = d;\n        }\n\n        /* Update (even samples -> low) */\n        for (int k = 0; k < llx; k++) {\n            const int idx = 2 * k;\n            int s = input[rowIn + idx];\n\n            if (hlx > 0) {\n                const int leftD = (k == 0) ? output[rowTmp + llx + 0]\n                                           : output[rowTmp + llx + (k - 1)];\n                const int rightD = (k < hlx) ? output[rowTmp + llx + k]\n                                             : output[rowTmp + llx + (hlx - 1)];\n                s += (leftD + rightD + 2) / 4;\n            }\n\n            output[rowTmp + k] = s;\n        }\n    }\n\n    /* Vertical forward 5/3 on low-horizontal band -> LL and LH (write to input) */\n    for (int x = 0; x < llx; x++) {\n        /* Predict odd rows -> LH */\n        for (int k = 0; k < hhy; k++) {\n            const int yOdd = 2 * k + 1;\n            const int left = output[(yOdd - 1) * sx + x];\n            const int right = (yOdd + 1 < sy) ? output[(yOdd + 1) * sx + x] : left;\n            const int d = output[yOdd * sx + x] - (left + right) / 2;\n            input[offsetLH + k * llx + x] = d;\n        }\n\n        /* Update even rows -> LL */\n        for (int k = 0; k < lly; k++) {\n            const int yEven = 2 * k;\n            int s = output[yEven * sx + x];\n\n            if (hhy > 0) {\n                const int leftD = (k == 0) ? input[offsetLH + 0 * llx + x]\n                                           : input[offsetLH + (k - 1) * llx + x];\n                const int rightD = (k < hhy) ? input[offsetLH + k * llx + x]\n                                             : input[offsetLH + (hhy - 1) * llx + x];\n                s += (leftD + rightD + 2) / 4;\n            }\n\n            input[offsetLL + k * llx + x] = s;\n        }\n    }\n\n    /* Vertical forward 5/3 on high-horizontal band -> HL and HH (write to input) */\n    for (int x = 0; x < hlx; x++) {\n        const int col = llx + x;\n\n        /* Predict odd rows -> HH */\n        for (int k = 0; k < hhy; k++) {\n            const int yOdd = 2 * k + 1;\n            const int left = output[(yOdd - 1) * sx + col];\n            const int right = (yOdd + 1 < sy) ? output[(yOdd + 1) * sx + col] : left;\n            const int d = output[yOdd * sx + col] - (left + right) / 2;\n            input[offsetHH + k * hlx + x] = d;\n        }\n\n        /* Update even rows -> HL */\n        for (int k = 0; k < hly; k++) {\n            const int yEven = 2 * k;\n            int s = output[yEven * sx + col];\n\n            if (hhy > 0) {\n                const int leftD = (k == 0) ? input[offsetHH + 0 * hlx + x]\n                                           : input[offsetHH + (k - 1) * hlx + x];\n                const int rightD = (k < hhy) ? input[offsetHH + k * hlx + x]\n                                             : input[offsetHH + (hhy - 1) * hlx + x];\n                s += (leftD + rightD + 2) / 4;\n            }\n\n            input[offsetHL + k * hlx + x] = s;\n        }\n    }\n\n    /* Copy final packed result back to output buffer */\n    const int total = sx * sy;\n    for (int i = 0; i < total; i++) {\n        output[i] = input[i];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "com_dwt.cl"
+  ],
+  "target_files_extracted": [
+    "com_dwt.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 78.043,
+      "prompt_tokens": 30828,
+      "completion_tokens": 4960,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

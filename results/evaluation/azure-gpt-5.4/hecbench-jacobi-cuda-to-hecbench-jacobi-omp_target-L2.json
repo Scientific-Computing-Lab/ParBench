@@ -1,0 +1,74 @@
+{
+  "source_spec": "hecbench-jacobi-cuda",
+  "target_spec": "hecbench-jacobi-omp_target",
+  "kernel": "jacobi",
+  "model": "azure-gpt-5.4",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1153317234,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-27T06:57:07Z",
+  "prompt_tokens": 1725,
+  "completion_tokens": 1552,
+  "llm_response_time_seconds": 37.258,
+  "build_status": "pass",
+  "build_time_seconds": 0.726,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.551,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Error after iteration 0 = 0.00781059\nError after iteration 1000 = 3.91151e-05\nError after iteration 2000 = 2.32109e-05\nError after iteration 3000 = 1.70863e-05\nError after iteration 4000 = 1.37387e-05\nError after iteration 5000 = 1.15945e-05\nError after iteration 6000 = 1.00891e-05\nAverage execution time per iteration: 7.99378e-05 (s)\nPASS\nTotal elapsed time: 0.5012 seconds\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 7.99378e-05,
+      "unit": "s"
+    }
+  },
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.551,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cpp": "#include <chrono>\n#include <cmath>\n#include <cstdio>\n#include <cstdlib>\n#include <iostream>\n#include <iomanip>\n#include <limits>\n#include <utility>\n#include <omp.h>\n\n#define N 2048\n#define IDX(i, j) ((i) + (j) * N)\n\nvoid initialize_data(float* f) {\n  const float pi = acosf(-1.0f);\n  for (int j = 0; j < N; ++j) {\n    for (int i = 0; i < N; ++i) {\n      if (i == 0 || i == N - 1) {\n        f[IDX(i, j)] = sinf(j * 2.0f * pi / (N - 1));\n      } else if (j == 0 || j == N - 1) {\n        f[IDX(i, j)] = sinf(i * 2.0f * pi / (N - 1));\n      } else {\n        f[IDX(i, j)] = 0.0f;\n      }\n    }\n  }\n}\n\nint main() {\n  auto start_time = std::chrono::steady_clock::now();\n\n  float* f = (float*)aligned_alloc(64, N * N * sizeof(float));\n  float* f_old = (float*)aligned_alloc(64, N * N * sizeof(float));\n\n  initialize_data(f);\n  initialize_data(f_old);\n\n  float error = std::numeric_limits<float>::max();\n  const float tolerance = 1.e-5f;\n\n  const int max_iters = 10000;\n  int num_iters = 0;\n\n  auto start = std::chrono::steady_clock::now();\n\n#pragma omp target data map(tofrom : f[0:N * N], f_old[0:N * N])\n  {\n    while (error > tolerance && num_iters < max_iters) {\n      float error_sum = 0.0f;\n\n      if ((num_iters & 1) == 0) {\n#pragma omp target teams distribute parallel for collapse(2) reduction(+ : error_sum)\n        for (int j = 1; j <= N - 2; ++j) {\n          for (int i = 1; i <= N - 2; ++i) {\n            f[IDX(i, j)] = 0.25f * (f_old[IDX(i + 1, j)] +\n                                    f_old[IDX(i - 1, j)] +\n                                    f_old[IDX(i, j + 1)] +\n                                    f_old[IDX(i, j - 1)]);\n            float df = f[IDX(i, j)] - f_old[IDX(i, j)];\n            error_sum += df * df;\n          }\n        }\n      } else {\n#pragma omp target teams distribute parallel for collapse(2) reduction(+ : error_sum)\n        for (int j = 1; j <= N - 2; ++j) {\n          for (int i = 1; i <= N - 2; ++i) {\n            f_old[IDX(i, j)] = 0.25f * (f[IDX(i + 1, j)] +\n                                        f[IDX(i - 1, j)] +\n                                        f[IDX(i, j + 1)] +\n                                        f[IDX(i, j - 1)]);\n            float df = f_old[IDX(i, j)] - f[IDX(i, j)];\n            error_sum += df * df;\n          }\n        }\n      }\n\n      error = sqrtf(error_sum / (N * N));\n\n      if (num_iters % 1000 == 0) {\n        std::cout << \"Error after iteration \" << num_iters << \" = \" << error << std::endl;\n      }\n\n      ++num_iters;\n    }\n  }\n\n  auto end = std::chrono::steady_clock::now();\n  auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n  std::cout << \"Average execution time per iteration: \" << (time * 1e-9f) / num_iters << \" (s)\\n\";\n\n  if (error <= tolerance && num_iters < max_iters) {\n    std::cout << \"PASS\" << std::endl;\n  } else {\n    std::cout << \"FAIL\" << std::endl;\n    free(f);\n    free(f_old);\n    return -1;\n  }\n\n  free(f);\n  free(f_old);\n\n  auto end_time = std::chrono::steady_clock::now();\n  auto total_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();\n  double duration = total_time * 1e-9;\n  std::cout << \"Total elapsed time: \" << std::setprecision(4) << duration << \" seconds\" << std::endl;\n\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cpp"
+  ],
+  "target_files_extracted": [
+    "main.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 37.258,
+      "prompt_tokens": 1725,
+      "completion_tokens": 1552,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

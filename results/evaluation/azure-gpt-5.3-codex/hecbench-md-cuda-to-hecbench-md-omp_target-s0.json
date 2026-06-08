@@ -1,0 +1,77 @@
+{
+  "source_spec": "hecbench-md-cuda",
+  "target_spec": "hecbench-md-omp_target",
+  "kernel": "md",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1858763338,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "1",
+    "100"
+  ],
+  "timestamp": "2026-04-30T07:15:37Z",
+  "prompt_tokens": 3274,
+  "completion_tokens": 2772,
+  "llm_response_time_seconds": 31.842,
+  "build_status": "pass",
+  "build_time_seconds": 0.792,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 2.656,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Initializing test problem (this can take several minutes for large problems).\nFinished.\n3145643 of 3145728 pairs within cutoff distance = 99.9973 %\nPerforming Correctness Check (may take several minutes)\nMax error between host and device: 0\nAverage kernel execution time 8.95275e-05 (s)\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+numeric_comparison+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 8.95275e-05,
+      "unit": "s"
+    }
+  },
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 2.656,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cpp": "#include <cassert>\n#include <chrono>\n#include <cfloat>\n#include <cmath>\n#include <cstdlib>\n#include <list>\n#include <iostream>\n#include <omp.h>\n#include \"MD.h\"\n\ntemplate <class T, class forceVecType, class posVecType>\nbool checkResults(forceVecType* d_force, posVecType *position,\n    int *neighList, int nAtom)\n{\n  T max_error = 0;\n  for (int i = 0; i < nAtom; i++)\n  {\n    posVecType ipos = position[i];\n    forceVecType f = zero;\n    int j = 0;\n    while (j < maxNeighbors)\n    {\n      int jidx = neighList[j*nAtom + i];\n\n      posVecType jpos = position[jidx];\n\n      T delx = ipos.x - jpos.x;\n      T dely = ipos.y - jpos.y;\n      T delz = ipos.z - jpos.z;\n      T r2inv = delx*delx + dely*dely + delz*delz;\n\n      if (r2inv > 0 && r2inv < cutsq) {\n        r2inv = (T)1.0/r2inv;\n        T r6inv = r2inv * r2inv * r2inv;\n        T force = r2inv*r6inv*(lj1*r6inv - lj2);\n\n        f.x += delx * force;\n        f.y += dely * force;\n        f.z += delz * force;\n      }\n      j++;\n    }\n\n    assert(std::isnan(d_force[i].x) == false);\n    assert(std::isnan(d_force[i].y) == false);\n    assert(std::isnan(d_force[i].z) == false);\n    T fxe = std::fabs(f.x - d_force[i].x);\n    T fye = std::fabs(f.y - d_force[i].y);\n    T fze = std::fabs(f.z - d_force[i].z);\n    if (fxe > max_error) max_error = fxe;\n    if (fye > max_error) max_error = fye;\n    if (fze > max_error) max_error = fze;\n  }\n  std::cout << \"Max error between host and device: \" << max_error <<\"\\n\";\n  return true;\n}\n\ntemplate <class T, class posVecType>\ninline T distance(const posVecType* position, const int i, const int j)\n{\n  posVecType ipos = position[i];\n  posVecType jpos = position[j];\n  T delx = ipos.x - jpos.x;\n  T dely = ipos.y - jpos.y;\n  T delz = ipos.z - jpos.z;\n  T r2inv = delx * delx + dely * dely + delz * delz;\n  return r2inv;\n}\n\ntemplate <class T>\ninline void insertInOrder(\n  std::list<T>& currDist,\n  std::list<int>& currList,\n  const int j,\n  const T distIJ,\n  const int maxN)\n{\n  typename std::list<T>::iterator it;\n  typename std::list<int>::iterator it2;\n\n  it2 = currList.begin();\n\n  T currMax = currDist.back();\n\n  if (distIJ > currMax) return;\n\n  for (it = currDist.begin(); it != currDist.end(); it++)\n  {\n    if (distIJ < (*it))\n    {\n      currDist.insert(it, distIJ);\n      currList.insert(it2, j);\n\n      currList.resize(maxN);\n      currDist.resize(maxN);\n      return;\n    }\n    it2++;\n  }\n}\n\ntemplate <class T>\ninline int populateNeighborList(\n    std::list<T>& currDist,\n    std::list<int>& currList,\n    const int i,\n    const int nAtom,\n    int* neighborList)\n{\n  int idx = 0;\n  int validPairs = 0;\n\n  typename std::list<T>::iterator distanceIter = currDist.begin();\n  for (std::list<int>::iterator neighborIter = currList.begin();\n      neighborIter != currList.end(); neighborIter++)\n  {\n    neighborList[(idx * nAtom) + i] = *neighborIter;\n\n    if (*distanceIter < cutsq)\n      validPairs++;\n\n    idx++;\n    distanceIter++;\n  }\n  return validPairs;\n}\n\ntemplate <class T, class posVecType>\ninline int buildNeighborList(const int nAtom, const posVecType* position,\n    int* neighborList)\n{\n  int totalPairs = 0;\n\n  for (int i = 0; i < nAtom; i++)\n  {\n    std::list<int> currList(maxNeighbors, -1);\n    std::list<T> currDist(maxNeighbors, FLT_MAX);\n\n    for (int j = 0; j < nAtom; j++)\n    {\n      if (i == j) continue;\n      T distIJ = distance<T, posVecType>(position, i, j);\n      insertInOrder<T>(currDist, currList, j, distIJ, maxNeighbors);\n    }\n\n    totalPairs += populateNeighborList<T>(currDist, currList, i, nAtom, neighborList);\n  }\n  return totalPairs;\n}\n\nstatic inline void md(\n  const POSVECTYPE* __restrict__ position,\n        FORCEVECTYPE* __restrict__ force,\n  const int* __restrict__ neighborList,\n  const int nAtom,\n  const int maxNeighbors_t,\n  const FPTYPE lj1_t,\n  const FPTYPE lj2_t,\n  const FPTYPE cutsq_t)\n{\n#pragma omp target teams distribute parallel for thread_limit(256)\n  for (int idx = 0; idx < nAtom; idx++)\n  {\n    POSVECTYPE ipos = position[idx];\n    FORCEVECTYPE f = zero;\n\n    int j = 0;\n    while (j < maxNeighbors_t)\n    {\n      int jidx = neighborList[j * nAtom + idx];\n      POSVECTYPE jpos = position[jidx];\n\n      FPTYPE delx = ipos.x - jpos.x;\n      FPTYPE dely = ipos.y - jpos.y;\n      FPTYPE delz = ipos.z - jpos.z;\n      FPTYPE r2inv = delx * delx + dely * dely + delz * delz;\n\n      if (r2inv > 0 && r2inv < cutsq_t)\n      {\n        r2inv = (FPTYPE)1.0 / r2inv;\n        FPTYPE r6inv = r2inv * r2inv * r2inv;\n        FPTYPE forceC = r2inv * r6inv * (lj1_t * r6inv - lj2_t);\n\n        f.x += delx * forceC;\n        f.y += dely * forceC;\n        f.z += delz * forceC;\n      }\n      j++;\n    }\n    force[idx] = f;\n  }\n}\n\nint main(int argc, char** argv)\n{\n  if (argc != 3) {\n    std::cout << \"Usage: ./\" << argv[0] << \" <class size> <iteration>\\n\";\n    return 1;\n  }\n\n  int sizeClass = atoi(argv[1]);\n  int iteration = atoi(argv[2]);\n  const int probSizes[] = { 12288, 24576, 36864, 73728 };\n  assert(sizeClass >= 0 && sizeClass < 4);\n  assert(iteration >= 0);\n\n  int nAtom = probSizes[sizeClass];\n\n  POSVECTYPE* position = (POSVECTYPE*) malloc(nAtom * sizeof(POSVECTYPE));\n  FORCEVECTYPE* h_force = (FORCEVECTYPE*) malloc(nAtom * sizeof(FORCEVECTYPE));\n  int *neighborList = (int*) malloc(maxNeighbors * nAtom * sizeof(int));\n\n  std::cout << \"Initializing test problem (this can take several minutes for large problems).\\n\";\n\n  srand(123);\n\n  for (int i = 0; i < nAtom; i++)\n  {\n    position[i].x = rand() % domainEdge;\n    position[i].y = rand() % domainEdge;\n    position[i].z = rand() % domainEdge;\n    position[i].w = 0;\n  }\n\n  std::cout << \"Finished.\\n\";\n  int totalPairs = buildNeighborList<FPTYPE, POSVECTYPE>(nAtom, position, neighborList);\n  std::cout << totalPairs << \" of \" << nAtom*maxNeighbors << \" pairs within cutoff distance = \"\n            << 100.0 * ((double)totalPairs / (nAtom*maxNeighbors)) << \" %\\n\";\n\n#pragma omp target data map(to: position[0:nAtom], neighborList[0:nAtom*maxNeighbors]) map(from: h_force[0:nAtom])\n  {\n    md(position, h_force, neighborList, nAtom, maxNeighbors, lj1, lj2, cutsq);\n\n#pragma omp target update from(h_force[0:nAtom])\n\n    std::cout << \"Performing Correctness Check (may take several minutes)\\n\";\n    checkResults<FPTYPE, FORCEVECTYPE, POSVECTYPE>(h_force, position, neighborList, nAtom);\n\n    auto start = std::chrono::steady_clock::now();\n\n    for (int j = 0; j < iteration; j++)\n    {\n      md(position, h_force, neighborList, nAtom, maxNeighbors, lj1, lj2, cutsq);\n    }\n\n    auto end = std::chrono::steady_clock::now();\n    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n    std::cout << \"Average kernel execution time \" << (time * 1e-9f) / iteration << \" (s)\\n\";\n  }\n\n  free(position);\n  free(h_force);\n  free(neighborList);\n\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cpp"
+  ],
+  "target_files_extracted": [
+    "main.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 31.842,
+      "prompt_tokens": 3274,
+      "completion_tokens": 2772,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

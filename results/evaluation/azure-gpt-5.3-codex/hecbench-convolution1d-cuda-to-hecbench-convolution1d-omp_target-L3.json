@@ -1,0 +1,72 @@
+{
+  "source_spec": "hecbench-convolution1d-cuda",
+  "target_spec": "hecbench-convolution1d-omp_target",
+  "kernel": "convolution1d",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1553817687,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "65536",
+    "100"
+  ],
+  "timestamp": "2026-05-01T01:51:29Z",
+  "prompt_tokens": 2399,
+  "completion_tokens": 3959,
+  "llm_response_time_seconds": 31.746,
+  "build_status": "pass",
+  "build_time_seconds": 3.079,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.575,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "FAIL\nAverage kernel execution time of conv1d-tiled-caching kernel (block size 64): 25.106630 (us)\nPASS\nAverage kernel execution time of conv1d-tiled-caching kernel (block size 128): 23.257681 (us)\nPASS\nAverage kernel execution time of conv1d-tiled-caching kernel (block size 256): 21.631250 (us)\nPASS\nAverage kernel execution time of conv1d-tiled-caching kernel (block size 512): 21.859961 (us)\nPASS\nAverage kernel execution time of conv1d-tiled-caching kernel (block size 1024): 21.763491 (us)\nFAIL\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.575,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cpp": "#include <assert.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <math.h>\n#include <chrono>\n#include <omp.h>\n#include <stdint.h>\n\n#define OMP_CHECK(x) do { \\\n    int err = (x); \\\n    if (err != 0) { \\\n        printf(\"OpenMP runtime error %s:%d: %d\\n\", __FILE__, __LINE__, err); \\\n        exit(1); \\\n    } \\\n} while (0)\n\n#define MAX_MASK_WIDTH 10\n#define MAX_BLOCK_SIZE 1024\n\ntemplate<typename T>\nvoid conv1d_kernel(const T * __restrict__ in,\n                   T * __restrict__ out,\n                   const T * __restrict__ mask,\n                   const int input_width,\n                   const int mask_width,\n                   const int bs)\n{\n  const int grids = input_width / bs;\n  #pragma omp target teams is_device_ptr(in, out, mask) num_teams(grids) thread_limit(bs)\n  {\n    int blockIdx_x = omp_get_team_num();\n    #pragma omp parallel num_threads(bs)\n    {\n      int threadIdx_x = omp_get_thread_num();\n      int i = threadIdx_x + blockIdx_x * bs;\n      T s = 0;\n      int start = i - mask_width / 2;\n      for (int j = 0; j < mask_width; j++) {\n        if (0 <= start + j && start + j < input_width) {\n          s += in[start + j] * mask[j];\n        }\n      }\n      out[i] = s;\n    }\n  }\n}\n\ntemplate<typename T>\nvoid conv1d_tiled_kernel(const T * __restrict__ in,\n                         T * __restrict__ out,\n                         const T * __restrict__ mask,\n                         const int input_width,\n                         const int mask_width,\n                         const int bs)\n{\n  const int grids = input_width / bs;\n  #pragma omp target teams is_device_ptr(in, out, mask) num_teams(grids) thread_limit(bs)\n  {\n    T tile[MAX_BLOCK_SIZE + MAX_MASK_WIDTH - 1];\n    int blockIdx_x = omp_get_team_num();\n    int n = mask_width / 2;\n\n    #pragma omp parallel num_threads(bs)\n    {\n      int threadIdx_x = omp_get_thread_num();\n      int i = threadIdx_x + blockIdx_x * bs;\n\n      int halo_left = (blockIdx_x - 1) * bs + threadIdx_x;\n      if (threadIdx_x >= bs - n)\n        tile[threadIdx_x - (bs - n)] = halo_left < 0 ? 0 : in[halo_left];\n\n      tile[n + threadIdx_x] = in[blockIdx_x * bs + threadIdx_x];\n\n      int halo_right = (blockIdx_x + 1) * bs + threadIdx_x;\n      if (threadIdx_x < n)\n        tile[threadIdx_x + bs + n] = halo_right >= input_width ? 0 : in[halo_right];\n\n      #pragma omp barrier\n\n      T s = 0;\n      for (int j = 0; j < mask_width; j++)\n        s += tile[threadIdx_x + j] * mask[j];\n\n      out[i] = s;\n    }\n  }\n}\n\ntemplate<typename T>\nvoid conv1d_tiled_caching_kernel(const T * __restrict__ in,\n                                 T * __restrict__ out,\n                                 const T * __restrict__ mask,\n                                 const int input_width,\n                                 const int mask_width,\n                                 const int bs)\n{\n  const int grids = input_width / bs;\n  #pragma omp target teams is_device_ptr(in, out, mask) num_teams(grids) thread_limit(bs)\n  {\n    T tile[MAX_BLOCK_SIZE];\n    int blockIdx_x = omp_get_team_num();\n\n    #pragma omp parallel num_threads(bs)\n    {\n      int threadIdx_x = omp_get_thread_num();\n      int i = threadIdx_x + blockIdx_x * bs;\n      tile[threadIdx_x] = in[i];\n\n      #pragma omp barrier\n\n      int this_tile_start = blockIdx_x * bs;\n      int next_tile_start = (blockIdx_x + 1) * bs;\n      int start = i - (mask_width / 2);\n      T s = 0;\n      for (int j = 0; j < mask_width; j++) {\n        int in_index = start + j;\n        if (in_index >= 0 && input_width > in_index) {\n          if (this_tile_start <= in_index && next_tile_start > in_index) {\n            s += tile[threadIdx_x + j - (mask_width / 2)] * mask[j];\n          } else {\n            s += in[in_index] * mask[j];\n          }\n        }\n      }\n      out[i] = s;\n    }\n  }\n}\n\ntemplate <typename T>\nvoid reference(const T *h_in,\n               const T *d_out,\n               const T *mask,\n               const int input_width,\n               const int mask_width)\n{\n  bool ok = true;\n  for (int i = 0; input_width > i; i++) {\n    T s = 0;\n    int start = i - mask_width / 2;\n    for (int j = 0; j < mask_width; j++) {\n      if (0 <= start + j && input_width > start + j) {\n        s += h_in[start + j] * mask[j];\n      }\n    }\n    if (fabs((double)(s - d_out[i])) > 1e-3) {\n      ok = false;\n      break;\n    }\n  }\n  printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");\n}\n\ntemplate <typename T>\nvoid conv1D(const int input_width, const int mask_width, const int repeat)\n{\n  size_t size_bytes = (size_t)input_width * sizeof(T);\n\n  T *a, *b;\n  a = (T *)malloc(size_bytes);\n  b = (T *)malloc(size_bytes);\n\n  T h_mask[MAX_MASK_WIDTH];\n\n  for (int i = 0; MAX_MASK_WIDTH > i; i++) h_mask[i] = 1;\n\n  srand(123);\n  for (int i = 0; input_width > i; i++) {\n    a[i] = (T)(rand() % 256);\n  }\n\n  int dev = omp_get_default_device();\n  int host = omp_get_initial_device();\n\n  T *d_a = (T *)omp_target_alloc(size_bytes, dev);\n  T *d_b = (T *)omp_target_alloc(size_bytes, dev);\n  T *d_mask = (T *)omp_target_alloc(MAX_MASK_WIDTH * sizeof(T), dev);\n\n  if (!d_a || !d_b || !d_mask) {\n    printf(\"OpenMP target allocation failed\\n\");\n    exit(1);\n  }\n\n  OMP_CHECK(omp_target_memcpy(d_a, a, size_bytes, 0, 0, dev, host));\n  OMP_CHECK(omp_target_memcpy(d_mask, h_mask, (size_t)mask_width * sizeof(T), 0, 0, dev, host));\n\n  for (int bs = 64; MAX_BLOCK_SIZE >= bs; bs *= 2) {\n    auto start = std::chrono::steady_clock::now();\n    for (int i = 0; i < repeat; i++) {\n      conv1d_kernel<T>(d_a, d_b, d_mask, input_width, mask_width, bs);\n    }\n    auto end = std::chrono::steady_clock::now();\n    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n    printf(\"Average kernel execution time of conv1d kernel (block size %d): %f (us)\\n\",\n           bs, (time * 1e-3f) / repeat);\n    OMP_CHECK(omp_target_memcpy(b, d_b, size_bytes, 0, 0, host, dev));\n    reference(a, b, h_mask, input_width, mask_width);\n  }\n\n  for (int bs = 64; MAX_BLOCK_SIZE >= bs; bs = bs * 2) {\n    auto start = std::chrono::steady_clock::now();\n    for (int i = 0; i < repeat; i++) {\n      conv1d_tiled_kernel<T>(d_a, d_b, d_mask, input_width, mask_width, bs);\n    }\n    auto end = std::chrono::steady_clock::now();\n    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n    printf(\"Average kernel execution time of conv1d-tiled kernel (block size %d): %f (us)\\n\",\n           bs, (time * 1e-3f) / repeat);\n    OMP_CHECK(omp_target_memcpy(b, d_b, size_bytes, 0, 0, host, dev));\n    reference(a, b, h_mask, input_width, mask_width);\n  }\n\n  for (int bs = 64; MAX_BLOCK_SIZE >= bs; bs = bs * 2) {\n    auto start = std::chrono::steady_clock::now();\n    for (int i = 0; repeat > i; i++) {\n      conv1d_tiled_caching_kernel<T>(d_a, d_b, d_mask, input_width, mask_width, bs);\n    }\n    auto end = std::chrono::steady_clock::now();\n    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n    printf(\"Average kernel execution time of conv1d-tiled-caching kernel (block size %d): %f (us)\\n\",\n           bs, (time * 1e-3f) / repeat);\n    OMP_CHECK(omp_target_memcpy(b, d_b, size_bytes, 0, 0, host, dev));\n    reference(a, b, h_mask, input_width, mask_width);\n  }\n\n  free(a);\n  free(b);\n  omp_target_free(d_a, dev);\n  omp_target_free(d_b, dev);\n  omp_target_free(d_mask, dev);\n}\n\nint main(int argc, char* argv[]) {\n  if (3 != argc) {\n    printf(\"Usage: %s <input_width> <repeat>\\n\", argv[0]);\n    return 1;\n  }\n\n  int input_width = atoi(argv[1]);\n  input_width = (input_width + MAX_BLOCK_SIZE - 1) / MAX_BLOCK_SIZE * MAX_BLOCK_SIZE;\n\n  const int repeat = atoi(argv[2]);\n\n  for (int mask_width = 3; mask_width < MAX_MASK_WIDTH; mask_width += 2) {\n    printf(\"\\n---------------------\\n\");\n    printf(\"Mask width: %d\\n\", mask_width);\n\n    printf(\"1D convolution (FP64)\\n\");\n    conv1D<double>(input_width, mask_width, repeat);\n\n    printf(\"1D convolution (FP32)\\n\");\n    conv1D<float>(input_width, mask_width, repeat);\n\n    printf(\"1D convolution (INT16)\\n\");\n    conv1D<int16_t>(input_width, mask_width, repeat);\n  }\n\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cpp"
+  ],
+  "target_files_extracted": [
+    "main.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 31.746,
+      "prompt_tokens": 2399,
+      "completion_tokens": 3959,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

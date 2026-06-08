@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-bptree-omp",
+  "target_spec": "rodinia-bptree-opencl",
+  "kernel": "bptree",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 512817157,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-04-30T03:50:33Z",
+  "prompt_tokens": 21119,
+  "completion_tokens": 2970,
+  "llm_response_time_seconds": 50.435,
+  "build_status": "pass",
+  "build_time_seconds": 0.546,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.654,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "_mem=4000000\nknodes_elem=7874, knodes_unit_mem=2068, knodes_mem=16283432\nPlatform: NVIDIA Corporation\nDevice num: 1\nCreating GPU Context\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n--------------------------------\n# of blocks = 10000, # of threads/block = 256 (ensure that device can handle)\nTime spent in different stages of GPU_CUDA KERNEL:\nInit: 99.700996\nMemAlloc: 0.003000\nHtoD: 1.164928\nExec: 0.060288\nDtoH: 0.002656\nClose: 46.867001\nTotal: 148.270004\n> > > > > > > > > > \n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.453,
+  "translated_wall_time_seconds": 0.654,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.6927,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 256\n#endif\n\ntypedef struct record {\n    int value;\n} record;\n\ntypedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    uchar is_leaf;\n    int num_keys;\n} knode;\n\n__kernel void findK(__private long maxheight,\n                    __global knode *knodes,\n                    __private long knodes_elem,\n                    __global record *records,\n                    __global long *currKnode,\n                    __global long *offset,\n                    __global int *keys,\n                    __global record *ans) {\n    const int bid = get_group_id(0);\n    const int thid = get_local_id(0);\n\n    for (long i = 0; i < maxheight; i++) {\n        long curr = currKnode[bid];\n        long off = offset[bid];\n\n        if ((knodes[curr].keys[thid] <= keys[bid]) &&\n            (knodes[curr].keys[thid + 1] > keys[bid])) {\n            if (knodes[off].indices[thid] < knodes_elem) {\n                offset[bid] = (long)knodes[off].indices[thid];\n            }\n        }\n\n        barrier(CLK_GLOBAL_MEM_FENCE);\n\n        if (thid == 0) {\n            currKnode[bid] = offset[bid];\n        }\n\n        barrier(CLK_GLOBAL_MEM_FENCE);\n    }\n\n    long curr = currKnode[bid];\n    if (knodes[curr].keys[thid] == keys[bid]) {\n        ans[bid].value = records[knodes[curr].indices[thid]].value;\n    }\n}\n",
+    "kernel/kernel_gpu_opencl_2.cl": "#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 256\n#endif\n\ntypedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    uchar is_leaf;\n    int num_keys;\n} knode;\n\n__kernel void findRangeK(__private long maxheight,\n                         __global knode *knodes,\n                         __private long knodes_elem,\n                         __global long *currKnode,\n                         __global long *offset,\n                         __global long *lastKnode,\n                         __global long *offset_2,\n                         __global int *start,\n                         __global int *end,\n                         __global int *recstart,\n                         __global int *reclength) {\n    const int bid = get_group_id(0);\n    const int thid = get_local_id(0);\n\n    for (long i = 0; i < maxheight; i++) {\n        long curr = currKnode[bid];\n        long last = lastKnode[bid];\n\n        if ((knodes[curr].keys[thid] <= start[bid]) &&\n            (knodes[curr].keys[thid + 1] > start[bid])) {\n            if (knodes[curr].indices[thid] < knodes_elem) {\n                offset[bid] = (long)knodes[curr].indices[thid];\n            }\n        }\n\n        if ((knodes[last].keys[thid] <= end[bid]) &&\n            (knodes[last].keys[thid + 1] > end[bid])) {\n            if (knodes[last].indices[thid] < knodes_elem) {\n                offset_2[bid] = (long)knodes[last].indices[thid];\n            }\n        }\n\n        barrier(CLK_GLOBAL_MEM_FENCE);\n\n        if (thid == 0) {\n            currKnode[bid] = offset[bid];\n            lastKnode[bid] = offset_2[bid];\n        }\n\n        barrier(CLK_GLOBAL_MEM_FENCE);\n    }\n\n    long curr = currKnode[bid];\n    if (knodes[curr].keys[thid] == start[bid]) {\n        recstart[bid] = knodes[curr].indices[thid];\n    }\n\n    barrier(CLK_GLOBAL_MEM_FENCE);\n\n    long last = lastKnode[bid];\n    if (knodes[last].keys[thid] == end[bid]) {\n        reclength[bid] = knodes[last].indices[thid] - recstart[bid] + 1;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 50.435,
+      "prompt_tokens": 21119,
+      "completion_tokens": 2970,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

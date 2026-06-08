@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-kmeans-cuda",
+  "target_spec": "rodinia-kmeans-opencl",
+  "kernel": "kmeans",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 130123954,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-i",
+    "../../data/kmeans/kdd_cup"
+  ],
+  "timestamp": "2026-04-21T23:11:31Z",
+  "prompt_tokens": 26241,
+  "completion_tokens": 4872,
+  "llm_response_time_seconds": 27.629,
+  "build_status": "pass",
+  "build_time_seconds": 0.837,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.505,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel_swap = 256, WG size of kernel_kmeans = 256 \n\nI/O completed\n\nNumber of objects: 494020\nNumber of features: 34\nnum_devices = 1\nERROR: clBuildProgram() => -11\nERROR: clEnqueueWriteBuffer d_cluster (size:494020) => -38\niterated 1 times\nNumber of Iteration: 1\nInit: 0.000000\nMemAlloc: 0.000000\nHtoD: 0.000000\nExec: 0.000000\nDtoH: 0.000000\nClose: 0.014000\nTotal: 455.140991\n",
+  "verify_status": "fail",
+  "verify_strategy": "stdout_pattern",
+  "overall_status": "VERIFY_FAIL",
+  "error_message": "Verify failed: Pattern '(?i)(PASS|passed|SUCCESS|correct)' NOT found in stdout. Output indicates correctness",
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.498,
+  "translated_wall_time_seconds": 0.505,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 2.9663,
+  "translated_files": {
+    "kmeans.cl": "#ifndef FLT_MAX\n#define FLT_MAX 3.40282347e+38f\n#endif\n\n#define THREADS_PER_DIM 16\n#define BLOCKS_PER_DIM 16\n#define THREADS_PER_BLOCK (THREADS_PER_DIM * THREADS_PER_DIM)\n\n#define ASSUMED_NR_CLUSTERS 32\n\n// Kernel for inverting mapping (transposes the data layout)\nkernel void invert_mapping(const float *input,\n                           float *output,\n                           int npoints,\n                           int nfeatures)\n{\n    int point_id = get_global_id(0);\n    int i;\n\n    if(point_id < npoints){\n        for(i=0;i<nfeatures;i++)\n            output[point_id + npoints*i] = input[point_id*nfeatures + i];\n    }\n}\n\n// Main kmeans kernel - finds nearest cluster for each point\nkernel void kmeansPoint(const float *features,\n                        int nfeatures,\n                        int npoints,\n                        int nclusters,\n                        int *membership,\n                        const float *clusters,\n                        float *block_clusters,\n                        int *block_deltas)\n{\n    // Calculate block and point IDs from OpenCL group/thread IDs\n    const unsigned int block_id = get_num_groups(0) * get_group_id(1) + get_group_id(0);\n    const unsigned int point_id = block_id * THREADS_PER_BLOCK + get_local_id(0);\n    \n    int index = -1;\n\n    if (point_id < npoints)\n    {\n        int i, j;\n        float min_dist = FLT_MAX;\n        float dist;\n        \n        // Find nearest cluster by computing Euclidean distance to each cluster center\n        for (i=0; i<nclusters; i++) {\n            int cluster_base_index = i*nfeatures;\n            float ans=0.0f;\n\n            for (j=0; j < nfeatures; j++)\n            {\n                int addr = point_id + j*npoints;\n                float diff = features[addr] - clusters[cluster_base_index + j];\n                ans += diff*diff;\n            }\n            dist = ans;\n\n            if (dist < min_dist) {\n                min_dist = dist;\n                index    = i;\n            }\n        }\n    }\n\n    // Local memory for delta reduction within block\n    __local int deltas[THREADS_PER_BLOCK];\n    if(get_local_id(0) < THREADS_PER_BLOCK) {\n        deltas[get_local_id(0)] = 0;\n    }\n    \n    if (point_id < npoints)\n    {\n        if (membership[point_id] != index) {\n            deltas[get_local_id(0)] = 1;\n        }\n        \n        membership[point_id] = index;\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    // Tree reduction to sum deltas within block\n    unsigned int threadids_participating = THREADS_PER_BLOCK / 2;\n    for(;threadids_participating > 1; threadids_participating /= 2) {\n        if(get_local_id(0) < threadids_participating) {\n            deltas[get_local_id(0)] += deltas[get_local_id(0) + threadids_participating];\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n    if(get_local_id(0) < 1) {\n        deltas[get_local_id(0)] += deltas[get_local_id(0) + 1];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n    \n    if(get_local_id(0) == 0) {\n        block_deltas[get_group_id(1) * get_num_groups(0) + get_group_id(0)] = deltas[0];\n    }\n\n    // New center reduction - accumulate feature values for each cluster\n    __local int new_center_ids[THREADS_PER_BLOCK];\n\n    new_center_ids[get_local_id(0)] = index;\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    int center_id = get_local_id(0) / nfeatures;\n    int dim_id = get_local_id(0) - nfeatures*center_id;\n\n    int new_base_index = (point_id - get_local_id(0))*nfeatures + dim_id;\n    float accumulator = 0.f;\n\n    if(get_local_id(0) < nfeatures * nclusters) {\n        for(int i = 0; i< THREADS_PER_BLOCK; i++) {\n            float val = features[new_base_index+i*nfeatures];\n            if(new_center_ids[i] == center_id) \n                accumulator += val;\n        }\n\n        block_clusters[(get_group_id(1)*get_num_groups(0) + get_group_id(0)) * nclusters * nfeatures + get_local_id(0)] = accumulator;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kmeans.cl"
+  ],
+  "target_files_extracted": [
+    "kmeans.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 27.629,
+      "prompt_tokens": 26241,
+      "completion_tokens": 4872,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "fail",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

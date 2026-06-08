@@ -1,0 +1,191 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "dwt2d",
+        "parallel_api": "opencl",
+        "unique_id": "rodinia-dwt2d-opencl",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "opencl/dwt2d",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "com_dwt.cl",
+            "components.cpp",
+            "dwt.cpp",
+            "main.cpp"
+        ],
+        "support_files": [
+            "common.h",
+            "components.h",
+            "dwt.h",
+            "dwt_cl/common.h",
+            "dwt_cl/dwt_cl.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "com_dwt.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl>=2.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl/dwt2d",
+        "commands": {
+            "configure": null,
+            "build": "make OPENCL_INC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include OPENCL_LIB=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+            "clean": "make clean"
+        },
+        "variables": {
+            "OPENCL_INC": {
+                "description": "Path to OpenCL headers",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include",
+                "detection": "find /usr -name 'cl.h' -path '*/CL/cl.h' | head -1 | xargs dirname | xargs dirname"
+            },
+            "OPENCL_LIB": {
+                "description": "Path to OpenCL libraries",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+                "detection": "find /usr -name 'libOpenCL.so' | head -1 | xargs dirname"
+            }
+        },
+        "outputs": {
+            "executable": "./dwt2d.out"
+        }
+    },
+    "run": {
+        "executable": "./dwt2d.out",
+        "default_arguments": [
+            "rgb.bmp",
+            "-i",
+            "../../data/dwt2d",
+            "-D",
+            "1024x1024",
+            "-f",
+            "-5",
+            "-l",
+            "3"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "rgb.bmp",
+                    "-i",
+                    "../../data/dwt2d",
+                    "-D",
+                    "1024x1024",
+                    "-f",
+                    "-5",
+                    "-l",
+                    "3"
+                ],
+                "description": "Small input for correctness verification of dwt2d (OPENCL)",
+                "input_files": [
+                    "../../data/dwt2d/rgb.bmp"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "fdwt53Kernel.*finished",
+                "description": "DWT kernel completed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.273885+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "\nSource file:\t\t../../data/dwt2d/rgb.bmp\n Dimensions:\t\t1024x1024\n Components count:\t3\n Bit depth:\t\t8\n DWT levels:\t\t3\n Forward transform:\t1\n 9/7 transform:\t\t0\nLoading ipnput: ../../data/dwt2d/rgb.bmp\nprecteno 3145728, inputsize 3145728\n\n*** 3 stages of 2D forward DWT:\nsliding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 3 , gx = 4 , gy = 11 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\n\n*** 3 stages of 2D forward DWT:\nsliding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 3 , gx = 4 , gy = 11 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\n\n*** 3 stages of 2D forward DWT:\nsliding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kern",
+                "wall_time_seconds": 0.1,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "2D discrete wavelet transform (DWT-5/3 and DWT-9/7) on GPU",
+        "domain": "signal processing",
+        "complexity": "2D discrete wavelet transform",
+        "tags": [
+            "dwt",
+            "dwt2d",
+            "image-processing",
+            "opencl",
+            "rodinia",
+            "wavelet"
+        ],
+        "multi_file": true,
+        "translation_complexity": "multi_to_single"
+    }
+}

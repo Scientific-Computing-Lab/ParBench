@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-dwt2d-cuda",
+  "target_spec": "rodinia-dwt2d-opencl",
+  "kernel": "dwt2d",
+  "model": "azure-gpt-5.4",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 59059947,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "rgb.bmp",
+    "-i",
+    "../../data/dwt2d",
+    "-D",
+    "1024x1024",
+    "-f",
+    "-5",
+    "-l",
+    "3"
+  ],
+  "timestamp": "2026-04-27T01:18:55Z",
+  "prompt_tokens": 30824,
+  "completion_tokens": 9202,
+  "llm_response_time_seconds": 177.147,
+  "build_status": "pass",
+  "build_time_seconds": 0.312,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.923,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "iding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 3 , gx = 4 , gy = 11 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\n\nWriting to rgb.bmp.dwt.r (1024 x 1024)\n\nWriting to rgb.bmp.dwt.g (1024 x 1024)\n\nWriting to rgb.bmp.dwt.b (1024 x 1024)\nInit: 197.770004\nMemAlloc: 10.761000\nHtoD: 0.000000\nExec: 0.022112\nDtoH: 214.568008\nClose: 0.596000\nTotal: 868.713989\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.1,
+  "translated_wall_time_seconds": 0.923,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.1083,
+  "translated_files": {
+    "com_dwt.cl": "#define THREADS 256\n\ninline int dwt53_predict_int(const int even_prev, const int odd, const int even_next)\n{\n    return odd - ((even_prev + even_next) / 2);\n}\n\ninline int dwt53_update_int(const int detail_prev, const int even, const int detail_next)\n{\n    return even + ((detail_prev + detail_next + 2) / 4);\n}\n\n__kernel void c_CopySrcToComponents(__global int *d_r,\n                                    __global int *d_g,\n                                    __global int *d_b,\n                                    __global const uchar *d_src,\n                                    const int pixels)\n{\n    const int x = (int)get_global_id(0);\n\n    if (x < pixels) {\n        const int offset = x * 3;\n        d_r[x] = ((int)d_src[offset + 0]) - 128;\n        d_g[x] = ((int)d_src[offset + 1]) - 128;\n        d_b[x] = ((int)d_src[offset + 2]) - 128;\n    }\n}\n\n__kernel void c_CopySrcToComponent(__global int *d_c,\n                                   __global const uchar *d_src,\n                                   const int pixels)\n{\n    const int x = (int)get_global_id(0);\n\n    if (x < pixels) {\n        d_c[x] = ((int)d_src[x]) - 128;\n    }\n}\n\n__kernel void cl_fdwt53Kernel(__global int *input,\n                              __global int *output,\n                              const int sizeX,\n                              const int sizeY,\n                              const int winSteps,\n                              const int WIN_SX,\n                              const int WIN_SY)\n{\n    (void)winSteps;\n    (void)WIN_SX;\n    (void)WIN_SY;\n\n    if (get_global_id(0) != 0 || get_global_id(1) != 0) {\n        return;\n    }\n\n    const int lowW = (sizeX + 1) >> 1;\n    const int highW = sizeX >> 1;\n    const int lowH = (sizeY + 1) >> 1;\n    const int highH = sizeY >> 1;\n\n    const int llBase = 0;\n    const int hlBase = lowW * lowH;\n    const int lhBase = hlBase + highW * lowH;\n    const int hhBase = lhBase + lowW * highH;\n\n    \n    for (int y = 0; y < sizeY; ++y) {\n        const int inBase = y * sizeX;\n        const int outBase = y * sizeX;\n\n        if (highW == 0) {\n            output[outBase] = input[inBase];\n            continue;\n        }\n\n        for (int i = 0; i < highW; ++i) {\n            const int even0 = input[inBase + (i << 1)];\n            const int odd   = input[inBase + (i << 1) + 1];\n            const int even1 = (((i << 1) + 2) < sizeX)\n                            ? input[inBase + (i << 1) + 2]\n                            : input[inBase + (i << 1)];\n            output[outBase + lowW + i] = dwt53_predict_int(even0, odd, even1);\n        }\n\n        for (int i = 0; i < lowW; ++i) {\n            const int even = input[inBase + (i << 1)];\n            const int prevD = (i == 0)\n                            ? output[outBase + lowW]\n                            : output[outBase + lowW + i - 1];\n            const int nextD = (i < highW)\n                            ? output[outBase + lowW + i]\n                            : output[outBase + lowW + highW - 1];\n            output[outBase + i] = dwt53_update_int(prevD, even, nextD);\n        }\n    }\n\n    \n    for (int x = 0; x < sizeX; ++x) {\n        const int isLowBand = (x < lowW);\n        const int colOut = isLowBand ? x : (x - lowW);\n        const int bandW = isLowBand ? lowW : highW;\n        const int lowBase = isLowBand ? llBase : hlBase;\n        const int highBase = isLowBand ? lhBase : hhBase;\n\n        if (highH == 0) {\n            input[lowBase + colOut] = output[x];\n            continue;\n        }\n\n        for (int i = 0; i < highH; ++i) {\n            const int even0 = output[(i << 1) * sizeX + x];\n            const int odd   = output[((i << 1) + 1) * sizeX + x];\n            const int even1 = ((((i << 1) + 2) < sizeY))\n                            ? output[((i << 1) + 2) * sizeX + x]\n                            : output[(i << 1) * sizeX + x];\n            input[highBase + i * bandW + colOut] = dwt53_predict_int(even0, odd, even1);\n        }\n\n        for (int i = 0; i < lowH; ++i) {\n            const int even = output[(i << 1) * sizeX + x];\n            const int prevD = (i == 0)\n                            ? input[highBase + colOut]\n                            : input[highBase + (i - 1) * bandW + colOut];\n            const int nextD = (i < highH)\n                            ? input[highBase + i * bandW + colOut]\n                            : input[highBase + (highH - 1) * bandW + colOut];\n            input[lowBase + i * bandW + colOut] = dwt53_update_int(prevD, even, nextD);\n        }\n    }\n\n    \n    for (int i = 0; i < sizeX * sizeY; ++i) {\n        output[i] = input[i];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "com_dwt.cl"
+  ],
+  "target_files_extracted": [
+    "com_dwt.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 177.147,
+      "prompt_tokens": 30824,
+      "completion_tokens": 9202,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

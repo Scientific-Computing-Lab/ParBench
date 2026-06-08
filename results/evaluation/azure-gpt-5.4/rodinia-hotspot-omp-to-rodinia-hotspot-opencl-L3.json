@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-hotspot-omp",
+  "target_spec": "rodinia-hotspot-opencl",
+  "kernel": "hotspot",
+  "model": "azure-gpt-5.4",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 325865020,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-04-27T03:39:31Z",
+  "prompt_tokens": 7311,
+  "completion_tokens": 6774,
+  "llm_response_time_seconds": 166.022,
+  "build_status": "pass",
+  "build_time_seconds": 0.177,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.291,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nPlatform: NVIDIA Corporation\nnum_devices = 1\nDevice: NVIDIA GeForce RTX 4070\nUse GPU device\nInit: 150.626007\nMemAlloc: 0.003000\nHtoD: 0.439000\nExec: 0.028864\nDtoH: 0.039776\nClose: 0.315000\nTotal: 194.087006\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.159,
+  "translated_wall_time_seconds": 0.291,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.5464,
+  "translated_files": {
+    "hotspot_kernel.cl": "#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\n#define EXPAND_RATE 2\n#define AMB_TEMP 80.0f\n\ninline float compute_point(int r, int c, int row, int col,\n                           float temp_c, float temp_n, float temp_s,\n                           float temp_w, float temp_e,\n                           float power_c,\n                           float Cap_1, float Rx_1, float Ry_1, float Rz_1)\n{\n    float delta;\n\n    if ((r == 0) && (c == 0)) {\n        delta = Cap_1 * (power_c +\n                         (temp_e - temp_c) * Rx_1 +\n                         (temp_s - temp_c) * Ry_1 +\n                         (AMB_TEMP - temp_c) * Rz_1);\n    } else if ((r == 0) && (c == col - 1)) {\n        delta = Cap_1 * (power_c +\n                         (temp_w - temp_c) * Rx_1 +\n                         (temp_s - temp_c) * Ry_1 +\n                         (AMB_TEMP - temp_c) * Rz_1);\n    } else if ((r == row - 1) && (c == col - 1)) {\n        delta = Cap_1 * (power_c +\n                         (temp_w - temp_c) * Rx_1 +\n                         (temp_n - temp_c) * Ry_1 +\n                         (AMB_TEMP - temp_c) * Rz_1);\n    } else if ((r == row - 1) && (c == 0)) {\n        delta = Cap_1 * (power_c +\n                         (temp_e - temp_c) * Rx_1 +\n                         (temp_n - temp_c) * Ry_1 +\n                         (AMB_TEMP - temp_c) * Rz_1);\n    } else if (r == 0) {\n        delta = Cap_1 * (power_c +\n                         (temp_e + temp_w - 2.0f * temp_c) * Rx_1 +\n                         (temp_s - temp_c) * Ry_1 +\n                         (AMB_TEMP - temp_c) * Rz_1);\n    } else if (c == col - 1) {\n        delta = Cap_1 * (power_c +\n                         (temp_s + temp_n - 2.0f * temp_c) * Ry_1 +\n                         (temp_w - temp_c) * Rx_1 +\n                         (AMB_TEMP - temp_c) * Rz_1);\n    } else if (r == row - 1) {\n        delta = Cap_1 * (power_c +\n                         (temp_e + temp_w - 2.0f * temp_c) * Rx_1 +\n                         (temp_n - temp_c) * Ry_1 +\n                         (AMB_TEMP - temp_c) * Rz_1);\n    } else if (c == 0) {\n        delta = Cap_1 * (power_c +\n                         (temp_s + temp_n - 2.0f * temp_c) * Ry_1 +\n                         (temp_e - temp_c) * Rx_1 +\n                         (AMB_TEMP - temp_c) * Rz_1);\n    } else {\n        delta = Cap_1 * (power_c +\n                         (temp_s + temp_n - 2.0f * temp_c) * Ry_1 +\n                         (temp_e + temp_w - 2.0f * temp_c) * Rx_1 +\n                         (AMB_TEMP - temp_c) * Rz_1);\n    }\n\n    return temp_c + delta;\n}\n\n__kernel void hotspot(int iteration,\n                      __global const float *power,\n                      __global const float *temp_src,\n                      __global float *temp_dst,\n                      int col,\n                      int row,\n                      int borderCols,\n                      int borderRows,\n                      float Cap,\n                      float Rx,\n                      float Ry,\n                      float Rz,\n                      float step)\n{\n    const int tx = get_local_id(0);\n    const int ty = get_local_id(1);\n    const int bx = get_group_id(0);\n    const int by = get_group_id(1);\n\n    const int small_block_cols = BLOCK_SIZE - iteration * EXPAND_RATE;\n    const int small_block_rows = BLOCK_SIZE - iteration * EXPAND_RATE;\n\n    const int blkX = small_block_cols * bx - borderCols;\n    const int blkY = small_block_rows * by - borderRows;\n\n    const int xidx = blkX + tx;\n    const int yidx = blkY + ty;\n\n    const int valid = (xidx >= 0 && xidx < col && yidx >= 0 && yidx < row);\n\n    const float Rx_1 = 1.0f / Rx;\n    const float Ry_1 = 1.0f / Ry;\n    const float Rz_1 = 1.0f / Rz;\n    const float Cap_1 = (step * 0.001f) / Cap;\n\n    __local float temp0[BLOCK_SIZE][BLOCK_SIZE];\n    __local float temp1[BLOCK_SIZE][BLOCK_SIZE];\n    __local float power_local[BLOCK_SIZE][BLOCK_SIZE];\n\n    if (valid) {\n        const int index = yidx * col + xidx;\n        temp0[ty][tx] = temp_src[index];\n        power_local[ty][tx] = power[index];\n    } else {\n        temp0[ty][tx] = 0.0f;\n        power_local[ty][tx] = 0.0f;\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    int buf = 0;\n\n    for (int i = 0; i < iteration; i++) {\n        const int txmin = i + 1;\n        const int txmax = BLOCK_SIZE - i - 2;\n        const int tymin = i + 1;\n        const int tymax = BLOCK_SIZE - i - 2;\n\n        if (valid &&\n            tx >= txmin && tx <= txmax &&\n            ty >= tymin && ty <= tymax) {\n\n            float tc, tn, ts, tw, te;\n\n            if (buf == 0) {\n                tc = temp0[ty][tx];\n                tn = temp0[ty - 1][tx];\n                ts = temp0[ty + 1][tx];\n                tw = temp0[ty][tx - 1];\n                te = temp0[ty][tx + 1];\n\n                temp1[ty][tx] = compute_point(yidx, xidx, row, col,\n                                              tc, tn, ts, tw, te,\n                                              power_local[ty][tx],\n                                              Cap_1, Rx_1, Ry_1, Rz_1);\n            } else {\n                tc = temp1[ty][tx];\n                tn = temp1[ty - 1][tx];\n                ts = temp1[ty + 1][tx];\n                tw = temp1[ty][tx - 1];\n                te = temp1[ty][tx + 1];\n\n                temp0[ty][tx] = compute_point(yidx, xidx, row, col,\n                                              tc, tn, ts, tw, te,\n                                              power_local[ty][tx],\n                                              Cap_1, Rx_1, Ry_1, Rz_1);\n            }\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n        buf = 1 - buf;\n    }\n\n    if (valid &&\n        tx >= borderCols && tx < BLOCK_SIZE - borderCols &&\n        ty >= borderRows && ty < BLOCK_SIZE - borderRows) {\n        const int index = yidx * col + xidx;\n        temp_dst[index] = (buf == 0) ? temp0[ty][tx] : temp1[ty][tx];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "hotspot_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspot_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 166.022,
+      "prompt_tokens": 7311,
+      "completion_tokens": 6774,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

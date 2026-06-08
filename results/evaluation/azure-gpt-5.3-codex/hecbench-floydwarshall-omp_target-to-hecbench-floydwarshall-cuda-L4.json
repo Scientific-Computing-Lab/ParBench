@@ -1,0 +1,78 @@
+{
+  "source_spec": "hecbench-floydwarshall-omp_target",
+  "target_spec": "hecbench-floydwarshall-cuda",
+  "kernel": "floydwarshall",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1647419528,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "1024",
+    "10",
+    "16"
+  ],
+  "timestamp": "2026-05-01T02:13:18Z",
+  "prompt_tokens": 1717,
+  "completion_tokens": 2779,
+  "llm_response_time_seconds": 29.83,
+  "build_status": "pass",
+  "build_time_seconds": 0.675,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.67,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Average kernel execution time 0.006621 (s)\nPASS\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 0.006621,
+      "unit": "s"
+    }
+  },
+  "baseline_wall_time_seconds": 0.74,
+  "translated_wall_time_seconds": 0.67,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 1.1045,
+  "translated_files": {
+    "main.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <assert.h>\n#include <string.h>\n#include <chrono>\n#include <cuda_runtime.h>\n\n#define MAXDISTANCE (200)\n\nunsigned int minimum(unsigned int a, unsigned int b) {\n  return (a > b) ? b : a;\n}\n\nvoid floydWarshallCPUReference(unsigned int *val_2, unsigned int *data_9, unsigned int var_21) {\n  unsigned int data_17, v_24, var_7, x_3;\n  unsigned int x_16 = var_21;\n  unsigned int var_0;\n\n  for (unsigned int k = 0; var_21 > k; ++k) {\n    for (unsigned int y = 0; var_21 > y; ++y) {\n      var_0 = y * var_21;\n      for (unsigned int x = 0; var_21 > x; ++x) {\n        data_17 = val_2[var_0 + x];\n        v_24 = val_2[var_0 + k];\n        var_7 = val_2[k * x_16 + x];\n\n        x_3 = v_24 + var_7;\n\n        if (data_17 > x_3) {\n          val_2[var_0 + x] = x_3;\n          data_9[var_0 + x] = k;\n        }\n      }\n    }\n  }\n}\n\n__global__ void floydWarshallStep(unsigned int *pathDistanceMatrix,\n                                  unsigned int *pathMatrix,\n                                  unsigned int n,\n                                  unsigned int k) {\n  unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;\n  unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;\n\n  if (x < n && y < n) {\n    unsigned int idx = y * n + x;\n    unsigned int tmp_10 = pathDistanceMatrix[idx];\n    unsigned int tmp_20 = pathDistanceMatrix[y * n + k];\n    unsigned int x_6 = pathDistanceMatrix[k * n + x];\n    unsigned int data_11 = tmp_20 + x_6;\n\n    if (tmp_10 > data_11) {\n      pathDistanceMatrix[idx] = data_11;\n      pathMatrix[idx] = k;\n    }\n  }\n}\n\nint main(int argc, char **argv) {\n  if (4 != argc) {\n    printf(\"Usage: %s <number of nodes> <iterations> <block size>\\n\", argv[0]);\n    return 1;\n  }\n\n  unsigned int x_8 = (unsigned int)atoi(argv[1]);\n  unsigned int elem_15 = (unsigned int)atoi(argv[2]);\n  unsigned int val_25 = (unsigned int)atoi(argv[3]);\n\n  if (0 != x_8 % val_25) {\n    x_8 = (x_8 / val_25 + 1) * val_25;\n  }\n\n  unsigned int *val_13 = NULL;\n  unsigned int *pathDistanceMatrix = NULL;\n  unsigned int *elem_22 = NULL;\n  unsigned int *v_23 = NULL;\n  unsigned int matrixSize;\n  unsigned int v_19;\n\n  matrixSize = x_8 * x_8;\n  v_19 = x_8 * x_8 * sizeof(unsigned int);\n\n  pathDistanceMatrix = (unsigned int *)malloc(v_19);\n  assert(pathDistanceMatrix != NULL);\n\n  val_13 = (unsigned int *)malloc(v_19);\n  assert(val_13 != NULL);\n\n  srand(2);\n  for (unsigned int i = 0; x_8 > i; i++)\n    for (unsigned int j = 0; x_8 > j; j++) {\n      int data_5 = (int)(i * x_8 + j);\n      pathDistanceMatrix[data_5] = rand() % (MAXDISTANCE + 1);\n    }\n\n  for (unsigned int i = 0; x_8 > i; ++i) {\n    unsigned int tmp_18 = i * x_8;\n    pathDistanceMatrix[tmp_18 + i] = 0;\n  }\n\n  for (unsigned int i = 0; x_8 > i; ++i) {\n    for (unsigned int j = 0; i > j; ++j) {\n      val_13[i * x_8 + j] = i;\n      val_13[j * x_8 + i] = j;\n    }\n    val_13[i * x_8 + i] = i;\n  }\n\n  elem_22 = (unsigned int *)malloc(v_19);\n  assert(elem_22 != NULL);\n\n  v_23 = (unsigned int *)malloc(v_19);\n  assert(v_23 != NULL);\n\n  memcpy(elem_22, pathDistanceMatrix, v_19);\n  memcpy(v_23, val_13, v_19);\n\n  unsigned int val_4 = x_8;\n\n  unsigned int *d_pathDistanceMatrix = NULL;\n  unsigned int *d_pathMatrix = NULL;\n  cudaMalloc((void **)&d_pathDistanceMatrix, (size_t)v_19);\n  cudaMalloc((void **)&d_pathMatrix, (size_t)v_19);\n\n  cudaMemcpy(d_pathMatrix, val_13, (size_t)v_19, cudaMemcpyHostToDevice);\n\n  float data_1 = 0.f;\n\n  dim3 block(val_25, val_25);\n  dim3 grid((x_8 + block.x - 1) / block.x, (x_8 + block.y - 1) / block.y);\n\n  for (unsigned int n = 0; elem_15 > n; n++) {\n    cudaMemcpy(d_pathDistanceMatrix, pathDistanceMatrix, (size_t)v_19, cudaMemcpyHostToDevice);\n\n    auto x_14 = std::chrono::steady_clock::now();\n\n    for (unsigned int k = 0; val_4 > k; k++) {\n      floydWarshallStep<<<grid, block>>>(d_pathDistanceMatrix, d_pathMatrix, x_8, k);\n    }\n    cudaDeviceSynchronize();\n\n    auto end = std::chrono::steady_clock::now();\n    auto tmp_12 = std::chrono::duration_cast<std::chrono::nanoseconds>(end - x_14).count();\n    data_1 = data_1 + (float)(tmp_12);\n  }\n\n  printf(\"Average kernel execution time %f (s)\\n\", (data_1 * 1e-9f) / elem_15);\n\n  cudaMemcpy(pathDistanceMatrix, d_pathDistanceMatrix, (size_t)v_19, cudaMemcpyDeviceToHost);\n\n  floydWarshallCPUReference(elem_22, v_23, x_8);\n  if (memcmp(pathDistanceMatrix, elem_22, x_8 * x_8 * sizeof(unsigned int)) == 0) {\n    printf(\"PASS\\n\");\n  } else {\n    printf(\"FAIL\\n\");\n    if (8 >= x_8) {\n      for (unsigned int i = 0; x_8 > i; i++) {\n        for (unsigned int j = 0; x_8 > j; j++)\n          printf(\"host: %u \", elem_22[i * x_8 + j]);\n        printf(\"\\n\");\n      }\n      for (unsigned int i = 0; x_8 > i; i++) {\n        for (unsigned int j = 0; x_8 > j; j++)\n          printf(\"device: %u \", pathDistanceMatrix[i * x_8 + j]);\n        printf(\"\\n\");\n      }\n    }\n  }\n\n  cudaFree(d_pathDistanceMatrix);\n  cudaFree(d_pathMatrix);\n\n  free(pathDistanceMatrix);\n  free(val_13);\n  free(elem_22);\n  free(v_23);\n\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cu"
+  ],
+  "target_files_extracted": [
+    "main.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 29.83,
+      "prompt_tokens": 1717,
+      "completion_tokens": 2779,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

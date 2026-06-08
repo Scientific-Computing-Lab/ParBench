@@ -1,0 +1,191 @@
+{
+  "spec_version": "1.0.0",
+  "identity": {
+    "kernel_name": "maxpool3d",
+    "parallel_api": "cuda",
+    "unique_id": "hecbench-maxpool3d-cuda",
+    "source_suite": "hecbench"
+  },
+  "provenance": {
+    "repository": {
+      "url": "https://github.com/zjin-lcf/HeCBench",
+      "commit": "archive-download",
+      "branch": "master"
+    },
+    "repo_root": "HeCBench-master/",
+    "source_path": "src/maxpool3d-cuda",
+    "license": "MIT"
+  },
+  "files": {
+    "prompt_payload": [
+      "main.cu"
+    ],
+    "support_files": [
+      "Makefile",
+      "CMakeLists.txt"
+    ],
+    "verification_only": [],
+    "translation_targets": [
+      "main.cu"
+    ]
+  },
+  "implementation": {
+    "api": "cuda",
+    "api_version": null,
+    "language": "C++",
+    "language_standard": "C++17"
+  },
+  "build": {
+    "environment": {
+      "preferred": "system",
+      "conda": null,
+      "system": {
+        "dependencies": [
+          "CUDA Toolkit >= 11.0",
+          "GCC >= 9.0"
+        ]
+      }
+    },
+    "build_system": "make",
+    "working_directory": "src/maxpool3d-cuda",
+    "commands": {
+      "configure": null,
+      "build": "make ARCH=sm_89",
+      "clean": "make clean"
+    },
+    "variables": null,
+    "outputs": {
+      "executable": "main"
+    }
+  },
+  "run": {
+    "executable": "./main",
+    "default_arguments": [
+      "2048",
+      "2048",
+      "96",
+      "100"
+    ],
+    "timeout_seconds": 300,
+    "environment_variables": null,
+    "input_configurations": {
+      "correctness": {
+        "arguments": [
+          "2048",
+          "2048",
+          "96",
+          "1"
+        ],
+        "description": "Single iteration with width=2048, height=2048, depth=96; compared against CPU reference",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      },
+      "performance": {
+        "arguments": [
+          "2048",
+          "2048",
+          "96",
+          "100"
+        ],
+        "description": "100-iteration run for performance measurement",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      }
+    }
+  },
+  "verification": {
+    "method": "self_checking",
+    "strategies": [
+      {
+        "type": "stdout_pattern",
+        "pattern": "PASS",
+        "description": "Element-wise comparison of GPU maxpool3d output vs CPU reference; prints PASS or FAIL"
+      },
+      {
+        "type": "exit_code",
+        "expected": 0,
+        "description": "Process exits cleanly"
+      }
+    ],
+    "floating_point": null
+  },
+  "performance": {
+    "metrics": [
+      {
+        "name": "kernel_time",
+        "extraction": {
+          "type": "regex",
+          "pattern": "Average kernel execution time\\s+([\\d.eE+-]+)\\s+\\(us\\)",
+          "capture_group": 1
+        },
+        "unit": "us"
+      }
+    ],
+    "warmup_runs": 1,
+    "measurement_runs": 5
+  },
+  "hardware": {
+    "target": "gpu",
+    "requirements": {
+      "gpu": {
+        "vendor": "NVIDIA",
+        "min_compute_capability": "sm_60",
+        "min_memory_gb": 2
+      }
+    },
+    "reference_platform": {
+      "platform_id": "rtx4070-r9-7900x",
+      "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+      },
+      "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+      },
+      "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+      }
+    }
+  },
+  "baseline_results": {
+    "reference_platform": "rtx4070-r9-7900x",
+    "timestamp": "2026-03-03T00:24:53Z",
+    "configurations": {
+      "correctness": {
+        "status": "pass",
+        "exit_code": 0,
+        "stdout_snippet": "input image width 2048 Hstride 2\ninput image height 2048 Vstride 2\noutput image width 1024\noutput image height 1024\nAverage kernel execution time: 0.004424 (s)\nPASS\n",
+        "wall_time_seconds": 3.364
+      }
+    }
+  },
+  "metadata": {
+    "description": "3D max pooling layer for deep learning on GPU. Applies max pooling with configurable kernel/stride/padding over 3D input tensors. Verified against CPU reference implementation.",
+    "domain": "machine learning",
+    "complexity": "O(n \u00d7 kernel_volume)",
+    "tags": [
+      "maxpool3d",
+      "pooling",
+      "3d",
+      "deep-learning",
+      "cnn",
+      "volumetric"
+    ],
+    "multi_file": false,
+    "translation_complexity": null
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "source_spec": "mixbench-mixbench-omp",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1157497905,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-26T12:24:34Z",
+  "prompt_tokens": 10182,
+  "completion_tokens": 5406,
+  "llm_response_time_seconds": 93.065,
+  "build_status": "pass",
+  "build_time_seconds": 0.469,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 4.288,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "9.17\n          192,     96.250,    0.48,27130.49, 281.88,     48.125,   26.67,  484.31,  10.06,    192.500,    0.00,     inf,    inf,    96.250,    0.85,15201.90, 157.94\n          256,    128.250,    0.61,28157.43, 219.55,     64.125,   35.14,  489.83,   7.64,    256.500,    0.00,     inf,    inf,   128.250,    1.12,15407.87, 120.14\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "single_precision_gflops": {
+      "value": 111.46,
+      "unit": "GFLOPS"
+    }
+  },
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": 4.288,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 6.9963,
+  "translated_files": {
+    "mix_kernels.cl": "#ifdef ENABLE_DP\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n\n#ifdef ENABLE_HP\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n\n#ifndef ELEMENTS_PER_THREAD\n#define ELEMENTS_PER_THREAD 1\n#endif\n\n#ifndef FUSION_DEGREE\n#define FUSION_DEGREE 1\n#endif\n\n#ifndef COMPUTE_ITERATIONS\n#define COMPUTE_ITERATIONS 0\n#endif\n\n#ifndef blockdim\n#define blockdim 1\n#endif\n\n#define TOTAL_ELEMENTS_PER_WI (ELEMENTS_PER_THREAD * FUSION_DEGREE)\n\n__kernel void benchmark_func(class_T seed, __global class_T* c) {\n  (void)seed;\n\n  const size_t gid = get_global_id(0);\n  const size_t gsize = get_global_size(0);\n  const size_t lid = get_local_id(0);\n  const size_t group = get_group_id(0);\n\n#ifdef BLOCK_STRIDED\n  const size_t stride = (size_t)blockdim;\n  const size_t base = group * ((size_t)TOTAL_ELEMENTS_PER_WI * stride) + lid;\n#else\n  const size_t stride = gsize;\n  const size_t base = gid;\n#endif\n\n  class_T sum = (class_T)(0);\n\n  for (uint fusion = 0; fusion < (uint)FUSION_DEGREE; ++fusion) {\n    const size_t fusion_base = base + (size_t)fusion * (size_t)ELEMENTS_PER_THREAD * stride;\n\n    class_T f[8];\n    for (uint k = 0; k < 8; ++k) {\n      f[k] = c[fusion_base + (size_t)k * stride];\n    }\n\n    for (uint i = 0; i < (uint)ELEMENTS_PER_THREAD; ++i) {\n      const size_t idx = fusion_base + (size_t)i * stride;\n      const class_T v = c[idx];\n\n      class_T t0 = v;\n      class_T t1 = v;\n      class_T t2 = v;\n      class_T t3 = v;\n      class_T t4 = v;\n      class_T t5 = v;\n      class_T t6 = v;\n      class_T t7 = v;\n\n      for (uint j = 0; j < (uint)(COMPUTE_ITERATIONS / 8); ++j) {\n        t0 = t0 * t0 + f[0];\n        t1 = t1 * t1 + f[1];\n        t2 = t2 * t2 + f[2];\n        t3 = t3 * t3 + f[3];\n        t4 = t4 * t4 + f[4];\n        t5 = t5 * t5 + f[5];\n        t6 = t6 * t6 + f[6];\n        t7 = t7 * t7 + f[7];\n      }\n\n#if (COMPUTE_ITERATIONS % 8) > 0\n      t0 = t0 * t0 + f[0];\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 1\n      t1 = t1 * t1 + f[1];\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 2\n      t2 = t2 * t2 + f[2];\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 3\n      t3 = t3 * t3 + f[3];\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 4\n      t4 = t4 * t4 + f[4];\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 5\n      t5 = t5 * t5 + f[5];\n#endif\n#if (COMPUTE_ITERATIONS % 8) > 6\n      t6 = t6 * t6 + f[6];\n#endif\n\n      sum += t0 + t1 + t2 + t3 + t4 + t5 + t6 + t7;\n    }\n  }\n\n  c[base] = sum;\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 93.065,
+      "prompt_tokens": 10182,
+      "completion_tokens": 5406,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

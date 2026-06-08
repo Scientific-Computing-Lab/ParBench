@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-srad-opencl",
+  "target_spec": "rodinia-srad-omp",
+  "kernel": "srad",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1854971599,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "-s",
+    "502",
+    "458",
+    "-n",
+    "2",
+    "-l",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-05-01T01:39:40Z",
+  "prompt_tokens": 15754,
+  "completion_tokens": 4404,
+  "llm_response_time_seconds": 32.889,
+  "build_status": "pass",
+  "build_time_seconds": 0.199,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.017,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 256 \nThe file was not opened for reading\nPlatform: OpenMP\nDevice: CPU\n-----OpenCL Compiler Output-----\n--------------------------------\nmax # of workgroups = 899, # of threads/workgroup = 256 (ensure that device can handle)\nIterations Progress: hidden\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.006,
+  "translated_wall_time_seconds": 0.017,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.3529,
+  "translated_files": {
+    "srad.cpp": "#include <cstdio>\n#include <cstdlib>\n#include <cstring>\n#include <cmath>\n#include <omp.h>\n\n#define fp float\n\n#ifdef RD_WG_SIZE_0_0\n#define NUMBER_THREADS RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n#define NUMBER_THREADS RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n#define NUMBER_THREADS RD_WG_SIZE\n#else\n#define NUMBER_THREADS 256\n#endif\n\nint platform_id_inuse = 0;\nint device_id_inuse = 0;\n\nstatic void write_graphics(char* filename,\n                           fp* input,\n                           int data_rows,\n                           int data_cols,\n                           int major,\n                           int data_range) {\n    FILE* fid;\n    int i, j;\n\n    fid = fopen(filename, \"w\");\n    if (fid == NULL) {\n        printf(\"The file was not created/opened for writing\\n\");\n        return;\n    }\n\n    fprintf(fid, \"P2\\n\");\n    fprintf(fid, \"%d %d\\n\", data_cols, data_rows);\n    fprintf(fid, \"%d\\n\", data_range);\n\n    if (major == 0) {\n        for (i = 0; i < data_rows; i++) {\n            for (j = 0; j < data_cols; j++) {\n                fprintf(fid, \"%d \", (int)input[i * data_cols + j]);\n            }\n            fprintf(fid, \"\\n\");\n        }\n    } else {\n        for (i = 0; i < data_rows; i++) {\n            for (j = 0; j < data_cols; j++) {\n                fprintf(fid, \"%d \", (int)input[j * data_rows + i]);\n            }\n            fprintf(fid, \"\\n\");\n        }\n    }\n\n    fclose(fid);\n}\n\nstatic void read_graphics(char* filename,\n                          fp* input,\n                          int data_rows,\n                          int data_cols,\n                          int major) {\n    FILE* fid;\n    int i, j;\n    char c;\n    int temp;\n\n    fid = fopen(filename, \"r\");\n    if (fid == NULL) {\n        printf(\"The file was not opened for reading\\n\");\n        return;\n    }\n\n    i = 0;\n    while (i < 3) {\n        c = (char)fgetc(fid);\n        if (c == '\\n') {\n            i = i + 1;\n        }\n    }\n\n    if (major == 0) {\n        for (i = 0; i < data_rows; i++) {\n            for (j = 0; j < data_cols; j++) {\n                fscanf(fid, \"%d\", &temp);\n                input[i * data_cols + j] = (fp)temp;\n            }\n        }\n    } else {\n        for (i = 0; i < data_rows; i++) {\n            for (j = 0; j < data_cols; j++) {\n                fscanf(fid, \"%d\", &temp);\n                input[j * data_rows + i] = (fp)temp;\n            }\n        }\n    }\n\n    fclose(fid);\n}\n\nstatic void resize(fp* input,\n                   int input_rows,\n                   int input_cols,\n                   fp* output,\n                   int output_rows,\n                   int output_cols,\n                   int major) {\n    int i, j;\n    int i2, j2;\n\n    if (major == 0) {\n        for (i = 0, i2 = 0; i < output_rows; i++, i2++) {\n            if (i2 >= input_rows) {\n                i2 = i2 - input_rows;\n            }\n            for (j = 0, j2 = 0; j < output_cols; j++, j2++) {\n                if (j2 >= input_cols) {\n                    j2 = j2 - input_cols;\n                }\n                output[i * output_cols + j] = input[i2 * input_cols + j2];\n            }\n        }\n    } else {\n        for (j = 0, j2 = 0; j < output_cols; j++, j2++) {\n            if (j2 >= input_cols) {\n                j2 = j2 - input_cols;\n            }\n            for (i = 0, i2 = 0; i < output_rows; i++, i2++) {\n                if (i2 >= input_rows) {\n                    i2 = i2 - input_rows;\n                }\n                output[j * output_rows + i] = input[j2 * input_rows + i2];\n            }\n        }\n    }\n}\n\nvoid kernel_gpu_opencl_wrapper(fp* image,\n                               int Nr,\n                               int Nc,\n                               long Ne,\n                               int niter,\n                               fp lambda,\n                               long NeROI,\n                               int* iN,\n                               int* iS,\n                               int* jE,\n                               int* jW,\n                               int iter,\n                               int mem_size_i,\n                               int mem_size_j) {\n    (void)platform_id_inuse;\n    (void)device_id_inuse;\n    (void)iter;\n    (void)mem_size_i;\n    (void)mem_size_j;\n\n    printf(\"Platform: OpenMP\\n\");\n    printf(\"Device: CPU\\n\");\n    printf(\"-----OpenCL Compiler Output-----\\n\");\n    printf(\"--------------------------------\\n\");\n\n    int blocks_x = (int)(Ne / NUMBER_THREADS);\n    if (Ne % NUMBER_THREADS != 0) {\n        blocks_x = blocks_x + 1;\n    }\n    int blocks_work_size = blocks_x;\n    long global_work_size = (long)blocks_work_size * NUMBER_THREADS;\n\n    printf(\"max # of workgroups = %d, # of threads/workgroup = %d (ensure that device can handle)\\n\",\n           blocks_work_size, NUMBER_THREADS);\n\n    fp* d_I = (fp*)malloc(sizeof(fp) * Ne);\n    fp* d_dN = (fp*)malloc(sizeof(fp) * Ne);\n    fp* d_dS = (fp*)malloc(sizeof(fp) * Ne);\n    fp* d_dW = (fp*)malloc(sizeof(fp) * Ne);\n    fp* d_dE = (fp*)malloc(sizeof(fp) * Ne);\n    fp* d_c = (fp*)malloc(sizeof(fp) * Ne);\n\n    memcpy(d_I, image, sizeof(fp) * Ne);\n\n    #pragma omp parallel for schedule(static)\n    for (long ei = 0; ei < global_work_size; ei++) {\n        if (ei < Ne) {\n            d_I[ei] = expf(d_I[ei] / 255.0f);\n        }\n    }\n\n    printf(\"Iterations Progress: hidden\");\n    for (iter = 0; iter < niter; iter++) {\n        fp total = 0.0f;\n        fp total2 = 0.0f;\n\n        #pragma omp parallel for reduction(+:total,total2) schedule(static)\n        for (long ei = 0; ei < Ne; ei++) {\n            fp v = d_I[ei];\n            total += v;\n            total2 += v * v;\n        }\n\n        fp meanROI = total / (fp)(NeROI);\n        fp meanROI2 = meanROI * meanROI;\n        fp varROI = (total2 / (fp)(NeROI)) - meanROI2;\n        fp q0sqr = varROI / meanROI2;\n\n        #pragma omp parallel for schedule(static)\n        for (long ei = 0; ei < global_work_size; ei++) {\n            int row, col;\n            if (ei >= Ne) continue;\n\n            row = (int)((ei + 1) % Nr - 1);\n            col = (int)((ei + 1) / Nr + 1 - 1);\n            if ((ei + 1) % Nr == 0) {\n                row = Nr - 1;\n                col -= 1;\n            }\n\n            fp d_Jc = d_I[ei];\n\n            fp d_dN_loc = d_I[iN[row] + Nr * col] - d_Jc;\n            fp d_dS_loc = d_I[iS[row] + Nr * col] - d_Jc;\n            fp d_dW_loc = d_I[row + Nr * jW[col]] - d_Jc;\n            fp d_dE_loc = d_I[row + Nr * jE[col]] - d_Jc;\n\n            fp d_G2 = (d_dN_loc * d_dN_loc + d_dS_loc * d_dS_loc + d_dW_loc * d_dW_loc + d_dE_loc * d_dE_loc) / (d_Jc * d_Jc);\n            fp d_L = (d_dN_loc + d_dS_loc + d_dW_loc + d_dE_loc) / d_Jc;\n\n            fp d_num = (0.5f * d_G2) - ((1.0f / 16.0f) * (d_L * d_L));\n            fp d_den = 1.0f + (0.25f * d_L);\n            fp d_qsqr = d_num / (d_den * d_den);\n\n            d_den = (d_qsqr - q0sqr) / (q0sqr * (1.0f + q0sqr));\n            fp d_c_loc = 1.0f / (1.0f + d_den);\n\n            if (d_c_loc < 0.0f) d_c_loc = 0.0f;\n            else if (d_c_loc > 1.0f) d_c_loc = 1.0f;\n\n            d_dN[ei] = d_dN_loc;\n            d_dS[ei] = d_dS_loc;\n            d_dW[ei] = d_dW_loc;\n            d_dE[ei] = d_dE_loc;\n            d_c[ei] = d_c_loc;\n        }\n\n        #pragma omp parallel for schedule(static)\n        for (long ei = 0; ei < global_work_size; ei++) {\n            int row, col;\n            if (ei >= Ne) continue;\n\n            row = (int)((ei + 1) % Nr - 1);\n            col = (int)((ei + 1) / Nr + 1 - 1);\n            if ((ei + 1) % Nr == 0) {\n                row = Nr - 1;\n                col = col - 1;\n            }\n\n            fp d_cN = d_c[ei];\n            fp d_cS = d_c[iS[row] + Nr * col];\n            fp d_cW = d_c[ei];\n            fp d_cE = d_c[row + Nr * jE[col]];\n\n            fp d_D = d_cN * d_dN[ei] + d_cS * d_dS[ei] + d_cW * d_dW[ei] + d_cE * d_dE[ei];\n            d_I[ei] = d_I[ei] + 0.25f * lambda * d_D;\n        }\n    }\n    printf(\"\\n\");\n\n    #pragma omp parallel for schedule(static)\n    for (long ei = 0; ei < global_work_size; ei++) {\n        if (ei < Ne) {\n            d_I[ei] = logf(d_I[ei]) * 255.0f;\n        }\n    }\n\n    memcpy(image, d_I, sizeof(fp) * Ne);\n\n    free(d_I);\n    free(d_dN);\n    free(d_dS);\n    free(d_dW);\n    free(d_dE);\n    free(d_c);\n}\n\nint main(int argc, char* argv[]) {\n    printf(\"WG size of kernel = %d \\n\", NUMBER_THREADS);\n\n    fp* image_ori;\n    int image_ori_rows;\n    int image_ori_cols;\n    long image_ori_elem;\n\n    fp* image;\n    int Nr = 0, Nc = 0;\n    long Ne;\n\n    int niter = 0;\n    fp lambda = 0.0f;\n\n    int r1, r2, c1, c2;\n    long NeROI;\n\n    int* iN;\n    int* iS;\n    int* jE;\n    int* jW;\n\n    int iter = 0;\n    long i;\n    long j;\n\n    int mem_size_i;\n    int mem_size_j;\n\n    int cur_arg;\n    for (cur_arg = 1; argc > cur_arg; cur_arg++) {\n        if (strcmp(argv[cur_arg], \"-n\") == 0) {\n            if (cur_arg + 1 <= argc) {\n                niter = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        } else if (strcmp(argv[cur_arg], \"-l\") == 0) {\n            if (argc >= cur_arg + 1) {\n                lambda = (fp)atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        } else if (strcmp(argv[cur_arg], \"-s\") == 0) {\n            if (cur_arg + 3 <= argc) {\n                Nr = atoi(argv[cur_arg + 1]);\n                Nc = atoi(argv[cur_arg + 2]);\n                cur_arg += 2;\n            }\n        } else if (strcmp(argv[cur_arg], \"-p\") == 0) {\n            if (argc >= cur_arg + 1) {\n                platform_id_inuse = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        } else if (strcmp(argv[cur_arg], \"-d\") == 0) {\n            if (cur_arg + 1 <= argc) {\n                device_id_inuse = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        }\n    }\n\n    image_ori_rows = 502;\n    image_ori_cols = 458;\n    image_ori_elem = (long)image_ori_rows * image_ori_cols;\n\n    image_ori = (fp*)malloc(sizeof(fp) * image_ori_elem);\n\n    read_graphics((char*)\"../../data/srad/image.pgm\",\n                  image_ori,\n                  image_ori_rows,\n                  image_ori_cols,\n                  1);\n\n    Ne = (long)Nr * Nc;\n    image = (fp*)malloc(sizeof(fp) * Ne);\n\n    resize(image_ori,\n           image_ori_rows,\n           image_ori_cols,\n           image,\n           Nr,\n           Nc,\n           1);\n\n    r1 = 0;\n    r2 = Nr - 1;\n    c1 = 0;\n    c2 = Nc - 1;\n\n    NeROI = (long)(r2 - r1 + 1) * (c2 - c1 + 1);\n\n    mem_size_i = (int)(sizeof(int) * Nr);\n    iN = (int*)malloc(mem_size_i);\n    iS = (int*)malloc(mem_size_i);\n    mem_size_j = (int)(sizeof(int) * Nc);\n    jW = (int*)malloc(mem_size_j);\n    jE = (int*)malloc(mem_size_j);\n\n    for (i = 0; i < Nr; i++) {\n        iN[i] = (int)i - 1;\n        iS[i] = (int)i + 1;\n    }\n    for (j = 0; Nc > j; j++) {\n        jW[j] = (int)j - 1;\n        jE[j] = (int)j + 1;\n    }\n\n    iN[0] = 0;\n    iS[Nr - 1] = Nr - 1;\n    jW[0] = 0;\n    jE[Nc - 1] = Nc - 1;\n\n    kernel_gpu_opencl_wrapper(image,\n                              Nr,\n                              Nc,\n                              Ne,\n                              niter,\n                              lambda,\n                              NeROI,\n                              iN,\n                              iS,\n                              jE,\n                              jW,\n                              iter,\n                              mem_size_i,\n                              mem_size_j);\n\n    write_graphics((char*)\"./output/image_out.pgm\",\n                   image,\n                   Nr,\n                   Nc,\n                   1,\n                   255);\n\n    free(image_ori);\n    free(image);\n    free(iN);\n    free(iS);\n    free(jW);\n    free(jE);\n\n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "srad.cpp"
+  ],
+  "target_files_extracted": [
+    "srad.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 32.889,
+      "prompt_tokens": 15754,
+      "completion_tokens": 4404,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

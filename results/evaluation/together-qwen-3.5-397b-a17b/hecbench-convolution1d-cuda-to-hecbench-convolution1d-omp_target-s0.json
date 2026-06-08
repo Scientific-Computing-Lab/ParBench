@@ -1,0 +1,69 @@
+{
+  "source_spec": "hecbench-convolution1d-cuda",
+  "target_spec": "hecbench-convolution1d-omp_target",
+  "kernel": "convolution1d",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1553817687,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T05:53:48Z",
+  "prompt_tokens": 2592,
+  "completion_tokens": 8709,
+  "llm_response_time_seconds": 47.445,
+  "build_status": "fail",
+  "build_time_seconds": 0.159,
+  "build_error_snippet": "\"main.cpp\", line 183: error: invalid text in pragma\n    #pragma omp target copyin(a[0:input_width])\n                       ^\n          detected during instantiation of \"void conv1D<T>(int, int, int) [with T=double]\" at line 280\n\n\"main.cpp\", line 183: error: invalid text in pragma\n    #pragma omp target copyin(a[0:input_width])\n                             ^\n          detected during instantiation of \"void conv1D<T>(int, int, int) [with T=double]\" at line 280\n\n\"main.cpp\", line 183: error: extra text after expected end of preprocessing directive\n    #pragma omp target copyin(a[0:input_width])\n                              ^\n          detected during instantiation of \"void conv1D<T>(int, int, int) [with T=double]\" at line 280\n\n\"main.cpp\", line\n...[truncated]...\nnchronize\n                         ^\n          detected during instantiation of \"void conv1D<T>(int, int, int) [with T=int16_t]\" at line 286\n\n\"main.cpp\", line 247: error: invalid text in pragma\n      #pragma omp target copyout(b[0:input_width])\n                         ^\n          detected during instantiation of \"void conv1D<T>(int, int, int) [with T=int16_t]\" at line 286\n\n\"main.cpp\", line 247: error: extra text after expected end of preprocessing directive\n      #pragma omp target copyout(b[0:input_width])\n                                ^\n          detected during instantiation of \"void conv1D<T>(int, int, int) [with T=int16_t]\" at line 286\n\n57 errors detected in the compilation of \"main.cpp\".\nmake: *** [Makefile.nvc:57: main.o] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: detected during instantiation of \"void conv1D<T>(int, int, int) [with T=int16_t]\" at line 286\n\n57 errors detected in the compilation of \"main.cpp\".\nmake: *** [Makefile.nvc:57: main.o] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cpp": "#include <assert.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <math.h>\n#include <chrono>\n#include <omp.h>\n\n#define MAX_MASK_WIDTH 10\n#define MAX_BLOCK_SIZE 1024\n\ntemplate<typename T>\nvoid conv1d(const T *in,\n            T *out,\n            const int input_width,\n            const int mask_width,\n            const T *mask)\n{\n  #pragma omp target\n  {\n    #pragma omp teams distribute parallel for\n    for (int i = 0; i < input_width; i++) {\n      T s = 0;\n      int start = i - mask_width / 2;\n      for (int j = 0; j < mask_width; j++) {\n        if (start + j >= 0 && start + j < input_width) {\n          s += in[start + j] * mask[j];\n        }\n      }\n      out[i] = s;\n    }\n  }\n}\n\ntemplate<typename T>\nvoid conv1d_tiled(const T *in,\n                  T *out,\n                  const int input_width,\n                  const int mask_width,\n                  const T *mask,\n                  int block_size)\n{\n  int num_blocks = input_width / block_size;\n  int n = mask_width / 2;\n  \n  #pragma omp target\n  {\n    #pragma omp teams distribute parallel for\n    for (int block = 0; block < num_blocks; block++) {\n      T tile[block_size + mask_width - 1];\n      \n      int block_start = block * block_size;\n      \n      for (int t = 0; t < block_size; t++) {\n        int i = block_start + t;\n        if (i < input_width) {\n          tile[n + t] = in[i];\n        }\n      }\n      \n      for (int t = block_size - n; t < block_size; t++) {\n        int halo_left = (block - 1) * block_size + t;\n        tile[t - (block_size - n)] = halo_left < 0 ? 0 : in[halo_left];\n      }\n      \n      for (int t = 0; t < n; t++) {\n        int halo_right = (block + 1) * block_size + t;\n        tile[t + block_size + n] = halo_right >= input_width ? 0 : in[halo_right];\n      }\n      \n      #pragma omp barrier\n      \n      for (int t = 0; t < block_size; t++) {\n        int i = block_start + t;\n        if (i < input_width) {\n          T s = 0;\n          for (int j = 0; j < mask_width; j++) {\n            s += tile[t + j] * mask[j];\n          }\n          out[i] = s;\n        }\n      }\n    }\n  }\n}\n\ntemplate<typename T>\nvoid conv1d_tiled_caching(const T *in,\n                          T *out,\n                          const int input_width,\n                          const int mask_width,\n                          const T *mask,\n                          int block_size)\n{\n  int num_blocks = input_width / block_size;\n  \n  #pragma omp target\n  {\n    #pragma omp teams distribute parallel for\n    for (int block = 0; block < num_blocks; block++) {\n      T tile[block_size];\n      \n      int block_start = block * block_size;\n      int next_tile_start = (block + 1) * block_size;\n      \n      for (int t = 0; t < block_size; t++) {\n        int i = block_start + t;\n        if (i < input_width) {\n          tile[t] = in[i];\n        }\n      }\n      \n      #pragma omp barrier\n      \n      for (int t = 0; t < block_size; t++) {\n        int i = block_start + t;\n        if (i < input_width) {\n          int start = i - (mask_width / 2);\n          T s = 0;\n          for (int j = 0; j < mask_width; j++) {\n            int in_index = start + j;\n            if (in_index >= 0 && in_index < input_width) {\n              if (in_index >= block_start && in_index < next_tile_start) {\n                s += tile[t + j - (mask_width / 2)] * mask[j];\n              } else {\n                s += in[in_index] * mask[j];\n              }\n            }\n          }\n          out[i] = s;\n        }\n      }\n    }\n  }\n}\n\ntemplate <typename T>\nvoid reference(const T *h_in,\n               const T *d_out,\n               const T *mask,\n               const int input_width,\n               const int mask_width)\n{\n  bool ok = true;\n  for (int i = 0; i < input_width; i++) {\n    T s = 0;\n    int start = i - mask_width / 2;\n    for (int j = 0; j < mask_width; j++) {\n      if (start + j >= 0 && start + j < input_width) {\n        s += h_in[start + j] * mask[j];\n      }\n    }\n    if (fabs(s - d_out[i]) > 1e-3) {\n      ok = false;\n      break;\n    }\n  }\n  printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");\n}\n\ntemplate <typename T>\nvoid conv1D(const int input_width, const int mask_width, const int repeat)\n{\n  size_t size_bytes = input_width * sizeof(T);\n\n  T *a, *b;\n  a = (T *)malloc(size_bytes);\n  b = (T *)malloc(size_bytes);\n\n  T h_mask[MAX_MASK_WIDTH];\n\n  for (int i = 0; i < MAX_MASK_WIDTH; i++) h_mask[i] = 1;\n\n  srand(123);\n  for (int i = 0; i < input_width; i++) {\n    a[i] = rand() % 256;\n  }\n\n  T *d_a, *d_b, *d_mask;\n  d_a = (T *)omp_target_alloc(size_bytes, omp_get_default_device());\n  d_b = (T *)omp_target_alloc(size_bytes, omp_get_default_device());\n  d_mask = (T *)omp_target_alloc(mask_width * sizeof(T), omp_get_default_device());\n\n  #pragma omp target copyin(a[0:input_width])\n  {\n    for (int i = 0; i < input_width; i++) {\n      d_a[i] = a[i];\n    }\n  }\n  \n  #pragma omp target copyin(h_mask[0:mask_width])\n  {\n    for (int i = 0; i < mask_width; i++) {\n      d_mask[i] = h_mask[i];\n    }\n  }\n\n  #pragma omp target synchronize\n\n  for (int bs = 64; bs <= MAX_BLOCK_SIZE; bs = bs * 2) {\n    auto start = std::chrono::steady_clock::now();\n    for (int i = 0; i < repeat; i++) {\n      conv1d(d_a, d_b, input_width, mask_width, d_mask);\n    }\n    #pragma omp target synchronize\n    auto end = std::chrono::steady_clock::now();\n    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n    printf(\"Average kernel execution time of conv1d kernel (block size %d): %f (us)\\n\",\n           bs, (time * 1e-3f) / repeat);\n    #pragma omp target copyout(b[0:input_width])\n    {\n      for (int i = 0; i < input_width; i++) {\n        b[i] = d_b[i];\n      }\n    }\n    reference(a, b, h_mask, input_width, mask_width);\n  }\n\n  for (int bs = 64; bs <= MAX_BLOCK_SIZE; bs = bs * 2) {\n    auto start = std::chrono::steady_clock::now();\n    for (int i = 0; i < repeat; i++) {\n      conv1d_tiled(d_a, d_b, input_width, mask_width, d_mask, bs);\n    }\n    #pragma omp target synchronize\n    auto end = std::chrono::steady_clock::now();\n    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n    printf(\"Average kernel execution time of conv1d-tiled kernel (block size %d): %f (us)\\n\",\n           bs, (time * 1e-3f) / repeat);\n    #pragma omp target copyout(b[0:input_width])\n    {\n      for (int i = 0; i < input_width; i++) {\n        b[i] = d_b[i];\n      }\n    }\n    reference(a, b, h_mask, input_width, mask_width);\n  }\n\n  for (int bs = 64; bs <= MAX_BLOCK_SIZE; bs = bs * 2) {\n    auto start = std::chrono::steady_clock::now();\n    for (int i = 0; i < repeat; i++) {\n      conv1d_tiled_caching(d_a, d_b, input_width, mask_width, d_mask, bs);\n    }\n    #pragma omp target synchronize\n    auto end = std::chrono::steady_clock::now();\n    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n    printf(\"Average kernel execution time of conv1d-tiled-caching kernel (block size %d): %f (us)\\n\",\n           bs, (time * 1e-3f) / repeat);\n    #pragma omp target copyout(b[0:input_width])\n    {\n      for (int i = 0; i < input_width; i++) {\n        b[i] = d_b[i];\n      }\n    }\n    reference(a, b, h_mask, input_width, mask_width);\n  }\n\n  free(a);\n  free(b);\n  omp_target_free(d_a, omp_get_default_device());\n  omp_target_free(d_b, omp_get_default_device());\n  omp_target_free(d_mask, omp_get_default_device());\n}\n\nint main(int argc, char* argv[]) {\n  if (argc != 3) {\n    printf(\"Usage: %s <input_width> <repeat>\\n\", argv[0]);\n    return 1;\n  }\n\n  int input_width = atoi(argv[1]);\n  \n  input_width = (input_width + MAX_BLOCK_SIZE - 1) / MAX_BLOCK_SIZE * MAX_BLOCK_SIZE;\n\n  const int repeat = atoi(argv[2]);\n\n  for (int mask_width = 3; mask_width < MAX_MASK_WIDTH; mask_width += 2) {\n    printf(\"\\n---------------------\\n\");\n    printf(\"Mask width: %d\\n\", mask_width); \n\n    printf(\"1D convolution (FP64)\\n\");\n    conv1D<double>(input_width, mask_width, repeat);\n\n    printf(\"1D convolution (FP32)\\n\");\n    conv1D<float>(input_width, mask_width, repeat);\n\n    printf(\"1D convolution (INT16)\\n\");\n    conv1D<int16_t>(input_width, mask_width, repeat);\n  }\n\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cpp"
+  ],
+  "target_files_extracted": [
+    "main.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 47.445,
+      "prompt_tokens": 2592,
+      "completion_tokens": 8709,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "\"main.cpp\", line 183: error: invalid text in pragma\n    #pragma omp target copyin(a[0:input_width])\n                       ^\n          detected during instantiation of \"void conv1D<T>(int, int, int) [with T=double]\" at line 280\n\n\"main.cpp\", line 183: error: invalid text in pragma\n    #pragma omp target copyin(a[0:input_width])\n                             ^\n          detected during instantiation of \"void conv1D<T>(int, int, int) [with T=double]\" at line 280\n\n\"main.cpp\", line 183: error: extra text after expected end of preprocessing directive\n    #pragma omp target copyin(a[0:input_width])\n                              ^\n          detected during instantiation of \"void conv1D<T>(int, int, int) [with T=double]\" at line 280\n\n\"main.cpp\", line\n...[truncated]...\nnchronize\n                         ^\n          detected during instantiation of \"void conv1D<T>(int, int, int) [with T=int16_t]\" at line 286\n\n\"main.cpp\", line 247: error: invalid text in pragma\n      #pragma omp target copyout(b[0:input_width])\n                         ^\n          detected during instantiation of \"void conv1D<T>(int, int, int) [with T=int16_t]\" at line 286\n\n\"main.cpp\", line 247: error: extra text after expected end of preprocessing directive\n      #pragma omp target copyout(b[0:input_width])\n                                ^\n          detected during instantiation of \"void conv1D<T>(int, int, int) [with T=int16_t]\" at line 286\n\n57 errors detected in the compilation of \"main.cpp\".\nmake: *** [Makefile.nvc:57: main.o] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

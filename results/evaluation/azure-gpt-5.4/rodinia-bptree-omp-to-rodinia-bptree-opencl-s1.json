@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-bptree-omp",
+  "target_spec": "rodinia-bptree-opencl",
+  "kernel": "bptree",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 891686103,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-04-26T06:48:48Z",
+  "prompt_tokens": 21119,
+  "completion_tokens": 4881,
+  "llm_response_time_seconds": 76.397,
+  "build_status": "pass",
+  "build_time_seconds": 0.544,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.486,
+  "run_exit_code": 245,
+  "run_stderr_snippet": "2 errors generated.\n",
+  "run_stdout_snippet": "874, knodes_unit_mem=2068, knodes_mem=16283432\nPlatform: NVIDIA Corporation\nDevice num: 1\nCreating GPU Context\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n<<<<\n<kernel>:3:17: error: use of undeclared identifier 'DEFAULT_ORDER'\n    int indices[DEFAULT_ORDER + 1];\n                ^\n<kernel>:4:14: error: use of undeclared identifier 'DEFAULT_ORDER'\n    int keys[DEFAULT_ORDER + 1];\n             ^\n\n>>>>\n--------------------------------\nError at line 258: CL_BUILD_PROGRAM_FAILURE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 245)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.453,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "typedef struct record {\n    int value;\n} record;\n\ntypedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    uchar is_leaf;\n    uchar _pad[3];\n    int num_keys;\n} knode;\n\n__kernel void findK(const long maxheight,\n                    __global knode *knodes,\n                    const long knodes_elem,\n                    __global record *records,\n                    __global long *currKnode,\n                    __global long *offset,\n                    __global int *keys,\n                    __global record *ans)\n{\n    const int thid = (int)get_local_id(0);\n    const int bid = (int)get_group_id(0);\n\n    __local long l_currKnode[1];\n    __local long l_offset[1];\n    __local int l_key[1];\n\n    if (thid == 0) {\n        l_currKnode[0] = currKnode[bid];\n        l_offset[0] = offset[bid];\n        l_key[0] = keys[bid];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    for (long i = 0; i < maxheight; i++) {\n        long curr = l_currKnode[0];\n        long off = l_offset[0];\n        int key = l_key[0];\n\n        if ((knodes[curr].keys[thid] <= key) &&\n            (knodes[curr].keys[thid + 1] > key)) {\n            long index = (long)knodes[off].indices[thid];\n            if (index < knodes_elem) {\n                l_offset[0] = index;\n            }\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n\n        if (thid == 0) {\n            l_currKnode[0] = l_offset[0];\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    if (knodes[l_currKnode[0]].keys[thid] == l_key[0]) {\n        ans[bid].value = records[knodes[l_currKnode[0]].indices[thid]].value;\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (thid == 0) {\n        currKnode[bid] = l_currKnode[0];\n        offset[bid] = l_offset[0];\n    }\n}\n",
+    "kernel/kernel_gpu_opencl_2.cl": "typedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    uchar is_leaf;\n    uchar _pad[3];\n    int num_keys;\n} knode;\n\n__kernel void findRangeK(const long maxheight,\n                         __global knode *knodes,\n                         const long knodes_elem,\n                         __global long *currKnode,\n                         __global long *offset,\n                         __global long *lastKnode,\n                         __global long *offset_2,\n                         __global int *start,\n                         __global int *end,\n                         __global int *recstart,\n                         __global int *reclength)\n{\n    const int thid = (int)get_local_id(0);\n    const int bid = (int)get_group_id(0);\n\n    __local long l_currKnode[1];\n    __local long l_offset[1];\n    __local long l_lastKnode[1];\n    __local long l_offset_2[1];\n    __local int l_start[1];\n    __local int l_end[1];\n    __local int l_recstart[1];\n    __local int l_reclength[1];\n\n    if (thid == 0) {\n        l_currKnode[0] = currKnode[bid];\n        l_offset[0] = offset[bid];\n        l_lastKnode[0] = lastKnode[bid];\n        l_offset_2[0] = offset_2[bid];\n        l_start[0] = start[bid];\n        l_end[0] = end[bid];\n        l_recstart[0] = recstart[bid];\n        l_reclength[0] = reclength[bid];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    for (long i = 0; i < maxheight; i++) {\n        long curr = l_currKnode[0];\n        long off = l_offset[0];\n        long last = l_lastKnode[0];\n        long off2 = l_offset_2[0];\n        int s = l_start[0];\n        int e = l_end[0];\n\n        if ((knodes[curr].keys[thid] <= s) &&\n            (knodes[curr].keys[thid + 1] > s)) {\n            long index = (long)knodes[off].indices[thid];\n            if (index < knodes_elem) {\n                l_offset[0] = index;\n            }\n        }\n\n        if ((knodes[last].keys[thid] <= e) &&\n            (knodes[last].keys[thid + 1] > e)) {\n            long index2 = (long)knodes[off2].indices[thid];\n            if (index2 < knodes_elem) {\n                l_offset_2[0] = index2;\n            }\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n\n        if (thid == 0) {\n            l_currKnode[0] = l_offset[0];\n            l_lastKnode[0] = l_offset_2[0];\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    if (knodes[l_currKnode[0]].keys[thid] == l_start[0]) {\n        l_recstart[0] = knodes[l_currKnode[0]].indices[thid];\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (knodes[l_lastKnode[0]].keys[thid] == l_end[0]) {\n        l_reclength[0] = knodes[l_lastKnode[0]].indices[thid] - l_recstart[0] + 1;\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (thid == 0) {\n        currKnode[bid] = l_currKnode[0];\n        offset[bid] = l_offset[0];\n        lastKnode[bid] = l_lastKnode[0];\n        offset_2[bid] = l_offset_2[0];\n        recstart[bid] = l_recstart[0];\n        reclength[bid] = l_reclength[0];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 76.397,
+      "prompt_tokens": 21119,
+      "completion_tokens": 4881,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "2 errors generated.\n",
+      "run_stdout_snippet": "874, knodes_unit_mem=2068, knodes_mem=16283432\nPlatform: NVIDIA Corporation\nDevice num: 1\nCreating GPU Context\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n<<<<\n<kernel>:3:17: error: use of undeclared identifier 'DEFAULT_ORDER'\n    int indices[DEFAULT_ORDER + 1];\n                ^\n<kernel>:4:14: error: use of undeclared identifier 'DEFAULT_ORDER'\n    int keys[DEFAULT_ORDER + 1];\n             ^\n\n>>>>\n--------------------------------\nError at line 258: CL_BUILD_PROGRAM_FAILURE\n",
+      "extraction_fail": null
+    }
+  ]
+}

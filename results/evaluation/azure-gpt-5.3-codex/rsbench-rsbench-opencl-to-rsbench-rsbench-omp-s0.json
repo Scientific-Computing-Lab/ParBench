@@ -1,0 +1,79 @@
+{
+  "source_spec": "rsbench-rsbench-opencl",
+  "target_spec": "rsbench-rsbench-omp",
+  "kernel": "rsbench",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1114693935,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "-m",
+    "event",
+    "-s",
+    "small"
+  ],
+  "timestamp": "2026-04-30T06:05:32Z",
+  "prompt_tokens": 24234,
+  "completion_tokens": 6134,
+  "llm_response_time_seconds": 106.203,
+  "build_status": "pass",
+  "build_time_seconds": 0.384,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.624,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "======================\nSimulation Complete.\n================================================================================\n                                     RESULTS\n================================================================================\nThreads:               24\nRuntime:               1.621 seconds\nLookups:               10,200,000\nLookups/s:             6,293,987\nVerification checksum: 880018 (Valid)\n================================================================================\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "runtime": {
+      "value": 1.621,
+      "unit": "seconds"
+    }
+  },
+  "baseline_wall_time_seconds": 1.7,
+  "translated_wall_time_seconds": 1.624,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 1.0468,
+  "translated_files": {
+    "simulation.c": "#include \"rsbench.h\"\n\nRSComplex c_add(RSComplex A, RSComplex B)\n{\n\tRSComplex C;\n\tC.r = A.r + B.r;\n\tC.i = A.i + B.i;\n\treturn C;\n}\n\nRSComplex c_sub(RSComplex A, RSComplex B)\n{\n\tRSComplex C;\n\tC.r = A.r - B.r;\n\tC.i = A.i - B.i;\n\treturn C;\n}\n\nRSComplex c_mul(RSComplex A, RSComplex B)\n{\n\tdouble a = A.r;\n\tdouble b = A.i;\n\tdouble c = B.r;\n\tdouble d = B.i;\n\tRSComplex C;\n\tC.r = (a * c) - (b * d);\n\tC.i = (a * d) + (b * c);\n\treturn C;\n}\n\nRSComplex c_div(RSComplex A, RSComplex B)\n{\n\tdouble a = A.r;\n\tdouble b = A.i;\n\tdouble c = B.r;\n\tdouble d = B.i;\n\tRSComplex C;\n\tdouble denom = c * c + d * d;\n\tC.r = ((a * c) + (b * d)) / denom;\n\tC.i = ((b * c) - (a * d)) / denom;\n\treturn C;\n}\n\ndouble c_abs(RSComplex A)\n{\n\treturn sqrt(A.r * A.r + A.i * A.i);\n}\n\ndouble LCG_random_double(uint64_t *seed)\n{\n\tconst uint64_t m = 9223372036854775808ULL;\n\tconst uint64_t a = 2806196910506780709ULL;\n\tconst uint64_t c = 1ULL;\n\t*seed = (a * (*seed) + c) % m;\n\treturn (double)(*seed) / (double)m;\n}\n\nuint64_t LCG_random_int(uint64_t *seed)\n{\n\tconst uint64_t m = 9223372036854775808ULL;\n\tconst uint64_t a = 2806196910506780709ULL;\n\tconst uint64_t c = 1ULL;\n\t*seed = (a * (*seed) + c) % m;\n\treturn *seed;\n}\n\nuint64_t fast_forward_LCG(uint64_t seed, uint64_t n)\n{\n\tconst uint64_t m = 9223372036854775808ULL;\n\tuint64_t a = 2806196910506780709ULL;\n\tuint64_t c = 1ULL;\n\n\tn = n % m;\n\n\tuint64_t a_new = 1ULL;\n\tuint64_t c_new = 0ULL;\n\n\twhile (n > 0)\n\t{\n\t\tif (n & 1ULL)\n\t\t{\n\t\t\ta_new *= a;\n\t\t\tc_new = c_new * a + c;\n\t\t}\n\t\tc *= (a + 1ULL);\n\t\ta *= a;\n\t\tn >>= 1ULL;\n\t}\n\n\treturn (a_new * seed + c_new) % m;\n}\n\ndouble fast_exp(double x)\n{\n\tx = 1.0 + x * 0.000244140625;\n\tx *= x;\n\tx *= x;\n\tx *= x;\n\tx *= x;\n\tx *= x;\n\tx *= x;\n\tx *= x;\n\tx *= x;\n\tx *= x;\n\tx *= x;\n\tx *= x;\n\tx *= x;\n\treturn x;\n}\n\nRSComplex fast_cexp(RSComplex z)\n{\n\tdouble x = z.r;\n\tdouble y = z.i;\n\tdouble t1 = fast_exp(x);\n\tdouble t2 = cos(y);\n\tdouble t3 = sin(y);\n\tRSComplex t4 = {t2, t3};\n\tRSComplex t5 = {t1, 0};\n\treturn c_mul(t5, t4);\n}\n\nRSComplex fast_nuclear_W(RSComplex Z)\n{\n\tif (c_abs(Z) < 6.0)\n\t{\n\t\tRSComplex prefactor = {0, 8.124330e+01};\n\t\tdouble an[10] = {\n\t\t\t2.758402e-01, 2.245740e-01, 1.594149e-01, 9.866577e-02, 5.324414e-02,\n\t\t\t2.505215e-02, 1.027747e-02, 3.676164e-03, 1.146494e-03, 3.117570e-04};\n\t\tdouble neg_1n[10] = {-1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0};\n\t\tdouble denominator_left[10] = {\n\t\t\t9.869604e+00, 3.947842e+01, 8.882644e+01, 1.579137e+02, 2.467401e+02,\n\t\t\t3.553058e+02, 4.836106e+02, 6.316547e+02, 7.994380e+02, 9.869604e+02};\n\n\t\tRSComplex t1 = {0, 12};\n\t\tRSComplex t2 = {12, 0};\n\t\tRSComplex i = {0, 1};\n\t\tRSComplex one = {1, 0};\n\n\t\tRSComplex W = c_div(c_mul(i, c_sub(one, fast_cexp(c_mul(t1, Z)))), c_mul(t2, Z));\n\t\tRSComplex sum = {0, 0};\n\n\t\tfor (int n = 0; n < 10; n++)\n\t\t{\n\t\t\tRSComplex t3 = {neg_1n[n], 0};\n\t\t\tRSComplex top = c_sub(c_mul(t3, fast_cexp(c_mul(t1, Z))), one);\n\t\t\tRSComplex t4 = {denominator_left[n], 0};\n\t\t\tRSComplex t5 = {144, 0};\n\t\t\tRSComplex bot = c_sub(t4, c_mul(t5, c_mul(Z, Z)));\n\t\t\tRSComplex t6 = {an[n], 0};\n\t\t\tsum = c_add(sum, c_mul(t6, c_div(top, bot)));\n\t\t}\n\n\t\tW = c_add(W, c_mul(prefactor, c_mul(Z, sum)));\n\t\treturn W;\n\t}\n\telse\n\t{\n\t\tRSComplex a = {0.512424224754768462984202823134979415014943561548661637413182, 0};\n\t\tRSComplex b = {0.275255128608410950901357962647054304017026259671664935783653, 0};\n\t\tRSComplex c = {0.051765358792987823963876628425793170829107067780337219430904, 0};\n\t\tRSComplex d = {2.724744871391589049098642037352945695982973740328335064216346, 0};\n\n\t\tRSComplex i = {0, 1};\n\t\tRSComplex Z2 = c_mul(Z, Z);\n\n\t\tRSComplex W = c_mul(c_mul(Z, i), c_add(c_div(a, c_sub(Z2, b)), c_div(c, c_sub(Z2, d))));\n\t\treturn W;\n\t}\n}\n\nvoid calculate_sig_T(int nuc, double E, Input input, SimulationData data, RSComplex *sigTfactors)\n{\n\tdouble phi;\n\n\tfor (int i = 0; i < 4; i++)\n\t{\n\t\tphi = data.pseudo_K0RS[nuc * input.numL + i] * sqrt(E);\n\n\t\tif (i == 1)\n\t\t\tphi -= -atan(phi);\n\t\telse if (i == 2)\n\t\t\tphi -= atan(3.0 * phi / (3.0 - phi * phi));\n\t\telse if (i == 3)\n\t\t\tphi -= atan(phi * (15.0 - phi * phi) / (15.0 - 6.0 * phi * phi));\n\n\t\tphi *= 2.0;\n\n\t\tsigTfactors[i].r = cos(phi);\n\t\tsigTfactors[i].i = -sin(phi);\n\t}\n}\n\nvoid calculate_micro_xs(double *micro_xs, int nuc, double E, Input input, SimulationData data)\n{\n\tdouble sigT, sigA, sigF, sigE;\n\n\tdouble spacing = 1.0 / data.n_windows[nuc];\n\tint window = (int)(E / spacing);\n\tif (window == data.n_windows[nuc])\n\t\twindow--;\n\n\tRSComplex sigTfactors[4];\n\tcalculate_sig_T(nuc, E, input, data, sigTfactors);\n\n\tWindow w = data.windows[nuc * data.max_num_windows + window];\n\tsigT = E * w.T;\n\tsigA = E * w.A;\n\tsigF = E * w.F;\n\n\tfor (int i = w.start; i < w.end; i++)\n\t{\n\t\tRSComplex PSIIKI;\n\t\tRSComplex CDUM;\n\t\tPole pole = data.poles[nuc * data.max_num_poles + i];\n\t\tRSComplex t1 = {0, 1};\n\t\tRSComplex t2 = {sqrt(E), 0};\n\t\tPSIIKI = c_div(t1, c_sub(pole.MP_EA, t2));\n\t\tRSComplex E_c = {E, 0};\n\t\tCDUM = c_div(PSIIKI, E_c);\n\t\tsigT += (c_mul(pole.MP_RT, c_mul(CDUM, sigTfactors[pole.l_value]))).r;\n\t\tsigA += (c_mul(pole.MP_RA, CDUM)).r;\n\t\tsigF += (c_mul(pole.MP_RF, CDUM)).r;\n\t}\n\n\tsigE = sigT - sigA;\n\n\tmicro_xs[0] = sigT;\n\tmicro_xs[1] = sigA;\n\tmicro_xs[2] = sigF;\n\tmicro_xs[3] = sigE;\n}\n\nvoid calculate_micro_xs_doppler(double *micro_xs, int nuc, double E, Input input, SimulationData data)\n{\n\tdouble sigT, sigA, sigF, sigE;\n\n\tdouble spacing = 1.0 / data.n_windows[nuc];\n\tint window = (int)(E / spacing);\n\tif (window == data.n_windows[nuc])\n\t\twindow--;\n\n\tRSComplex sigTfactors[4];\n\tcalculate_sig_T(nuc, E, input, data, sigTfactors);\n\n\tWindow w = data.windows[nuc * data.max_num_windows + window];\n\tsigT = E * w.T;\n\tsigA = E * w.A;\n\tsigF = E * w.F;\n\n\tdouble dopp = 0.5;\n\n\tfor (int i = w.start; i < w.end; i++)\n\t{\n\t\tPole pole = data.poles[nuc * data.max_num_poles + i];\n\n\t\tRSComplex E_c = {E, 0};\n\t\tRSComplex dopp_c = {dopp, 0};\n\t\tRSComplex Z = c_mul(c_sub(E_c, pole.MP_EA), dopp_c);\n\n\t\tRSComplex faddeeva = fast_nuclear_W(Z);\n\n\t\tsigT += (c_mul(pole.MP_RT, c_mul(faddeeva, sigTfactors[pole.l_value]))).r;\n\t\tsigA += (c_mul(pole.MP_RA, faddeeva)).r;\n\t\tsigF += (c_mul(pole.MP_RF, faddeeva)).r;\n\t}\n\n\tsigE = sigT - sigA;\n\n\tmicro_xs[0] = sigT;\n\tmicro_xs[1] = sigA;\n\tmicro_xs[2] = sigF;\n\tmicro_xs[3] = sigE;\n}\n\nvoid calculate_macro_xs(double *macro_xs, int mat, double E, Input input, SimulationData data)\n{\n\tfor (int i = 0; i < 4; i++)\n\t\tmacro_xs[i] = 0.0;\n\n\tfor (int i = 0; i < data.num_nucs[mat]; i++)\n\t{\n\t\tdouble micro_xs[4];\n\t\tint nuc = data.mats[mat * data.max_num_nucs + i];\n\n\t\tif (input.doppler == 1)\n\t\t\tcalculate_micro_xs_doppler(micro_xs, nuc, E, input, data);\n\t\telse\n\t\t\tcalculate_micro_xs(micro_xs, nuc, E, input, data);\n\n\t\tfor (int j = 0; j < 4; j++)\n\t\t\tmacro_xs[j] += micro_xs[j] * data.concs[mat * data.max_num_nucs + i];\n\t}\n}\n\nvoid run_event_based_simulation(Input input, SimulationData data, unsigned long *vhash_result)\n{\n\tint *verification_array = (int *)malloc((size_t)input.lookups * sizeof(int));\n\n\t#pragma omp parallel for schedule(static)\n\tfor (int i = 0; i < input.lookups; i++)\n\t{\n\t\tuint64_t seed = STARTING_SEED;\n\t\tseed = fast_forward_LCG(seed, (uint64_t)(2ULL * (uint64_t)i));\n\n\t\tdouble p_energy = LCG_random_double(&seed);\n\t\tint mat = pick_mat(&seed);\n\n\t\tdouble macro_xs_vector[4] = {0.0, 0.0, 0.0, 0.0};\n\t\tcalculate_macro_xs(macro_xs_vector, mat, p_energy, input, data);\n\n\t\tdouble max_val = -DBL_MAX;\n\t\tint max_idx = 0;\n\t\tfor (int j = 0; j < 4; j++)\n\t\t{\n\t\t\tif (macro_xs_vector[j] > max_val)\n\t\t\t{\n\t\t\t\tmax_val = macro_xs_vector[j];\n\t\t\t\tmax_idx = j;\n\t\t\t}\n\t\t}\n\t\tverification_array[i] = max_idx + 1;\n\t}\n\n\tunsigned long long verification = 0ULL;\n\tfor (int l = 0; l < input.lookups; l++)\n\t\tverification += (unsigned long long)verification_array[l];\n\n\tfree(verification_array);\n\t*vhash_result = (unsigned long)verification;\n}\n\nvoid run_event_based_simulation_optimization_1(Input in, SimulationData SD, unsigned long *vhash_result)\n{\n\trun_event_based_simulation(in, SD, vhash_result);\n}\n\nvoid run_history_based_simulation(Input input, SimulationData data, unsigned long *vhash_result)\n{\n\tunsigned long long verification = 0ULL;\n\n\t#pragma omp parallel for reduction(+:verification) schedule(static)\n\tfor (int p = 0; p < input.particles; p++)\n\t{\n\t\tuint64_t seed = STARTING_SEED;\n\t\tuint64_t offset = (uint64_t)2ULL * (uint64_t)input.lookups * (uint64_t)p;\n\t\tseed = fast_forward_LCG(seed, offset);\n\n\t\tunsigned long long p_verification = 0ULL;\n\n\t\tfor (int l = 0; l < input.lookups; l++)\n\t\t{\n\t\t\tdouble p_energy = LCG_random_double(&seed);\n\t\t\tint mat = pick_mat(&seed);\n\n\t\t\tdouble macro_xs_vector[4] = {0.0, 0.0, 0.0, 0.0};\n\t\t\tcalculate_macro_xs(macro_xs_vector, mat, p_energy, input, data);\n\n\t\t\tdouble max_val = -DBL_MAX;\n\t\t\tint max_idx = 0;\n\t\t\tfor (int j = 0; j < 4; j++)\n\t\t\t{\n\t\t\t\tif (macro_xs_vector[j] > max_val)\n\t\t\t\t{\n\t\t\t\t\tmax_val = macro_xs_vector[j];\n\t\t\t\t\tmax_idx = j;\n\t\t\t\t}\n\t\t\t}\n\t\t\tp_verification += (unsigned long long)(max_idx + 1);\n\t\t}\n\n\t\tverification += p_verification;\n\t}\n\n\t*vhash_result = (unsigned long)verification;\n}\n"
+  },
+  "target_files_expected": [
+    "simulation.c"
+  ],
+  "target_files_extracted": [
+    "simulation.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 106.203,
+      "prompt_tokens": 24234,
+      "completion_tokens": 6134,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

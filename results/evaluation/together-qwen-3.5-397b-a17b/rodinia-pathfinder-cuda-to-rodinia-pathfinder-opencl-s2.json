@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-pathfinder-cuda",
+  "target_spec": "rodinia-pathfinder-opencl",
+  "kernel": "pathfinder",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 2044542920,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-c",
+    "100000",
+    "-r",
+    "100",
+    "-h",
+    "20"
+  ],
+  "timestamp": "2026-04-21T23:42:45Z",
+  "prompt_tokens": 5111,
+  "completion_tokens": 2440,
+  "llm_response_time_seconds": 24.104,
+  "build_status": "pass",
+  "build_time_seconds": 0.477,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.218,
+  "run_exit_code": 1,
+  "run_stderr_snippet": "4 errors generated.\n",
+  "run_stdout_snippet": "gpuSrc,\n               ^\n<kernel>:11:10: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    int *gpuResults,\n         ^\n<kernel>:19:10: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    int *outputBuffer\n         ^\n\n\n*************************************************\n*** END OUTPUT FROM COMPILING THE KERNEL FILE ***\n*************************************************\n\n\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernels.cl": "#define BLOCK_SIZE 256\n#define HALO 1\n\n#define IN_RANGE(x, min, max) ((x)>=(min) && (x)<=(max))\n#define MIN(a, b) ((a)<=(b) ? (a) : (b))\n\nkernel void dynproc_kernel(\n    int iteration,\n    const int *gpuWall,\n    const int *gpuSrc,\n    int *gpuResults,\n    int cols,\n    int rows,\n    int startStep,\n    int border,\n    int halo,\n    __local int *prev,\n    __local int *result,\n    int *outputBuffer\n)\n{\n    int bx = get_group_id(0);\n    int tx = get_local_id(0);\n\n    int small_block_cols = BLOCK_SIZE - iteration * halo * 2;\n    int blkX = small_block_cols * bx - border;\n    int blkXmax = blkX + BLOCK_SIZE - 1;\n\n    int xidx = blkX + tx;\n\n    int validXmin = (blkX < 0) ? -blkX : 0;\n    int validXmax = (blkXmax > cols - 1) ? BLOCK_SIZE - 1 - (blkXmax - cols + 1) : BLOCK_SIZE - 1;\n\n    int W = tx - 1;\n    int E = tx + 1;\n\n    W = (W < validXmin) ? validXmin : W;\n    E = (E > validXmax) ? validXmax : E;\n\n    bool isValid = IN_RANGE(tx, validXmin, validXmax);\n\n    if (IN_RANGE(xidx, 0, cols - 1)) {\n        prev[tx] = gpuSrc[xidx];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    bool computed = false;\n    for (int i = 0; i < iteration; i++) {\n        computed = false;\n        if (IN_RANGE(tx, i + 1, BLOCK_SIZE - i - 2) && isValid) {\n            computed = true;\n            int left = prev[W];\n            int up = prev[tx];\n            int right = prev[E];\n            int shortest = MIN(left, up);\n            shortest = MIN(shortest, right);\n            int index = cols * (startStep + i) + xidx;\n            result[tx] = shortest + gpuWall[index];\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n        if (i == iteration - 1)\n            break;\n        if (computed)\n            prev[tx] = result[tx];\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    if (computed) {\n        gpuResults[xidx] = result[tx];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernels.cl"
+  ],
+  "target_files_extracted": [
+    "kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 24.104,
+      "prompt_tokens": 5111,
+      "completion_tokens": 2440,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "4 errors generated.\n",
+      "run_stdout_snippet": "gpuSrc,\n               ^\n<kernel>:11:10: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    int *gpuResults,\n         ^\n<kernel>:19:10: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    int *outputBuffer\n         ^\n\n\n*************************************************\n*** END OUTPUT FROM COMPILING THE KERNEL FILE ***\n*************************************************\n\n\n",
+      "extraction_fail": null
+    }
+  ]
+}

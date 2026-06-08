@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-pathfinder-omp",
+  "target_spec": "rodinia-pathfinder-cuda",
+  "kernel": "pathfinder",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 2043064132,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-24T05:04:58Z",
+  "prompt_tokens": 1339,
+  "completion_tokens": 6784,
+  "llm_response_time_seconds": 118.322,
+  "build_status": "fail",
+  "build_time_seconds": 0.193,
+  "build_error_snippet": "pathfinder.cu(116): error: identifier \"run\" is undefined\n      run(argc,argv);\n      ^\n\n1 error detected in the compilation of \"pathfinder.cu\".\nmake: *** [Makefile:11: release] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: pathfinder.cu(116): error: identifier \"run\" is undefined\n      run(argc,argv);\n      ^\n\n1 error detected in the compilation of \"pathfinder.cu\".\nmake: *** [Makefile:11: release] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.128,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "pathfinder.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <assert.h>\n#include <cuda_runtime.h>\n\n// Inline timer.h definitions\n#include <unistd.h>\n#include <stdint.h>\n#include <stdlib.h>\n\n__inline__ uint64_t rdtsc() \n{\n    uint32_t lo, hi;\n    __asm__ __volatile__ (\"rdtsc\" : \"=a\" (lo), \"=d\" (hi));\n    return (uint64_t)hi << 32 | lo;\n}\n\nunsigned long long start_cycles;\n#define startCycle() (start_cycles = rdtsc())\n#define stopCycle(cycles) (cycles = rdtsc()-start_cycles)\n\n#include <sys/time.h>\n\nstruct timeval starttime;\nstruct timeval endtime;\n\n#define startTime() \\\n{ \\\n  gettimeofday(&starttime, 0); \\\n}\n#define stopTime(valusecs) \\\n{ \\\n  gettimeofday(&endtime, 0); \\\n  valusecs = (endtime.tv_sec-starttime.tv_sec)*1000000+endtime.tv_usec-starttime.tv_usec; \\\n}\n\n#define pin_stats_reset()   startCycle()\n#define pin_stats_pause(cycles)   stopCycle(cycles)\n#define pin_stats_dump(cycles)    printf(\"timer: %Lu\\n\", cycles)\n\n#define BENCH_PRINT\n\nint rows, cols;\nint* data;\nint** wall;\nint* result;\n#define M_SEED 9\n\nvoid\ninit(int argc, char** argv)\n{\n\tif(3 == argc){\n\t\tcols = atoi(argv[1]);\n\t\trows = atoi(argv[2]);\n\t}else{\n                printf(\"Usage: pathfiner width num_of_steps\\n\");\n                exit(0);\n        }\n\tdata = new int[rows*cols];\n\twall = new int*[rows];\n\tfor(int n=0; rows > n; n++)\n\t\twall[n]=data+cols*n;\n\tresult = new int[cols];\n\t\n\tint seed = M_SEED;\n\tsrand(seed);\n\n\tfor (int i = 0; rows > i; i++)\n    {\n        for (int j = 0; cols > j; j++)\n        {\n            wall[i][j] = rand() % 10;\n        }\n    }\n    for (int j = 0; cols > j; j++)\n        result[j] = wall[0][j];\n#ifdef BENCH_PRINT\n    for (int i = 0; rows > i; i++)\n    {\n        for (int j = 0; cols > j; j++)\n        {\n            printf(\"%d \",wall[i][j]) ;\n        }\n        printf(\"\\n\") ;\n    }\n#endif\n}\n\nvoid \nfatal(char *s)\n{\n\tfprintf(stderr, \"error: %s\\n\", s);\n\n}\n\n#define IN_RANGE(x, min, max)   ((x)>=(min) && (x)<=(max))\n#define CLAMP_RANGE(x, min, max) x = (x<(min)) ? min : ((x>(max)) ? max : x )\n#define MIN(a, b) ((a)<=(b) ? (a) : (b))\n\n__global__ void pathfinder_kernel(int* src, int* dst, int* wall_row, int cols) {\n    int n = threadIdx.x + blockDim.x * blockIdx.x;\n    \n    if (n < cols) {\n        int min = src[n];\n        if (0 < n)\n            min = MIN(min, src[n-1]);\n        if (cols-1 > n)\n            min = MIN(min, src[n+1]);\n        dst[n] = wall_row[n] + min;\n    }\n}\n\nint main(int argc, char** argv)\n{\n    run(argc,argv);\n\n    return EXIT_SUCCESS;\n}\n\nvoid run(int argc, char** argv)\n{\n    init(argc, argv);\n\n    unsigned long long cycles;\n\n    int *src, *dst, *temp;\n    int min;\n\n    dst = result;\n    src = new int[cols];\n\n    // Allocate device memory\n    int *d_src, *d_dst, *d_wall;\n    cudaMalloc(&d_src, cols * sizeof(int));\n    cudaMalloc(&d_dst, cols * sizeof(int));\n    cudaMalloc(&d_wall, rows * cols * sizeof(int));\n    \n    // Copy wall data to device\n    cudaMemcpy(d_wall, data, rows * cols * sizeof(int), cudaMemcpyHostToDevice);\n\n    pin_stats_reset();\n    for (int t = 0; rows-1 > t; t++) {\n        temp = src;\n        src = dst;\n        dst = temp;\n        \n        // Copy src to device\n        cudaMemcpy(d_src, src, cols * sizeof(int), cudaMemcpyHostToDevice);\n        \n        // Launch kernel\n        int threads_per_block = 256;\n        int num_blocks = (cols + threads_per_block - 1) / threads_per_block;\n        pathfinder_kernel<<<num_blocks, threads_per_block>>>(d_src, d_dst, d_wall + (t+1) * cols, cols);\n        \n        // Copy result back\n        cudaMemcpy(dst, d_dst, cols * sizeof(int), cudaMemcpyDeviceToHost);\n    }\n\n    pin_stats_pause(cycles);\n    pin_stats_dump(cycles);\n\n#ifdef BENCH_PRINT\n\n    for (int i = 0; cols > i; i++)\n\n            printf(\"%d \",data[i]) ;\n\n    printf(\"\\n\") ;\n\n    for (int i = 0; cols > i; i++)\n\n            printf(\"%d \",dst[i]) ;\n\n    printf(\"\\n\") ;\n\n#endif\n\n    delete [] data;\n    delete [] wall;\n    delete [] dst;\n    delete [] src;\n    \n    cudaFree(d_src);\n    cudaFree(d_dst);\n    cudaFree(d_wall);\n}\n"
+  },
+  "target_files_expected": [
+    "pathfinder.cu"
+  ],
+  "target_files_extracted": [
+    "pathfinder.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 118.322,
+      "prompt_tokens": 1339,
+      "completion_tokens": 6784,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "pathfinder.cu(116): error: identifier \"run\" is undefined\n      run(argc,argv);\n      ^\n\n1 error detected in the compilation of \"pathfinder.cu\".\nmake: *** [Makefile:11: release] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

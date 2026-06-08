@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-backprop-omp",
+  "target_spec": "rodinia-backprop-opencl",
+  "kernel": "backprop",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 598990301,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-n",
+    "65536"
+  ],
+  "timestamp": "2026-04-24T05:17:46Z",
+  "prompt_tokens": 14185,
+  "completion_tokens": 3468,
+  "llm_response_time_seconds": 91.764,
+  "build_status": "pass",
+  "build_time_seconds": 0.641,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.205,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Random number generator seed: 7\nInput layer size : 65536\nStarting training kernel\nnum_devices = 1\nPerforming GPU computation\nInit: 136.160004\nMemAlloc: 0.010000\nHtoD: 0.574336\nExec: 0.177056\nDtoH: 0.242112\nClose: 0.225000\nTotal: 140.559006\nERROR: 1  clEnqueueReadBuffer: input_ocl\n\nFinish the training for one iteration\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": 0.205,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0049,
+  "translated_files": {
+    "backprop_kernel.cl": "#define ETA 0.3f\n#define MOMENTUM 0.3f\n#define BLOCK_SIZE 16\n#define WIDTH 16\n#define HEIGHT 16\n\ninline float squash(float x) {\n    return 1.0f / (1.0f + exp(-x));\n}\n\n__kernel void bpnn_layerforward_ocl(\n    __global float *input,\n    __global float *output,\n    __global float *weights,\n    __global float *partial_sum,\n    __local float *local_mem1,\n    __local float *local_mem2,\n    const int n1,\n    const int n2)\n{\n    int block_id = get_global_id(1) / BLOCK_SIZE;\n    int j = get_global_id(1) % BLOCK_SIZE + 1;\n    \n    if (j <= n2 && block_id <= n1 / BLOCK_SIZE) {\n        float sum = 0.0f;\n        int start_k = block_id * BLOCK_SIZE;\n        int end_k = start_k + BLOCK_SIZE;\n        \n        for (int k = start_k; k < end_k && k <= n1; k++) {\n            sum += weights[k * (n2 + 1) + j] * input[k];\n        }\n        \n        partial_sum[block_id * WIDTH + (j - 1)] = sum;\n    }\n}\n\n__kernel void bpnn_adjust_weights_ocl(\n    __global float *delta,\n    const int ndelta,\n    __global float *ly,\n    const int nly,\n    __global float *w,\n    __global float *oldw)\n{\n    int j = get_global_id(1) % ndelta + 1;\n    int k = get_global_id(0);\n    \n    if (j <= ndelta && k <= nly) {\n        int idx = k * (ndelta + 1) + j;\n        float new_dw = (ETA * delta[j] * ly[k]) + (MOMENTUM * oldw[idx]);\n        w[idx] += new_dw;\n        oldw[idx] = new_dw;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "backprop_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "backprop_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 91.764,
+      "prompt_tokens": 14185,
+      "completion_tokens": 3468,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

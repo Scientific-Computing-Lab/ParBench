@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-bptree-omp",
+  "target_spec": "rodinia-bptree-opencl",
+  "kernel": "bptree",
+  "model": "azure-gpt-5.4",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 512817157,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-04-27T03:26:47Z",
+  "prompt_tokens": 21119,
+  "completion_tokens": 4158,
+  "llm_response_time_seconds": 94.419,
+  "build_status": "pass",
+  "build_time_seconds": 0.544,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.688,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "_mem=4000000\nknodes_elem=7874, knodes_unit_mem=2068, knodes_mem=16283432\nPlatform: NVIDIA Corporation\nDevice num: 1\nCreating GPU Context\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n--------------------------------\n# of blocks = 10000, # of threads/block = 256 (ensure that device can handle)\nTime spent in different stages of GPU_CUDA KERNEL:\nInit: 99.504997\nMemAlloc: 0.004000\nHtoD: 1.171936\nExec: 0.058368\nDtoH: 0.002432\nClose: 46.540001\nTotal: 147.742996\n> > > > > > > > > > \n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.453,
+  "translated_wall_time_seconds": 0.688,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.6584,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 256\n#endif\n\ntypedef struct record {\n    int value;\n} record;\n\ntypedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    uchar is_leaf;\n    uchar _pad0;\n    uchar _pad1;\n    uchar _pad2;\n    int num_keys;\n} knode;\n\n__kernel void\nfindK(long maxheight,\n      __global knode *knodes,\n      long knodes_elem,\n      __global record *records,\n      __global long *currKnode,\n      __global long *offset,\n      __global int *keys,\n      __global record *ans)\n{\n    const uint bid = get_group_id(0);\n    const uint thid = get_local_id(0);\n    const uint threadsPerBlock = get_local_size(0);\n\n    __local long shared_currKnode;\n    __local long shared_offset;\n\n    if (thid == 0) {\n        shared_currKnode = currKnode[bid];\n        shared_offset = offset[bid];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n\n    for (long i = 0; i < maxheight; i++) {\n        long curr = shared_currKnode;\n        int key = keys[bid];\n\n        if ((knodes[curr].keys[thid] <= key) &&\n            (knodes[curr].keys[thid + 1] > key)) {\n            int index = knodes[curr].indices[thid];\n            if ((long)index < knodes_elem) {\n                shared_offset = (long)index;\n            }\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n\n        if (thid == 0) {\n            shared_currKnode = shared_offset;\n            currKnode[bid] = shared_currKnode;\n            offset[bid] = shared_offset;\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n    }\n\n    long curr = shared_currKnode;\n    if ((uint)thid < threadsPerBlock) {\n        if (knodes[curr].keys[thid] == keys[bid]) {\n            ans[bid].value = records[knodes[curr].indices[thid]].value;\n        }\n    }\n}\n",
+    "kernel/kernel_gpu_opencl_2.cl": "#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 256\n#endif\n\ntypedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    uchar is_leaf;\n    uchar _pad0;\n    uchar _pad1;\n    uchar _pad2;\n    int num_keys;\n} knode;\n\n__kernel void\nfindRangeK(long maxheight,\n           __global knode *knodes,\n           long knodes_elem,\n           __global long *currKnode,\n           __global long *offset,\n           __global long *lastKnode,\n           __global long *offset_2,\n           __global int *start,\n           __global int *end,\n           __global int *recstart,\n           __global int *reclength)\n{\n    const uint bid = get_group_id(0);\n    const uint thid = get_local_id(0);\n    const uint threadsPerBlock = get_local_size(0);\n\n    __local long shared_currKnode;\n    __local long shared_offset;\n    __local long shared_lastKnode;\n    __local long shared_offset_2;\n\n    if (thid == 0) {\n        shared_currKnode = currKnode[bid];\n        shared_offset = offset[bid];\n        shared_lastKnode = lastKnode[bid];\n        shared_offset_2 = offset_2[bid];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n\n    for (long i = 0; i < maxheight; i++) {\n        long curr = shared_currKnode;\n        long last = shared_lastKnode;\n        int s = start[bid];\n        int e = end[bid];\n\n        if ((knodes[curr].keys[thid] <= s) &&\n            (knodes[curr].keys[thid + 1] > s)) {\n            int index = knodes[curr].indices[thid];\n            if ((long)index < knodes_elem) {\n                shared_offset = (long)index;\n            }\n        }\n\n        if ((knodes[last].keys[thid] <= e) &&\n            (knodes[last].keys[thid + 1] > e)) {\n            int index2 = knodes[last].indices[thid];\n            if ((long)index2 < knodes_elem) {\n                shared_offset_2 = (long)index2;\n            }\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n\n        if (thid == 0) {\n            shared_currKnode = shared_offset;\n            shared_lastKnode = shared_offset_2;\n            currKnode[bid] = shared_currKnode;\n            offset[bid] = shared_offset;\n            lastKnode[bid] = shared_lastKnode;\n            offset_2[bid] = shared_offset_2;\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n    }\n\n    long curr = shared_currKnode;\n    if ((uint)thid < threadsPerBlock) {\n        if (knodes[curr].keys[thid] == start[bid]) {\n            recstart[bid] = knodes[curr].indices[thid];\n        }\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n\n    long last = shared_lastKnode;\n    if ((uint)thid < threadsPerBlock) {\n        if (knodes[last].keys[thid] == end[bid]) {\n            reclength[bid] = knodes[last].indices[thid] - recstart[bid] + 1;\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 94.419,
+      "prompt_tokens": 21119,
+      "completion_tokens": 4158,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

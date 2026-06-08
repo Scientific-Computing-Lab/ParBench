@@ -1,0 +1,657 @@
+Benchmark,Kernel,APIs,API_Count,Has_CUDA,Has_HIP,Has_SYCL,Has_OpenMP
+BabelStream,copy,"CUDA, HIP, Kokkos, OpenACC, OpenCL, OpenMP, RAJA, SYCL, TBB, Thrust, stdpar",11,True,True,True,True
+BabelStream,mul,"CUDA, HIP, Kokkos, OpenACC, OpenCL, OpenMP, RAJA, SYCL, TBB, Thrust, stdpar",11,True,True,True,True
+BabelStream,add,"CUDA, HIP, Kokkos, OpenACC, OpenCL, OpenMP, RAJA, SYCL, TBB, Thrust, stdpar",11,True,True,True,True
+BabelStream,triad,"CUDA, HIP, Kokkos, OpenACC, OpenCL, OpenMP, RAJA, SYCL, TBB, Thrust, stdpar",11,True,True,True,True
+BabelStream,dot,"CUDA, HIP, Kokkos, OpenACC, OpenCL, OpenMP, RAJA, SYCL, TBB, Thrust, stdpar",11,True,True,True,True
+HeCBench,rainflow,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,cmp,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,softmax-fused,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,quantBnB,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,quant3MatMul,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,dpid,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,phmm,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,attentionMultiHead,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,particle-diffusion,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,rushlarsen,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,nn,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,nw,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,bmf,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,f16atomic,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,spsort,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,degrid,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,testSNAP,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,convolutionDeformable,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,miniFE,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,thomas,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,conversion,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,collision,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,score,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,easyWave,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,keccaktreehash,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,binomial,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,jenkins-hash,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,particles,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,deredundancy,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,perplexity,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,pns,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,diamond,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,sddmm-batch,"CUDA, HIP",2,True,True,False,False
+HeCBench,radixsort,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,aop,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,mallocFree,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,scan,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,ldpc,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,unfold,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,chi2,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,interleave,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,lsqt,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,d2q9-bgk,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,segment-reduce,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,channelSum,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,accuracy,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,kernelLaunch,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,flip,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,zoom,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,spmm,"CUDA, HIP",2,True,True,False,False
+HeCBench,atan2,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,gmm,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,mis,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,halo-finder,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,wyllie,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,minisweep,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,bn,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,aes,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,dxtc2,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,fresnel,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,crc64,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,heartwall,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,reverse2D,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,scan2,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,merge,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,feynman-kac,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,fsm,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,projectile,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,sparkler,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,graphExecution,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,aligned-types,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,mixbench,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,fpc,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,hogbom,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,matrixT,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,libor,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,warpsort,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,lda,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,rayleighBenardConvection,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,sobel,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,wsm5,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,geodesic,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,extrema,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,hpl,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,langevin,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,asmooth,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,graphB+,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,slu,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,quantVLLM,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,kmc,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,softmax-online,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,boxfilter,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,miniWeather,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,asta,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,permutate,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,mcmd,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,nbody,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,michalewicz,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,tgvnn,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,scatter,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,expdist,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,segsort,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,qem,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,pathfinder,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,convolution3D,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,linearprobing,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,atomicIntrinsics,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,blas-fp8gemm,"CUDA, HIP",2,True,True,False,False
+HeCBench,jacobi,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,s3d,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,langford,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,sampling,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,present,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,sosfil,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,prefetch,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,attention,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,softmax,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,warpexchange,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,zmddft,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,pso,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,rotary,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,voxelization,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,sobol,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,simpleMultiDevice,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,morphology,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,meanshift,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,all-pairs-distance,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,bh,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,chacha20,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,tonemapping,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,ssim,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,dwconv1d,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,pingpong,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,background-subtract,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,hmm,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,divergence,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,lr,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,eikonal,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,grrt,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,fluidSim,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,relu,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,mask,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,wlcpow,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,murmurhash3,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,leukocyte,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,mxfp4,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,allreduce,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,bfs,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,mt,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,bezier-surface,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,crs,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,iso2dfd,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,depixel,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,winograd,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,wmma,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,hellinger,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,popcount,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,fhd,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,overlay,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,geglu,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,seam-carving,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,stddev,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,f16max,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,knn,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,pool,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,ecdh,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,debayer,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,addBiasResidualLayerNorm,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,ne,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,srad,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,nms,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,sort,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,moe-sum,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,triad,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,tsp,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,ccs,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,minmax,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,bsearch,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,tsa,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,norm2,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,filter,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,blas-gemmBatched,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,nlll,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,wedford,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,gd,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,bincount,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,eigenvalue,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,snake,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,simpleSpmv,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,zerocopy,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,glu,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,gc,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,lombscargle,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,gaussian,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,recursiveGaussian,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,resnet-kernels,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,sptrsv,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,mrg32k3a,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,logic-rewrite,"CUDA, HIP",2,True,True,False,False
+HeCBench,mriQ,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,layernorm,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,colorwheel,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,amgmk,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,distort,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,car,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,determinant,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,perlin,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,affine,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,lud,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,ccsd-trpdrv,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,mnist,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,lebesgue,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,multinomial,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,maxpool3d,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,qrg,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,gelu,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,ga,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,bsw,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,tridiagonal,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,urng,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,cc,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,bwt,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,reaction,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,reverse,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,fwt,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,spmv,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,ddbp,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,atomicReduction,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,hexciton,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,vmc,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,is,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,prna,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,pointwise,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,mpc,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,openmp,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,shmembench,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,gamma-correction,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,lzss,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,backprop,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,rle,"CUDA, HIP",2,True,True,False,False
+HeCBench,tqs,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,rsbench,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,gels,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,md,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,permute,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,scel,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,qkv,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,adam,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,frna,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,nosync,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,blas-dot,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,floydwarshall,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,pad,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,lanczos,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,dp,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,bonds,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,medianfilter,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,spsm,"CUDA, HIP",2,True,True,False,False
+HeCBench,streamOrderedAllocation,"CUDA, HIP",2,True,True,False,False
+HeCBench,opticalFlow,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,fft,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,spaxpby,"CUDA, HIP",2,True,True,False,False
+HeCBench,mmcsf,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,bitpacking,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,scatterAdd,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,laplace3d,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,maxFlops,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,moe-align,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,blockAccess,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,convolutionSeparable,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,swish,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,columnarSolver,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,hwt1d,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,rsmt,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,kmeans,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,svd3x3,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,quantAQLM,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,dct8x8,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,dropout,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,bitonic-sort,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,streamcluster,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,lif,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,cm,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,cross,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,bilateral,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,mtf,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,match,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,tensorT,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,lrn,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,nbnxm,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,tsne,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,rodrigues,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,fpdc,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,contract,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,cbsfil,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,face,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,bicgstab,"CUDA, HIP",2,True,True,False,False
+HeCBench,page-rank,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,henry,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,b+tree,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,wordcount,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,blockexchange,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,kurtosis,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,mdh,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,atomicSystemWide,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,bitcracker,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,babelstream,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,ring,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,bscan,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,scatterThrust,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,matern,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,ising,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,d3q19-bgk,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,atomicPerf,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,idivide,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,interval,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,mr,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,lci,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,zeropoint,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,hotspot3D,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,logic-resim,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,sph,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,fdtd3d,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,randomAccess,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,keogh,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,gibbs,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,resize,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,saxpy-ompt,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,bspline-vgh,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,rfs,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,clenergy,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,chemv,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,scan3,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,remap,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,moe,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,mf-sgd,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,compute-score,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,marchingCubes,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,md5hash,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,aobench,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,gemv,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,haccmk,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,hbc,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,tensorAccessor,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,lfib4,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,split,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,lulesh,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,adv,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,cmembench,"CUDA, HIP",2,True,True,False,False
+HeCBench,surfel,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,stencil1d,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,goulash,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,hypterm,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,atomicCost,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,concat,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,slit,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,adjacent,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,fma,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,cooling,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,dispatch,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,pitch,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,grep,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,mcpr,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,doh,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,axpby,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,radixsort2,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,floydwarshall2,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,romberg,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,cfd,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,rtm8,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,laplace,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,tissue,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,memtest,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,logprob,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,flame,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,sssp,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,dense-embedding,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,layout,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,p4,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,adamw,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,spgeam,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,rowwiseMoments,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,ss,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,intrinsics-cast,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,gru,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,blas-gemmEx2,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,ntt,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,ace,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,xlqc,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,lut-gemm,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,coordinates,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,streamPriority,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,dslash,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,threadfence,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,merkle,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,stsg,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,egs,"CUDA, HIP",2,True,True,False,False
+HeCBench,black-scholes,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,ge-spmm,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,btree,"CUDA, SYCL",2,True,False,True,False
+HeCBench,lavaMD,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,ced,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,spm,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,minkowski,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,ludb,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,ans,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,atomicCAS,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,sheath,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,pnpoly,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,atomicAggregate,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,burger,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,log2,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,f8cast,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,qtclustering,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,loopback,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,entropy,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,s8n,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,mandelbrot,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,extend2,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,word2vec,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,vol2col,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,simplemoc,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,histogram,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,lid-driven-cavity,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,jaccard,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,rng-wallace,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,particlefilter,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,rsc,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,streamUM,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,vote,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,inversek2j,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,tpacf,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,crossEntropy,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,dwconv,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,logan,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,daphne,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,blas-gemmEx,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,bitpermute,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,myocyte,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,kalman,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,assert,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,gabor,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,heat,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,xsbench,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,stencil3d,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,matrix-rotate,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,quicksort,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,su3,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,sw4ck,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,epistasis,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,haversine,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,che,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,overlap,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,concurrentKernels,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,hotspot,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,complex,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,snicit,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,multimaterial,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,gerbil,"CUDA, HIP",2,True,True,False,False
+HeCBench,vanGenuchten,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,sc,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,memcpy,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,nqueen,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,sad,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,axhelm,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,hausdorff,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,convolution1D,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,channelShuffle,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,minimod,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,damage,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,bm3d,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,spd2s,"CUDA, HIP",2,True,True,False,False
+HeCBench,cobahh,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,blas-gemm,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,sortKV,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,sss,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,shuffle,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,hybridsort,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,gpp,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,metropolis,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,addBiasQKV,"CUDA, HIP",2,True,True,False,False
+HeCBench,clock,"CUDA, HIP",2,True,True,False,False
+HeCBench,mrc,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,spgemm,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,nonzero,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,sps2d,"CUDA, HIP",2,True,True,False,False
+HeCBench,streamCreateCopyDestroy,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,hungarian,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,ert,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,geam,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,local-ht,"CUDA, HIP",2,True,True,False,False
+HeCBench,secp256k1,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,sa,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,minimap2,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,p2p,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,clink,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,pcc,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,blas-gemmStridedBatched,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,ccl,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,si,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,f16sp,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,kiss,"CUDA, HIP, SYCL",3,True,True,True,False
+HeCBench,spnnz,"CUDA, HIP",2,True,True,False,False
+HeCBench,heat2d,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,aidw,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+HeCBench,minibude,"CUDA, HIP, OpenMP, SYCL",4,True,True,True,True
+RAJAPerf,INIT_VIEW1D,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,MULADDSUB,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,PI_REDUCE,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,INDEXLIST_3LOOP,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,TRAP_INT,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,MAT_MAT_SHARED,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,REDUCE3_INT,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,INIT_VIEW1D_OFFSET,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,EMPTY,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,INIT3,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,IF_QUAD,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,DAXPY,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,INDEXLIST,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,NESTED_INIT,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,PI_ATOMIC,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,DAXPY_ATOMIC,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,COPY8,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,TRAP_INT-func,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,MULTI_REDUCE,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,ARRAY_OF_PTRS,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,REDUCE_STRUCT,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,ATOMIC,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,SCAN,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,SORT,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,MEMCPY,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,MEMSET,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,SORTPAIRS,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,REDUCE_SUM,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,HISTOGRAM,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,HALO_PACKING_FUSED,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,HALO_base,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,HALO_EXCHANGE_FUSED,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,HALO_EXCHANGE,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,HALO_PACKING,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,HALO_SENDRECV,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,DIFF_PREDICT,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,HYDRO_1D,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,GEN_LIN_RECUR,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,INT_PREDICT,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,FIRST_DIFF,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,EOS,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,FIRST_MIN,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,TRIDIAG_ELIM,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,HYDRO_2D,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,FIRST_SUM,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,PLANCKIAN,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,RunParams,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,HipDataUtils,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,OpenMPTargetDataUtils,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,DataUtils,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,RAJAPerfSuite,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,KernelBase,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,CudaGridScan,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,CudaDataUtils,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,GPUUtils,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,RPTypes,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,KokkosViewUtils,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,SyclDataUtils,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,HipGridScan,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,OutputUtils,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,Executor,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,WindowsTypes,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,TRIAD,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,COPY,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,MUL,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,DOT,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,ADD,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,INTSC_HEXHEX_BODY,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,mixed_fem_helper,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,AppsData,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,LTIMES,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,CONVECTION3DPA,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,MASSVEC3DPA,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,MASS3DPA_ATOMIC,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,FEM_MACROS,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,PRESSURE,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,VOL3D,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,INTSC_HEXHEX,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,ZONAL_ACCUMULATION_3D,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,EDGE3D,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,FEMSWEEP,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,FEMSWEEP_DATA,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,DEL_DOT_VEC_2D,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,FIR,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,MASS3DEA,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,MASS3DPA,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,ENERGY,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,NODAL_ACCUMULATION_3D,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,MATVEC_3D_STENCIL,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,DIFFUSION3DPA,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,LTIMES_NOVIEW,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,INTSC_HEXRECT,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,INTSC_HEXRECT_BODY,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,POLYBENCH_GEMVER,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,POLYBENCH_MVT,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,POLYBENCH_FLOYD_WARSHALL,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,POLYBENCH_GESUMMV,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,POLYBENCH_FDTD_2D,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,POLYBENCH_ADI,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,POLYBENCH_3MM,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,POLYBENCH_GEMM,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,POLYBENCH_2MM,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,POLYBENCH_ATAX,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,POLYBENCH_JACOBI_1D,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,POLYBENCH_JACOBI_2D,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+RAJAPerf,POLYBENCH_HEAT_3D,"CUDA, HIP, OpenMP, OpenMP Target, SYCL, Sequential",6,True,True,True,True
+CloverLeaf,accelerate,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,initialise_chunk,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,update_tile_halo_kernel,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,advec_cell,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,revert,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,build_field,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,advec_mom,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,calc_dt,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,field_summary,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,generate_chunk,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,ideal_gas,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,update_halo,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,reset_field,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,PdV,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,flux_calc,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+CloverLeaf,viscosity,"CUDA, HIP, Kokkos, OpenACC, OpenMP, SYCL, Serial, TBB",8,True,True,True,True
+miniBUDE,fasten,"CUDA, HIP, Kokkos, OpenACC, OpenCL, OpenMP, RAJA, SYCL, Serial, TBB, Thrust, stdpar",12,True,True,True,True
+Rodinia,nw,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,heartwall,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,hybridsort,"CUDA, OpenCL",2,True,False,False,False
+Rodinia,backprop,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,dwt2d,"CUDA, OpenCL",2,True,False,False,False
+Rodinia,b+tree,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,leukocyte,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,cfd,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,bfs,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,kmeans,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,lavaMD,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,mummergpu,"CUDA, OpenMP",2,True,False,False,True
+Rodinia,particlefilter,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,nn,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,pathfinder,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,lud,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,myocyte,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,streamcluster,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,hotspot3D,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,hotspot,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,srad,"CUDA, OpenCL, OpenMP",3,True,False,False,True
+Rodinia,gaussian,"CUDA, OpenCL",2,True,False,False,False

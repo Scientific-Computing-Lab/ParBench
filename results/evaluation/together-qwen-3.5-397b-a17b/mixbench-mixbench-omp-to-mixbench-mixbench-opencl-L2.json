@@ -1,0 +1,69 @@
+{
+  "source_spec": "mixbench-mixbench-omp",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1825021715,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-24T05:14:22Z",
+  "prompt_tokens": 11191,
+  "completion_tokens": 2140,
+  "llm_response_time_seconds": 84.4,
+  "build_status": "pass",
+  "build_time_seconds": 0.473,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.382,
+  "run_exit_code": 1,
+  "run_stderr_snippet": "<kernel>:1:9: warning: #pragma once in main file\n#pragma once\n        ^\n<kernel>:91:24: error: passing '__global short *' to parameter of type 'short *' changes address space of pointer\n    sum += bench_block(&data[idx], seed);\n                       ^~~~~~~~~~\n<kernel>:35:30: note: passing argument to parameter 'data' here\nclass_T bench_block(class_T* data, class_T f) {\n                             ^\n----------------------------------------------------------------------------------------------\n",
+  "run_stdout_snippet": "uffer:  2962 MB\nOpenCL version:      OpenCL 3.0 CUDA\nTotal CUs:           46\n-----------------------------------------------------------------------\nBuffer size:            256MB\nWorkgroup size:         256\nElements per workitem:  8\nWorkitem fusion degree: 4\nWorkitem stride:        NDRange\nBuffer allocation:      Device allocated\nTimer:                  CL event based\nWarning:                Half precision computations are not supported\nLoading kernel source file...\nPrecompilation of kernels... ",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "mix_kernels.cl": "#pragma once\n\n#ifdef ENABLE_DP\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n\n#ifdef ENABLE_HP\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\ntypedef short half2[2];\n#endif\n\n#ifndef ELEMENTS_PER_THREAD\n#define ELEMENTS_PER_THREAD 8\n#endif\n\n#ifndef FUSION_DEGREE\n#define FUSION_DEGREE 4\n#endif\n\n#ifndef COMPUTE_ITERATIONS\n#define COMPUTE_ITERATIONS 16\n#endif\n\n#ifndef blockdim\n#define blockdim 256\n#endif\n\n#ifdef BLOCK_STRIDED\n#define STRIDE blockdim\n#else\n#define STRIDE 1\n#endif\n\n__attribute__((noinline))\nclass_T bench_block(class_T* data, class_T f) {\n  class_T sum = 0;\n  \n#ifdef BASELINE_IMPL\n  for (int i = 0; i < ELEMENTS_PER_THREAD; i++) {\n    class_T t = data[i];\n    for (int j = 0; j < COMPUTE_ITERATIONS; j++) {\n      t = t * t + f;\n    }\n    sum += t;\n  }\n#else\n  class_T f_arr[8];\n  for (int k = 0; k < 8; k++) {\n    f_arr[k] = data[k];\n  }\n  \n  for (int i = 0; i < ELEMENTS_PER_THREAD / 8; i++) {\n    class_T t[8];\n    for (int k = 0; k < 8; k++) {\n      t[k] = data[i * 8 + k];\n    }\n    \n    for (int j = 0; j < COMPUTE_ITERATIONS / 8; j++) {\n      for (int k = 0; k < 8; k++) {\n        t[k] = t[k] * t[k] + f_arr[k];\n      }\n    }\n    \n    int remainder = COMPUTE_ITERATIONS % 8;\n    if (remainder > 0) t[0] = t[0] * t[0] + f_arr[0];\n    if (remainder > 1) t[1] = t[1] * t[1] + f_arr[1];\n    if (remainder > 2) t[2] = t[2] * t[2] + f_arr[2];\n    if (remainder > 3) t[3] = t[3] * t[3] + f_arr[3];\n    if (remainder > 4) t[4] = t[4] * t[4] + f_arr[4];\n    if (remainder > 5) t[5] = t[5] * t[5] + f_arr[5];\n    if (remainder > 6) t[6] = t[6] * t[6] + f_arr[6];\n    \n    for (int k = 0; k < 8; k++) {\n      sum += t[k];\n    }\n  }\n#endif\n  \n  return sum;\n}\n\n__kernel void benchmark_func(class_T seed, __global class_T* data) {\n  size_t global_id = get_global_id(0);\n  size_t stride = (size_t)STRIDE * ELEMENTS_PER_THREAD * FUSION_DEGREE;\n  size_t base_idx = global_id * ELEMENTS_PER_THREAD * FUSION_DEGREE * stride;\n  \n  class_T sum = 0;\n  \n  for (int fusion = 0; fusion < FUSION_DEGREE; fusion++) {\n    size_t idx = base_idx + fusion * ELEMENTS_PER_THREAD * stride;\n    sum += bench_block(&data[idx], seed);\n  }\n  \n  data[global_id] = sum;\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 84.4,
+      "prompt_tokens": 11191,
+      "completion_tokens": 2140,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "<kernel>:1:9: warning: #pragma once in main file\n#pragma once\n        ^\n<kernel>:91:24: error: passing '__global short *' to parameter of type 'short *' changes address space of pointer\n    sum += bench_block(&data[idx], seed);\n                       ^~~~~~~~~~\n<kernel>:35:30: note: passing argument to parameter 'data' here\nclass_T bench_block(class_T* data, class_T f) {\n                             ^\n----------------------------------------------------------------------------------------------\n",
+      "run_stdout_snippet": "uffer:  2962 MB\nOpenCL version:      OpenCL 3.0 CUDA\nTotal CUs:           46\n-----------------------------------------------------------------------\nBuffer size:            256MB\nWorkgroup size:         256\nElements per workitem:  8\nWorkitem fusion degree: 4\nWorkitem stride:        NDRange\nBuffer allocation:      Device allocated\nTimer:                  CL event based\nWarning:                Half precision computations are not supported\nLoading kernel source file...\nPrecompilation of kernels... ",
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "spec_version": "1.0.0",
+  "identity": {
+    "kernel_name": "nqueen",
+    "parallel_api": "cuda",
+    "unique_id": "hecbench-nqueen-cuda",
+    "source_suite": "hecbench"
+  },
+  "provenance": {
+    "repository": {
+      "url": "https://github.com/zjin-lcf/HeCBench",
+      "commit": "archive-download",
+      "branch": "master"
+    },
+    "repo_root": "HeCBench-master/",
+    "source_path": "src/nqueen-cuda",
+    "license": "MIT"
+  },
+  "files": {
+    "prompt_payload": [
+      "main.cu"
+    ],
+    "support_files": [
+      "Makefile",
+      "CMakeLists.txt",
+      "LICENSE"
+    ],
+    "verification_only": [],
+    "translation_targets": [
+      "main.cu"
+    ]
+  },
+  "implementation": {
+    "api": "cuda",
+    "api_version": null,
+    "language": "C++",
+    "language_standard": "C++17"
+  },
+  "build": {
+    "environment": {
+      "preferred": "system",
+      "conda": null,
+      "system": {
+        "dependencies": [
+          "CUDA Toolkit >= 11.0",
+          "GCC >= 9.0"
+        ]
+      }
+    },
+    "build_system": "make",
+    "working_directory": "src/nqueen-cuda",
+    "commands": {
+      "configure": null,
+      "build": "make ARCH=sm_89",
+      "clean": "make clean"
+    },
+    "variables": null,
+    "outputs": {
+      "executable": "main"
+    }
+  },
+  "run": {
+    "executable": "./main",
+    "default_arguments": [
+      "15",
+      "7",
+      "1"
+    ],
+    "timeout_seconds": 300,
+    "environment_variables": null,
+    "input_configurations": {
+      "correctness": {
+        "arguments": [
+          "15",
+          "7",
+          "1"
+        ],
+        "description": "N-Queens with size=15, initial_depth=7, repeat=1; verifies solution count and tree size",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      },
+      "performance": {
+        "arguments": [
+          "15",
+          "7",
+          "10"
+        ],
+        "description": "N-Queens with 10 kernel repeats for timing measurement",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      }
+    }
+  },
+  "verification": {
+    "method": "self_checking",
+    "strategies": [
+      {
+        "type": "stdout_pattern",
+        "pattern": "PASS",
+        "description": "Verifies qtd_sols_global==2279184 and tree_size==171129071 for size=15, depth=7"
+      },
+      {
+        "type": "exit_code",
+        "expected": 0,
+        "description": "Process exits cleanly"
+      }
+    ],
+    "floating_point": null
+  },
+  "performance": {
+    "metrics": [
+      {
+        "name": "kernel_time",
+        "extraction": {
+          "type": "regex",
+          "pattern": "Average kernel execution time:\\s+([\\d.eE+-]+)\\s+\\(s\\)",
+          "capture_group": 1
+        },
+        "unit": "s"
+      }
+    ],
+    "warmup_runs": 1,
+    "measurement_runs": 5
+  },
+  "hardware": {
+    "target": "gpu",
+    "requirements": {
+      "gpu": {
+        "vendor": "NVIDIA",
+        "min_compute_capability": "sm_60",
+        "min_memory_gb": 2
+      }
+    },
+    "reference_platform": {
+      "platform_id": "rtx4070-r9-7900x",
+      "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+      },
+      "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+      },
+      "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+      }
+    }
+  },
+  "baseline_results": {
+    "reference_platform": "rtx4070-r9-7900x",
+    "timestamp": "2026-03-28T20:00:00Z",
+    "configurations": {
+      "correctness": {
+        "status": "pass",
+        "exit_code": 0,
+        "stdout_snippet": "Number of solutions found: 2279184 \nTree size: 171129071\nPASS",
+        "wall_time_seconds": null
+      },
+      "performance": {
+        "status": "pass",
+        "wall_time_seconds": null,
+        "metrics": {
+          "kernel_time_s": 0.340551
+        }
+      }
+    }
+  },
+  "metadata": {
+    "description": "N-Queens problem solver using backtracking DFS on GPU. Generates search tree prefixes on CPU, then explores subtrees in parallel on GPU. Verified by comparing solution count against known analytical results.",
+    "domain": "combinatorial optimization",
+    "complexity": "O(N!)",
+    "tags": [
+      "nqueens",
+      "backtracking",
+      "dfs",
+      "combinatorial",
+      "tree-search"
+    ],
+    "multi_file": false,
+    "translation_complexity": null
+  }
+}

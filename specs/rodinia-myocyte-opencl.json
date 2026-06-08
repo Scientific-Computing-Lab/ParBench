@@ -1,0 +1,201 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "myocyte",
+        "parallel_api": "opencl",
+        "unique_id": "rodinia-myocyte-opencl",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "opencl/myocyte",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "kernel/kernel_gpu_opencl.cl",
+            "kernel/embedded_fehlberg_7_8.c",
+            "kernel/kernel_fin.c",
+            "kernel/kernel_gpu_opencl_wrapper.c",
+            "kernel/master.c",
+            "kernel/solver.c",
+            "main.c"
+        ],
+        "support_files": [
+            "util/file/file.c",
+            "util/num/num.c",
+            "util/opencl/opencl.c",
+            "util/timer/timer.c",
+            "common.h",
+            "kernel/kernel_gpu_opencl_wrapper.h",
+            "main.h",
+            "util/file/file.h",
+            "util/num/num.h",
+            "util/opencl/opencl.h",
+            "util/timer/timer.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "kernel/kernel_gpu_opencl.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C",
+        "language_standard": null
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl>=2.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl/myocyte",
+        "commands": {
+            "configure": null,
+            "build": "make OPENCL_INC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include OPENCL_LIB=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+            "clean": "make clean"
+        },
+        "variables": {
+            "OPENCL_INC": {
+                "description": "Path to OpenCL headers",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include",
+                "detection": "find /usr -name 'cl.h' -path '*/CL/cl.h' | head -1 | xargs dirname | xargs dirname"
+            },
+            "OPENCL_LIB": {
+                "description": "Path to OpenCL libraries",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+                "detection": "find /usr -name 'libOpenCL.so' | head -1 | xargs dirname"
+            }
+        },
+        "outputs": {
+            "executable": "./myocyte.out"
+        }
+    },
+    "run": {
+        "executable": "./myocyte.out",
+        "default_arguments": [
+            "-time",
+            "100",
+            "-r",
+            "../../data/myocyte"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-time",
+                    "100",
+                    "-r",
+                    "../../data/myocyte"
+                ],
+                "description": "Small input for correctness verification of myocyte (OPENCL)",
+                "input_files": [],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "-time",
+                    "1000",
+                    "-r",
+                    "../../data/myocyte"
+                ],
+                "description": "Large input for performance measurement of myocyte (OPENCL)",
+                "input_files": [],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Time spent in different stages of the application",
+                "description": "Myocyte completion banner. file_hash downgraded 2026-04-19 (S7b): CUDA main.cu/work.cu and OpenCL main.c/kernel_gpu_opencl_wrapper.c run the same ODE integration but diverge bit-exact due to floating-point non-associativity across API runtimes (CUDA=1e329f02..., OpenCL=59efddcb...). LLM translations faithful to source-API semantics cannot match both file_hash references. stdout_pattern is the honest oracle until resolved upstream. See .planning/phases/03-oracle-framework/04-S7b-ORACLE-AUDIT.md."
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak",
+        "reference_files": []
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.279289+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "ERROR: Unknown argument\n",
+                "wall_time_seconds": 0.001,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Cardiac myocyte electrophysiology simulation (ODE solver) on GPU",
+        "domain": "scientific simulation",
+        "complexity": "cardiac myocyte simulation (ODE solver)",
+        "tags": [
+            "cardiac",
+            "myocyte",
+            "ode",
+            "opencl",
+            "rodinia",
+            "simulation"
+        ],
+        "multi_file": true,
+        "translation_complexity": "multi_to_single"
+    }
+}

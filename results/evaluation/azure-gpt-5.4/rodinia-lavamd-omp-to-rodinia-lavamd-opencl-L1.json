@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lavamd-omp",
+  "target_spec": "rodinia-lavamd-opencl",
+  "kernel": "lavamd",
+  "model": "azure-gpt-5.4",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 98940247,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-boxes1d",
+    "10"
+  ],
+  "timestamp": "2026-04-27T03:54:25Z",
+  "prompt_tokens": 9212,
+  "completion_tokens": 1278,
+  "llm_response_time_seconds": 46.469,
+  "build_status": "pass",
+  "build_time_seconds": 0.219,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.166,
+  "run_exit_code": 245,
+  "run_stderr_snippet": "1 error generated.\n",
+  "run_stdout_snippet": "WG size of kernel = 128 \nConfiguration used: arch = 0, cores = 1, boxes1d = 10\nPlatform: NVIDIA Corporation\nDevice: NVIDIA GeForce RTX 4070\n<<<<\nIn file included from <kernel>:1:\n./main.h:100:1: error: function cannot be called 'main'\nmain(   int argc, \n^\n\n>>>>\nError at line 238: CL_BUILD_PROGRAM_FAILURE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 245)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#include \"main.h\"\n\n__kernel void kernel_gpu_opencl(par_str par,\n                                dim_str dim,\n                                __global box_str* box,\n                                __global FOUR_VECTOR* rv,\n                                __global fp* qv,\n                                __global FOUR_VECTOR* fv)\n{\n    int l = (int)get_group_id(0);\n    int i = (int)get_local_id(0);\n\n    if (l >= dim.number_boxes || i >= NUMBER_PAR_PER_BOX) {\n        return;\n    }\n\n    fp alpha = par.alpha;\n    fp a2 = (fp)2.0 * alpha * alpha;\n\n    long first_i = box[l].offset;\n    __global FOUR_VECTOR* rA = rv + first_i;\n    __global FOUR_VECTOR* fA = fv + first_i;\n\n    FOUR_VECTOR rAi = rA[i];\n    FOUR_VECTOR fAi = fA[i];\n\n    for (int k = 0; k < (1 + box[l].nn); k++) {\n        int pointer;\n        if (k == 0) {\n            pointer = l;\n        } else {\n            pointer = box[l].nei[k - 1].number;\n        }\n\n        long first_j = box[pointer].offset;\n        __global FOUR_VECTOR* rB = rv + first_j;\n        __global fp* qB = qv + first_j;\n\n        for (int j = 0; j < NUMBER_PAR_PER_BOX; j++) {\n            fp r2 = rAi.v + rB[j].v - DOT(rAi, rB[j]);\n            fp u2 = a2 * r2;\n            fp vij = exp(-u2);\n            fp fs = (fp)2.0 * vij;\n\n            fp dx = rAi.x - rB[j].x;\n            fp dy = rAi.y - rB[j].y;\n            fp dz = rAi.z - rB[j].z;\n\n            fp fxij = fs * dx;\n            fp fyij = fs * dy;\n            fp fzij = fs * dz;\n\n            fp q = qB[j];\n            fAi.v += q * vij;\n            fAi.x += q * fxij;\n            fAi.y += q * fyij;\n            fAi.z += q * fzij;\n        }\n    }\n\n    fA[i] = fAi;\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 46.469,
+      "prompt_tokens": 9212,
+      "completion_tokens": 1278,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "1 error generated.\n",
+      "run_stdout_snippet": "WG size of kernel = 128 \nConfiguration used: arch = 0, cores = 1, boxes1d = 10\nPlatform: NVIDIA Corporation\nDevice: NVIDIA GeForce RTX 4070\n<<<<\nIn file included from <kernel>:1:\n./main.h:100:1: error: function cannot be called 'main'\nmain(   int argc, \n^\n\n>>>>\nError at line 238: CL_BUILD_PROGRAM_FAILURE\n",
+      "extraction_fail": null
+    }
+  ]
+}

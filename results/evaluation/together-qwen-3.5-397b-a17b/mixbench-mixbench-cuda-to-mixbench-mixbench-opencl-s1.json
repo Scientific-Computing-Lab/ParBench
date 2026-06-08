@@ -1,0 +1,69 @@
+{
+  "source_spec": "mixbench-mixbench-cuda",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1136831229,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T04:15:55Z",
+  "prompt_tokens": 12131,
+  "completion_tokens": 11971,
+  "llm_response_time_seconds": 70.872,
+  "build_status": "pass",
+  "build_time_seconds": 0.47,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.379,
+  "run_exit_code": 1,
+  "run_stderr_snippet": "-------- Kernel compilation log ----------------------------------\n<kernel>:47:51: error: invalid address space for pointee of pointer argument to __kernel function\nkernel void benchmark_func(class_T seed, class_T *g_data) {\n                                                  ^\n<kernel>:47:51: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n----------------------------------------------------------------------------------------------\n",
+  "run_stdout_snippet": "uffer:  2962 MB\nOpenCL version:      OpenCL 3.0 CUDA\nTotal CUs:           46\n-----------------------------------------------------------------------\nBuffer size:            256MB\nWorkgroup size:         256\nElements per workitem:  8\nWorkitem fusion degree: 4\nWorkitem stride:        NDRange\nBuffer allocation:      Device allocated\nTimer:                  CL event based\nWarning:                Half precision computations are not supported\nLoading kernel source file...\nPrecompilation of kernels... ",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "mix_kernels.cl": "#ifndef class_T\n#define class_T float\n#endif\n\n#ifndef blockdim\n#define blockdim 256\n#endif\n\n#ifndef ELEMENTS_PER_THREAD\n#define ELEMENTS_PER_THREAD 8\n#endif\n\n#ifndef FUSION_DEGREE\n#define FUSION_DEGREE 4\n#endif\n\n#ifndef COMPUTE_ITERATIONS\n#define COMPUTE_ITERATIONS 1\n#endif\n\n#ifdef BLOCK_STRIDED\n#define stride_val (blockdim)\n#else\n#define stride_val (1)\n#endif\n\n#ifdef ENABLE_HP\ntypedef short half2[2];\n#endif\n\n#ifdef ENABLE_HP\ninline half2 conv_int(int i) {\n    half2 r; r[0] = (short)i; r[1] = (short)i; return r;\n}\ninline half2 mad(half2 a, half2 b, half2 c) {\n    half2 r; r[0] = a[0]*b[0]+c[0]; r[1] = a[1]*b[1]+c[1]; return r;\n}\ninline int equal(half2 a, half2 b) {\n    return (a[0]==b[0]) && (a[1]==b[1]);\n}\n#else\ninline class_T conv_int(int i) { return (class_T)i; }\ninline class_T mad(class_T a, class_T b, class_T c) { return a*b+c; }\ninline int equal(class_T a, class_T b) { return a==b; }\n#endif\n\nkernel void benchmark_func(class_T seed, class_T *g_data) {\n    const unsigned int blockSize = blockdim;\n    const unsigned int stride = stride_val;\n    unsigned int idx = get_group_id(0) * blockSize * ELEMENTS_PER_THREAD + get_local_id(0);\n    const unsigned int big_stride = get_num_groups(0) * blockSize * ELEMENTS_PER_THREAD;\n\n    class_T tmps[ELEMENTS_PER_THREAD];\n    for(int k=0; k<FUSION_DEGREE; k++){\n        for(int j=0; j<ELEMENTS_PER_THREAD; j++){\n            tmps[j] = g_data[idx + j * stride + k * big_stride];\n            for(int i=0; i<COMPUTE_ITERATIONS; i++){\n                tmps[j] = mad(tmps[j], tmps[j], seed);\n            }\n        }\n        class_T sum = conv_int(0);\n        for(int j=0; j<ELEMENTS_PER_THREAD; j+=2)\n            sum = mad(tmps[j], tmps[j+1], sum);\n        if(equal(sum, conv_int(-1)))\n            g_data[idx + k * big_stride] = sum;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 70.872,
+      "prompt_tokens": 12131,
+      "completion_tokens": 11971,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "-------- Kernel compilation log ----------------------------------\n<kernel>:47:51: error: invalid address space for pointee of pointer argument to __kernel function\nkernel void benchmark_func(class_T seed, class_T *g_data) {\n                                                  ^\n<kernel>:47:51: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n----------------------------------------------------------------------------------------------\n",
+      "run_stdout_snippet": "uffer:  2962 MB\nOpenCL version:      OpenCL 3.0 CUDA\nTotal CUs:           46\n-----------------------------------------------------------------------\nBuffer size:            256MB\nWorkgroup size:         256\nElements per workitem:  8\nWorkitem fusion degree: 4\nWorkitem stride:        NDRange\nBuffer allocation:      Device allocated\nTimer:                  CL event based\nWarning:                Half precision computations are not supported\nLoading kernel source file...\nPrecompilation of kernels... ",
+      "extraction_fail": null
+    }
+  ]
+}

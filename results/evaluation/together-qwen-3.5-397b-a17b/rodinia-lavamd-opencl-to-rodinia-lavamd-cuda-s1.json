@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lavamd-opencl",
+  "target_spec": "rodinia-lavamd-cuda",
+  "kernel": "lavamd",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1934201631,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T00:41:15Z",
+  "prompt_tokens": 9528,
+  "completion_tokens": 6531,
+  "llm_response_time_seconds": 53.475,
+  "build_status": "fail",
+  "build_time_seconds": 0.126,
+  "build_error_snippet": "rm: cannot remove './kernel/*.o': No such file or directory\nrm: cannot remove './util/num/*.o': No such file or directory\nrm: cannot remove './util/timer/*.o': No such file or directory\nrm: cannot remove './util/device/*.o': No such file or directory\nrm: cannot remove 'lavaMD': No such file or directory\nmake: *** [makefile:87: clean] Error 1\n\nmain.c: In function \u2018main\u2019:\nmain.c:95:20: warning: implicit declaration of function \u2018strcmp\u2019 [-Wimplicit-function-declaration]\n   95 |                 if(strcmp(argv[dim_cpu.cur_arg], \"-boxes1d\")==0){\n      |                    ^~~~~~\nmain.c:42:1: note: include \u2018<string.h>\u2019 or provide a declaration of \u2018strcmp\u2019\n   41 | #include \"./kernel/kernel_gpu_cuda_wrapper.h\"   // (in library path specified here)\n  +++ |+#include <string.h>\n   42 | \nmain.c:228:15: warning: implicit declaration of function \u2018time\u2019 [-Wimplicit-function-declaration]\n  228 |         srand(time(NULL));\n      |               ^~~~\nmain.c:42:1: note: \u2018time\u2019 is defined in header \u2018<time.h>\u2019; did you forget to \u2018#include <time.h>\u2019?\n   41 | #include \"./kernel/kernel_gpu_cuda_wrapper.h\"   // (in library path specified here)\n  +++ |+#include <time.h>\n   42 | \n./kernel/kernel_gpu_cuda_wrapper.cu:13:10: fatal error: timing.h: No such file or directory\n   13 | #include \"timing.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\nmake: *** [makefile:58: kernel/kernel_gpu_cuda_wrapper.o] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: :10: fatal error: timing.h: No such file or directory\n   13 | #include \"timing.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\nmake: *** [makefile:58: kernel/kernel_gpu_cuda_wrapper.o] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_cuda.cu": "#ifdef __cplusplus\nextern \"C\" {\n#endif\n\n#define fp float\n\n#define NUMBER_PAR_PER_BOX 100\n\n#define NUMBER_THREADS 128\n\n#define DOT(A,B) ((A.x)*(B.x)+(A.y)*(B.y)+(A.z)*(B.z))\n\ntypedef struct\n{\n\tfp x, y, z;\n\n} THREE_VECTOR;\n\ntypedef struct\n{\n\tfp v, x, y, z;\n\n} FOUR_VECTOR;\n\ntypedef struct nei_str\n{\n\n\tint x, y, z;\n\tint number;\n\tlong offset;\n\n} nei_str;\n\ntypedef struct box_str\n{\n\n\tint x, y, z;\n\tint number;\n\tlong offset;\n\n\tint nn;\n\tnei_str nei[26];\n\n} box_str;\n\ntypedef struct par_str\n{\n\n\tfp alpha;\n\n} par_str;\n\ntypedef struct dim_str\n{\n\n\tint cur_arg;\n\tint arch_arg;\n\tint cores_arg;\n\tint boxes1d_arg;\n\n\tlong number_boxes;\n\tlong box_mem;\n\tlong space_elem;\n\tlong space_mem;\n\tlong space_mem2;\n\n} dim_str;\n\n__global__ void kernel_gpu_cuda(\tpar_str d_par_gpu,\n\t\t\t\t\tdim_str d_dim_gpu,\n\t\t\t\t\tbox_str *d_box_gpu,\n\t\t\t\t\tFOUR_VECTOR *d_rv_gpu,\n\t\t\t\t\tfp *d_qv_gpu,\n\t\t\t\t\tFOUR_VECTOR *d_fv_gpu)\n{\n\n\tint bx = blockIdx.x;\n\tint tx = threadIdx.x;\n\tint wtx = tx;\n\n\t__shared__ FOUR_VECTOR rA_shared[100];\n\t__shared__ FOUR_VECTOR rB_shared[100];\n\t__shared__ fp qB_shared[100];\n\n\tif(bx<d_dim_gpu.number_boxes){\n\n\t\tfp a2 = 2*d_par_gpu.alpha*d_par_gpu.alpha;\n\n\t\tint first_i;\n\n\t\tint pointer;\n\t\tint k = 0;\n\t\tint first_j;\n\t\tint j = 0;\n\n\t\tfp r2;\n\t\tfp u2;\n\t\tfp vij;\n\t\tfp fs;\n\t\tfp fxij;\n\t\tfp fyij;\n\t\tfp fzij;\n\t\tTHREE_VECTOR d;\n\n\t\tfirst_i = d_box_gpu[bx].offset;\n\n\t\twhile(wtx<NUMBER_PAR_PER_BOX){\n\t\t\trA_shared[wtx] = d_rv_gpu[first_i+wtx];\n\t\t\twtx = wtx + NUMBER_THREADS;\n\t\t}\n\t\twtx = tx;\n\n\t\t__syncthreads();\n\n\t\tfor (k=0; k<(1+d_box_gpu[bx].nn); k++){\n\n\t\t\tif(k==0){\n\t\t\t\tpointer = bx;\n\t\t\t}\n\t\t\telse{\n\t\t\t\tpointer = d_box_gpu[bx].nei[k-1].number;\n\t\t\t}\n\n\t\t\tfirst_j = d_box_gpu[pointer].offset;\n\n\t\t\twhile(wtx<NUMBER_PAR_PER_BOX){\n\t\t\t\trB_shared[wtx] = d_rv_gpu[first_j+wtx];\n\t\t\t\tqB_shared[wtx] = d_qv_gpu[first_j+wtx];\n\t\t\t\twtx = wtx + NUMBER_THREADS;\n\t\t\t}\n\t\t\twtx = tx;\n\n\t\t\t__syncthreads();\n\n\t\t\twhile(wtx<NUMBER_PAR_PER_BOX){\n\n\t\t\t\tfor (j=0; j<NUMBER_PAR_PER_BOX; j++){\n\n\t\t\t\t\tr2 = rA_shared[wtx].v + rB_shared[j].v - DOT(rA_shared[wtx],rB_shared[j]); \n\t\t\t\t\tu2 = a2*r2;\n\t\t\t\t\tvij= exp(-u2);\n\t\t\t\t\tfs = 2*vij;\n\t\t\t\t\td.x = rA_shared[wtx].x  - rB_shared[j].x;\n\t\t\t\t\tfxij=fs*d.x;\n\t\t\t\t\td.y = rA_shared[wtx].y  - rB_shared[j].y;\n\t\t\t\t\tfyij=fs*d.y;\n\t\t\t\t\td.z = rA_shared[wtx].z  - rB_shared[j].z;\n\t\t\t\t\tfzij=fs*d.z;\n\t\t\t\t\td_fv_gpu[first_i+wtx].v +=  qB_shared[j]*vij;\n\t\t\t\t\td_fv_gpu[first_i+wtx].x +=  qB_shared[j]*fxij;\n\t\t\t\t\td_fv_gpu[first_i+wtx].y +=  qB_shared[j]*fyij;\n\t\t\t\t\td_fv_gpu[first_i+wtx].z +=  qB_shared[j]*fzij;\n\n\t\t\t\t}\n\n\t\t\t\twtx = wtx + NUMBER_THREADS;\n\n\t\t\t}\n\n\t\t\twtx = tx;\n\n\t\t\t__syncthreads();\n\n\t\t}\n\n\t}\n\n}\n\n#ifdef __cplusplus\n}\n#endif\n",
+    "kernel/kernel_gpu_cuda_wrapper.cu": "#ifdef __cplusplus\nextern \"C\" {\n#endif\n\n#include <string.h>\n\n#include <stdio.h>\n#include <stdlib.h>\n\n#include \"./../main.h\"\n\n#include \"./../util/timer/timer.h\"\n#include \"timing.h\"\n\n#include \"./kernel_gpu_cuda_wrapper.h\"\n\n#include <cuda.h>\n\nvoid \nkernel_gpu_cuda_wrapper(\tpar_str par_cpu,\n\t\t\t\t\t\t\tdim_str dim_cpu,\n\t\t\t\t\t\t\tbox_str* box_cpu,\n\t\t\t\t\t\t\tFOUR_VECTOR* rv_cpu,\n\t\t\t\t\t\t\tfp* qv_cpu,\n\t\t\t\t\t\t\tFOUR_VECTOR* fv_cpu)\n{\n\n#ifdef TIMING\n    struct timeval tv;\n    struct timeval tv_total_start, tv_total_end;\n    struct timeval tv_init_end;\n    struct timeval tv_h2d_start, tv_h2d_end;\n    struct timeval tv_d2h_start, tv_d2h_end;\n    struct timeval tv_kernel_start, tv_kernel_end;\n    struct timeval tv_mem_alloc_start, tv_mem_alloc_end;\n    struct timeval tv_close_start, tv_close_end;\n    float init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n          d2h_time = 0, close_time = 0, total_time = 0;\n\n    gettimeofday(&tv_total_start, NULL);\n#endif\n\n\tcudaError_t error;\n\n#ifdef TIMING\n    gettimeofday(&tv_init_end, NULL);\n    tvsub(&tv_init_end, &tv_total_start, &tv);\n    init_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n\tsize_t local_work_size[1];\n\tlocal_work_size[0] = NUMBER_THREADS;\n\tsize_t global_work_size[1];\n\tglobal_work_size[0] = dim_cpu.number_boxes * local_work_size[0];\n\n\tprintf(\"# of blocks = %lu, # of threads/block = %lu (ensure that device can handle)\\n\", global_work_size[0]/local_work_size[0], local_work_size[0]);\n\n\tFOUR_VECTOR *d_box_gpu;\n\tFOUR_VECTOR *d_rv_gpu;\n\tfp *d_qv_gpu;\n\tFOUR_VECTOR *d_fv_gpu;\n\n#ifdef TIMING\n    gettimeofday(&tv_mem_alloc_start, NULL);\n#endif\n\n\terror = cudaMalloc((void**)&d_box_gpu, dim_cpu.box_mem);\n\tif (error != cudaSuccess) \n\t\tcheckCUDAError(\"cudaMalloc d_box_gpu\");\n\n\terror = cudaMalloc((void**)&d_rv_gpu, dim_cpu.space_mem);\n\tif (error != cudaSuccess) \n\t\tcheckCUDAError(\"cudaMalloc d_rv_gpu\");\n\n\terror = cudaMalloc((void**)&d_qv_gpu, dim_cpu.space_mem2);\n\tif (error != cudaSuccess) \n\t\tcheckCUDAError(\"cudaMalloc d_qv_gpu\");\n\n\terror = cudaMalloc((void**)&d_fv_gpu, dim_cpu.space_mem);\n\tif (error != cudaSuccess) \n\t\tcheckCUDAError(\"cudaMalloc d_fv_gpu\");\n\n#ifdef TIMING\n    gettimeofday(&tv_mem_alloc_end, NULL);\n    tvsub(&tv_mem_alloc_end, &tv_mem_alloc_start, &tv);\n    mem_alloc_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n#ifdef TIMING\n    gettimeofday(&tv_h2d_start, NULL);\n#endif\n\n\terror = cudaMemcpy(d_box_gpu, box_cpu, dim_cpu.box_mem, cudaMemcpyHostToDevice);\n\tif (error != cudaSuccess) \n\t\tcheckCUDAError(\"cudaMemcpy d_box_gpu\");\n\n\terror = cudaMemcpy(d_rv_gpu, rv_cpu, dim_cpu.space_mem, cudaMemcpyHostToDevice);\n\tif (error != cudaSuccess) \n\t\tcheckCUDAError(\"cudaMemcpy d_rv_gpu\");\n\n\terror = cudaMemcpy(d_qv_gpu, qv_cpu, dim_cpu.space_mem2, cudaMemcpyHostToDevice);\n\tif (error != cudaSuccess) \n\t\tcheckCUDAError(\"cudaMemcpy d_qv_gpu\");\n\n\terror = cudaMemcpy(d_fv_gpu, fv_cpu, dim_cpu.space_mem, cudaMemcpyHostToDevice);\n\tif (error != cudaSuccess) \n\t\tcheckCUDAError(\"cudaMemcpy d_fv_gpu\");\n\n#ifdef TIMING\n    gettimeofday(&tv_h2d_end, NULL);\n    tvsub(&tv_h2d_end, &tv_h2d_start, &tv);\n    h2d_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n#ifdef TIMING\n    gettimeofday(&tv_kernel_start, NULL);\n#endif\n\n\tkernel_gpu_cuda<<<global_work_size[0]/local_work_size[0], local_work_size[0]>>>(par_cpu, dim_cpu, d_box_gpu, d_rv_gpu, d_qv_gpu, d_fv_gpu);\n\n\terror = cudaDeviceSynchronize();\n\tif (error != cudaSuccess) \n\t\tcheckCUDAError(\"cudaDeviceSynchronize\");\n\n#ifdef TIMING\n    gettimeofday(&tv_kernel_end, NULL);\n    tvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n    kernel_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n#ifdef TIMING\n    gettimeofday(&tv_d2h_start, NULL);\n#endif\n\n\terror = cudaMemcpy(fv_cpu, d_fv_gpu, dim_cpu.space_mem, cudaMemcpyDeviceToHost);\n\tif (error != cudaSuccess) \n\t\tcheckCUDAError(\"cudaMemcpy d_fv_gpu\");\n\n#ifdef TIMING\n    gettimeofday(&tv_d2h_end, NULL);\n    tvsub(&tv_d2h_end, &tv_d2h_start, &tv);\n    d2h_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n#ifdef TIMING\n    gettimeofday(&tv_close_start, NULL);\n#endif\n\n\tcudaFree(d_box_gpu);\n\tcudaFree(d_rv_gpu);\n\tcudaFree(d_qv_gpu);\n\tcudaFree(d_fv_gpu);\n\n#ifdef TIMING\n    printf(\"Time spent in different stages of the application:\\n\");\n    gettimeofday(&tv_close_end, NULL);\n    tvsub(&tv_close_end, &tv_close_start, &tv);\n    close_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n    tvsub(&tv_close_end, &tv_total_start, &tv);\n    total_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n\n    printf(\"Init: %f\\n\", init_time);\n    printf(\"MemAlloc: %f\\n\", mem_alloc_time);\n    printf(\"HtoD: %f\\n\", h2d_time);\n    printf(\"Exec: %f\\n\", kernel_time);\n    printf(\"DtoH: %f\\n\", d2h_time);\n    printf(\"Close: %f\\n\", close_time);\n    printf(\"Total: %f\\n\", total_time);\n#endif\n}\n\n#ifdef __cplusplus\n}\n#endif\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_cuda.cu",
+    "kernel/kernel_gpu_cuda_wrapper.cu"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_cuda.cu",
+    "kernel/kernel_gpu_cuda_wrapper.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 53.475,
+      "prompt_tokens": 9528,
+      "completion_tokens": 6531,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "rm: cannot remove './kernel/*.o': No such file or directory\nrm: cannot remove './util/num/*.o': No such file or directory\nrm: cannot remove './util/timer/*.o': No such file or directory\nrm: cannot remove './util/device/*.o': No such file or directory\nrm: cannot remove 'lavaMD': No such file or directory\nmake: *** [makefile:87: clean] Error 1\n\nmain.c: In function \u2018main\u2019:\nmain.c:95:20: warning: implicit declaration of function \u2018strcmp\u2019 [-Wimplicit-function-declaration]\n   95 |                 if(strcmp(argv[dim_cpu.cur_arg], \"-boxes1d\")==0){\n      |                    ^~~~~~\nmain.c:42:1: note: include \u2018<string.h>\u2019 or provide a declaration of \u2018strcmp\u2019\n   41 | #include \"./kernel/kernel_gpu_cuda_wrapper.h\"   // (in library path specified here)\n  +++ |+#include <string.h>\n   42 | \nmain.c:228:15: warning: implicit declaration of function \u2018time\u2019 [-Wimplicit-function-declaration]\n  228 |         srand(time(NULL));\n      |               ^~~~\nmain.c:42:1: note: \u2018time\u2019 is defined in header \u2018<time.h>\u2019; did you forget to \u2018#include <time.h>\u2019?\n   41 | #include \"./kernel/kernel_gpu_cuda_wrapper.h\"   // (in library path specified here)\n  +++ |+#include <time.h>\n   42 | \n./kernel/kernel_gpu_cuda_wrapper.cu:13:10: fatal error: timing.h: No such file or directory\n   13 | #include \"timing.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\nmake: *** [makefile:58: kernel/kernel_gpu_cuda_wrapper.o] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

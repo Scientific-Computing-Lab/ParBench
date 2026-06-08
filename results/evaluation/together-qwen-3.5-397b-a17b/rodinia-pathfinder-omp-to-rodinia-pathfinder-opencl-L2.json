@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-pathfinder-omp",
+  "target_spec": "rodinia-pathfinder-opencl",
+  "kernel": "pathfinder",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 793451816,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-c",
+    "100000",
+    "-r",
+    "100",
+    "-h",
+    "20"
+  ],
+  "timestamp": "2026-04-24T05:51:34Z",
+  "prompt_tokens": 4330,
+  "completion_tokens": 4244,
+  "llm_response_time_seconds": 39.279,
+  "build_status": "pass",
+  "build_time_seconds": 0.481,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.256,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Init: 136.100006\nMemAlloc: 0.004000\nHtoD: 2.179040\nExec: 0.226912\nDtoH: 0.017504\nClose: 0.851000\nTotal: 142.005005\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.256,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernels.cl": "__kernel void dynproc_kernel(\n    int pyramid_height,\n    __global const int* wall,\n    __global const int* src,\n    __global int* dst,\n    int cols,\n    int rows,\n    int t_offset,\n    int borderCols,\n    int halo,\n    __local int* local_buf1,\n    __local int* local_buf2,\n    __global int* outputBuffer)\n{\n    int col = get_global_id(0);\n    \n    if (col >= cols) return;\n    \n    // Initial values from src buffer\n    int current = src[col];\n    int left = (col > 0) ? src[col-1] : current;\n    int right = (col < cols-1) ? src[col+1] : current;\n    \n    // Process pyramid_height rows\n    for (int h = 0; h < pyramid_height; h++) {\n        // Check if we've exceeded the grid\n        if (t_offset + h + 1 >= rows) break;\n        \n        // Find minimum of current position and neighbors\n        int min_val = current;\n        if (left < min_val) min_val = left;\n        if (right < min_val) min_val = right;\n        \n        // Compute new value: wall value + minimum path\n        int wall_idx = (t_offset + h) * cols + col;\n        current = wall[wall_idx] + min_val;\n        \n        // Write result to destination buffer\n        dst[col] = current;\n        \n        // Update neighbor values for next iteration\n        if (h + 1 < pyramid_height) {\n            if (col > 0) left = dst[col-1];\n            if (col < cols-1) right = dst[col+1];\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernels.cl"
+  ],
+  "target_files_extracted": [
+    "kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 39.279,
+      "prompt_tokens": 4330,
+      "completion_tokens": 4244,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

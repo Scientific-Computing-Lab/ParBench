@@ -1,0 +1,78 @@
+{
+  "source_spec": "rodinia-srad-cuda",
+  "target_spec": "rodinia-srad-omp",
+  "kernel": "srad",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 88152946,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "512",
+    "512",
+    "0",
+    "127",
+    "0",
+    "127",
+    "0.5",
+    "2"
+  ],
+  "timestamp": "2026-04-21T21:37:25Z",
+  "prompt_tokens": 5060,
+  "completion_tokens": 2496,
+  "llm_response_time_seconds": 16.984,
+  "build_status": "pass",
+  "build_time_seconds": 0.185,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.005,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nRandomizing the input matrix\nStart the SRAD main loop\nComputation Done\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.006,
+  "translated_wall_time_seconds": 0.005,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 1.2,
+  "translated_files": {
+    "srad.cpp": "#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <omp.h>\n\n#define STR_SIZE 256\n\n#ifdef RD_WG_SIZE_0_0\n        #define BLOCK_SIZE RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n        #define BLOCK_SIZE RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n        #define BLOCK_SIZE RD_WG_SIZE\n#else\n        #define BLOCK_SIZE 16\n#endif\n\nvoid random_matrix(float *I, int rows, int cols);\nvoid runTest( int argc, char** argv);\nvoid usage(int argc, char **argv)\n{\n\tfprintf(stderr, \"Usage: %s <rows> <cols> <y1> <y2> <x1> <x2> <lamda> <no. of iter>\\n\", argv[0]);\n\tfprintf(stderr, \"\\t<rows>   - number of rows\\n\");\n\tfprintf(stderr, \"\\t<cols>    - number of cols\\n\");\n\tfprintf(stderr, \"\\t<y1> \t - y1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<y2>      - y2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x1>       - x1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x2>       - x2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<lamda>   - lambda (0,1)\\n\");\n\tfprintf(stderr, \"\\t<no. of iter>   - number of iterations\\n\");\n\t\n\texit(1);\n}\n\nint\nmain( int argc, char** argv) \n{\n  printf(\"WG size of kernel = %d X %d\\n\", BLOCK_SIZE, BLOCK_SIZE);\n    runTest( argc, argv);\n\n    return EXIT_SUCCESS;\n}\n\nvoid\nrunTest( int argc, char** argv) \n{\n    int rows, cols, size_I, size_R, niter = 10, iter;\n    float *I, *J, lambda, q0sqr, sum, sum2, tmp, meanROI,varROI ;\n\n\tfloat Jc, G2, L, num, den, qsqr;\n\tint *iN,*iS,*jE,*jW, k;\n\tfloat *dN,*dS,*dW,*dE;\n\tfloat cN,cS,cW,cE,D;\n\n\tfloat *E_C, *W_C, *N_C, *S_C, *C_cuda;\n\n\tunsigned int r1, r2, c1, c2;\n\tfloat *c;\n    \n\t\n \n\tif (argc == 9)\n\t{\n\t\trows = atoi(argv[1]);  \n\t\tcols = atoi(argv[2]);  \n\t\tif ((rows%16!=0) || (cols%16!=0)){\n\t\tfprintf(stderr, \"rows and cols must be multiples of 16\\n\");\n\t\texit(1);\n\t\t}\n\t\tr1   = atoi(argv[3]);  \n\t\tr2   = atoi(argv[4]);  \n\t\tc1   = atoi(argv[5]);  \n\t\tc2   = atoi(argv[6]);  \n\t\tlambda = atof(argv[7]); \n\t\tniter = atoi(argv[8]); \n\t\t\n\t}\n    else{\n\tusage(argc, argv);\n    }\n\n\tsize_I = cols * rows;\n    size_R = (r2-r1+1)*(c2-c1+1);   \n\n\tI = (float *)malloc( size_I * sizeof(float) );\n    J = (float *)malloc( size_I * sizeof(float) );\n\tc  = (float *)malloc(sizeof(float)* size_I) ;\n\n    iN = (int *)malloc(sizeof(unsigned int*) * rows) ;\n    iS = (int *)malloc(sizeof(unsigned int*) * rows) ;\n    jW = (int *)malloc(sizeof(unsigned int*) * cols) ;\n    jE = (int *)malloc(sizeof(unsigned int*) * cols) ;    \n\n\n\tdN = (float *)malloc(sizeof(float)* size_I) ;\n    dS = (float *)malloc(sizeof(float)* size_I) ;\n    dW = (float *)malloc(sizeof(float)* size_I) ;\n    dE = (float *)malloc(sizeof(float)* size_I) ;\n\n    E_C = (float *)malloc(sizeof(float)* size_I) ;\n    W_C = (float *)malloc(sizeof(float)* size_I) ;\n    N_C = (float *)malloc(sizeof(float)* size_I) ;\n    S_C = (float *)malloc(sizeof(float)* size_I) ;\n    C_cuda = (float *)malloc(sizeof(float)* size_I) ;\n\n    for (int i=0; i< rows; i++) {\n        iN[i] = i-1;\n        iS[i] = i+1;\n    }    \n    for (int j=0; j< cols; j++) {\n        jW[j] = j-1;\n        jE[j] = j+1;\n    }\n    iN[0]    = 0;\n    iS[rows-1] = rows-1;\n    jW[0]    = 0;\n    jE[cols-1] = cols-1;\n\n\tprintf(\"Randomizing the input matrix\\n\");\n\t\n\trandom_matrix(I, rows, cols);\n\n    for (int k = 0;  k < size_I; k++ ) {\n     \tJ[k] = (float)exp(I[k]) ;\n    }\n\tprintf(\"Start the SRAD main loop\\n\");\n for (iter=0; iter< niter; iter++){     \n\t\tsum=0; sum2=0;\n        for (int i=r1; i<=r2; i++) {\n            for (int j=c1; j<=c2; j++) {\n                tmp   = J[i * cols + j];\n                sum  += tmp ;\n                sum2 += tmp*tmp;\n            }\n        }\n        meanROI = sum / size_R;\n        varROI  = (sum2 / size_R) - meanROI*meanROI;\n        q0sqr   = varROI / (meanROI*meanROI);\n\n\t#pragma omp parallel for collapse(2)\n\t\tfor (int i = 0 ; i < rows ; i++) {\n            for (int j = 0; j < cols; j++) { \n\t\t\n\t\t\t\tk = i * cols + j;\n\t\t\t\tJc = J[k];\n \n\t\t\t\t\n                dN[k] = J[iN[i] * cols + j] - Jc;\n                dS[k] = J[iS[i] * cols + j] - Jc;\n                dW[k] = J[i * cols + jW[j]] - Jc;\n                dE[k] = J[i * cols + jE[j]] - Jc;\n\t\t\t\n                G2 = (dN[k]*dN[k] + dS[k]*dS[k] \n                    + dW[k]*dW[k] + dE[k]*dE[k]) / (Jc*Jc);\n\n   \t\t        L = (dN[k] + dS[k] + dW[k] + dE[k]) / Jc;\n\n\t\t\t\tnum  = (0.5*G2) - ((1.0/16.0)*(L*L)) ;\n                den  = 1 + (.25*L);\n                qsqr = num/(den*den);\n \n                \n                den = (qsqr-q0sqr) / (q0sqr * (1+q0sqr)) ;\n                c[k] = 1.0 / (1.0+den) ;\n                \n                \n                if (c[k] < 0) {c[k] = 0;}\n                else if (c[k] > 1) {c[k] = 1;}\n\t\t}\n\t}\n\t\n\t#pragma omp parallel for collapse(2)\n         for (int i = 0; i < rows; i++) {\n            for (int j = 0; j < cols; j++) {        \n\n                \n                k = i * cols + j;\n                \n                \n\t\t\t\t\tcN = c[k];\n\t\t\t\t\tcS = c[iS[i] * cols + j];\n\t\t\t\t\tcW = c[k];\n\t\t\t\t\tcE = c[i * cols + jE[j]];\n\n                \n                D = cN * dN[k] + cS * dS[k] + cW * dW[k] + cE * dE[k];\n                \n                \n                J[k] = J[k] + 0.25*lambda*D;\n            }\n\t}\n\n}\n\n#ifdef OUTPUT\n    \n\t\tprintf(\"Printing Output:\\n\"); \n    for( int i = 0 ; i < rows ; i++){\n\t\tfor ( int j = 0 ; j < cols ; j++){\n         printf(\"%.5f \", J[i * cols + j]); \n\t\t}\t\n     printf(\"\\n\"); \n   }\n#endif \n\n\tprintf(\"Computation Done\\n\");\n\n\tfree(I);\n\tfree(J);\n\tfree(iN); free(iS); free(jW); free(jE);\n    free(dN); free(dS); free(dW); free(dE);\n    free(E_C); free(W_C); free(N_C); free(S_C); free(C_cuda);\n\tfree(c);\n  \n}\n\nvoid random_matrix(float *I, int rows, int cols){\n    \n\tsrand(7);\n\t\n\tfor( int i = 0 ; i < rows ; i++){\n\t\tfor ( int j = 0 ; j < cols ; j++){\n\t\t I[i * cols + j] = rand()/(float)RAND_MAX ;\n\t\t}\n\t}\n\n}\n"
+  },
+  "target_files_expected": [
+    "srad.cpp"
+  ],
+  "target_files_extracted": [
+    "srad.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 16.984,
+      "prompt_tokens": 5060,
+      "completion_tokens": 2496,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

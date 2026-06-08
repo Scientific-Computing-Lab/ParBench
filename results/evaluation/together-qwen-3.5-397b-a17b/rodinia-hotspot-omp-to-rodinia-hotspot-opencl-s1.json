@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-hotspot-omp",
+  "target_spec": "rodinia-hotspot-opencl",
+  "kernel": "hotspot",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 298048703,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-04-22T01:32:55Z",
+  "prompt_tokens": 7798,
+  "completion_tokens": 5376,
+  "llm_response_time_seconds": 44.24,
+  "build_status": "pass",
+  "build_time_seconds": 0.177,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.289,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nPlatform: NVIDIA Corporation\nnum_devices = 1\nDevice: NVIDIA GeForce RTX 4070\nUse GPU device\nInit: 147.727997\nMemAlloc: 0.003000\nHtoD: 0.446000\nExec: 1.909760\nDtoH: 0.039872\nClose: 0.330000\nTotal: 193.093002\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.159,
+  "translated_wall_time_seconds": 0.289,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.5502,
+  "translated_files": {
+    "hotspot_kernel.cl": "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n\n#define BLOCK_SIZE 16\n\nkernel void hotspot(\n    int num_iterations,\n    const global float* power,\n    const global float* temp,\n    global float* result,\n    int col,\n    int row,\n    int borderCols,\n    int borderRows,\n    float Cap,\n    float Rx,\n    float Ry,\n    float Rz,\n    float step)\n{\n    float Cap_1 = step / Cap;\n    float Rx_1 = 1.0f / Rx;\n    float Ry_1 = 1.0f / Ry;\n    float Rz_1 = 1.0f / Rz;\n    float amb_temp = 80.0f;\n    \n    int blockCol = get_group_id(0);\n    int blockRow = get_group_id(1);\n    int localCol = get_local_id(0);\n    int localRow = get_local_id(1);\n    \n    int c_start = blockCol * BLOCK_SIZE;\n    int r_start = blockRow * BLOCK_SIZE;\n    \n    for (int iter = 0; iter < num_iterations; iter++) {\n        for (int local_r = 0; local_r < BLOCK_SIZE; local_r++) {\n            for (int local_c = 0; local_c < BLOCK_SIZE; local_c++) {\n                int r = r_start + local_r;\n                int c = c_start + local_c;\n                \n                if (r >= row || c >= col) continue;\n                \n                int idx = r * col + c;\n                float delta;\n                \n                if (r == 0 && c == 0) {\n                    delta = Cap_1 * (power[idx] +\n                        (temp[idx + 1] - temp[idx]) * Rx_1 +\n                        (temp[idx + col] - temp[idx]) * Ry_1 +\n                        (amb_temp - temp[idx]) * Rz_1);\n                }\n                else if (r == 0 && c == col - 1) {\n                    delta = Cap_1 * (power[idx] +\n                        (temp[idx - 1] - temp[idx]) * Rx_1 +\n                        (temp[idx + col] - temp[idx]) * Ry_1 +\n                        (amb_temp - temp[idx]) * Rz_1);\n                }\n                else if (r == row - 1 && c == col - 1) {\n                    delta = Cap_1 * (power[idx] +\n                        (temp[idx - 1] - temp[idx]) * Rx_1 +\n                        (temp[idx - col] - temp[idx]) * Ry_1 +\n                        (amb_temp - temp[idx]) * Rz_1);\n                }\n                else if (r == row - 1 && c == 0) {\n                    delta = Cap_1 * (power[idx] +\n                        (temp[idx + 1] - temp[idx]) * Rx_1 +\n                        (temp[idx - col] - temp[idx]) * Ry_1 +\n                        (amb_temp - temp[idx]) * Rz_1);\n                }\n                else if (r == 0) {\n                    delta = Cap_1 * (power[idx] +\n                        (temp[idx + 1] + temp[idx - 1] - 2.0f * temp[idx]) * Rx_1 +\n                        (temp[idx + col] - temp[idx]) * Ry_1 +\n                        (amb_temp - temp[idx]) * Rz_1);\n                }\n                else if (c == col - 1) {\n                    delta = Cap_1 * (power[idx] +\n                        (temp[idx + col] + temp[idx - col] - 2.0f * temp[idx]) * Ry_1 +\n                        (temp[idx - 1] - temp[idx]) * Rx_1 +\n                        (amb_temp - temp[idx]) * Rz_1);\n                }\n                else if (r == row - 1) {\n                    delta = Cap_1 * (power[idx] +\n                        (temp[idx + 1] + temp[idx - 1] - 2.0f * temp[idx]) * Rx_1 +\n                        (temp[idx - col] - temp[idx]) * Ry_1 +\n                        (amb_temp - temp[idx]) * Rz_1);\n                }\n                else if (c == 0) {\n                    delta = Cap_1 * (power[idx] +\n                        (temp[idx + col] + temp[idx - col] - 2.0f * temp[idx]) * Ry_1 +\n                        (temp[idx + 1] - temp[idx]) * Rx_1 +\n                        (amb_temp - temp[idx]) * Rz_1);\n                }\n                else {\n                    delta = Cap_1 * (power[idx] +\n                        (temp[idx + col] + temp[idx - col] - 2.0f * temp[idx]) * Ry_1 +\n                        (temp[idx + 1] + temp[idx - 1] - 2.0f * temp[idx]) * Rx_1 +\n                        (amb_temp - temp[idx]) * Rz_1);\n                }\n                \n                result[idx] = temp[idx] + delta;\n            }\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "hotspot_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspot_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 44.24,
+      "prompt_tokens": 7798,
+      "completion_tokens": 5376,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

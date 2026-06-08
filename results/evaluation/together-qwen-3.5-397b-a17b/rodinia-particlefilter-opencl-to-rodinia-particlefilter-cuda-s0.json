@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-particlefilter-opencl",
+  "target_spec": "rodinia-particlefilter-cuda",
+  "kernel": "particlefilter",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 841413876,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T01:06:13Z",
+  "prompt_tokens": 39315,
+  "completion_tokens": 2710,
+  "llm_response_time_seconds": 46.513,
+  "build_status": "fail",
+  "build_time_seconds": 1.135,
+  "build_error_snippet": "rm: cannot remove 'particlefilter_float': No such file or directory\nmake: *** [Makefile:18: clean] Error 1\n\nex_particle_CUDA_naive_seq.cu(619): warning #2464-D: conversion from a string literal to \"char *\" is deprecated\n   char* usage = \"naive.out -x <dimX> -y <dimY> -z <Nfr> -np <Nparticles>\";\n                 ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nex_particle_CUDA_naive_seq.cu(619): warning #2464-D: conversion from a string literal to \"char *\" is deprecated\n   char* usage = \"naive.out -x <dimX> -y <dimY> -z <Nfr> -np <Nparticles>\";\n                 ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nex_particle_CUDA_naive_seq.cu: In function \u2018void particleFilter(int*\n...[truncated]...\n         ^\n\nex_particle_CUDA_float_seq.cu(19): warning #177-D: variable \"threads_per_block\" was declared but never referenced\n  const int threads_per_block = 128;\n            ^\n\nex_particle_CUDA_float_seq.cu(207): error: identifier \"buffer\" is undefined in device code\n\nex_particle_CUDA_float_seq.cu(210): error: identifier \"buffer\" is undefined in device code\n\nex_particle_CUDA_float_seq.cu(215): error: identifier \"buffer\" is undefined in device code\n\nex_particle_CUDA_float_seq.cu(215): error: identifier \"buffer\" is undefined in device code\n\nex_particle_CUDA_float_seq.cu(219): error: identifier \"buffer\" is undefined in device code\n\n5 errors detected in the compilation of \"ex_particle_CUDA_float_seq.cu\".\nmake: *** [Makefile:15: float] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: article_CUDA_float_seq.cu(219): error: identifier \"buffer\" is undefined in device code\n\n5 errors detected in the compilation of \"ex_particle_CUDA_float_seq.cu\".\nmake: *** [Makefile:15: float] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.093,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "ex_particle_CUDA_float_seq.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <limits.h>\n#include <math.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <float.h>\n#include <sys/time.h>\n\n#define PI 3.14159265358979323846\n#define BLOCK_X 16\n#define BLOCK_Y 16\n\nlong M = INT_MAX;\nint A = 1103515245;\nint C = 12345;\n\nconst int threads_per_block = 128;\n\nvoid check_error(cudaError e) {\n    if (e != cudaSuccess) {\n        printf(\"\\nCUDA error: %s\\n\", cudaGetErrorString(e));\n        exit(1);\n    }\n}\n\n__device__ double dev_round_double(double value) {\n    int newValue = (int)(value);\n    if (value - newValue < .5)\n        return newValue;\n    else\n        return newValue + 1;\n}\n\n__device__ double calcLikelihoodSum(unsigned char *I, int *ind, int numOnes, int index) {\n    double likelihoodSum = 0.0;\n    int x;\n    for (x = 0; x < numOnes; x++)\n        likelihoodSum += (pow((double)(I[ind[index * numOnes + x]] - 100), 2) - pow((double)(I[ind[index * numOnes + x]] - 228), 2)) / 50.0;\n    return likelihoodSum;\n}\n\n__device__ void cdfCalc(double *CDF, double *weights, int Nparticles) {\n    int x;\n    CDF[0] = weights[0];\n    for (x = 1; x < Nparticles; x++) {\n        CDF[x] = weights[x] + CDF[x - 1];\n    }\n}\n\n__device__ double d_randu(int *seed, int index) {\n    int M = INT_MAX;\n    int A = 1103515245;\n    int C = 12345;\n    int num = A * seed[index] + C;\n    seed[index] = num % M;\n    return fabs(seed[index] / ((double)M));\n}\n\n__device__ double d_randn(int *seed, int index) {\n    double pi = 3.14159265358979323846;\n    double u = d_randu(seed, index);\n    double v = d_randu(seed, index);\n    double cosine = cos(2 * pi * v);\n    double rt = -2 * log(u);\n    return sqrt(rt) * cosine;\n}\n\n__device__ double updateWeights(double *weights, double *likelihood, int Nparticles) {\n    int x;\n    double sum = 0;\n    for (x = 0; x < Nparticles; x++) {\n        weights[x] = weights[x] * exp(likelihood[x]);\n        sum += weights[x];\n    }\n    return sum;\n}\n\n__device__ int findIndexBin(double *CDF, int beginIndex, int endIndex, double value) {\n    if (endIndex < beginIndex)\n        return -1;\n    int middleIndex;\n    while (endIndex > beginIndex) {\n        middleIndex = beginIndex + ((endIndex - beginIndex) / 2);\n        if (CDF[middleIndex] >= value) {\n            if (middleIndex == 0)\n                return middleIndex;\n            else if (CDF[middleIndex - 1] < value)\n                return middleIndex;\n            else if (CDF[middleIndex - 1] == value) {\n                while (CDF[middleIndex] == value && middleIndex >= 0)\n                    middleIndex--;\n                middleIndex++;\n                return middleIndex;\n            }\n        }\n        if (CDF[middleIndex] > value)\n            endIndex = middleIndex - 1;\n        else\n            beginIndex = middleIndex + 1;\n    }\n    return -1;\n}\n\n__global__ void find_index_kernel(double *arrayX, double *arrayY,\n                                  double *CDF, double *u, double *xj,\n                                  double *yj, double *weights, int Nparticles) {\n    int i = blockIdx.x * blockDim.x + threadIdx.x;\n\n    if (i < Nparticles) {\n        int index = -1;\n        int x;\n\n        for (x = 0; x < Nparticles; x++) {\n            if (CDF[x] >= u[i]) {\n                index = x;\n                break;\n            }\n        }\n        if (index == -1) {\n            index = Nparticles - 1;\n        }\n\n        xj[i] = arrayX[index];\n        yj[i] = arrayY[index];\n    }\n}\n\n__global__ void normalize_weights_kernel(double *weights, int Nparticles, double *partial_sums, double *CDF, double *u, int *seed) {\n    int i = blockIdx.x * blockDim.x + threadIdx.x;\n    int local_id = threadIdx.x;\n    static double u1;\n    static double sumWeights;\n\n    if (0 == local_id)\n        sumWeights = partial_sums[0];\n\n    if (i < Nparticles) {\n        weights[i] = weights[i] / sumWeights;\n    }\n\n    if (i == 0) {\n        cdfCalc(CDF, weights, Nparticles);\n        u[0] = (1 / ((double)(Nparticles))) * d_randu(seed, i);\n    }\n\n    if (0 == local_id)\n        u1 = u[0];\n\n    if (i < Nparticles) {\n        u[i] = u1 + i / ((double)(Nparticles));\n    }\n}\n\n__global__ void sum_kernel(double *partial_sums, int Nparticles) {\n    int i = blockIdx.x * blockDim.x + threadIdx.x;\n    int THREADS_PER_BLOCK = blockDim.x;\n\n    if (i == 0) {\n        int x;\n        double sum = 0;\n        int num_blocks = ceil((double)Nparticles / (double)THREADS_PER_BLOCK);\n        for (x = 0; x < num_blocks; x++) {\n            sum += partial_sums[x];\n        }\n        partial_sums[0] = sum;\n    }\n}\n\n__global__ void likelihood_kernel(double *arrayX, double *arrayY, double *xj, double *yj, double *CDF, int *ind, int *objxy, double *likelihood, unsigned char *I, double *u, double *weights, const int Nparticles, const int countOnes, const int max_size, int k, const int IszY, const int Nfr, int *seed, double *partial_sums) {\n    int block_id = blockIdx.x;\n    int thread_id = threadIdx.x;\n    int i = blockIdx.x * blockDim.x + threadIdx.x;\n    int THREADS_PER_BLOCK = blockDim.x;\n    int y;\n    int indX, indY;\n\n    extern double buffer[];\n\n    if (i < Nparticles) {\n        arrayX[i] = xj[i];\n        arrayY[i] = yj[i];\n\n        weights[i] = 1 / ((double)(Nparticles));\n\n        arrayX[i] = arrayX[i] + 1.0 + 5.0 * d_randn(seed, i);\n        arrayY[i] = arrayY[i] - 2.0 + 2.0 * d_randn(seed, i);\n    }\n\n    if (i < Nparticles) {\n        for (y = 0; y < countOnes; y++) {\n            indX = dev_round_double(arrayX[i]) + objxy[y * 2 + 1];\n            indY = dev_round_double(arrayY[i]) + objxy[y * 2];\n\n            ind[i * countOnes + y] = abs(indX * IszY * Nfr + indY * Nfr + k);\n            if (ind[i * countOnes + y] >= max_size)\n                ind[i * countOnes + y] = 0;\n        }\n        likelihood[i] = calcLikelihoodSum(I, ind, countOnes, i);\n\n        likelihood[i] = likelihood[i] / countOnes;\n\n        weights[i] = weights[i] * exp(likelihood[i]);\n    }\n\n    buffer[thread_id] = 0.0;\n\n    if (i < Nparticles) {\n        buffer[thread_id] = weights[i];\n    }\n\n    for (unsigned int s = THREADS_PER_BLOCK / 2; s > 0; s >>= 1) {\n        if (thread_id < s) {\n            buffer[thread_id] += buffer[thread_id + s];\n        }\n    }\n    if (thread_id == 0) {\n        partial_sums[block_id] = buffer[0];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "ex_particle_CUDA_float_seq.cu"
+  ],
+  "target_files_extracted": [
+    "ex_particle_CUDA_float_seq.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 46.513,
+      "prompt_tokens": 39315,
+      "completion_tokens": 2710,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "rm: cannot remove 'particlefilter_float': No such file or directory\nmake: *** [Makefile:18: clean] Error 1\n\nex_particle_CUDA_naive_seq.cu(619): warning #2464-D: conversion from a string literal to \"char *\" is deprecated\n   char* usage = \"naive.out -x <dimX> -y <dimY> -z <Nfr> -np <Nparticles>\";\n                 ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nex_particle_CUDA_naive_seq.cu(619): warning #2464-D: conversion from a string literal to \"char *\" is deprecated\n   char* usage = \"naive.out -x <dimX> -y <dimY> -z <Nfr> -np <Nparticles>\";\n                 ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nex_particle_CUDA_naive_seq.cu: In function \u2018void particleFilter(int*\n...[truncated]...\n         ^\n\nex_particle_CUDA_float_seq.cu(19): warning #177-D: variable \"threads_per_block\" was declared but never referenced\n  const int threads_per_block = 128;\n            ^\n\nex_particle_CUDA_float_seq.cu(207): error: identifier \"buffer\" is undefined in device code\n\nex_particle_CUDA_float_seq.cu(210): error: identifier \"buffer\" is undefined in device code\n\nex_particle_CUDA_float_seq.cu(215): error: identifier \"buffer\" is undefined in device code\n\nex_particle_CUDA_float_seq.cu(215): error: identifier \"buffer\" is undefined in device code\n\nex_particle_CUDA_float_seq.cu(219): error: identifier \"buffer\" is undefined in device code\n\n5 errors detected in the compilation of \"ex_particle_CUDA_float_seq.cu\".\nmake: *** [Makefile:15: float] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

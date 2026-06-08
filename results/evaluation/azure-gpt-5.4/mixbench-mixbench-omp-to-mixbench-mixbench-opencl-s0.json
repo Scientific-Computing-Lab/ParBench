@@ -1,0 +1,74 @@
+{
+  "source_spec": "mixbench-mixbench-omp",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1825021715,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-26T12:21:10Z",
+  "prompt_tokens": 10182,
+  "completion_tokens": 5219,
+  "llm_response_time_seconds": 96.994,
+  "build_status": "pass",
+  "build_time_seconds": 0.471,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 4.043,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "3.22\n          192,     96.250,    0.45,28606.98, 297.22,     48.125,   30.33,  425.89,   8.85,    192.500,    0.00,     inf,    inf,    96.250,    0.84,15347.54, 159.45\n          256,    128.250,    0.59,29354.41, 228.88,     64.125,   40.39,  426.21,   6.65,    256.500,    0.00,     inf,    inf,   128.250,    1.11,15536.03, 121.14\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "single_precision_gflops": {
+      "value": 111.23,
+      "unit": "GFLOPS"
+    }
+  },
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": 4.043,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 7.4202,
+  "translated_files": {
+    "mix_kernels.cl": "#ifdef ENABLE_DP\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n\n#ifdef ENABLE_HP\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n\n__kernel void benchmark_func(const class_T seed, __global class_T* data) {\n  const size_t gid = get_global_id(0);\n  const size_t lid = get_local_id(0);\n  const size_t gsize = get_global_size(0);\n  const size_t lsize = get_local_size(0);\n  const size_t group = get_group_id(0);\n\n  const class_T zero = seed - seed;\n  class_T sum = zero;\n\n#ifdef BLOCK_STRIDED\n  const size_t first_index =\n      group * lsize * (size_t)ELEMENTS_PER_THREAD * (size_t)FUSION_DEGREE + lid;\n#else\n  const size_t first_index = gid;\n#endif\n\n  for (uint fusion = 0; fusion < (uint)FUSION_DEGREE; ++fusion) {\n#ifdef BLOCK_STRIDED\n    const size_t base =\n        group * lsize * (size_t)ELEMENTS_PER_THREAD * (size_t)FUSION_DEGREE +\n        (size_t)fusion * lsize * (size_t)ELEMENTS_PER_THREAD + lid;\n#else\n    const size_t base =\n        gid + (size_t)fusion * gsize * (size_t)ELEMENTS_PER_THREAD;\n#endif\n\n    for (uint i = 0; i < (uint)ELEMENTS_PER_THREAD; ++i) {\n#ifdef BLOCK_STRIDED\n      const size_t idx = base + (size_t)i * lsize;\n#else\n      const size_t idx = base + (size_t)i * gsize;\n#endif\n\n      class_T t = data[idx];\n      for (uint j = 0; j < (uint)COMPUTE_ITERATIONS; ++j) {\n        t = t * t + seed;\n      }\n      sum = sum + t;\n    }\n  }\n\n  data[first_index] = sum;\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 96.994,
+      "prompt_tokens": 10182,
+      "completion_tokens": 5219,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

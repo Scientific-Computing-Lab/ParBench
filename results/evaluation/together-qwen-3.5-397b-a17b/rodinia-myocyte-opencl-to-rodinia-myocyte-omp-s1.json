@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-myocyte-opencl",
+  "target_spec": "rodinia-myocyte-omp",
+  "kernel": "myocyte",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1636794763,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T02:51:52Z",
+  "prompt_tokens": 46820,
+  "completion_tokens": 3014,
+  "llm_response_time_seconds": 21.143,
+  "build_status": "fail",
+  "build_time_seconds": 0.01,
+  "build_error_snippet": "rm: cannot remove '*.o': No such file or directory\nrm: cannot remove 'myocyte.out': No such file or directory\nrm: cannot remove 'output.txt': No such file or directory\nmake: *** [Makefile:32: clean] Error 1\n\nmain.c:1:10: fatal error: ../common.h: No such file or directory\n    1 | #include \"../common.h\"\n      |          ^~~~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:27: main.o] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: Error 1\n\nmain.c:1:10: fatal error: ../common.h: No such file or directory\n    1 | #include \"../common.h\"\n      |          ^~~~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:27: main.o] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.c": "#include \"../common.h\"\n#include \"../util/timer/timer.h\"\n#include \"./solver.c\"\n#include <stdio.h>\n#include <string.h>\n#include <stdlib.h>\n#include <sys/time.h>\n\n#include \"kernel_gpu_opencl_wrapper.h\"\n\n#ifdef TIMING\n#include \"timing.h\"\n\nstruct timeval tv;\nstruct timeval tv_total_start, tv_total_end;\nstruct timeval tv_init_end;\nstruct timeval tv_h2d_start, tv_h2d_end;\nstruct timeval tv_d2h_start, tv_d2h_end;\nstruct timeval tv_kernel_start, tv_kernel_end;\nstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\nstruct timeval tv_close_start, tv_close_end;\nfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n      d2h_time = 0, close_time = 0, total_time = 0;\n#endif\n\nextern int device_id_inuse;\nextern int platform_id_inuse;\n\nint \nkernel_gpu_opencl_wrapper(\tint xmax,\n\t\t\t\t\t\t\tint workload,\n\n\t\t\t\t\t\t\tfp ***y,\n\t\t\t\t\t\t\tfp **x,\n\t\t\t\t\t\t\tfp **params,\n\t\t\t\t\t\t\tfp *com)\n{\n\n\t\n\tlong long time0;\n\tlong long time1;\n\tlong long time2;\n\tlong long time3;\n\tlong long time4;\n\tlong long time5;\n\tlong long timecopyin = 0;\n\tlong long timekernel = 0;\n\tlong long timecopyout = 0;\n\tlong long timeother;\n\n\ttime0 = get_time();\n\n\tint i;\n\n\t\n#ifdef  TIMING\n    gettimeofday(&tv_total_start, NULL);\n#endif\n\n\t\n#ifdef  TIMING\n\tgettimeofday(&tv_init_end, NULL);\n\ttvsub(&tv_init_end, &tv_total_start, &tv);\n\tinit_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n\ttime1 = get_time();\n\n\t\n\ttime2 = get_time();\n#ifdef  TIMING\n    gettimeofday(&tv_mem_alloc_end, NULL);\n    tvsub(&tv_mem_alloc_end, &tv_init_end, &tv);\n    mem_alloc_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n\t\n\tint status;\n\n\t\n#pragma omp parallel for\n\tfor(i=0; i<workload; i++){\n\n\t\tstatus = solver(\ty[i],\n\t\t\t\t\t\t\tx[i],\n\t\t\t\t\t\t\txmax,\n\t\t\t\t\t\t\tparams[i],\n\t\t\t\t\t\t\tcom,\n\n\t\t\t\t\t\t\t&timecopyin,\n\t\t\t\t\t\t\t&timekernel,\n\t\t\t\t\t\t\t&timecopyout);\n\n\t\tif(status !=0){\n\t\t\tprintf(\"STATUS: %d\\n\", status);\n\t\t}\n\n\t}\n\n\ttime3 = get_time();\n\n\t\n#ifdef  TIMING\n\tgettimeofday(&tv_close_start, NULL);\n#endif\n\n\ttime4= get_time();\n#ifdef  TIMING\n\tgettimeofday(&tv_close_end, NULL);\n\ttvsub(&tv_close_end, &tv_close_start, &tv);\n\tclose_time += tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n\ttvsub(&tv_close_end, &tv_total_start, &tv);\n\ttotal_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n\n\tprintf(\"Init: %f\\n\", init_time);\n\tprintf(\"MemAlloc: %f\\n\", mem_alloc_time);\n\tprintf(\"HtoD: %f\\n\", h2d_time);\n\tprintf(\"Exec: %f\\n\", kernel_time);\n\tprintf(\"DtoH: %f\\n\", d2h_time);\n\tprintf(\"Close: %f\\n\", close_time);\n\tprintf(\"Total: %f\\n\\n\", total_time);\n#endif\n\n\t\n\tprintf(\"Time spent in different stages of the application:\\n\");\n\tprintf(\"%15.12f s, %15.12f % : CPU: GPU SETUP\\n\", \t\t\t\t\t\t\t\t(float) (time1-time0) / 1000000, (float) (time1-time0) / (float) (time4-time0) * 100);\n\tprintf(\"%15.12f s, %15.12f % : CPU: ALLOCATE GPU MEMORY\\n\", \t\t\t\t\t(float) (time2-time1) / 1000000, (float) (time2-time1) / (float) (time4-time0) * 100);\n\tprintf(\"%15.12f s, %15.12f % : GPU: COMPUTATION\\n\", \t\t\t\t\t\t\t(float) (time3-time2) / 1000000, (float) (time3-time2) / (float) (time4-time0) * 100);\n\n\tprintf(\"\\tGPU: COMPUTATION Components:\\n\");\n\tprintf(\"\\t%15.12f s, %15.12f % : GPU: COPY DATA IN\\n\", \t\t\t\t\t\t\t(float) (timecopyin) / 1000000, (float) (timecopyin) / (float) (time4-time0) * 100);\n\tprintf(\"\\t%15.12f s, %15.12f % : GPU: KERNEL\\n\", \t\t\t\t\t\t\t\t(float) (timekernel) / 1000000, (float) (timekernel) / (float) (time4-time0) * 100);\n\tprintf(\"\\t%15.12f s, %15.12f % : GPU: COPY DATA OUT\\n\", \t\t\t\t\t\t(float) (timecopyout) / 1000000, (float) (timecopyout) / (float) (time4-time0) * 100);\n\ttimeother = time3-time2-timecopyin-timekernel-timecopyout;\n\tprintf(\"\\t%15.12f s, %15.12f % : GPU: OTHER\\n\", \t\t\t\t\t\t\t\t(float) (timeother) / 1000000, (float) (timeother) / (float) (time4-time0) * 100);\n\n\tprintf(\"%15.12f s, %15.12f % : CPU: FREE GPU MEMORY\\n\", \t\t\t\t\t\t(float) (time4-time3) / 1000000, (float) (time4-time3) / (float) (time4-time0) * 100);\n\tprintf(\"Total time:\\n\");\n\tprintf(\"%.12f s\\n\", \t\t\t\t\t\t\t\t\t\t\t\t\t\t\t(float) (time4-time0) / 1000000);\n\n\t\n\treturn 0;\n\n\t\n}\n",
+    "master.c": "#include \"../common.h\"\n#include \"./kernel_fin.c\"\n#include <stdio.h>\n#include <stdlib.h>\n#include <math.h>\n\n#ifdef TIMING\n#include \"timing.h\"\nextern float kernel_time, d2h_time, h2d_time;\n#endif\n\nvoid \nmaster(\tfp timeinst,\n\t\tfp *initvalu,\n\t\tfp *parameter,\n\t\tfp *finavalu,\n\t\tfp *com,\n\n\t\tlong long *timecopyin,\n\t\tlong long *timekernel,\n\t\tlong long *timecopyout)\n{\n\n\t\n\tlong long time0;\n\tlong long time1;\n\tlong long time2;\n\tlong long time3;\n\n\t\n\tint i;\n\n\t\n\tint initvalu_offset_ecc;\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\tint initvalu_offset_Dyad;\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\tint initvalu_offset_SL;\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\tint initvalu_offset_Cyt;\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\n\ttime0 = get_time();\n\n\t\n\tfp JCaDyad;\n\tfp JCaSL;\n\tfp JCaCyt;\n\n\t\n\tinitvalu_offset_ecc = 0;\t\t\t\t\t\t\t\t\t\t\t\t\n\tinitvalu_offset_Dyad = 46;\t\t\t\t\t\t\t\t\t\t\t\t\n\tinitvalu_offset_SL = 61;\t\t\t\t\t\t\t\t\t\t\t\t\n\tinitvalu_offset_Cyt = 76;\t\t\t\t\t\t\t\t\t\t\t\t\n\n\t\n\tecc(\ttimeinst,\n\t\t\tinitvalu,\n\t\t\tinitvalu_offset_ecc,\n\t\t\tparameter,\n\t\t\t0,\n\t\t\tfinavalu);\n\n\t\n\tJCaDyad = cam(\ttimeinst,\n\t\t\t\t\tinitvalu,\n\t\t\t\t\tinitvalu_offset_Dyad,\n\t\t\t\t\tparameter,\n\t\t\t\t\t2,\n\t\t\t\t\tfinavalu,\n\t\t\t\t\tinitvalu[35]*1e3);\n\n\t\n\tJCaSL = cam(\ttimeinst,\n\t\t\t\t\tinitvalu,\n\t\t\t\t\tinitvalu_offset_SL,\n\t\t\t\t\tparameter,\n\t\t\t\t\t5,\n\t\t\t\t\tfinavalu,\n\t\t\t\t\tinitvalu[36]*1e3);\n\n\t\n\tJCaCyt = cam(\ttimeinst,\n\t\t\t\t\tinitvalu,\n\t\t\t\t\tinitvalu_offset_Cyt,\n\t\t\t\t\tparameter,\n\t\t\t\t\t10,\n\t\t\t\t\tfinavalu,\n\t\t\t\t\tinitvalu[37]*1e3);\n\n\t\n\tcom[0] = JCaDyad;\n\tcom[1] = JCaSL;\n\tcom[2] = JCaCyt;\n\n\ttime1 = get_time();\n\n\t\n\ttime2 = get_time();\n\n\t\n\ttime3 = get_time();\n\n\t\n\ttimecopyin[0] = timecopyin[0] + (time1-time0);\n\ttimekernel[0] = timekernel[0] + (time2-time1);\n\ttimecopyout[0] = timecopyout[0] + (time3-time2);\n\n\t\n\tkernel_fin(\tinitvalu,\n\t\t\t\tinitvalu_offset_ecc,\n\t\t\t\tinitvalu_offset_Dyad,\n\t\t\t\tinitvalu_offset_SL,\n\t\t\t\tinitvalu_offset_Cyt,\n\t\t\t\tparameter,\n\t\t\t\tfinavalu,\n\t\t\t\tcom[0],\n\t\t\t\tcom[1],\n\t\t\t\tcom[2]);\n\n\t\n\tfor(i=0; i<EQUATIONS; i++){\n\t\tif (isnan(finavalu[i]) == 1){ \n\t\t\tfinavalu[i] = 0.0001;\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t}\n\t\telse if (isinf(finavalu[i]) == 1){ \n\t\t\tfinavalu[i] = 0.0001;\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t}\n\t}\n\n#ifdef TIMING\n    h2d_time += (time1-time0)/1000.0;\n    kernel_time += (time2-time1)/1000.0;\n    d2h_time += (time3-time2)/1000.0;\n#endif\n\n\t\n}\n"
+  },
+  "target_files_expected": [
+    "main.c",
+    "master.c"
+  ],
+  "target_files_extracted": [
+    "main.c",
+    "master.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 21.143,
+      "prompt_tokens": 46820,
+      "completion_tokens": 3014,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "rm: cannot remove '*.o': No such file or directory\nrm: cannot remove 'myocyte.out': No such file or directory\nrm: cannot remove 'output.txt': No such file or directory\nmake: *** [Makefile:32: clean] Error 1\n\nmain.c:1:10: fatal error: ../common.h: No such file or directory\n    1 | #include \"../common.h\"\n      |          ^~~~~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:27: main.o] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

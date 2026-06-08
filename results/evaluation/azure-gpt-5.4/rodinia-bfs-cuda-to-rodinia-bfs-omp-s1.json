@@ -1,0 +1,71 @@
+{
+  "source_spec": "rodinia-bfs-cuda",
+  "target_spec": "rodinia-bfs-omp",
+  "kernel": "bfs",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 277232206,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "../../data/bfs/graph1MW_6.txt"
+  ],
+  "timestamp": "2026-04-25T22:01:21Z",
+  "prompt_tokens": 2609,
+  "completion_tokens": 3744,
+  "llm_response_time_seconds": 64.869,
+  "build_status": "pass",
+  "build_time_seconds": 0.158,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.126,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Reading File\nRead File\nCopied Everything to GPU memory\nStart traversing the tree\nKernel Executed 12 times\nResult stored in result.txt\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": 1.126,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0009,
+  "translated_files": {
+    "bfs.cpp": "#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <omp.h>\n\n#ifdef TIMING\n#include \"timing.h\"\n#endif\n\n#define MAX_THREADS_PER_BLOCK 512\n\nint no_of_nodes;\nint edge_list_size;\nFILE *fp;\n\n#ifdef TIMING\nstruct timeval tv;\nstruct timeval tv_total_start, tv_total_end;\nstruct timeval tv_h2d_start, tv_h2d_end;\nstruct timeval tv_d2h_start, tv_d2h_end;\nstruct timeval tv_kernel_start, tv_kernel_end;\nstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\nstruct timeval tv_close_start, tv_close_end;\nfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n      d2h_time = 0, close_time = 0, total_time = 0;\n#endif\n\nstruct Node\n{\n    int starting;\n    int no_of_edges;\n};\n\nstatic void Kernel(Node* g_graph_nodes, int* g_graph_edges, bool* g_graph_mask,\n                   bool* g_updating_graph_mask, bool* g_graph_visited,\n                   int* g_cost, int no_of_nodes)\n{\n    #pragma omp parallel for schedule(static)\n    for (int tid = 0; tid < no_of_nodes; tid++)\n    {\n        if (g_graph_mask[tid])\n        {\n            g_graph_mask[tid] = false;\n            for (int i = g_graph_nodes[tid].starting;\n                 i < (g_graph_nodes[tid].no_of_edges + g_graph_nodes[tid].starting);\n                 i++)\n            {\n                int id = g_graph_edges[i];\n                if (!g_graph_visited[id])\n                {\n                    #pragma omp critical\n                    {\n                        if (!g_graph_visited[id])\n                        {\n                            g_cost[id] = g_cost[tid] + 1;\n                            g_updating_graph_mask[id] = true;\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n\nstatic void Kernel2(bool* g_graph_mask, bool* g_updating_graph_mask,\n                    bool* g_graph_visited, bool* g_over, int no_of_nodes)\n{\n    int over = 0;\n\n    #pragma omp parallel for reduction(|:over) schedule(static)\n    for (int tid = 0; tid < no_of_nodes; tid++)\n    {\n        if (g_updating_graph_mask[tid])\n        {\n            g_graph_mask[tid] = true;\n            g_graph_visited[tid] = true;\n            over = 1;\n            g_updating_graph_mask[tid] = false;\n        }\n    }\n\n    *g_over = (over != 0);\n}\n\nvoid BFSGraph(int argc, char** argv);\n\nint main(int argc, char** argv)\n{\n    no_of_nodes = 0;\n    edge_list_size = 0;\n    BFSGraph(argc, argv);\n    return 0;\n}\n\nvoid Usage(int argc, char** argv)\n{\n    fprintf(stderr, \"Usage: %s <input_file>\\n\", argv[0]);\n}\n\nvoid BFSGraph(int argc, char** argv)\n{\n    char *input_f;\n    if (argc != 2) {\n        Usage(argc, argv);\n        exit(0);\n    }\n\n    input_f = argv[1];\n    printf(\"Reading File\\n\");\n\n    fp = fopen(input_f, \"r\");\n    if (!fp)\n    {\n        printf(\"Error Reading graph file\\n\");\n        return;\n    }\n\n    int source = 0;\n\n    fscanf(fp, \"%d\", &no_of_nodes);\n\n    int num_of_blocks = 1;\n    int num_of_threads_per_block = no_of_nodes;\n\n    if (no_of_nodes > MAX_THREADS_PER_BLOCK)\n    {\n        num_of_blocks = (int)ceil(no_of_nodes / (double)MAX_THREADS_PER_BLOCK);\n        num_of_threads_per_block = MAX_THREADS_PER_BLOCK;\n    }\n\n    Node* h_graph_nodes = (Node*) malloc(sizeof(Node) * no_of_nodes);\n    bool* h_graph_mask = (bool*) malloc(sizeof(bool) * no_of_nodes);\n    bool* h_updating_graph_mask = (bool*) malloc(sizeof(bool) * no_of_nodes);\n    bool* h_graph_visited = (bool*) malloc(sizeof(bool) * no_of_nodes);\n\n    int start, edgeno;\n\n    for (unsigned int i = 0; i < (unsigned int)no_of_nodes; i++)\n    {\n        fscanf(fp, \"%d %d\", &start, &edgeno);\n        h_graph_nodes[i].starting = start;\n        h_graph_nodes[i].no_of_edges = edgeno;\n        h_graph_mask[i] = false;\n        h_updating_graph_mask[i] = false;\n        h_graph_visited[i] = false;\n    }\n\n    fscanf(fp, \"%d\", &source);\n    source = 0;\n\n    h_graph_mask[source] = true;\n    h_graph_visited[source] = true;\n\n    fscanf(fp, \"%d\", &edge_list_size);\n\n    int id, cost;\n    int* h_graph_edges = (int*) malloc(sizeof(int) * edge_list_size);\n    for (int i = 0; i < edge_list_size; i++)\n    {\n        fscanf(fp, \"%d\", &id);\n        fscanf(fp, \"%d\", &cost);\n        h_graph_edges[i] = id;\n    }\n\n    if (fp)\n        fclose(fp);\n\n    printf(\"Read File\\n\");\n\n#ifdef TIMING\n    gettimeofday(&tv_total_start, NULL);\n#endif\n\n    Node* d_graph_nodes = (Node*) malloc(sizeof(Node) * no_of_nodes);\n    memcpy(d_graph_nodes, h_graph_nodes, sizeof(Node) * no_of_nodes);\n\n    int* d_graph_edges = (int*) malloc(sizeof(int) * edge_list_size);\n    memcpy(d_graph_edges, h_graph_edges, sizeof(int) * edge_list_size);\n\n    bool* d_graph_mask = (bool*) malloc(sizeof(bool) * no_of_nodes);\n    memcpy(d_graph_mask, h_graph_mask, sizeof(bool) * no_of_nodes);\n\n    bool* d_updating_graph_mask = (bool*) malloc(sizeof(bool) * no_of_nodes);\n    memcpy(d_updating_graph_mask, h_updating_graph_mask, sizeof(bool) * no_of_nodes);\n\n    bool* d_graph_visited = (bool*) malloc(sizeof(bool) * no_of_nodes);\n    memcpy(d_graph_visited, h_graph_visited, sizeof(bool) * no_of_nodes);\n\n    int* h_cost = (int*) malloc(sizeof(int) * no_of_nodes);\n    for (int i = 0; i < no_of_nodes; i++)\n        h_cost[i] = -1;\n    h_cost[source] = 0;\n\n    int* d_cost = (int*) malloc(sizeof(int) * no_of_nodes);\n    memcpy(d_cost, h_cost, sizeof(int) * no_of_nodes);\n\n    bool* d_over = (bool*) malloc(sizeof(bool));\n\n#ifdef TIMING\n    gettimeofday(&tv_mem_alloc_end, NULL);\n    tvsub(&tv_mem_alloc_end, &tv_total_start, &tv);\n    h2d_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n    (void)num_of_blocks;\n    (void)num_of_threads_per_block;\n\n    printf(\"Copied Everything to GPU memory\\n\");\n\n    int k = 0;\n    printf(\"Start traversing the tree\\n\");\n    bool stop;\n\n    do\n    {\n        stop = false;\n#ifdef TIMING\n        gettimeofday(&tv_h2d_start, NULL);\n#endif\n        memcpy(d_over, &stop, sizeof(bool));\n#ifdef TIMING\n        gettimeofday(&tv_h2d_end, NULL);\n        tvsub(&tv_h2d_end, &tv_h2d_start, &tv);\n        h2d_time += tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n        Kernel(d_graph_nodes, d_graph_edges, d_graph_mask, d_updating_graph_mask,\n               d_graph_visited, d_cost, no_of_nodes);\n\n        Kernel2(d_graph_mask, d_updating_graph_mask, d_graph_visited, d_over,\n                no_of_nodes);\n\n#ifdef TIMING\n        gettimeofday(&tv_kernel_end, NULL);\n        tvsub(&tv_kernel_end, &tv_h2d_end, &tv);\n        kernel_time += tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n        memcpy(&stop, d_over, sizeof(bool));\n#ifdef TIMING\n        gettimeofday(&tv_d2h_end, NULL);\n        tvsub(&tv_d2h_end, &tv_kernel_end, &tv);\n        d2h_time += tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n        k++;\n    }\n    while (stop);\n\n    printf(\"Kernel Executed %d times\\n\", k);\n\n#ifdef TIMING\n    gettimeofday(&tv_d2h_start, NULL);\n#endif\n    memcpy(h_cost, d_cost, sizeof(int) * no_of_nodes);\n#ifdef TIMING\n    gettimeofday(&tv_d2h_end, NULL);\n    tvsub(&tv_d2h_end, &tv_d2h_start, &tv);\n    d2h_time += tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n    FILE *fpo = fopen(\"result.txt\", \"w\");\n    for (int i = 0; i < no_of_nodes; i++)\n        fprintf(fpo, \"%d) cost:%d\\n\", i, h_cost[i]);\n    fclose(fpo);\n    printf(\"Result stored in result.txt\\n\");\n\n    free(h_graph_nodes);\n    free(h_graph_edges);\n    free(h_graph_mask);\n    free(h_updating_graph_mask);\n    free(h_graph_visited);\n    free(h_cost);\n#ifdef TIMING\n    gettimeofday(&tv_close_start, NULL);\n#endif\n    free(d_graph_nodes);\n    free(d_graph_edges);\n    free(d_graph_mask);\n    free(d_updating_graph_mask);\n    free(d_graph_visited);\n    free(d_cost);\n    free(d_over);\n\n#ifdef TIMING\n    gettimeofday(&tv_close_end, NULL);\n    tvsub(&tv_close_end, &tv_close_start, &tv);\n    close_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n    tvsub(&tv_close_end, &tv_total_start, &tv);\n    total_time = tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n\n    printf(\"Init: %f\\n\", init_time);\n    printf(\"MemAlloc: %f\\n\", mem_alloc_time);\n    printf(\"HtoD: %f\\n\", h2d_time);\n    printf(\"Exec: %f\\n\", kernel_time);\n    printf(\"DtoH: %f\\n\", d2h_time);\n    printf(\"Close: %f\\n\", close_time);\n    printf(\"Total: %f\\n\", total_time);\n#endif\n}\n"
+  },
+  "target_files_expected": [
+    "bfs.cpp"
+  ],
+  "target_files_extracted": [
+    "bfs.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 64.869,
+      "prompt_tokens": 2609,
+      "completion_tokens": 3744,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

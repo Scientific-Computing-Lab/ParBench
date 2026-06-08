@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-pathfinder-omp",
+  "target_spec": "rodinia-pathfinder-opencl",
+  "kernel": "pathfinder",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 793451816,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-c",
+    "100000",
+    "-r",
+    "100",
+    "-h",
+    "20"
+  ],
+  "timestamp": "2026-05-01T01:05:30Z",
+  "prompt_tokens": 3914,
+  "completion_tokens": 1891,
+  "llm_response_time_seconds": 22.345,
+  "build_status": "pass",
+  "build_time_seconds": 0.476,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.261,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Init: 142.132004\nMemAlloc: 0.004000\nHtoD: 2.209696\nExec: 2.123488\nDtoH: 0.017536\nClose: 0.858000\nTotal: 149.755997\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.261,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernels.cl": "#define IN_RANGE(x, min, max) ((x) >= (min) && (x) <= (max))\n#define MIN(a, b) ((a) <= (b) ? (a) : (b))\n\n__kernel void dynproc_kernel(\n    int iteration,\n    __global int* gpuWall,\n    __global int* gpuSrc,\n    __global int* gpuResults,\n    int cols,\n    int rows,\n    int startStep,\n    int border,\n    int HALO,\n    __local int* prev,\n    __local int* result,\n    __global int* outputBuffer)\n{\n    (void)rows;\n    (void)HALO;\n    (void)outputBuffer;\n\n    int bx = get_group_id(0);\n    int tx = get_local_id(0);\n    int local_size = (int)get_local_size(0);\n\n    int small_block_cols = local_size - iteration * 2;\n    int blkX = small_block_cols * bx - border;\n    int blkXmax = blkX + local_size - 1;\n    int xidx = blkX + tx;\n\n    if (IN_RANGE(xidx, 0, cols - 1)) {\n        prev[tx] = gpuSrc[xidx];\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    int validXmin = (blkX < 0) ? -blkX : 0;\n    int validXmax = (blkXmax > (cols - 1)) ? (local_size - 1 - (blkXmax - (cols - 1))) : (local_size - 1);\n\n    for (int i = 0; i < iteration; i++) {\n        int isValid = 0;\n\n        if (IN_RANGE(tx, i + 1, local_size - i - 2) && IN_RANGE(tx, validXmin, validXmax)) {\n            isValid = 1;\n            int left = prev[tx - 1];\n            int up = prev[tx];\n            int right = prev[tx + 1];\n            int shortest = MIN(MIN(left, up), right);\n            int index = cols * (startStep + i) + xidx;\n            result[tx] = shortest + gpuWall[index];\n        }\n\n        barrier(CLK_LOCAL_MEM_FENCE);\n\n        if (i == iteration - 1) {\n            if (isValid) {\n                gpuResults[xidx] = result[tx];\n            }\n        } else {\n            if (isValid) {\n                prev[tx] = result[tx];\n            }\n            barrier(CLK_LOCAL_MEM_FENCE);\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernels.cl"
+  ],
+  "target_files_extracted": [
+    "kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 22.345,
+      "prompt_tokens": 3914,
+      "completion_tokens": 1891,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

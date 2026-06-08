@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-bptree-omp",
+  "target_spec": "rodinia-bptree-opencl",
+  "kernel": "bptree",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 512817157,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-05-01T00:41:03Z",
+  "prompt_tokens": 21108,
+  "completion_tokens": 2884,
+  "llm_response_time_seconds": 34.237,
+  "build_status": "pass",
+  "build_time_seconds": 0.542,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.491,
+  "run_exit_code": 245,
+  "run_stderr_snippet": "2 errors generated.\n",
+  "run_stdout_snippet": "874, knodes_unit_mem=2068, knodes_mem=16283432\nPlatform: NVIDIA Corporation\nDevice num: 1\nCreating GPU Context\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n<<<<\n<kernel>:3:17: error: use of undeclared identifier 'DEFAULT_ORDER'\n    int indices[DEFAULT_ORDER + 1];\n                ^\n<kernel>:4:14: error: use of undeclared identifier 'DEFAULT_ORDER'\n    int keys[DEFAULT_ORDER + 1];\n             ^\n\n>>>>\n--------------------------------\nError at line 258: CL_BUILD_PROGRAM_FAILURE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 245)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.453,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "typedef struct record {\n    int value;\n} record;\n\ntypedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    uchar is_leaf;\n    int num_keys;\n} knode;\n\n__kernel void findK(const long maxheight,\n                    __global knode *knodes,\n                    const long knodes_elem,\n                    __global record *records,\n                    __global long *currKnode,\n                    __global long *offset,\n                    __global int *keys,\n                    __global record *ans) {\n    const int thid = (int)get_local_id(0);\n    const int bid = (int)get_group_id(0);\n\n    int i;\n    for (i = 0; i < maxheight; i++) {\n        long cknode = currKnode[bid];\n        int key = keys[bid];\n\n        if ((knodes[cknode].keys[thid] <= key) &&\n            (knodes[cknode].keys[thid + 1] > key)) {\n            int index = knodes[cknode].indices[thid];\n            if ((long)index < knodes_elem) {\n                offset[bid] = (long)index;\n            }\n        }\n\n        barrier(CLK_GLOBAL_MEM_FENCE);\n\n        if (thid == 0) {\n            currKnode[bid] = offset[bid];\n        }\n\n        barrier(CLK_GLOBAL_MEM_FENCE);\n    }\n\n    if (keys[bid] == knodes[currKnode[bid]].keys[thid]) {\n        ans[bid].value = records[knodes[currKnode[bid]].indices[thid]].value;\n    }\n}\n",
+    "kernel/kernel_gpu_opencl_2.cl": "typedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    uchar is_leaf;\n    int num_keys;\n} knode;\n\n__kernel void findRangeK(const long maxheight,\n                         __global knode *knodes,\n                         const long knodes_elem,\n                         __global long *currKnode,\n                         __global long *offset,\n                         __global long *lastKnode,\n                         __global long *offset_2,\n                         __global int *start,\n                         __global int *end,\n                         __global int *recstart,\n                         __global int *reclength) {\n    const int thid = (int)get_local_id(0);\n    const int bid = (int)get_group_id(0);\n\n    int i;\n    for (i = 0; i < maxheight; i++) {\n        long cknode = currKnode[bid];\n        long lknode = lastKnode[bid];\n        int s = start[bid];\n        int e = end[bid];\n\n        if ((knodes[cknode].keys[thid] <= s) &&\n            (s < knodes[cknode].keys[thid + 1])) {\n            int index = knodes[cknode].indices[thid];\n            if (knodes_elem > (long)index) {\n                offset[bid] = (long)index;\n            }\n        }\n\n        if ((e >= knodes[lknode].keys[thid]) &&\n            (e < knodes[lknode].keys[thid + 1])) {\n            int index2 = knodes[lknode].indices[thid];\n            if (knodes_elem > (long)index2) {\n                offset_2[bid] = (long)index2;\n            }\n        }\n\n        barrier(CLK_GLOBAL_MEM_FENCE);\n\n        if (thid == 0) {\n            currKnode[bid] = offset[bid];\n            lastKnode[bid] = offset_2[bid];\n        }\n\n        barrier(CLK_GLOBAL_MEM_FENCE);\n    }\n\n    if (knodes[currKnode[bid]].keys[thid] == start[bid]) {\n        recstart[bid] = knodes[currKnode[bid]].indices[thid];\n    }\n\n    barrier(CLK_GLOBAL_MEM_FENCE);\n\n    if (knodes[lastKnode[bid]].keys[thid] == end[bid]) {\n        reclength[bid] = knodes[lastKnode[bid]].indices[thid] - recstart[bid] + 1;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 34.237,
+      "prompt_tokens": 21108,
+      "completion_tokens": 2884,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "2 errors generated.\n",
+      "run_stdout_snippet": "874, knodes_unit_mem=2068, knodes_mem=16283432\nPlatform: NVIDIA Corporation\nDevice num: 1\nCreating GPU Context\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n<<<<\n<kernel>:3:17: error: use of undeclared identifier 'DEFAULT_ORDER'\n    int indices[DEFAULT_ORDER + 1];\n                ^\n<kernel>:4:14: error: use of undeclared identifier 'DEFAULT_ORDER'\n    int keys[DEFAULT_ORDER + 1];\n             ^\n\n>>>>\n--------------------------------\nError at line 258: CL_BUILD_PROGRAM_FAILURE\n",
+      "extraction_fail": null
+    }
+  ]
+}

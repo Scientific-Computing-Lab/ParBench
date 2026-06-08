@@ -1,0 +1,2449 @@
+[
+  {
+    "spec_id": "rodinia-backprop-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "backprop.c": [],
+      "backprop_kernel.c": [],
+      "facetrain.c": [],
+      "imagenet.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.017,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-backprop-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "backprop.c": [],
+      "backprop_kernel.c": [],
+      "facetrain.c": [],
+      "imagenet.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.016,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-backprop-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "backprop.c": [],
+      "backprop_kernel.c": [],
+      "facetrain.c": [],
+      "imagenet.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.016,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-backprop-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "backprop.c": [],
+      "backprop_kernel.c": [
+        "ChangeNames"
+      ],
+      "facetrain.c": [
+        "ChangeNames"
+      ],
+      "imagenet.c": []
+    },
+    "transforms_summary": [
+      "ChangeNames"
+    ],
+    "files_changed": [
+      "backprop_kernel.c",
+      "facetrain.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.017,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bfs-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bfs.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bfs-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bfs.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bfs-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bfs.cpp": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "bfs.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bfs-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "bfs.cpp": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "bfs.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bptree-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_cpu.c": [],
+      "kernel/kernel_cpu_2.c": [],
+      "main.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.499,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bptree-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_cpu.c": [],
+      "kernel/kernel_cpu_2.c": [],
+      "main.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.48,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-bptree-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_cpu.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kernel/kernel_cpu_2.c": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "main.c": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_cpu.c",
+      "kernel/kernel_cpu_2.c",
+      "main.c"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "\", &input);\n      |                                 ^~~~~~~~~~~~~~~~~~~\n./main.c:2246:33: warning: ignoring return value of \u2018scanf\u2019 declared with attribute \u2018warn_unused_result\u2019 [-Wunused-result]\n 2246 |                                 scanf(\"%d\", &start);\n      |                                 ^~~~~~~~~~~~~~~~~~~\n./main.c:2247:33: warning: ignoring return value of \u2018scanf\u2019 declared with attribute \u2018warn_unused_result\u2019 [-Wunused-result]\n 2247 |                                 scanf(\"%d\", &v_118);\n      |                                 ^~~~~~~~~~~~~~~~~~~\nmake: *** [Makefile:33: main.o] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-bptree-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_cpu.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kernel/kernel_cpu_2.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "main.c": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_cpu.c",
+      "kernel/kernel_cpu_2.c",
+      "main.c"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "x_169);\n      |                                 ^~~~~~~~~~~~~~~~~~~\n./main.c:2246:33: warning: ignoring return value of \u2018scanf\u2019 declared with attribute \u2018warn_unused_result\u2019 [-Wunused-result]\n 2246 |                                 scanf(\"%d\", &x_185);\n      |                                 ^~~~~~~~~~~~~~~~~~~\n./main.c:2247:33: warning: ignoring return value of \u2018scanf\u2019 declared with attribute \u2018warn_unused_result\u2019 [-Wunused-result]\n 2247 |                                 scanf(\"%d\", &val_186);\n      |                                 ^~~~~~~~~~~~~~~~~~~~~\nmake: *** [Makefile:33: main.o] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-cfd-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "euler3d_cpu.cpp": [],
+      "euler3d_cpu_double.cpp": [],
+      "pre_euler3d_cpu.cpp": [],
+      "pre_euler3d_cpu_double.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pre_euler3d_cpu_double.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 112.279,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-cfd-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "euler3d_cpu.cpp": [],
+      "euler3d_cpu_double.cpp": [],
+      "pre_euler3d_cpu.cpp": [],
+      "pre_euler3d_cpu_double.cpp": [
+        "SwapCondition"
+      ]
+    },
+    "transforms_summary": [
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pre_euler3d_cpu_double.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 106.191,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-cfd-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "euler3d_cpu.cpp": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "euler3d_cpu_double.cpp": [
+        "ArithmeticTransform",
+        "ChangeNames"
+      ],
+      "pre_euler3d_cpu.cpp": [
+        "ArithmeticTransform",
+        "SwapCondition"
+      ],
+      "pre_euler3d_cpu_double.cpp": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "euler3d_cpu.cpp",
+      "euler3d_cpu_double.cpp",
+      "pre_euler3d_cpu.cpp",
+      "pre_euler3d_cpu_double.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "euler3d_cpu.cpp: In function \u2018int main(int, char**)\u2019:\neuler3d_cpu.cpp:407:57: error: invalid types \u2018int[int]\u2019 for array subscript\n  407 |                 ff_momentum.y = ff_variable+VAR_MOMENTUM[1];\n      |                                                         ^\nmake: *** [makefile:15: euler3d_cpu] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-cfd-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "euler3d_cpu.cpp": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "euler3d_cpu_double.cpp": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "pre_euler3d_cpu.cpp": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "pre_euler3d_cpu_double.cpp": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "euler3d_cpu.cpp",
+      "euler3d_cpu_double.cpp",
+      "pre_euler3d_cpu.cpp",
+      "pre_euler3d_cpu_double.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "ipt\n  407 |                 tmp_106.y = v_96+VAR_MOMENTUM[1];\n      |                                              ^\neuler3d_cpu.cpp:408:46: error: invalid types \u2018int[int]\u2019 for array subscript\n  408 |                 tmp_106.z = v_96+VAR_MOMENTUM[2];\n      |                                              ^\neuler3d_cpu.cpp:437:43: error: lvalue required as decrement operand\n  437 |                                 *((v_110) + (i + j*var_108))--; //it's coming in with Fortran numbering\n      |                                  ~~~~~~~~~^~~~~~~~~~~~~~~~~~\nmake: *** [makefile:15: euler3d_cpu] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-heartwall-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "define.c": [],
+      "kernel.c": [],
+      "main.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 2.579,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-heartwall-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "define.c": [],
+      "kernel.c": [],
+      "main.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 2.564,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-heartwall-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "define.c": [],
+      "kernel.c": [],
+      "main.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 2.565,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-heartwall-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "define.c": [],
+      "kernel.c": [],
+      "main.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "main.c"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "public.frame_rows = AVI_video_height(public.data_12);\n      |                                                    ^\nmain.c:134:51: error: \u2018public_struct\u2019 has no member named \u2018data_12\u2019\n  134 |         public.frame_cols = AVI_video_width(public.data_12);\n      |                                                   ^\nmain.c:536:50: error: \u2018public_struct\u2019 has no member named \u2018data_12\u2019\n  536 |                 public.d_frame = get_frame(public.data_12,                              // pointer to video file\n      |                                                  ^\nmake: *** [makefile:12: main.o] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-hotspot-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot_openmp.cpp": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "hotspot_openmp.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.07,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot_openmp.cpp": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "hotspot_openmp.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.071,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot_openmp.cpp": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "hotspot_openmp.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.069,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hotspot_openmp.cpp": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "hotspot_openmp.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.07,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot3d-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "3D.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.435,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot3d-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "3D.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.459,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot3d-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "3D.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "3D.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.43,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-hotspot3d-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "3D.c": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "3D.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.435,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-kmeans-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kmeans_openmp/cluster.c": [],
+      "kmeans_openmp/getopt.c": [],
+      "kmeans_openmp/kmeans.c": [],
+      "kmeans_openmp/kmeans_clustering.c": [
+        "SwapCondition"
+      ],
+      "kmeans_serial/cluster.c": [],
+      "kmeans_serial/getopt.c": [],
+      "kmeans_serial/kmeans.c": [
+        "SwapCondition"
+      ],
+      "kmeans_serial/kmeans_clustering.c": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kmeans_openmp/kmeans_clustering.c",
+      "kmeans_serial/kmeans.c",
+      "kmeans_serial/kmeans_clustering.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 1.845,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-kmeans-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kmeans_openmp/cluster.c": [],
+      "kmeans_openmp/getopt.c": [],
+      "kmeans_openmp/kmeans.c": [],
+      "kmeans_openmp/kmeans_clustering.c": [
+        "SwapCondition"
+      ],
+      "kmeans_serial/cluster.c": [],
+      "kmeans_serial/getopt.c": [],
+      "kmeans_serial/kmeans.c": [
+        "SwapCondition"
+      ],
+      "kmeans_serial/kmeans_clustering.c": [
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kmeans_openmp/kmeans_clustering.c",
+      "kmeans_serial/kmeans.c",
+      "kmeans_serial/kmeans_clustering.c"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "sizeof(int));\n      |         ^~~~\n      |         fread\nkmeans.c:160:9: warning: implicit declaration of function \u2018close\u2019; did you mean \u2018pclose\u2019? [-Wimplicit-function-declaration]\n  160 |         close(infile);\n      |         ^~~~~\n      |         pclose\nkmeans_clustering.c: In function \u2018kmeans_clustering\u2019:\nkmeans_clustering.c:170:47: error: lvalue required as increment operand\n  170 |                 *((new_centers_len) + (index))++;\n      |                                               ^~\nmake[1]: *** [Makefile:21: kmeans_clustering.o] Error 1\nmake: *** [Makefile:7: SERIAL/kmeans] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-kmeans-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kmeans_openmp/cluster.c": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kmeans_openmp/getopt.c": [],
+      "kmeans_openmp/kmeans.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kmeans_openmp/kmeans_clustering.c": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kmeans_serial/cluster.c": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kmeans_serial/getopt.c": [],
+      "kmeans_serial/kmeans.c": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "kmeans_serial/kmeans_clustering.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kmeans_openmp/cluster.c",
+      "kmeans_openmp/kmeans.c",
+      "kmeans_openmp/kmeans_clustering.c",
+      "kmeans_serial/cluster.c",
+      "kmeans_serial/kmeans.c",
+      "kmeans_serial/kmeans_clustering.c"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "^~~~\n      |         fread\nkmeans.c:165:9: warning: implicit declaration of function \u2018close\u2019; did you mean \u2018pclose\u2019? [-Wimplicit-function-declaration]\n  165 |         close(infile);\n      |         ^~~~~\n      |         pclose\nkmeans_clustering.c: In function \u2018kmeans_clustering\u2019:\nkmeans_clustering.c:206:62: error: lvalue required as increment operand\n  206 |                 *((partial_new_centers_len[tid]) + (item_11))++;\n      |                                                              ^~\nmake[1]: *** [Makefile:21: kmeans_clustering.o] Error 1\nmake: *** [Makefile:4: OPENMP/kmeans] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-kmeans-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kmeans_openmp/cluster.c": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kmeans_openmp/getopt.c": [],
+      "kmeans_openmp/kmeans.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kmeans_openmp/kmeans_clustering.c": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kmeans_serial/cluster.c": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kmeans_serial/getopt.c": [],
+      "kmeans_serial/kmeans.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "kmeans_serial/kmeans_clustering.c": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kmeans_openmp/cluster.c",
+      "kmeans_openmp/kmeans.c",
+      "kmeans_openmp/kmeans_clustering.c",
+      "kmeans_serial/cluster.c",
+      "kmeans_serial/kmeans.c",
+      "kmeans_serial/kmeans_clustering.c"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "9,    sizeof(int));\n      |         ^~~~\n      |         fread\nkmeans.c:165:9: warning: implicit declaration of function \u2018close\u2019; did you mean \u2018pclose\u2019? [-Wimplicit-function-declaration]\n  165 |         close(x_15);\n      |         ^~~~~\n      |         pclose\nkmeans_clustering.c: In function \u2018kmeans_clustering\u2019:\nkmeans_clustering.c:206:45: error: lvalue required as increment operand\n  206 |                 *((var_25[val_27]) + (x_17))++;\n      |                                             ^~\nmake[1]: *** [Makefile:21: kmeans_clustering.o] Error 1\nmake: *** [Makefile:4: OPENMP/kmeans] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-lavamd-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_cpu.c": [],
+      "main.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lavamd-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_cpu.c": [],
+      "main.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lavamd-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_cpu.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "main.c": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_cpu.c",
+      "main.c"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "tf(\"%15.12f s, %15.12f % : CPU/MCPU: INPUTS\\n\",                             (float) (time3-time2) / 1000000, (float) (time3-time2) / (float) (time4-time0) * 100);\n      |                                      ^\n./kernel/kernel_cpu.c:209:38: warning: unknown conversion type character \u2018:\u2019 in format [-Wformat=]\n  209 |         printf(\"%15.12f s, %15.12f % : CPU/MCPU: KERNEL\\n\",                                     (float) (time4-time3) / 1000000, (float) (time4-time3) / (float) (time4-time0) * 100);\n      |                                      ^\nmake: *** [makefile:45: kernel/kernel_cpu.o] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-lavamd-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "kernel/kernel_cpu.c": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "main.c": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "kernel/kernel_cpu.c",
+      "main.c"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "tf(\"%15.12f s, %15.12f % : CPU/MCPU: INPUTS\\n\",                             (float) (var_9-x_8) / 1000000, (float) (var_9-x_8) / (float) (data_10-x_6) * 100);\n      |                                      ^\n./kernel/kernel_cpu.c:209:38: warning: unknown conversion type character \u2018:\u2019 in format [-Wformat=]\n  209 |         printf(\"%15.12f s, %15.12f % : CPU/MCPU: KERNEL\\n\",                                     (float) (data_10-var_9) / 1000000, (float) (data_10-var_9) / (float) (data_10-x_6) * 100);\n      |                                      ^\nmake: *** [makefile:45: kernel/kernel_cpu.o] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-lud-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "base/lud.c": [],
+      "base/lud_base.c": [],
+      "common/common.c": [],
+      "omp/lud.c": [
+        "SwapCondition"
+      ],
+      "omp/lud_omp.c": [
+        "SwapCondition"
+      ],
+      "tools/gen_input.c": [
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "omp/lud.c",
+      "omp/lud_omp.c",
+      "tools/gen_input.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.004,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lud-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "base/lud.c": [],
+      "base/lud_base.c": [],
+      "common/common.c": [],
+      "omp/lud.c": [
+        "SwapCondition"
+      ],
+      "omp/lud_omp.c": [
+        "SwapCondition"
+      ],
+      "tools/gen_input.c": [
+        "ArithmeticTransform"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "omp/lud.c",
+      "omp/lud_omp.c",
+      "tools/gen_input.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.004,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-lud-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "base/lud.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "base/lud_base.c": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "common/common.c": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "omp/lud.c": [
+        "SwapCondition",
+        "ChangeNames"
+      ],
+      "omp/lud_omp.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "tools/gen_input.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "base/lud.c",
+      "base/lud_base.c",
+      "common/common.c",
+      "omp/lud.c",
+      "omp/lud_omp.c",
+      "tools/gen_input.c"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "                                                          ^\nlud_omp.c:109:69: error: expected expression before \u2018)\u2019 token\n  109 |                         sum += *((BB((i_global+i),(j_global+k))) + ()) * temp[BS*k + j];\n      |                                                                     ^\nlud_omp.c:153:58: error: expected expression before \u2018)\u2019 token\n  153 |                     *((BB((i+i_global),(j+j_global))) + ()) -= *((sum) + (j));\n      |                                                          ^\nmake[1]: *** [Makefile:101: lud_omp.o] Error 1\nmake: *** [Makefile:4: lud_omp] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-lud-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "base/lud.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "base/lud_base.c": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "common/common.c": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "omp/lud.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "omp/lud_omp.c": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "tools/gen_input.c": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "base/lud.c",
+      "base/lud_base.c",
+      "common/common.c",
+      "omp/lud.c",
+      "omp/lud_omp.c",
+      "tools/gen_input.c"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "or: expected \u2018,\u2019 or \u2018;\u2019 at end of input\n   26 |         float elem_2 = 1.f/*((AA(i,i)) + (AA(i,i)));\n      |         ^~~~~\nlud_omp.c:26:9: error: expected declaration or statement at end of input\nlud_omp.c:26:15: warning: unused variable \u2018elem_2\u2019 [-Wunused-variable]\n   26 |         float elem_2 = 1.f/*((AA(i,i)) + (AA(i,i)));\n      |               ^~~~~~\nlud_omp.c:26:9: error: expected declaration or statement at end of input\n   26 |         float elem_2 = 1.f/*((AA(i,i)) + (AA(i,i)));\n      |         ^~~~~\nmake[1]: *** [Makefile:101: lud_omp.o] Error 1\nmake: *** [Makefile:4: lud_omp] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-mummergpu-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "src/PoolMalloc.cpp": [],
+      "src/common.cu": [],
+      "src/morton.c": [],
+      "src/mummergpu.cu": [
+        "SwapCondition"
+      ],
+      "src/mummergpu_gold.cpp": [
+        "SwapCondition"
+      ],
+      "src/mummergpu_kernel.cu": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "src/mummergpu_main.cpp": [
+        "ChangeNames"
+      ],
+      "src/smith-waterman.cpp": [
+        "ChangeNames"
+      ],
+      "src/suffix-tree.cpp": [
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "src/mummergpu.cu",
+      "src/mummergpu_gold.cpp",
+      "src/mummergpu_kernel.cu",
+      "src/mummergpu_main.cpp",
+      "src/smith-waterman.cpp",
+      "src/suffix-tree.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "int, TextureAddress, int, int, int, bool, bool)\u2019:\nsuffix-tree.cpp:2490:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2490 |   if (printParentId == matchNodeId)\n      |       ~~~~~~~~~~~~~~^~~~~~~~~~~~~~\nsuffix-tree.cpp:2630:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2630 |             if (cid == matchNodeId)\n      |                 ~~~~^~~~~~~~~~~~~~\nmake[1]: *** [Makefile:114: obj/release/suffix-tree.cpp_o] Error 1\nmake: *** [Makefile:4: mummer] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-mummergpu-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "src/PoolMalloc.cpp": [],
+      "src/common.cu": [],
+      "src/morton.c": [],
+      "src/mummergpu.cu": [
+        "SwapCondition"
+      ],
+      "src/mummergpu_gold.cpp": [
+        "ArithmeticTransform"
+      ],
+      "src/mummergpu_kernel.cu": [
+        "ArithmeticTransform"
+      ],
+      "src/mummergpu_main.cpp": [
+        "ChangeNames"
+      ],
+      "src/smith-waterman.cpp": [
+        "ChangeNames"
+      ],
+      "src/suffix-tree.cpp": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "src/mummergpu.cu",
+      "src/mummergpu_gold.cpp",
+      "src/mummergpu_kernel.cu",
+      "src/mummergpu_main.cpp",
+      "src/smith-waterman.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "int, TextureAddress, int, int, int, bool, bool)\u2019:\nsuffix-tree.cpp:2490:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2490 |   if (printParentId == matchNodeId)\n      |       ~~~~~~~~~~~~~~^~~~~~~~~~~~~~\nsuffix-tree.cpp:2630:21: warning: comparison of integer expressions of different signedness: \u2018int\u2019 and \u2018unsigned int\u2019 [-Wsign-compare]\n 2630 |             if (cid == matchNodeId)\n      |                 ~~~~^~~~~~~~~~~~~~\nmake[1]: *** [Makefile:114: obj/release/suffix-tree.cpp_o] Error 1\nmake: *** [Makefile:4: mummer] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-mummergpu-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "src/PoolMalloc.cpp": [],
+      "src/common.cu": [],
+      "src/morton.c": [
+        "SwapCondition"
+      ],
+      "src/mummergpu.cu": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "src/mummergpu_gold.cpp": [
+        "ArithmeticTransform",
+        "SwapCondition"
+      ],
+      "src/mummergpu_kernel.cu": [
+        "SwapCondition",
+        "ChangeNames"
+      ],
+      "src/mummergpu_main.cpp": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "src/smith-waterman.cpp": [
+        "TypedefExpansion",
+        "ChangeNames"
+      ],
+      "src/suffix-tree.cpp": [
+        "ArithmeticTransform",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "src/morton.c",
+      "src/mummergpu.cu",
+      "src/mummergpu_gold.cpp",
+      "src/mummergpu_kernel.cu",
+      "src/mummergpu_main.cpp",
+      "src/smith-waterman.cpp",
+      "src/suffix-tree.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "~~~~~~~~~\nsuffix-tree.cpp: In function \u2018int lookupNumLeaves(ReferencePage*, TextureAddress)\u2019:\nsuffix-tree.cpp:2182:30: error: \u2018elem_150\u2019 was not declared in this scope\n 2182 | #define NODE_PRINTPARENT(x) (elem_150->ref.aux_data[x].printParent)\n      |                              ^~~~~~~~\nsuffix-tree.cpp:2661:38: note: in expansion of macro \u2018NODE_PRINTPARENT\u2019\n 2661 |         TextureAddress printParent = NODE_PRINTPARENT(v_171);\n      |                                      ^~~~~~~~~~~~~~~~\nmake[1]: *** [Makefile:114: obj/release/suffix-tree.cpp_o] Error 1\nmake: *** [Makefile:4: mummer] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-mummergpu-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "src/PoolMalloc.cpp": [],
+      "src/common.cu": [],
+      "src/morton.c": [
+        "ArithmeticTransform",
+        "SwapCondition"
+      ],
+      "src/mummergpu.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "src/mummergpu_gold.cpp": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "src/mummergpu_kernel.cu": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "src/mummergpu_main.cpp": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "src/smith-waterman.cpp": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ],
+      "src/suffix-tree.cpp": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "src/morton.c",
+      "src/mummergpu.cu",
+      "src/mummergpu_gold.cpp",
+      "src/mummergpu_kernel.cu",
+      "src/mummergpu_main.cpp",
+      "src/smith-waterman.cpp",
+      "src/suffix-tree.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "             PixelOfNode* elem_50,\n      |                            ~~~~~~~~~~~~~^~~~~~~\nmummergpu_gold.cpp:617:50: warning: unused parameter \u2018tmp_51\u2019 [-Wunused-parameter]\n  617 |                                 PixelOfChildren* tmp_51,\n      |                                 ~~~~~~~~~~~~~~~~~^~~~~~\nmummergpu_gold.cpp:619:38: warning: unused parameter \u2018tmp_53\u2019 [-Wunused-parameter]\n  619 |                            const int tmp_53)\n      |                            ~~~~~~~~~~^~~~~~\nmake[1]: *** [Makefile:114: obj/release/mummergpu_gold.cpp_o] Error 1\nmake: *** [Makefile:4: mummer] Error 2\n"
+  },
+  {
+    "spec_id": "rodinia-myocyte-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "cam.c": [],
+      "define.c": [],
+      "ecc.c": [],
+      "embedded_fehlberg_7_8.c": [
+        "SwapCondition"
+      ],
+      "file.c": [
+        "SwapCondition"
+      ],
+      "fin.c": [
+        "ArithmeticTransform"
+      ],
+      "main.c": [],
+      "master.c": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "solver.c": [
+        "ChangeNames"
+      ],
+      "timer.c": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "embedded_fehlberg_7_8.c",
+      "file.c",
+      "fin.c",
+      "master.c",
+      "solver.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-myocyte-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "cam.c": [],
+      "define.c": [],
+      "ecc.c": [],
+      "embedded_fehlberg_7_8.c": [
+        "SwapCondition"
+      ],
+      "file.c": [
+        "SwapCondition"
+      ],
+      "fin.c": [],
+      "main.c": [
+        "ChangeNames"
+      ],
+      "master.c": [
+        "PointerArithmeticToArrayIndex"
+      ],
+      "solver.c": [
+        "ArithmeticTransform"
+      ],
+      "timer.c": []
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "embedded_fehlberg_7_8.c",
+      "file.c",
+      "main.c",
+      "master.c",
+      "solver.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-myocyte-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "cam.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "define.c": [],
+      "ecc.c": [
+        "SwapCondition"
+      ],
+      "embedded_fehlberg_7_8.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "file.c": [
+        "SwapCondition"
+      ],
+      "fin.c": [
+        "ArithmeticTransform",
+        "ChangeNames"
+      ],
+      "main.c": [],
+      "master.c": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "solver.c": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "timer.c": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "cam.c",
+      "ecc.c",
+      "embedded_fehlberg_7_8.c",
+      "file.c",
+      "fin.c",
+      "master.c",
+      "solver.c",
+      "timer.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-myocyte-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "cam.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "define.c": [],
+      "ecc.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "embedded_fehlberg_7_8.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "file.c": [
+        "SwapCondition",
+        "ChangeNames"
+      ],
+      "fin.c": [
+        "ArithmeticTransform",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "main.c": [
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "master.c": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "solver.c": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "timer.c": [
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "cam.c",
+      "ecc.c",
+      "embedded_fehlberg_7_8.c",
+      "file.c",
+      "fin.c",
+      "main.c",
+      "master.c",
+      "solver.c",
+      "timer.c"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "          ^\nfile.c: In function \u2018read\u2019:\nfile.c:109:33: warning: ignoring return value of \u2018fscanf\u2019 declared with attribute \u2018warn_unused_result\u2019 [-Wunused-result]\n  109 |                                 fscanf(item_12, \"%f\", &x_13);\n      |                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~\nfile.c:117:33: warning: ignoring return value of \u2018fscanf\u2019 declared with attribute \u2018warn_unused_result\u2019 [-Wunused-result]\n  117 |                                 fscanf(item_12, \"%f\", &x_13);\n      |                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~\nmake: *** [Makefile:27: main.o] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-nn-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hurricane_gen.c": [],
+      "nn_openmp.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "exit_code=1 != expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 1,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nn-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hurricane_gen.c": [],
+      "nn_openmp.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "exit_code=1 != expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 1,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nn-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hurricane_gen.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ],
+      "nn_openmp.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "hurricane_gen.c",
+      "nn_openmp.c"
+    ],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "exit_code=1 != expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 1,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nn-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "hurricane_gen.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ],
+      "nn_openmp.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "hurricane_gen.c",
+      "nn_openmp.c"
+    ],
+    "build_status": "pass",
+    "run_status": "fail",
+    "verify_status": "fail",
+    "overall_status": "FAIL",
+    "verify_details": "exit_code=1 != expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 1,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nw-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "needle.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.015,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nw-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "needle.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.072,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nw-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "needle.cpp": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "needle.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.016,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-nw-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "needle.cpp": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "needle.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.015,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-particlefilter-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "ex_particle_OPENMP_seq.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.007,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-particlefilter-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "ex_particle_OPENMP_seq.c": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.006,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-particlefilter-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "ex_particle_OPENMP_seq.c": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "ex_particle_OPENMP_seq.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.007,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-particlefilter-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "ex_particle_OPENMP_seq.c": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "ex_particle_OPENMP_seq.c"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.006,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-pathfinder-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "pathfinder.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-pathfinder-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "pathfinder.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.001,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-pathfinder-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "pathfinder.cpp": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pathfinder.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": " = *(() + ())MIN(min, src[n-1]);\n      |                      ^\npathfinder.cpp:102:27: error: expected primary-expression before \u2018)\u2019 token\n  102 |             min = *(() + ())MIN(min, src[n-1]);\n      |                           ^\npathfinder.cpp:104:22: error: expected primary-expression before \u2018)\u2019 token\n  104 |             min = *(() + ())MIN(min, src[n+1]);\n      |                      ^\npathfinder.cpp:104:27: error: expected primary-expression before \u2018)\u2019 token\n  104 |             min = *(() + ())MIN(min, src[n+1]);\n      |                           ^\nmake: *** [Makefile:7: release] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-pathfinder-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "pathfinder.cpp": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "pathfinder.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": ")MIN(min, data_2[n-1]);\n      |                      ^\npathfinder.cpp:102:27: error: expected primary-expression before \u2018)\u2019 token\n  102 |             min = *(() + ())MIN(min, data_2[n-1]);\n      |                           ^\npathfinder.cpp:104:22: error: expected primary-expression before \u2018)\u2019 token\n  104 |             min = *(() + ())MIN(min, data_2[n+1]);\n      |                      ^\npathfinder.cpp:104:27: error: expected primary-expression before \u2018)\u2019 token\n  104 |             min = *(() + ())MIN(min, data_2[n+1]);\n      |                           ^\nmake: *** [Makefile:7: release] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-srad-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "srad.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.006,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-srad-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "srad.cpp": []
+    },
+    "transforms_summary": [],
+    "files_changed": [],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.006,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-srad-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "srad.cpp": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex"
+      ]
+    },
+    "transforms_summary": [
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "srad.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.006,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-srad-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "srad.cpp": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition"
+    ],
+    "files_changed": [
+      "srad.cpp"
+    ],
+    "build_status": "pass",
+    "run_status": "pass",
+    "verify_status": "pass",
+    "overall_status": "PASS",
+    "verify_details": "exit_code=0 == expected 0. Process exits cleanly",
+    "wall_time_seconds": 0.006,
+    "exit_code": 0,
+    "tempdir": null,
+    "details": ""
+  },
+  {
+    "spec_id": "rodinia-streamcluster-omp",
+    "augment_level": 1,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "streamcluster_omp.cpp": [
+        "TypedefExpansion"
+      ],
+      "streamcluster_original.cpp": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "streamcluster_omp.cpp",
+      "streamcluster_original.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "902 | int contcenters(Points *points)\n      |                 ~~~~~~~~^~~~~~\nstreamcluster_original.cpp:1173:17: error: cannot convert \u2018int*\u2019 to \u2018Points*\u2019\n 1173 |     copycenters(&points, &centers, centerIDs, IDoffset);\n      |                 ^~~~~~~\n      |                 |\n      |                 int*\nstreamcluster_original.cpp:925:26: note:   initializing argument 1 of \u2018void copycenters(Points*, Points*, long int*, long int)\u2019\n  925 | void copycenters(Points *points, Points* centers, long* centerIDs, long offset)\n      |                  ~~~~~~~~^~~~~~\nmake: *** [Makefile:16: cpu] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-streamcluster-omp",
+    "augment_level": 2,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "streamcluster_omp.cpp": [
+        "TypedefExpansion"
+      ],
+      "streamcluster_original.cpp": [
+        "TypedefExpansion"
+      ]
+    },
+    "transforms_summary": [
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "streamcluster_omp.cpp",
+      "streamcluster_original.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "ize_t\u2019 {aka \u2018long unsigned int\u2019} [-Wformat=]\n 1143 |     fprintf(stderr,\"read %d points\\n\",numRead);\n      |                          ~^           ~~~~~~~\n      |                           |           |\n      |                           int         size_t {aka long unsigned int}\n      |                          %ld\nstreamcluster_original.cpp:1152:19: error: request for member \u2018weight\u2019 in \u2018*(points.Points::p + ((sizetype)(((long unsigned int)i) * 4)))\u2019, which is of non-class type \u2018int\u2019\n 1152 |       points.p[i].weight = 1.0;\n      |                   ^~~~~~\nmake: *** [Makefile:16: cpu] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-streamcluster-omp",
+    "augment_level": 3,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "streamcluster_omp.cpp": [
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion"
+      ],
+      "streamcluster_original.cpp": [
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "streamcluster_omp.cpp",
+      "streamcluster_original.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": "mbership = (bool*)malloc(centers.num*sizeof(bool));\n      |                                             ^~~\nstreamcluster_original.cpp:1191:37: error: request for member \u2018num\u2019 in \u2018centers\u2019, which is of non-class type \u2018int\u2019\n 1191 |   is_center = (bool*)calloc(centers.num,sizeof(bool));\n      |                                     ^~~\nstreamcluster_original.cpp:1192:39: error: request for member \u2018num\u2019 in \u2018centers\u2019, which is of non-class type \u2018int\u2019\n 1192 |   center_table = (int*)malloc(centers.num*sizeof(int));\n      |                                       ^~~\nmake: *** [Makefile:16: cpu] Error 1\n"
+  },
+  {
+    "spec_id": "rodinia-streamcluster-omp",
+    "augment_level": 4,
+    "seed": 42,
+    "config": "correctness",
+    "transforms_applied": {
+      "streamcluster_omp.cpp": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ],
+      "streamcluster_original.cpp": [
+        "ArithmeticTransform",
+        "SwapCondition",
+        "PointerArithmeticToArrayIndex",
+        "TypedefExpansion",
+        "ChangeNames"
+      ]
+    },
+    "transforms_summary": [
+      "ArithmeticTransform",
+      "ChangeNames",
+      "PointerArithmeticToArrayIndex",
+      "SwapCondition",
+      "TypedefExpansion"
+    ],
+    "files_changed": [
+      "streamcluster_omp.cpp",
+      "streamcluster_original.cpp"
+    ],
+    "build_status": "fail",
+    "run_status": "skipped",
+    "verify_status": "skipped",
+    "overall_status": "BUILD_FAIL",
+    "verify_details": "",
+    "wall_time_seconds": null,
+    "exit_code": null,
+    "tempdir": null,
+    "details": " = (bool*)malloc(item_134.num*sizeof(bool));\n      |                                              ^~~\nstreamcluster_original.cpp:1190:38: error: request for member \u2018num\u2019 in \u2018item_134\u2019, which is of non-class type \u2018int\u2019\n 1190 |   is_center = (bool*)calloc(item_134.num,sizeof(bool));\n      |                                      ^~~\nstreamcluster_original.cpp:1191:40: error: request for member \u2018num\u2019 in \u2018item_134\u2019, which is of non-class type \u2018int\u2019\n 1191 |   center_table = (int*)malloc(item_134.num*sizeof(int));\n      |                                        ^~~\nmake: *** [Makefile:16: cpu] Error 1\n"
+  }
+]

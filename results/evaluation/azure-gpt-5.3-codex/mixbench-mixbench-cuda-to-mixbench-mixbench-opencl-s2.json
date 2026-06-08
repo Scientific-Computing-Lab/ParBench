@@ -1,0 +1,74 @@
+{
+  "source_spec": "mixbench-mixbench-cuda",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 151085058,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-30T06:25:06Z",
+  "prompt_tokens": 11054,
+  "completion_tokens": 3682,
+  "llm_response_time_seconds": 63.508,
+  "build_status": "pass",
+  "build_time_seconds": 0.473,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 3.69,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "4.99\n          192,     96.250,    0.42,30695.09, 318.91,     48.125,   30.26,  426.93,   8.87,    192.500,    0.00,     inf,    inf,    96.250,    0.81,15888.77, 165.08\n          256,    128.250,    0.55,31129.60, 242.73,     64.125,   40.32,  426.96,   6.66,    256.500,    0.00,     inf,    inf,   128.250,    1.08,15977.65, 124.58\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "single_precision_gflops": {
+      "value": 118.72,
+      "unit": "GFLOPS"
+    }
+  },
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": 3.69,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 8.1301,
+  "translated_files": {
+    "mix_kernels.cl": "#ifdef ENABLE_DP\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n\n#ifdef ENABLE_HP\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n\n#ifdef ENABLE_HP\n#define CONV_INT(i) ((class_T)((half)(i), (half)(i)))\n#define IS_EQUAL(a, b) (all((a) == (b)))\n#else\n#define CONV_INT(i) ((class_T)(i))\n#define IS_EQUAL(a, b) ((a) == (b))\n#endif\n\n#define MADD(a, b, c) ((a) * (b) + (c))\n\n__kernel void benchmark_func(const class_T seed, __global class_T *g_data) {\n  const size_t lid = get_local_id(0);\n  const size_t gid = get_global_id(0);\n  const size_t group = get_group_id(0);\n  const size_t gsize = get_global_size(0);\n\n#ifdef BLOCK_STRIDED\n  const size_t stride = (size_t)blockdim;\n  size_t idx = group * (size_t)blockdim * (size_t)ELEMENTS_PER_THREAD + lid;\n#else\n  const size_t stride = gsize;\n  size_t idx = gid;\n#endif\n\n  const size_t big_stride = gsize * (size_t)ELEMENTS_PER_THREAD;\n\n  class_T tmps[ELEMENTS_PER_THREAD];\n\n  for (int k = 0; k < (int)FUSION_DEGREE; k++) {\n    for (int j = 0; j < (int)ELEMENTS_PER_THREAD; j++) {\n      tmps[j] = g_data[idx + (size_t)j * stride + (size_t)k * big_stride];\n      for (int i = 0; i < (int)COMPUTE_ITERATIONS; i++) {\n        tmps[j] = MADD(tmps[j], tmps[j], seed);\n      }\n    }\n\n    class_T sum = CONV_INT(0);\n    for (int j = 0; j < (int)ELEMENTS_PER_THREAD; j += 2) {\n      sum = MADD(tmps[j], tmps[j + 1], sum);\n    }\n\n    if (IS_EQUAL(sum, CONV_INT(-1))) {\n      g_data[idx + (size_t)k * big_stride] = sum;\n    }\n  }\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 63.508,
+      "prompt_tokens": 11054,
+      "completion_tokens": 3682,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

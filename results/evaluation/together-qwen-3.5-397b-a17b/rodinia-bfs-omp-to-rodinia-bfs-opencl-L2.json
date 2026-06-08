@@ -1,0 +1,71 @@
+{
+  "source_spec": "rodinia-bfs-omp",
+  "target_spec": "rodinia-bfs-opencl",
+  "kernel": "bfs",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 2015927612,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "../../data/bfs/graph1MW_6.txt"
+  ],
+  "timestamp": "2026-04-24T05:22:08Z",
+  "prompt_tokens": 12739,
+  "completion_tokens": 2437,
+  "llm_response_time_seconds": 45.017,
+  "build_status": "pass",
+  "build_time_seconds": 0.794,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 1.626,
+  "run_exit_code": -11,
+  "run_stderr_snippet": "     ^\n<kernel>:33:11: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    char* updating_graph_mask,\n          ^\n<kernel>:34:11: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    char* graph_visited,\n          ^\n<kernel>:35:11: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    char* over,\n          ^\n\n",
+  "run_stdout_snippet": "Reading File\nnumber of platforms:1\nvendor is NVIDIA Corporation\ndevice number: 1\nCreating GPU Context\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code -11)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.519,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "Kernels.cl": "typedef struct {\n    int starting;\n    int no_of_edges;\n} Node;\n\nkernel void BFS_1(\n    Node* graph_nodes,\n    int* graph_edges,\n    char* graph_mask,\n    char* updating_graph_mask,\n    char* graph_visited,\n    int* cost,\n    int no_of_nodes\n) {\n    int tid = get_global_id(0);\n    \n    if (tid < no_of_nodes) {\n        if (graph_mask[tid] == 1) {\n            graph_mask[tid] = 0;\n            for (int i = graph_nodes[tid].starting; i < (graph_nodes[tid].no_of_edges + graph_nodes[tid].starting); i++) {\n                int id = graph_edges[i];\n                if (graph_visited[id] == 0) {\n                    cost[id] = cost[tid] + 1;\n                    updating_graph_mask[id] = 1;\n                }\n            }\n        }\n    }\n}\n\nkernel void BFS_2(\n    char* graph_mask,\n    char* updating_graph_mask,\n    char* graph_visited,\n    char* over,\n    int no_of_nodes\n) {\n    int tid = get_global_id(0);\n    \n    if (tid < no_of_nodes) {\n        if (updating_graph_mask[tid] == 1) {\n            graph_mask[tid] = 1;\n            graph_visited[tid] = 1;\n            *over = 1;\n            updating_graph_mask[tid] = 0;\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 45.017,
+      "prompt_tokens": 12739,
+      "completion_tokens": 2437,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "     ^\n<kernel>:33:11: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    char* updating_graph_mask,\n          ^\n<kernel>:34:11: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    char* graph_visited,\n          ^\n<kernel>:35:11: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    char* over,\n          ^\n\n",
+      "run_stdout_snippet": "Reading File\nnumber of platforms:1\nvendor is NVIDIA Corporation\ndevice number: 1\nCreating GPU Context\n",
+      "extraction_fail": null
+    }
+  ]
+}

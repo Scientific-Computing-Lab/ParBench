@@ -1,0 +1,73 @@
+{
+  "source_spec": "rodinia-nw-omp",
+  "target_spec": "rodinia-nw-opencl",
+  "kernel": "nw",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 852895319,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "2048",
+    "10",
+    "./nw.cl"
+  ],
+  "timestamp": "2026-04-26T07:40:39Z",
+  "prompt_tokens": 11350,
+  "completion_tokens": 6209,
+  "llm_response_time_seconds": 100.172,
+  "build_status": "pass",
+  "build_time_seconds": 0.359,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.27,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 \nnum_devices = 1\nworksize = 2048\nProcessing upper-left matrix\nProcessing lower-right matrix\nComputation Done\nInit: 191.505997\nMemAlloc: 0.003000\nHtoD: 1.932896\nExec: 1.362561\nDtoH: 5.974688\nClose: 0.848000\nTotal: 202.996994\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.09,
+  "translated_wall_time_seconds": 0.27,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.3333,
+  "translated_files": {
+    "nw.cl": "#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\ninline int maximum(int a, int b, int c) {\n    int k = (a <= b) ? b : a;\n    return (k <= c) ? c : k;\n}\n\n__kernel void nw_kernel1(__global int *reference,\n                         __global int *input_itemsets,\n                         __global int *output_itemsets,\n                         __local int *input_itemsets_l,\n                         __local int *reference_l,\n                         int max_cols,\n                         int penalty,\n                         int blk,\n                         int block_width,\n                         int worksize,\n                         int offset_r,\n                         int offset_c)\n{\n    int tx = get_local_id(0);\n    int b_index_x = get_group_id(0);\n    int b_index_y = blk - 1 - b_index_x;\n\n    if (tx < BLOCK_SIZE) {\n        int ref_row = b_index_y * BLOCK_SIZE + tx + 1 + offset_r;\n        int ref_col = b_index_x * BLOCK_SIZE + 1 + offset_c;\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            reference_l[tx * BLOCK_SIZE + j] =\n                reference[max_cols * ref_row + ref_col + j];\n        }\n\n        int in_row = b_index_y * BLOCK_SIZE + tx + offset_r;\n        int in_col = b_index_x * BLOCK_SIZE + offset_c;\n        for (int j = 0; j < BLOCK_SIZE + 1; ++j) {\n            input_itemsets_l[tx * (BLOCK_SIZE + 1) + j] =\n                input_itemsets[max_cols * in_row + in_col + j];\n        }\n    }\n\n    if (tx == 0) {\n        int in_row = b_index_y * BLOCK_SIZE + BLOCK_SIZE + offset_r;\n        int in_col = b_index_x * BLOCK_SIZE + offset_c;\n        for (int j = 0; j < BLOCK_SIZE + 1; ++j) {\n            input_itemsets_l[BLOCK_SIZE * (BLOCK_SIZE + 1) + j] =\n                input_itemsets[max_cols * in_row + in_col + j];\n        }\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    for (int m = 0; m < BLOCK_SIZE; ++m) {\n        if (tx <= m) {\n            int i = tx + 1;\n            int j = m - tx + 1;\n            input_itemsets_l[i * (BLOCK_SIZE + 1) + j] =\n                maximum(input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + (j - 1)] +\n                            reference_l[(i - 1) * BLOCK_SIZE + (j - 1)],\n                        input_itemsets_l[i * (BLOCK_SIZE + 1) + (j - 1)] - penalty,\n                        input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + j] - penalty);\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    for (int m = BLOCK_SIZE - 2; m >= 0; --m) {\n        if (tx <= m) {\n            int i = BLOCK_SIZE - m + tx;\n            int j = BLOCK_SIZE - tx;\n            input_itemsets_l[i * (BLOCK_SIZE + 1) + j] =\n                maximum(input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + (j - 1)] +\n                            reference_l[(i - 1) * BLOCK_SIZE + (j - 1)],\n                        input_itemsets_l[i * (BLOCK_SIZE + 1) + (j - 1)] - penalty,\n                        input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + j] - penalty);\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    if (tx < BLOCK_SIZE) {\n        int out_row = b_index_y * BLOCK_SIZE + tx + 1 + offset_r;\n        int out_col = b_index_x * BLOCK_SIZE + 1 + offset_c;\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            int v = input_itemsets_l[(tx + 1) * (BLOCK_SIZE + 1) + (j + 1)];\n            input_itemsets[max_cols * out_row + out_col + j] = v;\n        }\n    }\n}\n\n__kernel void nw_kernel2(__global int *reference,\n                         __global int *input_itemsets,\n                         __global int *output_itemsets,\n                         __local int *input_itemsets_l,\n                         __local int *reference_l,\n                         int max_cols,\n                         int penalty,\n                         int blk,\n                         int block_width,\n                         int worksize,\n                         int offset_r,\n                         int offset_c)\n{\n    int tx = get_local_id(0);\n    int g = get_group_id(0);\n    int b_index_x = block_width - blk + g;\n    int b_index_y = block_width - g - 1;\n\n    if (tx < BLOCK_SIZE) {\n        int ref_row = b_index_y * BLOCK_SIZE + tx + 1 + offset_r;\n        int ref_col = b_index_x * BLOCK_SIZE + 1 + offset_c;\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            reference_l[tx * BLOCK_SIZE + j] =\n                reference[max_cols * ref_row + ref_col + j];\n        }\n\n        int in_row = b_index_y * BLOCK_SIZE + tx + offset_r;\n        int in_col = b_index_x * BLOCK_SIZE + offset_c;\n        for (int j = 0; j < BLOCK_SIZE + 1; ++j) {\n            input_itemsets_l[tx * (BLOCK_SIZE + 1) + j] =\n                input_itemsets[max_cols * in_row + in_col + j];\n        }\n    }\n\n    if (tx == 0) {\n        int in_row = b_index_y * BLOCK_SIZE + BLOCK_SIZE + offset_r;\n        int in_col = b_index_x * BLOCK_SIZE + offset_c;\n        for (int j = 0; j < BLOCK_SIZE + 1; ++j) {\n            input_itemsets_l[BLOCK_SIZE * (BLOCK_SIZE + 1) + j] =\n                input_itemsets[max_cols * in_row + in_col + j];\n        }\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    for (int m = 0; m < BLOCK_SIZE; ++m) {\n        if (tx <= m) {\n            int i = tx + 1;\n            int j = m - tx + 1;\n            input_itemsets_l[i * (BLOCK_SIZE + 1) + j] =\n                maximum(input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + (j - 1)] +\n                            reference_l[(i - 1) * BLOCK_SIZE + (j - 1)],\n                        input_itemsets_l[i * (BLOCK_SIZE + 1) + (j - 1)] - penalty,\n                        input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + j] - penalty);\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    for (int m = BLOCK_SIZE - 2; m >= 0; --m) {\n        if (tx <= m) {\n            int i = BLOCK_SIZE - m + tx;\n            int j = BLOCK_SIZE - tx;\n            input_itemsets_l[i * (BLOCK_SIZE + 1) + j] =\n                maximum(input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + (j - 1)] +\n                            reference_l[(i - 1) * BLOCK_SIZE + (j - 1)],\n                        input_itemsets_l[i * (BLOCK_SIZE + 1) + (j - 1)] - penalty,\n                        input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + j] - penalty);\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    if (tx < BLOCK_SIZE) {\n        int out_row = b_index_y * BLOCK_SIZE + tx + 1 + offset_r;\n        int out_col = b_index_x * BLOCK_SIZE + 1 + offset_c;\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            int v = input_itemsets_l[(tx + 1) * (BLOCK_SIZE + 1) + (j + 1)];\n            input_itemsets[max_cols * out_row + out_col + j] = v;\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "nw.cl"
+  ],
+  "target_files_extracted": [
+    "nw.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 100.172,
+      "prompt_tokens": 11350,
+      "completion_tokens": 6209,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

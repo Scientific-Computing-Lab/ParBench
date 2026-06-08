@@ -1,0 +1,21 @@
+kernel,category,description,apis,all_4_apis,cuda_source_files,has_makefile,has_self_check,original_pick,replacement_note
+adam,ml,Adam optimizer update,"cuda,hip,omp,sycl",True,2,True,True,adam,
+softmax,ml,Softmax activation function,"cuda,hip,omp,sycl",True,1,True,True,softmax,
+layernorm,ml,Layer normalization,"cuda,hip,omp,sycl",True,3,True,True,layernorm,
+swish,ml,Swish activation function,"cuda,hip,omp,sycl",True,2,True,True,gelu,Replaced gelu (missing omp variant)
+attention,ml,Attention mechanism,"cuda,hip,omp,sycl",True,3,True,True,attention,
+hotspot3D,stencil,3D thermal simulation stencil,"cuda,hip,omp,sycl",True,3,True,True,hotspot,Replaced hotspot (missing omp variant)
+laplace,stencil,Laplace equation solver,"cuda,hip,omp,sycl",True,4,True,True,laplace,
+jacobi,stencil,Jacobi iterative solver,"cuda,hip,omp,sycl",True,1,True,True,jacobi,
+md,molecular_dynamics,Molecular dynamics simulation,"cuda,hip,omp,sycl",True,4,True,True,md,
+clenergy,molecular_dynamics,Coulombic energy calculation,"cuda,hip,omp,sycl",True,3,True,True,lj,Replaced lj (not in HeCBench)
+blas-gemm,linear_algebra,Single-precision GEMM,"cuda,hip,omp,sycl",True,2,True,True,sgemm,Replaced sgemm (not in HeCBench as standalone)
+chemv,linear_algebra,Hermitian matrix-vector multiply,"cuda,hip,omp,sycl",True,3,True,True,gemv,Replaced gemv (missing omp variant)
+tridiagonal,linear_algebra,Tridiagonal solver,"cuda,hip,omp,sycl",True,16,True,True,tridiagonal,16 src files (slightly over 15 limit)
+bfs,graph,Breadth-first search,"cuda,hip,omp,sycl",True,1,True,True,bfs,
+page-rank,graph,PageRank algorithm,"cuda,hip,omp,sycl",True,2,True,True,sssp,Replaced sssp (missing omp variant)
+histogram,reduction,Histogram computation,"cuda,hip,omp,sycl",True,5,True,True,histogram,
+norm2,reduction,L2 norm (parallel reduction),"cuda,hip,omp,sycl",True,1,True,True,reduce,Replaced reduce (not in HeCBench)
+minkowski,other,Minkowski distance computation,"cuda,hip,omp,sycl",True,2,True,True,minkowski,
+memcpy,other,Memory copy benchmark,"cuda,hip,omp,sycl",True,1,True,True,memcpy,
+atomicIntrinsics,other,Atomic operations test,"cuda,hip,omp,sycl",True,4,True,True,atomicAdd,Replaced atomicAdd (not in HeCBench)

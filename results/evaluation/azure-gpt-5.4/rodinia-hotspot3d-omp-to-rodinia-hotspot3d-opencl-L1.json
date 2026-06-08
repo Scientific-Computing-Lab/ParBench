@@ -1,0 +1,82 @@
+{
+  "source_spec": "rodinia-hotspot3d-omp",
+  "target_spec": "rodinia-hotspot3d-opencl",
+  "kernel": "hotspot3d",
+  "model": "azure-gpt-5.4",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1898139338,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-n",
+    "512",
+    "-l",
+    "8",
+    "-i",
+    "100",
+    "-f",
+    "../../data/hotspot3D/power_512x8",
+    "../../data/hotspot3D/temp_512x8",
+    "output.out",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-27T03:44:00Z",
+  "prompt_tokens": 6546,
+  "completion_tokens": 5543,
+  "llm_response_time_seconds": 151.77,
+  "build_status": "pass",
+  "build_time_seconds": 0.191,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 18.121,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "num_devices = 1\n \n Device is  NVIDIA GeForce RTX 4070 \n NVIDIA Corporation \nInit: 155.067001\nMemAlloc: 0.003000\nHtoD: 2.162624\nExec: 16797.199219\nDtoH: 2.575968\nClose: 45.799000\nTotal: 17005.191406\nAccuracy: 3.687145e-02\n",
+  "verify_status": "fail",
+  "verify_strategy": "numeric_comparison",
+  "overall_status": "VERIFY_FAIL",
+  "error_message": "Verify failed: actual=0.03687145 differs from expected=5.547907e-05 by more than tolerance 0.0001",
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.156,
+  "translated_wall_time_seconds": 18.121,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0638,
+  "translated_files": {
+    "hotspotKernel.cl": "#define AMB_TEMP 80.0f\n\n__kernel void hotspotOpt1(__global const float *pIn,\n                          __global float *tIn,\n                          __global float *tOut,\n                          const float stepDivCap,\n                          const int nx,\n                          const int ny,\n                          const int nz,\n                          const float ce,\n                          const float cw,\n                          const float cn,\n                          const float cs,\n                          const float ct,\n                          const float cb,\n                          const float cc)\n{\n    if (get_global_id(0) != 0 || get_global_id(1) != 0)\n        return;\n\n    for (int z = 0; z < nz; z++) {\n        for (int y = 0; y < ny; y++) {\n            for (int x = 0; x < nx; x++) {\n                int c = x + y * nx + z * nx * ny;\n\n                int w = (x == 0)      ? c : c - 1;\n                int e = (x == nx - 1) ? c : c + 1;\n                int n = (y == 0)      ? c : c - nx;\n                int s = (y == ny - 1) ? c : c + nx;\n                int b = (z == 0)      ? c : c - nx * ny;\n                int t = (z == nz - 1) ? c : c + nx * ny;\n\n                tOut[c] = cc * tIn[c]\n                        + cw * tIn[w]\n                        + ce * tIn[e]\n                        + cn * tIn[n]\n                        + cs * tIn[s]\n                        + cb * tIn[b]\n                        + ct * tIn[t]\n                        + stepDivCap * pIn[c]\n                        + ct * AMB_TEMP;\n            }\n        }\n    }\n\n    int total = nx * ny * nz;\n    for (int i = 0; i < total; i++) {\n        tIn[i] = tOut[i];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "hotspotKernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspotKernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 151.77,
+      "prompt_tokens": 6546,
+      "completion_tokens": 5543,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "fail",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

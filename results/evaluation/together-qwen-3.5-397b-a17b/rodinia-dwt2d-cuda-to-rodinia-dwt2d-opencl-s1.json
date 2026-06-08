@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-dwt2d-cuda",
+  "target_spec": "rodinia-dwt2d-opencl",
+  "kernel": "dwt2d",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1365683746,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "rgb.bmp",
+    "-i",
+    "../../data/dwt2d",
+    "-D",
+    "1024x1024",
+    "-f",
+    "-5",
+    "-l",
+    "3"
+  ],
+  "timestamp": "2026-04-21T22:46:23Z",
+  "prompt_tokens": 33331,
+  "completion_tokens": 7335,
+  "llm_response_time_seconds": 83.331,
+  "build_status": "pass",
+  "build_time_seconds": 0.31,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 1.241,
+  "run_exit_code": -11,
+  "run_stderr_snippet": "                                       ^\n<kernel>:165:52: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\nkernel void cl_fdwt53Kernel(const int *input, int *output,\n                                                   ^\n<kernel>:179:21: error: variable length arrays are not supported in OpenCL\n    __local int data[2 * BUFFER_SIZE + PADDING];\n                    ^\nFailed to create kernel\nFailed to create kernel\nFailed to create kernel\n",
+  "run_stdout_snippet": "fail to create program!!\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code -11)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.1,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "com_dwt.cl": "#define THREADS 256\n#define DIVANDRND(a, b) ((((a) % (b)) != 0) ? ((a) / (b) + 1) : ((a) / (b)))\n#define IMUL(a, b) ((a) * (b))\n\n#define CTMIN(a,b) (((a) < (b)) ? (a) : (b))\n#define SHM_SIZE (16 * 1024)\n\nconst float f97Predict1 = -1.586134342f;\nconst float f97Update1 = -0.05298011854f;\nconst float f97Predict2 = 0.8829110762f;\nconst float f97Update2 = 0.4435068522f;\n\nconst float r97update2 = -f97Update2;\nconst float r97predict2 = -f97Predict2;\nconst float r97update1 = -f97Update1;\nconst float r97Predict1 = -f97Predict1;\n\nconst float scale97Mul = 1.23017410491400f;\nconst float scale97Div = 1.0f / scale97Mul;\n\nconst float forward53Predict = -0.5f;\nconst float forward53Update = 0.25f;\n\nconst float reverse53Update = -forward53Update;\nconst float reverse53Predict = -forward53Predict;\n\ninline void storeComponents_float(float *d_r, float *d_g, float *d_b, float r, float g, float b, int pos)\n{\n    d_r[pos] = (r/255.0f) - 0.5f;\n    d_g[pos] = (g/255.0f) - 0.5f;\n    d_b[pos] = (b/255.0f) - 0.5f;\n}\n\ninline void storeComponents_int(int *d_r, int *d_g, int *d_b, int r, int g, int b, int pos)\n{\n    d_r[pos] = r - 128;\n    d_g[pos] = g - 128;\n    d_b[pos] = b - 128;\n}\n\ninline void storeComponent_float(float *d_c, float c, int pos)\n{\n    d_c[pos] = (c/255.0f) - 0.5f;\n}\n\ninline void storeComponent_int(int *d_c, int c, int pos)\n{\n    d_c[pos] = c - 128;\n}\n\nkernel void c_copySrcToComponents_float(float *d_r, float *d_g, float *d_b, \n                                        unsigned char * d_src, \n                                        int pixels)\n{\n    int x = get_local_id(0);\n    int gX = get_local_size(0) * get_group_id(0);\n    \n    __local unsigned char sData[THREADS*3];\n    \n    if ((x*4) < THREADS*3) {\n        float *s = (float *)d_src;\n        float *d = (float *)sData;\n        d[x] = s[((gX*3)>>2) + x];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n    \n    float r, g, b;\n    int offset = x*3;\n    r = (float)(sData[offset]);\n    g = (float)(sData[offset+1]);\n    b = (float)(sData[offset+2]);\n    \n    int globalOutputPosition = gX + x;\n    if (globalOutputPosition < pixels) {\n        storeComponents_float(d_r, d_g, d_b, r, g, b, globalOutputPosition);\n    }\n}\n\nkernel void c_copySrcToComponents_int(int *d_r, int *d_g, int *d_b, \n                                      unsigned char * d_src, \n                                      int pixels)\n{\n    int x = get_local_id(0);\n    int gX = get_local_size(0) * get_group_id(0);\n    \n    __local unsigned char sData[THREADS*3];\n    \n    if ((x*4) < THREADS*3) {\n        float *s = (float *)d_src;\n        float *d = (float *)sData;\n        d[x] = s[((gX*3)>>2) + x];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n    \n    int r, g, b;\n    int offset = x*3;\n    r = (int)(sData[offset]);\n    g = (int)(sData[offset+1]);\n    b = (int)(sData[offset+2]);\n    \n    int globalOutputPosition = gX + x;\n    if (globalOutputPosition < pixels) {\n        storeComponents_int(d_r, d_g, d_b, r, g, b, globalOutputPosition);\n    }\n}\n\nkernel void c_copySrcToComponent_float(float *d_c, unsigned char * d_src, int pixels)\n{\n    int x = get_local_id(0);\n    int gX = get_local_size(0) * get_group_id(0);\n    \n    __local unsigned char sData[THREADS];\n    \n    if ((x*4) < THREADS) {\n        float *s = (float *)d_src;\n        float *d = (float *)sData;\n        d[x] = s[(gX>>2) + x];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n    \n    float c;\n    c = (float)(sData[x]);\n    \n    int globalOutputPosition = gX + x;\n    if (globalOutputPosition < pixels) {\n        storeComponent_float(d_c, c, globalOutputPosition);\n    }\n}\n\nkernel void c_copySrcToComponent_int(int *d_c, unsigned char * d_src, int pixels)\n{\n    int x = get_local_id(0);\n    int gX = get_local_size(0) * get_group_id(0);\n    \n    __local unsigned char sData[THREADS];\n    \n    if ((x*4) < THREADS) {\n        float *s = (float *)d_src;\n        float *d = (float *)sData;\n        d[x] = s[(gX>>2) + x];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n    \n    int c;\n    c = (int)(sData[x]);\n    \n    int globalOutputPosition = gX + x;\n    if (globalOutputPosition < pixels) {\n        storeComponent_int(d_c, c, globalOutputPosition);\n    }\n}\n\nstruct Forward53Predict {\n    void operator()(const int p, int *c, const int n) const {\n        *c -= (p + n) / 2;\n    }\n};\n\nstruct Forward53Update {\n    void operator()(const int p, int *c, const int n) const {\n        *c += (p + n + 2) / 4;\n    }\n};\n\nkernel void cl_fdwt53Kernel(const int *input, int *output,\n                            const int sizeX, const int sizeY,\n                            const int steps,\n                            const int WIN_SX, const int WIN_SY)\n{\n    const int WIN_SIZE_X = WIN_SX;\n    const int WIN_SIZE_Y = WIN_SY;\n    \n    const int VERTICAL_STRIDE = 2 + (WIN_SIZE_X / 2);\n    const int BUFFER_SIZE = VERTICAL_STRIDE * (WIN_SIZE_Y + 3);\n    const int SHM_BANKS = 16;\n    const int PADDING = SHM_BANKS - ((BUFFER_SIZE + SHM_BANKS / 2) % SHM_BANKS);\n    const int ODD_OFFSET = BUFFER_SIZE + PADDING;\n    \n    __local int data[2 * BUFFER_SIZE + PADDING];\n    \n    int threadIdx_x = get_local_id(0);\n    int blockIdx_x = get_group_id(0);\n    int blockIdx_y = get_group_id(1);\n    \n    const int firstY = blockIdx_y * WIN_SIZE_Y * steps;\n    const int firstX = blockIdx_x * WIN_SIZE_X + threadIdx_x;\n    \n    if (firstX >= sizeX || firstY >= sizeY) {\n        return;\n    }\n    \n    int columnOffset = threadIdx_x + 2;\n    columnOffset = columnOffset / 2 + (columnOffset & 1) * ODD_OFFSET;\n    \n    int loaderIndex = firstX + sizeX * firstY;\n    \n    int pixel0 = input[loaderIndex];\n    int pixel1 = input[loaderIndex + sizeX];\n    int pixel2 = input[loaderIndex + 2 * sizeX];\n    \n    data[columnOffset + 0 * VERTICAL_STRIDE] = pixel0;\n    data[columnOffset + 1 * VERTICAL_STRIDE] = pixel1;\n    data[columnOffset + 2 * VERTICAL_STRIDE] = pixel2;\n    \n    for (int i = 3; i < (3 + WIN_SIZE_Y); i++) {\n        int loadIndex = firstX + sizeX * (firstY + i);\n        if (loadIndex < sizeX * sizeY) {\n            data[columnOffset + i * VERTICAL_STRIDE] = input[loadIndex];\n        }\n    }\n    \n    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n    \n    for (int r = 0; r < WIN_SIZE_Y; r += 2) {\n        int rowIdx = 2 + r;\n        if (rowIdx < WIN_SIZE_Y + 3) {\n            int centerIdx = columnOffset + rowIdx * VERTICAL_STRIDE;\n            int prevIdx = columnOffset + (rowIdx - 1) * VERTICAL_STRIDE;\n            int nextIdx = columnOffset + (rowIdx + 1) * VERTICAL_STRIDE;\n            \n            if (prevIdx < 2 * BUFFER_SIZE + PADDING && centerIdx < 2 * BUFFER_SIZE + PADDING && nextIdx < 2 * BUFFER_SIZE + PADDING) {\n                data[centerIdx] -= (data[prevIdx] + data[nextIdx]) / 2;\n            }\n        }\n    }\n    \n    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n    \n    for (int r = 0; r < WIN_SIZE_Y; r += 2) {\n        int rowIdx = 2 + r;\n        if (rowIdx < WIN_SIZE_Y + 3) {\n            int centerIdx = columnOffset + rowIdx * VERTICAL_STRIDE;\n            int prevIdx = columnOffset + (rowIdx - 1) * VERTICAL_STRIDE;\n            int nextIdx = columnOffset + (rowIdx + 1) * VERTICAL_STRIDE;\n            \n            if (prevIdx < 2 * BUFFER_SIZE + PADDING && centerIdx < 2 * BUFFER_SIZE + PADDING && nextIdx < 2 * BUFFER_SIZE + PADDING) {\n                data[centerIdx] += (data[prevIdx] + data[nextIdx] + 2) / 4;\n            }\n        }\n    }\n    \n    barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\n    \n    int outColumnIndex = (threadIdx_x * 2) - (WIN_SIZE_X - 1) * (threadIdx_x / (WIN_SIZE_X / 2));\n    int outColumnOffset = outColumnIndex + 2;\n    outColumnOffset = outColumnOffset / 2 + (outColumnOffset & 1) * ODD_OFFSET;\n    \n    int outputFirstX = blockIdx_x * WIN_SIZE_X + outColumnIndex;\n    \n    for (int r = 2; r < (2 + WIN_SIZE_Y); r += 2) {\n        if (r < WIN_SIZE_Y + 3) {\n            int lowIndex = outputFirstX + sizeX * (firstY + r);\n            int highIndex = outputFirstX + sizeX * (firstY + r + 1);\n            \n            if (lowIndex < sizeX * sizeY) {\n                output[lowIndex] = data[outColumnOffset + r * VERTICAL_STRIDE];\n            }\n            if (highIndex < sizeX * sizeY) {\n                output[highIndex] = data[outColumnOffset + (r + 1) * VERTICAL_STRIDE];\n            }\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "com_dwt.cl"
+  ],
+  "target_files_extracted": [
+    "com_dwt.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 83.331,
+      "prompt_tokens": 33331,
+      "completion_tokens": 7335,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "                                       ^\n<kernel>:165:52: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\nkernel void cl_fdwt53Kernel(const int *input, int *output,\n                                                   ^\n<kernel>:179:21: error: variable length arrays are not supported in OpenCL\n    __local int data[2 * BUFFER_SIZE + PADDING];\n                    ^\nFailed to create kernel\nFailed to create kernel\nFailed to create kernel\n",
+      "run_stdout_snippet": "fail to create program!!\n",
+      "extraction_fail": null
+    }
+  ]
+}

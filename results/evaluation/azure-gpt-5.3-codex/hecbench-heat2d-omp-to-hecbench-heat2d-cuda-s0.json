@@ -1,0 +1,78 @@
+{
+  "source_spec": "hecbench-heat2d-omp",
+  "target_spec": "hecbench-heat2d-cuda",
+  "kernel": "heat2d",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 594272071,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "4096",
+    "4096",
+    "10"
+  ],
+  "timestamp": "2026-04-30T07:01:26Z",
+  "prompt_tokens": 1601,
+  "completion_tokens": 2795,
+  "llm_response_time_seconds": 39.313,
+  "build_status": "pass",
+  "build_time_seconds": 0.639,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.648,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": " Ly,Lx = 4096,4096\n niter = 10\nDevice: iters =       10, (Lx,Ly) =   4096,   4096, t =    309.8 usec/iter, BW = 433.240 GB/s, P = 324.930 Gflop/s\nPASS\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "throughput": {
+      "value": 433.24,
+      "unit": "GB/s"
+    }
+  },
+  "baseline_wall_time_seconds": 0.231,
+  "translated_wall_time_seconds": 0.648,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.3565,
+  "translated_files": {
+    "main.cu": "#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <assert.h>\n#include <sys/time.h>\n#include <math.h>\n#include <utility>\n#include <cuda_runtime.h>\n\n#define NTX 16\n#define NTY 16\n\ndouble stop_watch(double t0)\n{\n  double time;\n  struct timeval t;\n  gettimeofday(&t, NULL);\n  time = t.tv_sec * 1e6 + t.tv_usec;\n  return time - t0;\n}\n\nvoid usage(char *argv[]) {\n  fprintf(stderr, \" Usage: %s LX LY NITER\\n\", argv[0]);\n  return;\n}\n\nvoid reference(float *out, const float *in, const float delta, const float norm, const int Lx, const int Ly)\n{\n  for (int y = 0; y < Ly; y++) {\n    for (int x = 0; x < Lx; x++) {\n      int v00 = y * Lx + x;\n      int v0p = y * Lx + (x + 1) % Lx;\n      int v0m = y * Lx + (Lx + x - 1) % Lx;\n      int vp0 = ((y + 1) % Ly) * Lx + x;\n      int vm0 = ((Ly + y - 1) % Ly) * Lx + x;\n      out[v00] = norm * in[v00] + delta * (in[v0p] + in[v0m] + in[vp0] + in[vm0]);\n    }\n  }\n}\n\n__global__ void dev_lapl_iter_kernel(float *out, const float *in, const float delta, const float norm, const int Lx, const int Ly)\n{\n  int x = blockIdx.x * blockDim.x + threadIdx.x;\n  int y = blockIdx.y * blockDim.y + threadIdx.y;\n  if (x < Lx && y < Ly) {\n    int v00 = y * Lx + x;\n    int v0p = y * Lx + (x + 1) % Lx;\n    int v0m = y * Lx + (Lx + x - 1) % Lx;\n    int vp0 = ((y + 1) % Ly) * Lx + x;\n    int vm0 = ((Ly + y - 1) % Ly) * Lx + x;\n    out[v00] = norm * in[v00] + delta * (in[v0p] + in[v0m] + in[vp0] + in[vm0]);\n  }\n}\n\nvoid dev_lapl_iter(float *out_dev, const float *in_dev, const float delta, const float norm, const int Lx, const int Ly)\n{\n  dim3 block(NTX, NTY);\n  dim3 grid((Lx + NTX - 1) / NTX, (Ly + NTY - 1) / NTY);\n  dev_lapl_iter_kernel<<<grid, block>>>(out_dev, in_dev, delta, norm, Lx, Ly);\n}\n\nint main(int argc, char *argv[]) {\n\n  if (argc != 4) {\n    usage(argv);\n    exit(1);\n  }\n\n  int Lx = atoi(argv[1]);\n  int Ly = atoi(argv[2]);\n  if (Lx % NTX != 0 || Ly % NTY != 0) {\n    printf(\"Array length LX and LY must be a multiple of block size %d and %d, respectively\\n\",\n           NTX, NTY);\n    exit(1);\n  }\n\n  int niter = atoi(argv[3]);\n  assert(niter >= 1);\n\n  const float sigma = 0.01f;\n  const float xdelta = sigma / (1.0f + 4.0f * sigma);\n  const float xnorm = 1.0f / (1.0f + 4.0f * sigma);\n\n  printf(\" Ly,Lx = %d,%d\\n\", Ly, Lx);\n  printf(\" niter = %d\\n\", niter);\n\n  srand(123);\n  float *buffer = (float *)malloc(sizeof(float) * Lx * Ly);\n  float *h_out = (float *)malloc(sizeof(float) * Lx * Ly);\n  float *h_in = (float *)malloc(sizeof(float) * Lx * Ly);\n\n  int i, j, x, y;\n  for (i = 0; i < Lx; i += 16) {\n    x = rand() % Lx;\n    for (j = 0; j < Ly; j++)\n      buffer[x + j * Lx] = 1.f;\n  }\n  for (i = 0; i < Ly; i += 16) {\n    y = rand() % Ly;\n    for (j = 0; j < Lx; j++)\n      buffer[j + y * Lx] = 1.f;\n  }\n  memcpy(h_in, buffer, sizeof(float) * Lx * Ly);\n\n  for (i = 0; i < niter; i++) {\n    reference(h_out, h_in, xdelta, xnorm, Lx, Ly);\n    std::swap(h_out, h_in);\n  }\n\n  float *d_out = (float *)malloc(sizeof(float) * Lx * Ly);\n  float *d_in = (float *)malloc(sizeof(float) * Lx * Ly);\n  memcpy(d_in, buffer, sizeof(float) * Lx * Ly);\n\n  float *d_in_dev = NULL;\n  float *d_out_dev = NULL;\n  cudaMalloc((void **)&d_in_dev, sizeof(float) * Lx * Ly);\n  cudaMalloc((void **)&d_out_dev, sizeof(float) * Lx * Ly);\n  cudaMemcpy(d_in_dev, d_in, sizeof(float) * Lx * Ly, cudaMemcpyHostToDevice);\n\n  double t0;\n\n  t0 = stop_watch(0);\n  for (i = 0; i < niter; i++) {\n    dev_lapl_iter(d_out_dev, d_in_dev, xdelta, xnorm, Lx, Ly);\n    std::swap(d_out_dev, d_in_dev);\n    std::swap(d_out, d_in);\n  }\n  cudaDeviceSynchronize();\n  t0 = stop_watch(t0) / (double)niter;\n\n  cudaMemcpy(d_in, d_in_dev, sizeof(float) * Lx * Ly, cudaMemcpyDeviceToHost);\n\n  printf(\"Device: iters = %8d, (Lx,Ly) = %6d, %6d, t = %8.1f usec/iter, BW = %6.3f GB/s, P = %6.3f Gflop/s\\n\",\n         niter, Lx, Ly, t0,\n         Lx * Ly * sizeof(float) * 2.0 / (t0 * 1.0e3),\n         (Lx * Ly * 6.0) / (t0 * 1.0e3));\n\n  bool ok = true;\n  for (i = 0; i < Lx * Ly; i++) {\n    if (fabs(h_in[i] - d_in[i]) > 1e-2) {\n      printf(\"Mismatch at %d cpu=%f gpu=%f\\n\", i, h_in[i], d_in[i]);\n      ok = false;\n      break;\n    }\n  }\n  printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");\n\n  cudaFree(d_in_dev);\n  cudaFree(d_out_dev);\n\n  free(buffer);\n  free(h_out);\n  free(h_in);\n  free(d_in);\n  free(d_out);\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cu"
+  ],
+  "target_files_extracted": [
+    "main.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 39.313,
+      "prompt_tokens": 1601,
+      "completion_tokens": 2795,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

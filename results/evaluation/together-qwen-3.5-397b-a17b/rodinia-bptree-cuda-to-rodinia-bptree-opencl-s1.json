@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-bptree-cuda",
+  "target_spec": "rodinia-bptree-opencl",
+  "kernel": "bptree",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1500204452,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-04-21T22:41:49Z",
+  "prompt_tokens": 12515,
+  "completion_tokens": 1560,
+  "llm_response_time_seconds": 11.103,
+  "build_status": "pass",
+  "build_time_seconds": 0.542,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.498,
+  "run_exit_code": 245,
+  "run_stderr_snippet": "11 errors generated.\n",
+  "run_stdout_snippet": "nctions must reside in '__global', '__constant' or '__local' address space\n    int *endD,\n         ^\n<kernel>:25:10: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    int *RecstartD,\n         ^\n<kernel>:26:10: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    int *ReclenD)\n         ^\n\n>>>>\n--------------------------------\nError at line 258: CL_BUILD_PROGRAM_FAILURE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 245)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.453,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n\ntypedef struct record {\n    int value;\n} record;\n\ntypedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    int is_leaf;\n    int num_keys;\n} knode;\n\nkernel void findK(\n    long height,\n    knode *knodesD,\n    long knodes_elem,\n    record *recordsD,\n    long *currKnodeD,\n    long *offsetD,\n    int *keysD,\n    record *ansD)\n{\n    int thid = get_local_id(0);\n    int bid = get_group_id(0);\n\n    int i;\n    for(i = 0; i < height; i++){\n\n        if((knodesD[currKnodeD[bid]].keys[thid] <= keysD[bid]) && (knodesD[currKnodeD[bid]].keys[thid+1] > keysD[bid])){\n\n            if(knodesD[offsetD[bid]].indices[thid] < knodes_elem){\n                offsetD[bid] = knodesD[offsetD[bid]].indices[thid];\n            }\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n\n        if(thid==0){\n            currKnodeD[bid] = offsetD[bid];\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n\n    }\n\n    if(knodesD[currKnodeD[bid]].keys[thid] == keysD[bid]){\n        ansD[bid].value = recordsD[knodesD[currKnodeD[bid]].indices[thid]].value;\n    }\n}\n",
+    "kernel/kernel_gpu_opencl_2.cl": "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n\ntypedef struct record {\n    int value;\n} record;\n\ntypedef struct knode {\n    int location;\n    int indices[DEFAULT_ORDER + 1];\n    int keys[DEFAULT_ORDER + 1];\n    int is_leaf;\n    int num_keys;\n} knode;\n\nkernel void findRangeK(\n    long height,\n    knode *knodesD,\n    long knodes_elem,\n    long *currKnodeD,\n    long *offsetD,\n    long *lastKnodeD,\n    long *offset_2D,\n    int *startD,\n    int *endD,\n    int *RecstartD,\n    int *ReclenD)\n{\n    int thid = get_local_id(0);\n    int bid = get_group_id(0);\n\n    int i;\n    for(i = 0; i < height; i++){\n\n        if((knodesD[currKnodeD[bid]].keys[thid] <= startD[bid]) && (knodesD[currKnodeD[bid]].keys[thid+1] > startD[bid])){\n\n            if(knodesD[currKnodeD[bid]].indices[thid] < knodes_elem){\n                offsetD[bid] = knodesD[currKnodeD[bid]].indices[thid];\n            }\n        }\n        if((knodesD[lastKnodeD[bid]].keys[thid] <= endD[bid]) && (knodesD[lastKnodeD[bid]].keys[thid+1] > endD[bid])){\n\n            if(knodesD[lastKnodeD[bid]].indices[thid] < knodes_elem){\n                offset_2D[bid] = knodesD[lastKnodeD[bid]].indices[thid];\n            }\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n\n        if(thid==0){\n            currKnodeD[bid] = offsetD[bid];\n            lastKnodeD[bid] = offset_2D[bid];\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    if(knodesD[currKnodeD[bid]].keys[thid] == startD[bid]){\n        RecstartD[bid] = knodesD[currKnodeD[bid]].indices[thid];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if(knodesD[lastKnodeD[bid]].keys[thid] == endD[bid]){\n        ReclenD[bid] = knodesD[lastKnodeD[bid]].indices[thid] - RecstartD[bid] + 1;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 11.103,
+      "prompt_tokens": 12515,
+      "completion_tokens": 1560,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "11 errors generated.\n",
+      "run_stdout_snippet": "nctions must reside in '__global', '__constant' or '__local' address space\n    int *endD,\n         ^\n<kernel>:25:10: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    int *RecstartD,\n         ^\n<kernel>:26:10: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    int *ReclenD)\n         ^\n\n>>>>\n--------------------------------\nError at line 258: CL_BUILD_PROGRAM_FAILURE\n",
+      "extraction_fail": null
+    }
+  ]
+}

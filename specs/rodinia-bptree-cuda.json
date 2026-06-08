@@ -1,0 +1,200 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "bptree",
+        "parallel_api": "cuda",
+        "unique_id": "rodinia-bptree-cuda",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "cuda/b+tree",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "kernel/kernel_gpu_cuda.cu",
+            "kernel/kernel_gpu_cuda_2.cu",
+            "kernel/kernel_gpu_cuda_wrapper.cu",
+            "kernel/kernel_gpu_cuda_wrapper_2.cu",
+            "util/cuda/cuda.cu"
+        ],
+        "support_files": [
+            "main.c",
+            "util/num/num.c",
+            "util/timer/timer.c",
+            "common.h",
+            "kernel/kernel_gpu_cuda_wrapper.h",
+            "kernel/kernel_gpu_cuda_wrapper_2.h",
+            "main.h",
+            "util/cuda/cuda.h",
+            "util/num/num.h",
+            "util/timer/timer.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "kernel/kernel_gpu_cuda.cu",
+            "kernel/kernel_gpu_cuda_2.cu",
+            "kernel/kernel_gpu_cuda_wrapper.cu",
+            "kernel/kernel_gpu_cuda_wrapper_2.cu"
+        ]
+    },
+    "implementation": {
+        "api": "cuda",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "cuda-toolkit>=11.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "cuda/b+tree",
+        "commands": {
+            "configure": null,
+            "build": "make CUDA_DIR=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda CUDA_FLAG='-arch sm_89' CUDA_LIB_DIR='/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64'",
+            "clean": "make clean"
+        },
+        "variables": {
+            "CUDA_DIR": {
+                "description": "Path to CUDA toolkit installation",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda",
+                "detection": "dirname $(dirname $(which nvcc))"
+            }
+        },
+        "outputs": {
+            "executable": "./b+tree.out"
+        }
+    },
+    "run": {
+        "executable": "./b+tree.out",
+        "default_arguments": [
+            "file",
+            "../../data/b+tree/mil.txt",
+            "command",
+            "../../data/b+tree/command.txt"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": {
+            "LD_LIBRARY_PATH": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64:$LD_LIBRARY_PATH"
+        },
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "file",
+                    "../../data/b+tree/mil.txt",
+                    "command",
+                    "../../data/b+tree/command.txt"
+                ],
+                "description": "Small input for correctness verification of b+tree (CUDA)",
+                "input_files": [
+                    "../../data/b+tree/mil.txt",
+                    "../../data/b+tree/command.txt"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "file_hash",
+                "path": "output.txt",
+                "expected_sha256": "b22b08c5e4c13f3a4b01f3a97fc16164e12502a142c133b443b9c20ad8567def",
+                "description": "SHA-256 of bptree output.txt (6000 range queries + 10000 point lookups, deterministic two-run)"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "strong",
+        "reference_files": [
+            {
+                "path": "specs/references/bptree/cuda_output.txt",
+                "sha256": "b22b08c5e4c13f3a4b01f3a97fc16164e12502a142c133b443b9c20ad8567def",
+                "size_bytes": 284095,
+                "description": "Reference output.txt (mil.txt + command.txt) captured via _capture_baseline (deterministic two-run)"
+            }
+        ]
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "vendor": "NVIDIA",
+                "min_compute_capability": "sm_60",
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.272447+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "WG size of kernel 1 & 2  = 256 \nSelecting device 0\nInput File: ../../data/b+tree/mil.txt \nCommand File: ../../data/b+tree/command.txt \nCommand Buffer: \nj 6000 3000\nk 10000\n\n\nGetting input from file ../../data/b+tree/mil.txt...\nTransforming data to a GPU suitable structure...\nTree transformation took 0.066445\nWaiting for command\n> \n******command: j count=6000, rSize=6000 \nknodes_elem=7874, knodes_unit_mem=2068, knodes_mem=16283432\n# of blocks = 6000, # of threads/block = 256 (ensure that device can handle)\nTime spent in different stages of GPU_CUDA KERNEL:\n 0.000011000000 s,  0.632911384106 % : GPU: SET DEVICE / DRIVER INIT\n 0.000172000000 s,  9.896432876587 % : GPU MEM: ALO\n 0.000999000040 s, 57.479866027832 % : GPU MEM: COPY IN\n 0.000120999997 s,  6.962025165558 % : GPU: KERNEL\n 0.000023000001 s,  1.323360204697 % : GPU MEM: COPY OUT\n 0.000411999994 s, 23.705408096313 % : GPU MEM: FRE\nTotal time:\n0.001737999963 s\n> > > > > > > > > > > > \n ******command: k count=10000 \nrecords_elem=100",
+                "wall_time_seconds": 0.434,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "B+ tree search and range queries on GPU",
+        "domain": "data structures",
+        "complexity": "B+ tree search and range queries",
+        "tags": [
+            "b+tree",
+            "b-plus-tree",
+            "cuda",
+            "data-structures",
+            "rodinia",
+            "search"
+        ],
+        "multi_file": true,
+        "translation_complexity": null
+    }
+}

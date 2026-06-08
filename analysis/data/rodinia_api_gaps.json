@@ -1,0 +1,242 @@
+{
+  "generated_at": "2026-03-04",
+  "suite": "rodinia",
+  "summary": {
+    "total_kernels": 22,
+    "kernels_with_all_three_apis": 17,
+    "kernels_missing_at_least_one_api": 5,
+    "total_gaps": 6
+  },
+  "kernels": [
+    {
+      "kernel_name": "backprop",
+      "display_name": "backpropagation",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "bfs",
+      "display_name": "breadth-first search",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "bptree",
+      "display_name": "b+tree",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "cfd",
+      "display_name": "computational fluid dynamics",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "dwt2d",
+      "display_name": "2D discrete wavelet transform",
+      "available_apis": ["cuda", "opencl"],
+      "missing_apis": ["omp"],
+      "gap_type": "one_missing",
+      "notes": null
+    },
+    {
+      "kernel_name": "gaussian",
+      "display_name": "gaussian elimination",
+      "available_apis": ["cuda", "opencl"],
+      "missing_apis": ["omp"],
+      "gap_type": "one_missing",
+      "notes": null
+    },
+    {
+      "kernel_name": "heartwall",
+      "display_name": "heart wall tracking",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "hotspot",
+      "display_name": "hotspot thermal simulation",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "hotspot3d",
+      "display_name": "hotspot3D thermal simulation",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "huffman",
+      "display_name": "huffman encoding",
+      "available_apis": ["cuda"],
+      "missing_apis": ["omp", "opencl"],
+      "gap_type": "two_missing",
+      "notes": "CUDA-only in Rodinia; no OMP or OpenCL variants exist"
+    },
+    {
+      "kernel_name": "hybridsort",
+      "display_name": "hybrid sort",
+      "available_apis": ["cuda", "opencl"],
+      "missing_apis": ["omp"],
+      "gap_type": "one_missing",
+      "notes": null
+    },
+    {
+      "kernel_name": "kmeans",
+      "display_name": "k-means clustering",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "lavamd",
+      "display_name": "lava molecular dynamics",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "lud",
+      "display_name": "LU decomposition",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "mummergpu",
+      "display_name": "MUMmerGPU sequence alignment",
+      "available_apis": ["cuda", "omp"],
+      "missing_apis": ["opencl"],
+      "gap_type": "one_missing",
+      "notes": null
+    },
+    {
+      "kernel_name": "myocyte",
+      "display_name": "myocyte cardiac simulation",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "nn",
+      "display_name": "nearest neighbor",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "nw",
+      "display_name": "needleman-wunsch",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "particlefilter",
+      "display_name": "particle filter",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "pathfinder",
+      "display_name": "pathfinder",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    },
+    {
+      "kernel_name": "srad",
+      "display_name": "speckle reducing anisotropic diffusion (v2)",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": "Using srad_v2 only; srad_v1 excluded"
+    },
+    {
+      "kernel_name": "streamcluster",
+      "display_name": "stream cluster",
+      "available_apis": ["cuda", "omp", "opencl"],
+      "missing_apis": [],
+      "gap_type": "no_gap",
+      "notes": null
+    }
+  ],
+  "gaps": [
+    {
+      "kernel_name": "dwt2d",
+      "missing_api": "omp",
+      "source_api": "cuda",
+      "translation_direction": "cuda->omp",
+      "priority": "medium"
+    },
+    {
+      "kernel_name": "gaussian",
+      "missing_api": "omp",
+      "source_api": "cuda",
+      "translation_direction": "cuda->omp",
+      "priority": "medium"
+    },
+    {
+      "kernel_name": "huffman",
+      "missing_api": "omp",
+      "source_api": "cuda",
+      "translation_direction": "cuda->omp",
+      "priority": "high"
+    },
+    {
+      "kernel_name": "huffman",
+      "missing_api": "opencl",
+      "source_api": "cuda",
+      "translation_direction": "cuda->opencl",
+      "priority": "high"
+    },
+    {
+      "kernel_name": "hybridsort",
+      "missing_api": "omp",
+      "source_api": "cuda",
+      "translation_direction": "cuda->omp",
+      "priority": "medium"
+    },
+    {
+      "kernel_name": "mummergpu",
+      "missing_api": "opencl",
+      "source_api": "cuda",
+      "translation_direction": "cuda->opencl",
+      "priority": "medium"
+    }
+  ],
+  "excluded_kernels": [
+    {
+      "kernel_name": "leukocyte",
+      "reason": "Intentionally excluded: 80+ source files with meschach_lib dependency"
+    },
+    {
+      "kernel_name": "rng",
+      "reason": "Skipped: only available in 'others/' API category, not in spec schema"
+    }
+  ]
+}

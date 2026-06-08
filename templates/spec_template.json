@@ -1,0 +1,91 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "",
+        "parallel_api": "",
+        "unique_id": "",
+        "source_suite": ""
+    },
+    "provenance": {
+        "repository": {
+            "url": "",
+            "commit": "",
+            "branch": null
+        },
+        "repo_root": "",
+        "source_path": "",
+        "license": null
+    },
+    "files": {
+        "prompt_payload": [],
+        "support_files": [],
+        "verification_only": []
+    },
+    "implementation": {
+        "api": "",
+        "api_version": null,
+        "language": "",
+        "language_standard": null
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": []
+            }
+        },
+        "build_system": "make",
+        "working_directory": "",
+        "commands": {
+            "configure": null,
+            "build": "",
+            "clean": null
+        },
+        "variables": null,
+        "outputs": {
+            "executable": ""
+        }
+    },
+    "run": {
+        "executable": "",
+        "default_arguments": [],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "default": {
+                "arguments": [],
+                "description": "",
+                "input_files": [],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": ""
+            }
+        ],
+        "floating_point": null
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": null,
+        "reference_platform": {
+            "$ref": "schema/reference_platform.json"
+        }
+    },
+    "baseline_results": null,
+    "metadata": {
+        "description": "",
+        "domain": "",
+        "complexity": null,
+        "tags": [],
+        "multi_file": false
+    }
+}

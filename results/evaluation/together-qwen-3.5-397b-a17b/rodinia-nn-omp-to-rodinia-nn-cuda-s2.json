@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-nn-omp",
+  "target_spec": "rodinia-nn-cuda",
+  "kernel": "nn",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 65231998,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-21T22:25:53Z",
+  "prompt_tokens": 1974,
+  "completion_tokens": 2197,
+  "llm_response_time_seconds": 13.15,
+  "build_status": "fail",
+  "build_time_seconds": 0.195,
+  "build_error_snippet": "nn_cuda.cu(51): error: a value of type \"void *\" cannot be assigned to an entity of type \"neighbor *\"\n   neighbors = malloc(k*sizeof(struct neighbor));\n             ^\n\n1 error detected in the compilation of \"nn_cuda.cu\".\nmake: *** [Makefile:12: nn] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: e assigned to an entity of type \"neighbor *\"\n   neighbors = malloc(k*sizeof(struct neighbor));\n             ^\n\n1 error detected in the compilation of \"nn_cuda.cu\".\nmake: *** [Makefile:12: nn] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.078,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "nn_cuda.cu": "#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <sys/time.h>\n#include <cuda.h>\n\n#define MAX_ARGS 10\n#define REC_LENGTH 49\t\n#define REC_WINDOW 10\t\n#define LATITUDE_POS 28\t\n#define OPEN 10000\t\n\nstruct neighbor {\n\tchar entry[REC_LENGTH];\n\tdouble dist;\n};\n\n__global__ void calculate_distances(float* latitudes, float* longitudes, float* z, int rec_count, float target_lat, float target_long) {\n    int i = blockIdx.x * blockDim.x + threadIdx.x;\n    if (i < rec_count) {\n        float tmp_lat = latitudes[i];\n        float tmp_long = longitudes[i];\n        z[i] = sqrt(((tmp_lat - target_lat) * (tmp_lat - target_lat)) + ((tmp_long - target_long) * (tmp_long - target_long)));\n    }\n}\n\nint main(int argc, char* argv[]) {\n\tlong long time0 = clock();\n    FILE   *flist,*fp;\n\tint    i=0,j=0, k=0, rec_count=0, done=0;\n\tchar   sandbox[REC_LENGTH * REC_WINDOW], *rec_iter,*rec_iter2, dbname[64];\n\tstruct neighbor *neighbors = NULL;\n\tfloat target_lat, target_long, tmp_lat=0, tmp_long=0;\n\n\tif(argc < 5) {\n\t\tfprintf(stderr, \"Invalid set of arguments\\n\");\n\t\texit(-1);\n\t}\n\n\tflist = fopen(argv[1], \"r\");\n\tif(!flist) {\n\t\tprintf(\"error opening flist\\n\");\n\t\texit(1);\n\t}\n\n\tk = atoi(argv[2]);\n\ttarget_lat = atof(argv[3]);\n\ttarget_long = atof(argv[4]);\n\n\tneighbors = malloc(k*sizeof(struct neighbor));\n\n\tif(neighbors == NULL) {\n\t\tfprintf(stderr, \"no room for neighbors\\n\");\n\t\texit(0);\n\t}\n\n\tfor( j = 0 ; j < k ; j++ ) { \n\t\tneighbors[j].dist = OPEN;\n\t}\n\n\t  \n\tif(fscanf(flist, \"%s\\n\", dbname) != 1) {\n\t\tfprintf(stderr, \"error reading filelist\\n\");\n\t\texit(0);\n\t}\n\n\tfp = fopen(dbname, \"r\");\n\tif(!fp) {\n\t\tprintf(\"error opening flist\\n\");\n\t\texit(1);\n\t}\n\n\tfloat *z;\n\tz  = (float *) malloc(REC_WINDOW * sizeof(float));\n\t\n\tfloat *latitudes_host = (float *) malloc(REC_WINDOW * sizeof(float));\n\tfloat *longitudes_host = (float *) malloc(REC_WINDOW * sizeof(float));\n\t\n\tfloat *latitudes_dev = NULL;\n\tfloat *longitudes_dev = NULL;\n\tfloat *z_dev = NULL;\n\t\n\tcudaMalloc(&latitudes_dev, REC_WINDOW * sizeof(float));\n\tcudaMalloc(&longitudes_dev, REC_WINDOW * sizeof(float));\n\tcudaMalloc(&z_dev, REC_WINDOW * sizeof(float));\n\n\twhile(!done) {\n\t\t\n\t\trec_count = fread(sandbox, REC_LENGTH, REC_WINDOW, fp);\n\t\tif( rec_count != REC_WINDOW ) {\n\t\t\tif(!ferror(flist)) {\n\t\t\t\tfclose(fp);\n\n\t\t\t\tif(feof(flist))\n\t\t  \t\t\tdone = 1;\n\t\t\t\telse {\n\t \t\t\t\tif(fscanf(flist, \"%s\\n\", dbname) != 1) {\n\t    \t\t\t\t\tfprintf(stderr, \"error reading filelist\\n\");\n\t    \t\t\t\t\texit(0);\n\t\t\t\t\t}\n\n\t  \t\t\t\tfp = fopen(dbname, \"r\");\n\n\t  \t\t\t\tif(!fp) {\n\t\t\t\t\t    printf(\"error opening a db\\n\");\n\t\t\t\t\t    exit(1);\n\t  \t\t\t\t}\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tperror(\"Error\");\n\t\t\t\texit(0);\n\t\t\t}\n\t\t}\n\n        for (i = 0; i < rec_count; i++){\n\t\t\trec_iter = sandbox+(i * REC_LENGTH + LATITUDE_POS - 1);\n            latitudes_host[i] = atof(rec_iter);\n            longitudes_host[i] = atof(rec_iter+5);\n        }\n        \n        cudaMemcpy(latitudes_dev, latitudes_host, rec_count * sizeof(float), cudaMemcpyHostToDevice);\n        cudaMemcpy(longitudes_dev, longitudes_host, rec_count * sizeof(float), cudaMemcpyHostToDevice);\n        \n        int threads_per_block = 256;\n        int blocks = (rec_count + threads_per_block - 1) / threads_per_block;\n        calculate_distances<<<blocks, threads_per_block>>>(latitudes_dev, longitudes_dev, z_dev, rec_count, target_lat, target_long);\n        cudaDeviceSynchronize();\n        \n        cudaMemcpy(z, z_dev, rec_count * sizeof(float), cudaMemcpyDeviceToHost);\n\n\t\t\n        for( i = 0 ; i < rec_count ; i++ ) {\n\t\t\tfloat max_dist = -1;\n\t\t\tint max_idx = 0;\n\t\t\t\n\t\t\tfor( j = 0 ; j < k ; j++ ) {\n\t\t\t\tif( neighbors[j].dist > max_dist ) {\n\t\t\t\t\tmax_dist = neighbors[j].dist;\n\t\t\t\t\tmax_idx = j;\n\t\t\t\t}\n\t\t\t}\n\t\t\t\n\t\t\tif( z[i] < neighbors[max_idx].dist ) {\n\t\t\t\tsandbox[(i+1)*REC_LENGTH-1] = '\\0';\n\t\t\t  \tstrcpy(neighbors[max_idx].entry, sandbox +i*REC_LENGTH);\n\t\t\t  \tneighbors[max_idx].dist = z[i];\n\t\t\t}\n\t\t}\n\t}\n\n\tfprintf(stderr, \"The %d nearest neighbors are:\\n\", k);\n\tfor( j = 0 ; j < k ; j++ ) {\n\t\tif( !(neighbors[j].dist == OPEN) )\n\t\t\tfprintf(stderr, \"%s --> %f\\n\", neighbors[j].entry, neighbors[j].dist);\n\t}\n\n\tfclose(flist);\n\t\n\tcudaFree(latitudes_dev);\n\tcudaFree(longitudes_dev);\n\tcudaFree(z_dev);\n\tfree(latitudes_host);\n\tfree(longitudes_host);\n\n    long long time1 = clock();\n    printf(\"total time : %15.12f s\", (float) (time1 - time0) / 1000000);\n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "nn_cuda.cu"
+  ],
+  "target_files_extracted": [
+    "nn_cuda.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 13.15,
+      "prompt_tokens": 1974,
+      "completion_tokens": 2197,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "nn_cuda.cu(51): error: a value of type \"void *\" cannot be assigned to an entity of type \"neighbor *\"\n   neighbors = malloc(k*sizeof(struct neighbor));\n             ^\n\n1 error detected in the compilation of \"nn_cuda.cu\".\nmake: *** [Makefile:12: nn] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

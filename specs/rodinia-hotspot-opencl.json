@@ -1,0 +1,199 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "hotspot",
+        "parallel_api": "opencl",
+        "unique_id": "rodinia-hotspot-opencl",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "opencl/hotspot",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "hotspot_kernel.cl",
+            "hotspot.c"
+        ],
+        "support_files": [
+            "OpenCL_helper_library.h",
+            "hotspot.h",
+            "Makefile",
+            "OpenCL_helper_library.c"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "hotspot_kernel.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C",
+        "language_standard": null
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl>=2.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl/hotspot",
+        "commands": {
+            "configure": null,
+            "build": "make OPENCL_INC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include OPENCL_LIB=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+            "clean": "make clean"
+        },
+        "variables": {
+            "OPENCL_INC": {
+                "description": "Path to OpenCL headers",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include",
+                "detection": "find /usr -name 'cl.h' -path '*/CL/cl.h' | head -1 | xargs dirname | xargs dirname"
+            },
+            "OPENCL_LIB": {
+                "description": "Path to OpenCL libraries",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+                "detection": "find /usr -name 'libOpenCL.so' | head -1 | xargs dirname"
+            }
+        },
+        "outputs": {
+            "executable": "./hotspot.out"
+        }
+    },
+    "run": {
+        "executable": "./hotspot.out",
+        "default_arguments": [
+            "512",
+            "2",
+            "4",
+            "../../data/hotspot/temp_512",
+            "../../data/hotspot/power_512",
+            "output.out"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "512",
+                    "2",
+                    "4",
+                    "../../data/hotspot/temp_512",
+                    "../../data/hotspot/power_512",
+                    "output.out"
+                ],
+                "description": "Small input for correctness verification of hotspot (OPENCL)",
+                "input_files": [
+                    "../../data/hotspot/temp_512",
+                    "../../data/hotspot/power_512"
+                ],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "512",
+                    "2",
+                    "4",
+                    "../../data/hotspot/temp_512",
+                    "../../data/hotspot/power_512",
+                    "output.out"
+                ],
+                "description": "Large input for performance measurement of hotspot (OPENCL)",
+                "input_files": [
+                    "../../data/hotspot/temp_512",
+                    "../../data/hotspot/power_512"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Total:",
+                "description": "Hotspot simulation completed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.275458+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "WG size of kernel = 16 X 16\nPlatform: NVIDIA Corporation\nnum_devices = 1\nDevice: NVIDIA GeForce RTX 4070\nUse GPU device\nInit: 56.993999\nMemAlloc: 0.001000\nHtoD: 0.359000\nExec: 0.023552\nDtoH: 0.039776\nClose: 0.301000\nTotal: 94.901001\n",
+                "wall_time_seconds": 0.159,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "2D thermal simulation stencil computation on GPU",
+        "domain": "simulation",
+        "complexity": "thermal simulation (2D stencil)",
+        "tags": [
+            "hotspot",
+            "opencl",
+            "rodinia",
+            "simulation",
+            "stencil",
+            "thermal"
+        ],
+        "multi_file": true,
+        "translation_complexity": "single_file"
+    }
+}

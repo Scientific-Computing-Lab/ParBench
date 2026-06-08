@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-hotspot-omp",
+  "target_spec": "rodinia-hotspot-opencl",
+  "kernel": "hotspot",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 325865020,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-04-24T05:24:07Z",
+  "prompt_tokens": 7798,
+  "completion_tokens": 12724,
+  "llm_response_time_seconds": 317.402,
+  "build_status": "pass",
+  "build_time_seconds": 0.177,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.281,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nPlatform: NVIDIA Corporation\nnum_devices = 1\nDevice: NVIDIA GeForce RTX 4070\nUse GPU device\nInit: 142.893005\nMemAlloc: 0.003000\nHtoD: 0.426000\nExec: 0.022944\nDtoH: 0.039840\nClose: 0.311000\nTotal: 184.839005\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.159,
+  "translated_wall_time_seconds": 0.281,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.5658,
+  "translated_files": {
+    "hotspot_kernel.cl": "#ifndef amb_temp\n#define amb_temp 80.0f\n#endif\n\n__kernel void hotspot(\n    int iter,\n    __global const float *power,\n    __global const float *temp_in,\n    __global float *temp_out,\n    int col,\n    int row,\n    int borderCols,\n    int borderRows,\n    float Cap,\n    float Rx,\n    float Ry,\n    float Rz,\n    float step)\n{\n    float Rx_1 = 1.0f / Rx;\n    float Ry_1 = 1.0f / Ry;\n    float Rz_1 = 1.0f / Rz;\n    float Cap_1 = step / Cap;\n    \n    int c_start = get_group_id(0) * BLOCK_SIZE;\n    int r_start = get_group_id(1) * BLOCK_SIZE;\n    int local_c = get_local_id(0);\n    int local_r = get_local_id(1);\n    int c = c_start + local_c;\n    int r = r_start + local_r;\n    \n    if (r >= row || c >= col) return;\n    \n    // Local memory for this block's temperatures\n    __local float local_temp[BLOCK_SIZE][BLOCK_SIZE];\n    \n    // Initialize with input temperatures\n    local_temp[local_r][local_c] = temp_in[r * col + c];\n    barrier(CLK_LOCAL_MEM_FENCE);\n    \n    float current_temp = local_temp[local_r][local_c];\n    int idx = r * col + c;\n    \n    for (int i = 0; i < iter; i++) {\n        float delta;\n        \n        // Get neighbor temperatures\n        float temp_up, temp_down, temp_left, temp_right;\n        \n        // Up neighbor (r-1)\n        if (r == 0) {\n            temp_up = amb_temp;\n        } else if (local_r == 0) {\n            temp_up = temp_in[(r - 1) * col + c];\n        } else {\n            temp_up = local_temp[local_r - 1][local_c];\n        }\n        \n        // Down neighbor (r+1)\n        if (r == row - 1) {\n            temp_down = amb_temp;\n        } else if (local_r == BLOCK_SIZE - 1) {\n            temp_down = temp_in[(r + 1) * col + c];\n        } else {\n            temp_down = local_temp[local_r + 1][local_c];\n        }\n        \n        // Left neighbor (c-1)\n        if (c == 0) {\n            temp_left = amb_temp;\n        } else if (local_c == 0) {\n            temp_left = temp_in[r * col + c - 1];\n        } else {\n            temp_left = local_temp[local_r][local_c - 1];\n        }\n        \n        // Right neighbor (c+1)\n        if (c == col - 1) {\n            temp_right = amb_temp;\n        } else if (local_c == BLOCK_SIZE - 1) {\n            temp_right = temp_in[r * col + c + 1];\n        } else {\n            temp_right = local_temp[local_r][local_c + 1];\n        }\n        \n        // Compute based on boundary conditions\n        if (r == 0 && c == 0) {\n            delta = Cap_1 * (power[idx] +\n                (temp_right - current_temp) * Rx_1 +\n                (temp_down - current_temp) * Ry_1 +\n                (amb_temp - current_temp) * Rz_1);\n        }\n        else if (r == 0 && c == col - 1) {\n            delta = Cap_1 * (power[idx] +\n                (temp_left - current_temp) * Rx_1 +\n                (temp_down - current_temp) * Ry_1 +\n                (amb_temp - current_temp) * Rz_1);\n        }\n        else if (r == row - 1 && c == col - 1) {\n            delta = Cap_1 * (power[idx] +\n                (temp_left - current_temp) * Rx_1 +\n                (temp_up - current_temp) * Ry_1 +\n                (amb_temp - current_temp) * Rz_1);\n        }\n        else if (r == row - 1 && c == 0) {\n            delta = Cap_1 * (power[idx] +\n                (temp_right - current_temp) * Rx_1 +\n                (temp_up - current_temp) * Ry_1 +\n                (amb_temp - current_temp) * Rz_1);\n        }\n        else if (r == 0) {\n            delta = Cap_1 * (power[idx] +\n                (temp_right + temp_left - 2.0f * current_temp) * Rx_1 +\n                (temp_down - current_temp) * Ry_1 +\n                (amb_temp - current_temp) * Rz_1);\n        }\n        else if (c == col - 1) {\n            delta = Cap_1 * (power[idx] +\n                (temp_down + temp_up - 2.0f * current_temp) * Ry_1 +\n                (temp_left - current_temp) * Rx_1 +\n                (amb_temp - current_temp) * Rz_1);\n        }\n        else if (r == row - 1) {\n            delta = Cap_1 * (power[idx] +\n                (temp_right + temp_left - 2.0f * current_temp) * Rx_1 +\n                (temp_up - current_temp) * Ry_1 +\n                (amb_temp - current_temp) * Rz_1);\n        }\n        else if (c == 0) {\n            delta = Cap_1 * (power[idx] +\n                (temp_down + temp_up - 2.0f * current_temp) * Ry_1 +\n                (temp_right - current_temp) * Rx_1 +\n                (amb_temp - current_temp) * Rz_1);\n        }\n        else {\n            delta = Cap_1 * (power[idx] +\n                (temp_down + temp_up - 2.0f * current_temp) * Ry_1 +\n                (temp_right + temp_left - 2.0f * current_temp) * Rx_1 +\n                (amb_temp - current_temp) * Rz_1);\n        }\n        \n        current_temp = current_temp + delta;\n        local_temp[local_r][local_c] = current_temp;\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n    \n    temp_out[r * col + c] = current_temp;\n}\n"
+  },
+  "target_files_expected": [
+    "hotspot_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspot_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 317.402,
+      "prompt_tokens": 7798,
+      "completion_tokens": 12724,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

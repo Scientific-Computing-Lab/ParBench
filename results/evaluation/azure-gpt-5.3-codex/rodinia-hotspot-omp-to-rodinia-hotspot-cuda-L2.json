@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-hotspot-omp",
+  "target_spec": "rodinia-hotspot-cuda",
+  "kernel": "hotspot",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1273677049,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "512",
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-04-30T23:26:11Z",
+  "prompt_tokens": 3183,
+  "completion_tokens": 4189,
+  "llm_response_time_seconds": 39.054,
+  "build_status": "pass",
+  "build_time_seconds": 0.561,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.231,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Start computing the transient temperature\nEnding simulation\nTotal time: 0.093 seconds\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.149,
+  "translated_wall_time_seconds": 0.231,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.645,
+  "translated_files": {
+    "hotspot.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <sys/time.h>\n#include <cuda_runtime.h>\n\nlong long get_time()\n{\n    struct timeval tv;\n    gettimeofday(&tv, NULL);\n    return (tv.tv_sec * 1000000) + tv.tv_usec;\n}\n\nusing namespace std;\n\n#define BLOCK_SIZE 16\n#define BLOCK_SIZE_C BLOCK_SIZE\n#define BLOCK_SIZE_R BLOCK_SIZE\n\n#define STR_SIZE 256\n\n#define MAX_PD (3.0e6)\n\n#define PRECISION 0.001\n#define SPEC_HEAT_SI 1.75e6\n#define K_SI 100\n\n#define FACTOR_CHIP 0.5\n#define OPEN\n\ntypedef float FLOAT;\n\nconst FLOAT t_chip = 0.0005;\nconst FLOAT chip_height = 0.016;\nconst FLOAT chip_width = 0.016;\nconst FLOAT amb_temp = 80.0;\n\nint num_omp_threads;\n\nstatic inline void cuda_check(cudaError_t err, const char *msg)\n{\n    if (err != cudaSuccess) {\n        fprintf(stderr, \"error: %s (%s)\\n\", msg, cudaGetErrorString(err));\n        exit(1);\n    }\n}\n\n__global__ void single_iteration_kernel(FLOAT *result, const FLOAT *temp, const FLOAT *power, int row, int col,\n                                        FLOAT Cap_1, FLOAT Rx_1, FLOAT Ry_1, FLOAT Rz_1, FLOAT step)\n{\n    int chunk = blockIdx.x * blockDim.x + threadIdx.x;\n    int num_chunk = row * col / (BLOCK_SIZE_R * BLOCK_SIZE_C);\n    int chunks_in_row = col / BLOCK_SIZE_C;\n    int chunks_in_col = row / BLOCK_SIZE_R;\n\n    if (chunk >= num_chunk) return;\n\n    FLOAT delta;\n    int r, c;\n\n    int r_start = BLOCK_SIZE_R * (chunk / chunks_in_col);\n    int c_start = BLOCK_SIZE_C * (chunk % chunks_in_row);\n    int r_end = r_start + BLOCK_SIZE_R > row ? row : r_start + BLOCK_SIZE_R;\n    int c_end = c_start + BLOCK_SIZE_C > col ? col : c_start + BLOCK_SIZE_C;\n\n    if (r_start == 0 || c_start == 0 || r_end == row || c_end == col) {\n        for (r = r_start; r < r_start + BLOCK_SIZE_R; ++r) {\n            for (c = c_start; c < c_start + BLOCK_SIZE_C; ++c) {\n\n                if ((r == 0) && (c == 0)) {\n                    delta = (Cap_1) * (power[0] +\n                                       (temp[1] - temp[0]) * Rx_1 +\n                                       (temp[col] - temp[0]) * Ry_1 +\n                                       (amb_temp - temp[0]) * Rz_1);\n                } else if ((r == 0) && (c == col - 1)) {\n                    delta = (Cap_1) * (power[c] +\n                                       (temp[c - 1] - temp[c]) * Rx_1 +\n                                       (temp[c + col] - temp[c]) * Ry_1 +\n                                       (amb_temp - temp[c]) * Rz_1);\n                } else if ((r == row - 1) && (c == col - 1)) {\n                    delta = (Cap_1) * (power[r * col + c] +\n                                       (temp[r * col + c - 1] - temp[r * col + c]) * Rx_1 +\n                                       (temp[(r - 1) * col + c] - temp[r * col + c]) * Ry_1 +\n                                       (amb_temp - temp[r * col + c]) * Rz_1);\n                } else if ((r == row - 1) && (c == 0)) {\n                    delta = (Cap_1) * (power[r * col] +\n                                       (temp[r * col + 1] - temp[r * col]) * Rx_1 +\n                                       (temp[(r - 1) * col] - temp[r * col]) * Ry_1 +\n                                       (amb_temp - temp[r * col]) * Rz_1);\n                } else if (r == 0) {\n                    delta = (Cap_1) * (power[c] +\n                                       (temp[c + 1] + temp[c - 1] - 2.0f * temp[c]) * Rx_1 +\n                                       (temp[col + c] - temp[c]) * Ry_1 +\n                                       (amb_temp - temp[c]) * Rz_1);\n                } else if (c == col - 1) {\n                    delta = (Cap_1) * (power[r * col + c] +\n                                       (temp[(r + 1) * col + c] + temp[(r - 1) * col + c] - 2.0f * temp[r * col + c]) * Ry_1 +\n                                       (temp[r * col + c - 1] - temp[r * col + c]) * Rx_1 +\n                                       (amb_temp - temp[r * col + c]) * Rz_1);\n                } else if (r == row - 1) {\n                    delta = (Cap_1) * (power[r * col + c] +\n                                       (temp[r * col + c + 1] + temp[r * col + c - 1] - 2.0f * temp[r * col + c]) * Rx_1 +\n                                       (temp[(r - 1) * col + c] - temp[r * col + c]) * Ry_1 +\n                                       (amb_temp - temp[r * col + c]) * Rz_1);\n                } else if (c == 0) {\n                    delta = (Cap_1) * (power[r * col] +\n                                       (temp[(r + 1) * col] + temp[(r - 1) * col] - 2.0f * temp[r * col]) * Ry_1 +\n                                       (temp[r * col + 1] - temp[r * col]) * Rx_1 +\n                                       (amb_temp - temp[r * col]) * Rz_1);\n                }\n                result[r * col + c] = temp[r * col + c] + delta;\n            }\n        }\n        return;\n    }\n\n    for (r = r_start; r < r_start + BLOCK_SIZE_R; ++r) {\n        for (c = c_start; c < c_start + BLOCK_SIZE_C; ++c) {\n            result[r * col + c] = temp[r * col + c] +\n                                  (Cap_1 * (power[r * col + c] +\n                                            (temp[(r + 1) * col + c] + temp[(r - 1) * col + c] - 2.f * temp[r * col + c]) * Ry_1 +\n                                            (temp[r * col + c + 1] + temp[r * col + c - 1] - 2.f * temp[r * col + c]) * Rx_1 +\n                                            (amb_temp - temp[r * col + c]) * Rz_1));\n        }\n    }\n}\n\nvoid compute_tran_temp(FLOAT *result, int num_iterations, FLOAT *temp, FLOAT *power, int row, int col)\n{\n    FLOAT grid_height = chip_height / row;\n    FLOAT grid_width = chip_width / col;\n\n    FLOAT Cap = FACTOR_CHIP * SPEC_HEAT_SI * t_chip * grid_width * grid_height;\n    FLOAT Rx = grid_width / (2.0 * K_SI * t_chip * grid_height);\n    FLOAT Ry = grid_height / (2.0 * K_SI * t_chip * grid_width);\n    FLOAT Rz = t_chip / (K_SI * grid_height * grid_width);\n\n    FLOAT max_slope = MAX_PD / (FACTOR_CHIP * t_chip * SPEC_HEAT_SI);\n    FLOAT step = PRECISION / max_slope / 1000.0;\n\n    FLOAT Rx_1 = 1.f / Rx;\n    FLOAT Ry_1 = 1.f / Ry;\n    FLOAT Rz_1 = 1.f / Rz;\n    FLOAT Cap_1 = step / Cap;\n\n    int array_size = row * col;\n    size_t bytes = (size_t)array_size * sizeof(FLOAT);\n\n    FLOAT *d_temp = NULL, *d_power = NULL, *d_result = NULL;\n    cuda_check(cudaMalloc((void **)&d_temp, bytes), \"unable to allocate device memory for temp\");\n    cuda_check(cudaMalloc((void **)&d_power, bytes), \"unable to allocate device memory for power\");\n    cuda_check(cudaMalloc((void **)&d_result, bytes), \"unable to allocate device memory for result\");\n\n    cuda_check(cudaMemcpy(d_temp, temp, bytes, cudaMemcpyHostToDevice), \"copy temp H2D failed\");\n    cuda_check(cudaMemcpy(d_power, power, bytes, cudaMemcpyHostToDevice), \"copy power H2D failed\");\n\n    FLOAT *r = d_result;\n    FLOAT *t = d_temp;\n\n    int num_chunk = row * col / (BLOCK_SIZE_R * BLOCK_SIZE_C);\n    int threads = 256;\n    int blocks = (num_chunk + threads - 1) / threads;\n\n    for (int i = 0; i < num_iterations; i++) {\n        single_iteration_kernel<<<blocks, threads>>>(r, t, d_power, row, col, Cap_1, Rx_1, Ry_1, Rz_1, step);\n        cuda_check(cudaGetLastError(), \"kernel launch failed\");\n        FLOAT *tmp = t;\n        t = r;\n        r = tmp;\n    }\n\n    cuda_check(cudaMemcpy(temp, d_temp, bytes, cudaMemcpyDeviceToHost), \"copy temp D2H failed\");\n    cuda_check(cudaMemcpy(result, d_result, bytes, cudaMemcpyDeviceToHost), \"copy result D2H failed\");\n\n    cudaFree(d_temp);\n    cudaFree(d_power);\n    cudaFree(d_result);\n}\n\nvoid fatal(char *s)\n{\n    fprintf(stderr, \"error: %s\\n\", s);\n    exit(1);\n}\n\nvoid writeoutput(FLOAT *vect, int grid_rows, int grid_cols, char *file)\n{\n    int i, j, index = 0;\n    FILE *fp;\n    char str[STR_SIZE];\n\n    if ((fp = fopen(file, \"w\")) == 0)\n        printf(\"The file was not opened\\n\");\n\n    for (i = 0; i < grid_rows; i++)\n        for (j = 0; j < grid_cols; j++) {\n            sprintf(str, \"%d\\t%g\\n\", index, vect[i * grid_cols + j]);\n            fputs(str, fp);\n            index++;\n        }\n\n    fclose(fp);\n}\n\nvoid read_input(FLOAT *vect, int grid_rows, int grid_cols, char *file)\n{\n    int i;\n    FILE *fp;\n    char str[STR_SIZE];\n    FLOAT val;\n\n    fp = fopen(file, \"r\");\n    if (!fp)\n        fatal((char *)\"file could not be opened for reading\");\n\n    for (i = 0; i < grid_rows * grid_cols; i++) {\n        fgets(str, STR_SIZE, fp);\n        if (feof(fp))\n            fatal((char *)\"not enough lines in file\");\n        if ((sscanf(str, \"%f\", &val) != 1))\n            fatal((char *)\"invalid file format\");\n        vect[i] = val;\n    }\n\n    fclose(fp);\n}\n\nvoid usage(int argc, char **argv)\n{\n    fprintf(stderr, \"Usage: %s <grid_rows> <grid_cols> <sim_time> <no. of threads><temp_file> <power_file>\\n\", argv[0]);\n    fprintf(stderr, \"\\t<grid_rows>  - number of rows in the grid (positive integer)\\n\");\n    fprintf(stderr, \"\\t<grid_cols>  - number of columns in the grid (positive integer)\\n\");\n    fprintf(stderr, \"\\t<sim_time>   - number of iterations\\n\");\n    fprintf(stderr, \"\\t<no. of threads>   - number of threads\\n\");\n    fprintf(stderr, \"\\t<temp_file>  - name of the file containing the initial temperature values of each cell\\n\");\n    fprintf(stderr, \"\\t<power_file> - name of the file containing the dissipated power values of each cell\\n\");\n    fprintf(stderr, \"\\t<output_file> - name of the output file\\n\");\n    exit(1);\n}\n\nint main(int argc, char **argv)\n{\n    int grid_rows, grid_cols, sim_time, i;\n    FLOAT *temp, *power, *result;\n    char *tfile, *pfile, *ofile;\n\n    if (argc != 8)\n        usage(argc, argv);\n    if ((grid_rows = atoi(argv[1])) <= 0 ||\n        (grid_cols = atoi(argv[2])) <= 0 ||\n        (sim_time = atoi(argv[3])) <= 0 ||\n        (num_omp_threads = atoi(argv[4])) <= 0)\n        usage(argc, argv);\n\n    temp = (FLOAT *)calloc(grid_rows * grid_cols, sizeof(FLOAT));\n    power = (FLOAT *)calloc(grid_rows * grid_cols, sizeof(FLOAT));\n    result = (FLOAT *)calloc(grid_rows * grid_cols, sizeof(FLOAT));\n    if (!temp || !power)\n        fatal((char *)\"unable to allocate memory\");\n\n    tfile = argv[5];\n    pfile = argv[6];\n    ofile = argv[7];\n\n    read_input(temp, grid_rows, grid_cols, tfile);\n    read_input(power, grid_rows, grid_cols, pfile);\n\n    printf(\"Start computing the transient temperature\\n\");\n\n    long long start_time = get_time();\n\n    compute_tran_temp(result, sim_time, temp, power, grid_rows, grid_cols);\n\n    long long end_time = get_time();\n\n    printf(\"Ending simulation\\n\");\n    printf(\"Total time: %.3f seconds\\n\", ((float)(end_time - start_time)) / (1000 * 1000));\n\n    writeoutput((1 & sim_time) ? result : temp, grid_rows, grid_cols, ofile);\n\n#ifdef OUTPUT\n    for (i = 0; i < grid_rows * grid_cols; i++)\n        fprintf(stdout, \"%d\\t%g\\n\", i, temp[i]);\n#endif\n\n    free(temp);\n    free(power);\n\n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "hotspot.cu"
+  ],
+  "target_files_extracted": [
+    "hotspot.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 39.054,
+      "prompt_tokens": 3183,
+      "completion_tokens": 4189,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

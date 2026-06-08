@@ -1,0 +1,77 @@
+{
+  "source_spec": "hecbench-md-omp_target",
+  "target_spec": "hecbench-md-cuda",
+  "kernel": "md",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1370161578,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "1",
+    "100"
+  ],
+  "timestamp": "2026-04-30T07:27:58Z",
+  "prompt_tokens": 3075,
+  "completion_tokens": 2190,
+  "llm_response_time_seconds": 29.576,
+  "build_status": "pass",
+  "build_time_seconds": 1.09,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 2.839,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Initializing test problem (this can take several minutes for large problems).\nFinished.\n3145643 of 3145728 pairs within cutoff distance = 99.9973 %\nPerforming Correctness Check (may take several minutes)\nMax error between host and device: 1.86265e-09\nAverage kernel execution time 8.41336e-05 (s)\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+numeric_comparison+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 8.41336e-05,
+      "unit": "s"
+    }
+  },
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 2.839,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cu": "#include <cassert>\n#include <chrono>\n#include <cfloat>\n#include <cmath>\n#include <cstdlib>\n#include <list>\n#include <iostream>\n#include <cuda_runtime.h>\n\n#include \"MD.h\"\n#include \"reference.h\"\n#include \"utils.h\"\n\n__global__ void md_kernel(\n    const POSVECTYPE* __restrict__ position,\n    FORCEVECTYPE* __restrict__ force,\n    const int* __restrict__ neighborList,\n    const int nAtom,\n    const int maxNeighbors_t,\n    const FPTYPE lj1_t,\n    const FPTYPE lj2_t,\n    const FPTYPE cutsq_t)\n{\n  unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;\n  if (idx >= (unsigned int)nAtom) return;\n\n  POSVECTYPE ipos = position[idx];\n  FORCEVECTYPE f = zero;\n\n  int j = 0;\n  while (j < maxNeighbors_t)\n  {\n    int jidx = neighborList[j * nAtom + idx];\n    POSVECTYPE jpos = position[jidx];\n\n    FPTYPE delx = ipos.x - jpos.x;\n    FPTYPE dely = ipos.y - jpos.y;\n    FPTYPE delz = ipos.z - jpos.z;\n    FPTYPE r2inv = delx * delx + dely * dely + delz * delz;\n\n    if (r2inv > 0 && r2inv < cutsq_t)\n    {\n      r2inv = (FPTYPE)1.0 / r2inv;\n      FPTYPE r6inv = r2inv * r2inv * r2inv;\n      FPTYPE forceC = r2inv * r6inv * (lj1_t * r6inv - lj2_t);\n\n      f.x += delx * forceC;\n      f.y += dely * forceC;\n      f.z += delz * forceC;\n    }\n    j++;\n  }\n\n  force[idx] = f;\n}\n\nvoid md(\n    const POSVECTYPE* __restrict__ position,\n    FORCEVECTYPE* __restrict__ force,\n    const int* __restrict__ neighborList,\n    const int nAtom,\n    const int maxNeighbors_t,\n    const FPTYPE lj1_t,\n    const FPTYPE lj2_t,\n    const FPTYPE cutsq_t)\n{\n  const int blockSize = 256;\n  const int gridSize = (nAtom + blockSize - 1) / blockSize;\n  md_kernel<<<gridSize, blockSize>>>(position, force, neighborList, nAtom,\n                                     maxNeighbors_t, lj1_t, lj2_t, cutsq_t);\n  cudaDeviceSynchronize();\n}\n\nint main(int argc, char** argv)\n{\n  if (argc != 3) {\n    printf(\"usage: %s <class size> <iteration>\", argv[0]);\n    return 1;\n  }\n\n  int sizeClass = atoi(argv[1]);\n  int iteration = atoi(argv[2]);\n  const int probSizes[] = { 12288, 24576, 36864, 73728 };\n  assert(sizeClass >= 0 && sizeClass < 4);\n  assert(iteration >= 0);\n\n  int nAtom = probSizes[sizeClass];\n\n  POSVECTYPE* position = (POSVECTYPE*)malloc(nAtom * sizeof(POSVECTYPE));\n  FORCEVECTYPE* force = (FORCEVECTYPE*)malloc(nAtom * sizeof(FORCEVECTYPE));\n  int* neighborList = (int*)malloc(maxNeighbors * nAtom * sizeof(int));\n\n  std::cout << \"Initializing test problem (this can take several minutes for large problems).\\n\";\n\n  srand(123);\n\n  for (int i = 0; i < nAtom; i++)\n  {\n    position[i].x = rand() % domainEdge;\n    position[i].y = rand() % domainEdge;\n    position[i].z = rand() % domainEdge;\n  }\n\n  std::cout << \"Finished.\\n\";\n  int totalPairs = buildNeighborList<FPTYPE, POSVECTYPE>(nAtom, position, neighborList);\n  std::cout << totalPairs << \" of \" << nAtom * maxNeighbors\n            << \" pairs within cutoff distance = \"\n            << 100.0 * ((double)totalPairs / (nAtom * maxNeighbors)) << \" %\\n\";\n\n  POSVECTYPE* d_position = nullptr;\n  FORCEVECTYPE* d_force = nullptr;\n  int* d_neighborList = nullptr;\n\n  cudaMalloc((void**)&d_position, nAtom * sizeof(POSVECTYPE));\n  cudaMalloc((void**)&d_force, nAtom * sizeof(FORCEVECTYPE));\n  cudaMalloc((void**)&d_neighborList, maxNeighbors * nAtom * sizeof(int));\n\n  cudaMemcpy(d_position, position, nAtom * sizeof(POSVECTYPE), cudaMemcpyHostToDevice);\n  cudaMemcpy(d_neighborList, neighborList, maxNeighbors * nAtom * sizeof(int), cudaMemcpyHostToDevice);\n\n  md(d_position, d_force, d_neighborList, nAtom, maxNeighbors, lj1, lj2, cutsq);\n\n  cudaMemcpy(force, d_force, nAtom * sizeof(FORCEVECTYPE), cudaMemcpyDeviceToHost);\n\n  std::cout << \"Performing Correctness Check (may take several minutes)\\n\";\n\n  checkResults<FPTYPE, FORCEVECTYPE, POSVECTYPE>(force, position, neighborList, nAtom);\n\n  auto start = std::chrono::steady_clock::now();\n\n  for (int i = 0; i < iteration; i++) {\n    md(d_position, d_force, d_neighborList, nAtom, maxNeighbors, lj1, lj2, cutsq);\n  }\n\n  auto end = std::chrono::steady_clock::now();\n  auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n  std::cout << \"Average kernel execution time \" << (time * 1e-9f) / iteration << \" (s)\\n\";\n\n  cudaFree(d_position);\n  cudaFree(d_force);\n  cudaFree(d_neighborList);\n\n  free(position);\n  free(force);\n  free(neighborList);\n\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cu"
+  ],
+  "target_files_extracted": [
+    "main.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 29.576,
+      "prompt_tokens": 3075,
+      "completion_tokens": 2190,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

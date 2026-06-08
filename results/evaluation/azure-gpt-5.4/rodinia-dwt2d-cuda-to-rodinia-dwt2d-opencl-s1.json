@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-dwt2d-cuda",
+  "target_spec": "rodinia-dwt2d-opencl",
+  "kernel": "dwt2d",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1365683746,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "rgb.bmp",
+    "-i",
+    "../../data/dwt2d",
+    "-D",
+    "1024x1024",
+    "-f",
+    "-5",
+    "-l",
+    "3"
+  ],
+  "timestamp": "2026-04-26T02:17:45Z",
+  "prompt_tokens": 30828,
+  "completion_tokens": 12182,
+  "llm_response_time_seconds": 286.835,
+  "build_status": "pass",
+  "build_time_seconds": 0.311,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.284,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "sliding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 3 , gx = 4 , gy = 11 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\n\nWriting to rgb.bmp.dwt.r (1024 x 1024)\n\nWriting to rgb.bmp.dwt.g (1024 x 1024)\n\nWriting to rgb.bmp.dwt.b (1024 x 1024)\nInit: 208.235992\nMemAlloc: 10.691999\nHtoD: 0.000000\nExec: 0.021504\nDtoH: 0.840000\nClose: 0.641000\nTotal: 229.447006\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.1,
+  "translated_wall_time_seconds": 0.284,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.3521,
+  "translated_files": {
+    "com_dwt.cl": "inline int mirror_index_int(int d, int sizeD)\n{\n    if (sizeD <= 1) return 0;\n    if (d >= sizeD) {\n        d = 2 * sizeD - 2 - d;\n    } else if (d < 0) {\n        d = -d;\n    }\n    if (d < 0) d = 0;\n    if (d >= sizeD) d = sizeD - 1;\n    return d;\n}\n\ninline int read_input_mirror(__global const int *input, int sizeX, int sizeY, int x, int y)\n{\n    x = mirror_index_int(x, sizeX);\n    y = mirror_index_int(y, sizeY);\n    return input[y * sizeX + x];\n}\n\ninline int vhigh_from_input(__global const int *input, int sizeX, int sizeY, int x, int hy)\n{\n    const int y0 = 2 * hy;\n    const int y1 = y0 + 1;\n    const int y2 = y0 + 2;\n\n    const int s0 = read_input_mirror(input, sizeX, sizeY, x, y0);\n    const int s1 = read_input_mirror(input, sizeX, sizeY, x, y1);\n    const int s2 = read_input_mirror(input, sizeX, sizeY, x, y2);\n\n    return s1 - (s0 + s2) / 2;\n}\n\ninline int vlow_from_input(__global const int *input, int sizeX, int sizeY, int x, int ly)\n{\n    const int evenv = read_input_mirror(input, sizeX, sizeY, x, 2 * ly);\n    const int d0 = vhigh_from_input(input, sizeX, sizeY, x, ly - 1);\n    const int d1 = vhigh_from_input(input, sizeX, sizeY, x, ly);\n\n    return evenv + (d0 + d1 + 2) / 4;\n}\n\ninline int hhigh_from_vlow(__global const int *input, int sizeX, int sizeY, int hx, int ly)\n{\n    const int x0 = 2 * hx;\n    const int x1 = x0 + 1;\n    const int x2 = x0 + 2;\n\n    const int s0 = vlow_from_input(input, sizeX, sizeY, x0, ly);\n    const int s1 = vlow_from_input(input, sizeX, sizeY, x1, ly);\n    const int s2 = vlow_from_input(input, sizeX, sizeY, x2, ly);\n\n    return s1 - (s0 + s2) / 2;\n}\n\ninline int hlow_from_vlow(__global const int *input, int sizeX, int sizeY, int lx, int ly)\n{\n    const int evenv = vlow_from_input(input, sizeX, sizeY, 2 * lx, ly);\n    const int d0 = hhigh_from_vlow(input, sizeX, sizeY, lx - 1, ly);\n    const int d1 = hhigh_from_vlow(input, sizeX, sizeY, lx, ly);\n\n    return evenv + (d0 + d1 + 2) / 4;\n}\n\ninline int hhigh_from_vhigh(__global const int *input, int sizeX, int sizeY, int hx, int hy)\n{\n    const int x0 = 2 * hx;\n    const int x1 = x0 + 1;\n    const int x2 = x0 + 2;\n\n    const int s0 = vhigh_from_input(input, sizeX, sizeY, x0, hy);\n    const int s1 = vhigh_from_input(input, sizeX, sizeY, x1, hy);\n    const int s2 = vhigh_from_input(input, sizeX, sizeY, x2, hy);\n\n    return s1 - (s0 + s2) / 2;\n}\n\ninline int hlow_from_vhigh(__global const int *input, int sizeX, int sizeY, int lx, int hy)\n{\n    const int evenv = vhigh_from_input(input, sizeX, sizeY, 2 * lx, hy);\n    const int d0 = hhigh_from_vhigh(input, sizeX, sizeY, lx - 1, hy);\n    const int d1 = hhigh_from_vhigh(input, sizeX, sizeY, lx, hy);\n\n    return evenv + (d0 + d1 + 2) / 4;\n}\n\n__kernel void c_CopySrcToComponents(__global int *d_r,\n                                    __global int *d_g,\n                                    __global int *d_b,\n                                    __global const uchar *d_src,\n                                    const int pixels)\n{\n    const int gid = (int)get_global_id(0);\n\n    if (gid < pixels) {\n        const int base = gid * 3;\n        d_r[gid] = (int)d_src[base + 0] - 128;\n        d_g[gid] = (int)d_src[base + 1] - 128;\n        d_b[gid] = (int)d_src[base + 2] - 128;\n    }\n}\n\n__kernel void c_CopySrcToComponent(__global int *d_c,\n                                   __global const uchar *d_src,\n                                   const int pixels)\n{\n    const int gid0 = (int)get_global_id(0);\n    const int base = gid0 * 9;\n\n    for (int k = 0; k < 9; ++k) {\n        const int i = base + k;\n        if (i < pixels) {\n            d_c[i] = (int)d_src[i] - 128;\n        }\n    }\n}\n\n__kernel void cl_fdwt53Kernel(__global const int *input,\n                              __global int *output,\n                              const int sizeX,\n                              const int sizeY,\n                              const int steps,\n                              const int WIN_SX,\n                              const int WIN_SY)\n{\n    (void)steps;\n    (void)WIN_SX;\n    (void)WIN_SY;\n\n    const int x = (int)get_global_id(0);\n    const int yStart = (int)get_global_id(1);\n    const int yStride = (int)get_global_size(1);\n\n    const int llx = (sizeX + 1) / 2;\n    const int hlx = sizeX - llx;\n    const int lly = (sizeY + 1) / 2;\n    const int hly = sizeY - lly;\n\n    const int offLL = 0;\n    const int offHL = llx * lly;\n    const int offLH = offHL + hlx * lly;\n    const int offHH = offLH + llx * hly;\n\n    if (x < llx) {\n        for (int ly = yStart; ly < lly; ly += yStride) {\n            output[offLL + ly * llx + x] = hlow_from_vlow(input, sizeX, sizeY, x, ly);\n        }\n\n        for (int hy = yStart; hy < hly; hy += yStride) {\n            output[offLH + hy * llx + x] = hlow_from_vhigh(input, sizeX, sizeY, x, hy);\n        }\n    }\n\n    if (x < hlx) {\n        for (int ly = yStart; ly < lly; ly += yStride) {\n            output[offHL + ly * hlx + x] = hhigh_from_vlow(input, sizeX, sizeY, x, ly);\n        }\n\n        for (int hy = yStart; hy < hly; hy += yStride) {\n            output[offHH + hy * hlx + x] = hhigh_from_vhigh(input, sizeX, sizeY, x, hy);\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "com_dwt.cl"
+  ],
+  "target_files_extracted": [
+    "com_dwt.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 286.835,
+      "prompt_tokens": 30828,
+      "completion_tokens": 12182,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

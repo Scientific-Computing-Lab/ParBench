@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-nw-omp",
+  "target_spec": "rodinia-nw-cuda",
+  "kernel": "nw",
+  "model": "azure-gpt-5.4",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1219435530,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "2048",
+    "10",
+    "4"
+  ],
+  "timestamp": "2026-04-27T00:43:01Z",
+  "prompt_tokens": 5026,
+  "completion_tokens": 7583,
+  "llm_response_time_seconds": 116.704,
+  "build_status": "pass",
+  "build_time_seconds": 1.666,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.284,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Start Needleman-Wunsch\nNum of threads: 4\nProcessing top-left matrix\nProcessing bottom-right matrix\nTotal time: 0.213 seconds\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.116,
+  "translated_wall_time_seconds": 0.284,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.4085,
+  "translated_files": {
+    "needle.cu": "#define LIMIT -999\n\n#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <sys/time.h>\n#include <cuda_runtime.h>\n\n#ifdef RD_WG_SIZE_0_0\n#define BLOCK_SIZE RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n#define BLOCK_SIZE RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n#define BLOCK_SIZE RD_WG_SIZE\n#else\n#define BLOCK_SIZE 16\n#endif\n\nvoid runTest(int argc, char** argv);\n\nlong long get_time()\n{\n    struct timeval tv;\n    gettimeofday(&tv, NULL);\n    return (tv.tv_sec * 1000000LL) + tv.tv_usec;\n}\n\n__host__ __device__ static inline int maximum(int a, int b, int c)\n{\n    int k;\n    if (b >= a)\n        k = b;\n    else\n        k = a;\n\n    if (c >= k)\n        return c;\n    else\n        return k;\n}\n\nint blosum62[24][24] = {\n{ 4, -1, -2, -2,  0, -1, -1,  0, -2, -1, -1, -1, -1, -2, -1,  1,  0, -3, -2,  0, -2, -1,  0, -4},\n{-1,  5,  0, -2, -3,  1,  0, -2,  0, -3, -2,  2, -1, -3, -2, -1, -1, -3, -2, -3, -1,  0, -1, -4},\n{-2,  0,  6,  1, -3,  0,  0,  0,  1, -3, -3,  0, -2, -3, -2,  1,  0, -4, -2, -3,  3,  0, -1, -4},\n{-2, -2,  1,  6, -3,  0,  2, -1, -1, -3, -4, -1, -3, -3, -1,  0, -1, -4, -3, -3,  4,  1, -1, -4},\n{ 0, -3, -3, -3,  9, -3, -4, -3, -3, -1, -1, -3, -1, -2, -3, -1, -1, -2, -2, -1, -3, -3, -2, -4},\n{-1,  1,  0,  0, -3,  5,  2, -2,  0, -3, -2,  1,  0, -3, -1,  0, -1, -2, -1, -2,  0,  3, -1, -4},\n{-1,  0,  0,  2, -4,  2,  5, -2,  0, -3, -3,  1, -2, -3, -1,  0, -1, -3, -2, -2,  1,  4, -1, -4},\n{ 0, -2,  0, -1, -3, -2, -2,  6, -2, -4, -4, -2, -3, -3, -2,  0, -2, -2, -3, -3, -1, -2, -1, -4},\n{-2,  0,  1, -1, -3,  0,  0, -2,  8, -3, -3, -1, -2, -1, -2, -1, -2, -2,  2, -3,  0,  0, -1, -4},\n{-1, -3, -3, -3, -1, -3, -3, -4, -3,  4,  2, -3,  1,  0, -3, -2, -1, -3, -1,  3, -3, -3, -1, -4},\n{-1, -2, -3, -4, -1, -2, -3, -4, -3,  2,  4, -2,  2,  0, -3, -2, -1, -2, -1,  1, -4, -3, -1, -4},\n{-1,  2,  0, -1, -3,  1,  1, -2, -1, -3, -2,  5, -1, -3, -1,  0, -1, -3, -2, -2,  0,  1, -1, -4},\n{-1, -1, -2, -3, -1,  0, -2, -3, -2,  1,  2, -1,  5,  0, -2, -1, -1, -1, -1,  1, -3, -1, -1, -4},\n{-2, -3, -3, -3, -2, -3, -3, -3, -1,  0,  0, -3,  0,  6, -4, -2, -2,  1,  3, -1, -3, -3, -1, -4},\n{-1, -2, -2, -1, -3, -1, -1, -2, -2, -3, -3, -1, -2, -4,  7, -1, -1, -4, -3, -2, -2, -1, -2, -4},\n{ 1, -1,  1,  0, -1,  0,  0,  0, -1, -2, -2,  0, -1, -2, -1,  4,  1, -3, -2, -2,  0,  0,  0, -4},\n{ 0, -1,  0, -1, -1, -1, -1, -2, -2, -1, -1, -1, -1, -2, -1,  1,  5, -2, -2,  0, -1, -1,  0, -4},\n{-3, -3, -4, -4, -2, -2, -3, -2, -2, -3, -2, -3, -1,  1, -4, -3, -2, 11,  2, -3, -4, -3, -2, -4},\n{-2, -2, -2, -3, -2, -1, -2, -3,  2, -1, -1, -2, -1,  3, -3, -2, -2,  2,  7, -1, -3, -2, -1, -4},\n{ 0, -3, -3, -3, -1, -2, -2, -3, -3,  3,  1, -2,  1, -1, -2, -2,  0, -3, -1,  4, -3, -2, -1, -4},\n{-2, -1,  3,  4, -3,  0,  1, -1,  0, -3, -4,  0, -3, -3, -2,  0, -1, -4, -3, -3,  4,  1, -1, -4},\n{-1,  0,  0,  1, -3,  3,  4, -2,  0, -3, -3,  1, -1, -3, -1,  0, -1, -3, -2, -2,  1,  4, -1, -4},\n{ 0, -1, -1, -1, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2,  0,  0, -2, -1, -1, -1, -1, -1, -4},\n{-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4,  1}\n};\n\ndouble gettime()\n{\n    struct timeval t;\n    gettimeofday(&t, NULL);\n    return t.tv_sec + t.tv_usec * 1e-6;\n}\n\nstatic inline void cuda_check(cudaError_t err)\n{\n    if (err != cudaSuccess) {\n        fprintf(stderr, \"CUDA error: %s\\n\", cudaGetErrorString(err));\n        exit(1);\n    }\n}\n\n__global__ void nw_top_left_kernel(int *input_itemsets, const int *referrence,\n                                   int max_rows, int max_cols, int penalty, int blk)\n{\n    if (threadIdx.x != 0 || blockIdx.x >= (unsigned int)blk)\n        return;\n\n    const int elem_19 = (int)blockIdx.x;\n    const int item_11 = blk - 1 - elem_19;\n\n    int elem_23[(BLOCK_SIZE + 1) * (BLOCK_SIZE + 1)];\n    int item_16[BLOCK_SIZE * BLOCK_SIZE];\n\n    for (int i = 0; i < BLOCK_SIZE; ++i) {\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            item_16[i * BLOCK_SIZE + j] =\n                referrence[max_cols * (item_11 * BLOCK_SIZE + i + 1) + elem_19 * BLOCK_SIZE + j + 1];\n        }\n    }\n\n    for (int i = 0; i < BLOCK_SIZE + 1; ++i) {\n        for (int j = 0; j < BLOCK_SIZE + 1; ++j) {\n            elem_23[i * (BLOCK_SIZE + 1) + j] =\n                input_itemsets[max_cols * (item_11 * BLOCK_SIZE + i) + elem_19 * BLOCK_SIZE + j];\n        }\n    }\n\n    for (int i = 1; i < BLOCK_SIZE + 1; ++i) {\n        for (int j = 1; j < BLOCK_SIZE + 1; ++j) {\n            elem_23[i * (BLOCK_SIZE + 1) + j] =\n                maximum(elem_23[(i - 1) * (BLOCK_SIZE + 1) + j - 1] + item_16[(i - 1) * BLOCK_SIZE + j - 1],\n                        elem_23[i * (BLOCK_SIZE + 1) + j - 1] - penalty,\n                        elem_23[(i - 1) * (BLOCK_SIZE + 1) + j] - penalty);\n        }\n    }\n\n    for (int i = 0; i < BLOCK_SIZE; ++i) {\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            input_itemsets[max_cols * (item_11 * BLOCK_SIZE + i + 1) + elem_19 * BLOCK_SIZE + j + 1] =\n                elem_23[(i + 1) * (BLOCK_SIZE + 1) + j + 1];\n        }\n    }\n}\n\n__global__ void nw_bottom_right_kernel(int *input_itemsets, const int *referrence,\n                                       int max_rows, int max_cols, int penalty, int blk, int num_tiles)\n{\n    if (threadIdx.x != 0)\n        return;\n\n    const int local_idx = (int)blockIdx.x;\n    const int elem_10 = blk - 1 + local_idx;\n    if (elem_10 >= num_tiles)\n        return;\n\n    const int elem_2 = num_tiles + blk - 2 - elem_10;\n\n    int var_1[(BLOCK_SIZE + 1) * (BLOCK_SIZE + 1)];\n    int tmp_12[BLOCK_SIZE * BLOCK_SIZE];\n\n    for (int i = 0; i < BLOCK_SIZE; ++i) {\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            tmp_12[i * BLOCK_SIZE + j] =\n                referrence[max_cols * (elem_2 * BLOCK_SIZE + i + 1) + elem_10 * BLOCK_SIZE + j + 1];\n        }\n    }\n\n    for (int i = 0; i < BLOCK_SIZE + 1; ++i) {\n        for (int j = 0; j < BLOCK_SIZE + 1; ++j) {\n            var_1[i * (BLOCK_SIZE + 1) + j] =\n                input_itemsets[max_cols * (elem_2 * BLOCK_SIZE + i) + elem_10 * BLOCK_SIZE + j];\n        }\n    }\n\n    for (int i = 1; i < BLOCK_SIZE + 1; ++i) {\n        for (int j = 1; j < BLOCK_SIZE + 1; ++j) {\n            var_1[i * (BLOCK_SIZE + 1) + j] =\n                maximum(var_1[(i - 1) * (BLOCK_SIZE + 1) + j - 1] + tmp_12[(i - 1) * BLOCK_SIZE + j - 1],\n                        var_1[i * (BLOCK_SIZE + 1) + j - 1] - penalty,\n                        var_1[(i - 1) * (BLOCK_SIZE + 1) + j] - penalty);\n        }\n    }\n\n    for (int i = 0; i < BLOCK_SIZE; ++i) {\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            input_itemsets[max_cols * (elem_2 * BLOCK_SIZE + i + 1) + elem_10 * BLOCK_SIZE + j + 1] =\n                var_1[(i + 1) * (BLOCK_SIZE + 1) + j + 1];\n        }\n    }\n}\n\nvoid nw_optimized(int *input_itemsets, int *tmp_0, int *referrence,\n                  int max_rows, int max_cols, int penalty)\n{\n    (void)tmp_0;\n\n    const size_t transfer_size = (size_t)max_rows * (size_t)max_cols;\n    const size_t bytes = transfer_size * sizeof(int);\n\n    int *d_input_itemsets = NULL;\n    int *d_referrence = NULL;\n\n    cuda_check(cudaMalloc((void **)&d_input_itemsets, bytes));\n    cuda_check(cudaMalloc((void **)&d_referrence, bytes));\n\n    cuda_check(cudaMemcpy(d_input_itemsets, input_itemsets, bytes, cudaMemcpyHostToDevice));\n    cuda_check(cudaMemcpy(d_referrence, referrence, bytes, cudaMemcpyHostToDevice));\n\n    const int num_tiles = (max_cols - 1) / BLOCK_SIZE;\n\n    for (int blk = 1; blk <= num_tiles; blk++) {\n        nw_top_left_kernel<<<blk, 1>>>(d_input_itemsets, d_referrence, max_rows, max_cols, penalty, blk);\n        cuda_check(cudaGetLastError());\n    }\n\n    cuda_check(cudaDeviceSynchronize());\n\n    printf(\"Processing bottom-right matrix\\n\");\n\n    for (int blk = 2; blk <= num_tiles; blk++) {\n        const int grid = num_tiles - blk + 1;\n        nw_bottom_right_kernel<<<grid, 1>>>(d_input_itemsets, d_referrence, max_rows, max_cols, penalty, blk, num_tiles);\n        cuda_check(cudaGetLastError());\n    }\n\n    cuda_check(cudaMemcpy(input_itemsets, d_input_itemsets, bytes, cudaMemcpyDeviceToHost));\n\n    cuda_check(cudaFree(d_input_itemsets));\n    cuda_check(cudaFree(d_referrence));\n}\n\nint main(int argc, char** argv)\n{\n    runTest(argc, argv);\n    return EXIT_SUCCESS;\n}\n\nvoid usage(int argc, char **argv)\n{\n    fprintf(stderr, \"Usage: %s <max_rows/max_cols> <penalty> <num_threads>\\n\", argv[0]);\n    fprintf(stderr, \"\\t<dimension>      - x and y dimensions\\n\");\n    fprintf(stderr, \"\\t<penalty>        - penalty(positive integer)\\n\");\n    fprintf(stderr, \"\\t<num_threads>    - no. of threads\\n\");\n    exit(1);\n}\n\nvoid runTest(int argc, char** argv)\n{\n    int data_7, val_5, var_20;\n    int *tmp_18, *x_9, *elem_17;\n    int val_6;\n\n    if (4 == argc) {\n        data_7 = atoi(argv[1]);\n        val_5 = atoi(argv[1]);\n        var_20 = atoi(argv[2]);\n        val_6 = atoi(argv[3]);\n    } else {\n        usage(argc, argv);\n    }\n\n    data_7 += 1;\n    val_5 += 1;\n    elem_17 = (int *)malloc((size_t)data_7 * (size_t)val_5 * sizeof(int));\n    tmp_18 = (int *)malloc((size_t)data_7 * (size_t)val_5 * sizeof(int));\n    x_9 = (int *)malloc((size_t)data_7 * (size_t)val_5 * sizeof(int));\n\n    if (!tmp_18)\n        fprintf(stderr, \"error: can not allocate memory\");\n\n    srand(7);\n\n    for (int i = 0; val_5 > i; i++) {\n        for (int j = 0; data_7 > j; j++) {\n            tmp_18[i * val_5 + j] = 0;\n        }\n    }\n\n    printf(\"Start Needleman-Wunsch\\n\");\n\n    for (int i = 1; data_7 > i; i++) {\n        tmp_18[i * val_5] = rand() % 10 + 1;\n    }\n    for (int j = 1; val_5 > j; j++) {\n        tmp_18[j] = rand() % 10 + 1;\n    }\n\n    for (int i = 1; val_5 > i; i++) {\n        for (int j = 1; data_7 > j; j++) {\n            elem_17[i * val_5 + j] = blosum62[tmp_18[i * val_5]][tmp_18[j]];\n        }\n    }\n\n    for (int i = 1; data_7 > i; i++)\n        tmp_18[i * val_5] = -i * var_20;\n    for (int j = 1; val_5 > j; j++)\n        tmp_18[j] = -j * var_20;\n\n    printf(\"Num of threads: %d\\n\", val_6);\n    printf(\"Processing top-left matrix\\n\");\n\n    long long v_4 = get_time();\n\n    nw_optimized(tmp_18, x_9, elem_17, data_7, val_5, var_20);\n\n    long long tmp_22 = get_time();\n\n    printf(\"Total time: %.3f seconds\\n\", ((float)(tmp_22 - v_4)) / (1000 * 1000));\n\n#define TRACEBACK\n#ifdef TRACEBACK\n\n    FILE *elem_14 = fopen(\"result.txt\", \"w\");\n    fprintf(elem_14, \"print traceback value GPU:\\n\");\n\n    for (int i = data_7 - 2, j = data_7 - 2; 0 <= i, 0 <= j;) {\n        int v_3, n, w, x_8;\n        if (data_7 - 2 == i && data_7 - 2 == j)\n            fprintf(elem_14, \"%d \", tmp_18[i * val_5 + j]);\n        if (0 == i && 0 == j)\n            break;\n        if (0 < i && 0 < j) {\n            v_3 = tmp_18[(i - 1) * val_5 + j - 1];\n            w = tmp_18[i * val_5 + j - 1];\n            n = tmp_18[(i - 1) * val_5 + j];\n        }\n        else if (0 == i) {\n            v_3 = n = LIMIT;\n            w = tmp_18[i * val_5 + j - 1];\n        }\n        else if (0 == j) {\n            v_3 = w = LIMIT;\n            n = tmp_18[(i - 1) * val_5 + j];\n        }\n        else {\n        }\n\n        int elem_21, tmp_13, var_15;\n        elem_21 = v_3 + elem_17[i * val_5 + j];\n        tmp_13 = w - var_20;\n        var_15 = n - var_20;\n\n        x_8 = maximum(elem_21, tmp_13, var_15);\n        if (elem_21 == x_8)\n            x_8 = v_3;\n        if (tmp_13 == x_8)\n            x_8 = w;\n        if (var_15 == x_8)\n            x_8 = n;\n\n        fprintf(elem_14, \"%d \", x_8);\n\n        if (v_3 == x_8) {\n            i--;\n            j--;\n            continue;\n        }\n        else if (w == x_8) {\n            j--;\n            continue;\n        }\n        else if (n == x_8) {\n            i--;\n            continue;\n        }\n        else\n            ;\n    }\n\n    fclose(elem_14);\n\n#endif\n\n    free(elem_17);\n    free(tmp_18);\n    free(x_9);\n}\n",
+    "needle_kernel.cu": "/* intentionally empty */\n"
+  },
+  "target_files_expected": [
+    "needle.cu",
+    "needle_kernel.cu"
+  ],
+  "target_files_extracted": [
+    "needle.cu",
+    "needle_kernel.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 116.704,
+      "prompt_tokens": 5026,
+      "completion_tokens": 7583,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

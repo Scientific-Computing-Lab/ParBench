@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-srad-omp",
+  "target_spec": "rodinia-srad-cuda",
+  "kernel": "srad",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1837835909,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-30T03:05:22Z",
+  "prompt_tokens": 2301,
+  "completion_tokens": 3684,
+  "llm_response_time_seconds": 43.8,
+  "build_status": "fail",
+  "build_time_seconds": 0.548,
+  "build_error_snippet": "srad.cu(107): warning #550-D: variable \"nthreads\" was set but never used\n   int nthreads;\n       ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\n/usr/bin/ld: /tmp/tmpxft_0000b1eb_00000000-11_srad.o: in function `main':\ntmpxft_0000b1eb_00000000-6_srad.cudafe1.cpp:(.text+0x5c0): undefined reference to `random_matrix(float*, int, int)'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:12: release] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: tmpxft_0000b1eb_00000000-6_srad.cudafe1.cpp:(.text+0x5c0): undefined reference to `random_matrix(float*, int, int)'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:12: release] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.068,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "srad.cu": "#define OPEN\n#define ITERATION\n#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <cuda_runtime.h>\n\n#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\nvoid random_matrix(float *I, int rows, int cols);\n\nstatic inline void usage(int argc, char **argv)\n{\n\t(void)argc;\n\tfprintf(stderr, \"Usage: %s <rows> <cols> <y1> <y2> <x1> <x2> <no. of threads><lamda> <no. of iter>\\n\", argv[0]);\n\tfprintf(stderr, \"\\t<rows>   - number of rows\\n\");\n\tfprintf(stderr, \"\\t<cols>    - number of cols\\n\");\n\tfprintf(stderr, \"\\t<y1> \\t - y1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<y2>      - y2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x1>       - x1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x2>       - x2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<no. of threads>  - no. of threads\\n\");\n\tfprintf(stderr, \"\\t<lamda>   - lambda (0,1)\\n\");\n\tfprintf(stderr, \"\\t<no. of iter>   - number of iterations\\n\");\n\texit(1);\n}\n\n#define CUDA_CHECK(call) do { \\\n\tcudaError_t _e = (call); \\\n\tif (_e != cudaSuccess) { \\\n\t\tfprintf(stderr, \"CUDA error %s:%d: %s\\n\", __FILE__, __LINE__, cudaGetErrorString(_e)); \\\n\t\texit(1); \\\n\t} \\\n} while (0)\n\n__global__ void compute_coeff_kernel(\n\tconst float *J, float *dN, float *dS, float *dW, float *dE, float *c,\n\tint rows, int cols, float q0sqr)\n{\n\tint j = blockIdx.x * blockDim.x + threadIdx.x;\n\tint i = blockIdx.y * blockDim.y + threadIdx.y;\n\tif (i >= rows || j >= cols) return;\n\n\tint k = i * cols + j;\n\tfloat Jc = J[k];\n\n\tint iN = (i == 0) ? 0 : (i - 1);\n\tint iS = (i == rows - 1) ? (rows - 1) : (i + 1);\n\tint jW = (j == 0) ? 0 : (j - 1);\n\tint jE = (j == cols - 1) ? (cols - 1) : (j + 1);\n\n\tdN[k] = J[iN * cols + j] - Jc;\n\tdS[k] = J[iS * cols + j] - Jc;\n\tdW[k] = J[i * cols + jW] - Jc;\n\tdE[k] = J[i * cols + jE] - Jc;\n\n\tfloat G2 = (dN[k] * dN[k] + dS[k] * dS[k] + dW[k] * dW[k] + dE[k] * dE[k]) / (Jc * Jc);\n\tfloat L  = (dN[k] + dS[k] + dW[k] + dE[k]) / Jc;\n\n\tfloat num  = (0.5f * G2) - ((1.0f / 16.0f) * (L * L));\n\tfloat den  = 1.0f + (0.25f * L);\n\tfloat qsqr = num / (den * den);\n\n\tden = (qsqr - q0sqr) / (q0sqr * (1.0f + q0sqr));\n\tfloat ck = 1.0f / (1.0f + den);\n\n\tif (ck < 0.0f) ck = 0.0f;\n\telse if (ck > 1.0f) ck = 1.0f;\n\tc[k] = ck;\n}\n\n__global__ void update_kernel(\n\tfloat *J, const float *c, const float *dN, const float *dS, const float *dW, const float *dE,\n\tint rows, int cols, float lambda)\n{\n\tint j = blockIdx.x * blockDim.x + threadIdx.x;\n\tint i = blockIdx.y * blockDim.y + threadIdx.y;\n\tif (i >= rows || j >= cols) return;\n\n\tint k = i * cols + j;\n\n\tint iS = (i == rows - 1) ? (rows - 1) : (i + 1);\n\tint jE = (j == cols - 1) ? (cols - 1) : (j + 1);\n\n\tfloat cN = c[k];\n\tfloat cS = c[iS * cols + j];\n\tfloat cW = c[k];\n\tfloat cE = c[i * cols + jE];\n\n\tfloat D = cN * dN[k] + cS * dS[k] + cW * dW[k] + cE * dE[k];\n\tJ[k] = J[k] + 0.25f * lambda * D;\n}\n\nint main(int argc, char* argv[])\n{\n\tint rows, cols, size_I, size_R, niter = 10, iter, k;\n\tfloat *I, *J, q0sqr, sum, sum2, tmp, meanROI, varROI;\n\tint *iN, *iS, *jE, *jW;\n\tfloat *dN, *dS, *dW, *dE;\n\tint r1, r2, c1, c2;\n\tfloat *c;\n\tfloat lambda;\n\tint i, j;\n\tint nthreads;\n\n\tif (argc == 10) {\n\t\trows = atoi(argv[1]);\n\t\tcols = atoi(argv[2]);\n\t\tif ((rows % 16 != 0) || (cols % 16 != 0)) {\n\t\t\tfprintf(stderr, \"rows and cols must be multiples of 16\\n\");\n\t\t\texit(1);\n\t\t}\n\t\tr1 = atoi(argv[3]);\n\t\tr2 = atoi(argv[4]);\n\t\tc1 = atoi(argv[5]);\n\t\tc2 = atoi(argv[6]);\n\t\tnthreads = atoi(argv[7]);\n\t\t(void)nthreads;\n\t\tlambda = (float)atof(argv[8]);\n\t\tniter = atoi(argv[9]);\n\t} else {\n\t\tusage(argc, argv);\n\t}\n\n\tsize_I = cols * rows;\n\tsize_R = (r2 - r1 + 1) * (c2 - c1 + 1);\n\n\tI = (float *)malloc(size_I * sizeof(float));\n\tJ = (float *)malloc(size_I * sizeof(float));\n\tc = (float *)malloc(sizeof(float) * size_I);\n\n\tiN = (int *)malloc(sizeof(unsigned int*) * rows);\n\tiS = (int *)malloc(sizeof(unsigned int*) * rows);\n\tjW = (int *)malloc(sizeof(unsigned int*) * cols);\n\tjE = (int *)malloc(sizeof(unsigned int*) * cols);\n\n\tdN = (float *)malloc(sizeof(float) * size_I);\n\tdS = (float *)malloc(sizeof(float) * size_I);\n\tdW = (float *)malloc(sizeof(float) * size_I);\n\tdE = (float *)malloc(sizeof(float) * size_I);\n\n\tfor (int ii = 0; ii < rows; ii++) {\n\t\tiN[ii] = ii - 1;\n\t\tiS[ii] = ii + 1;\n\t}\n\tfor (int jj = 0; jj < cols; jj++) {\n\t\tjW[jj] = jj - 1;\n\t\tjE[jj] = jj + 1;\n\t}\n\tiN[0] = 0;\n\tiS[rows - 1] = rows - 1;\n\tjW[0] = 0;\n\tjE[cols - 1] = cols - 1;\n\n\tprintf(\"Randomizing the input matrix\\n\");\n\n\trandom_matrix(I, rows, cols);\n\n\tfor (k = 0; k < size_I; k++) {\n\t\tJ[k] = (float)exp((double)I[k]);\n\t}\n\n\tfloat *d_J = NULL, *d_c = NULL, *d_dN = NULL, *d_dS = NULL, *d_dW = NULL, *d_dE = NULL;\n\tCUDA_CHECK(cudaMalloc((void **)&d_J, size_I * sizeof(float)));\n\tCUDA_CHECK(cudaMalloc((void **)&d_c, size_I * sizeof(float)));\n\tCUDA_CHECK(cudaMalloc((void **)&d_dN, size_I * sizeof(float)));\n\tCUDA_CHECK(cudaMalloc((void **)&d_dS, size_I * sizeof(float)));\n\tCUDA_CHECK(cudaMalloc((void **)&d_dW, size_I * sizeof(float)));\n\tCUDA_CHECK(cudaMalloc((void **)&d_dE, size_I * sizeof(float)));\n\n\tprintf(\"Start the SRAD main loop\\n\");\n\n#ifdef ITERATION\n\tfor (iter = 0; iter < niter; iter++) {\n#endif\n\t\tsum = 0.0f;\n\t\tsum2 = 0.0f;\n\t\tfor (i = r1; i <= r2; i++) {\n\t\t\tfor (j = c1; j <= c2; j++) {\n\t\t\t\ttmp = J[i * cols + j];\n\t\t\t\tsum += tmp;\n\t\t\t\tsum2 += tmp * tmp;\n\t\t\t}\n\t\t}\n\t\tmeanROI = sum / (float)size_R;\n\t\tvarROI = (sum2 / (float)size_R) - meanROI * meanROI;\n\t\tq0sqr = varROI / (meanROI * meanROI);\n\n\t\tCUDA_CHECK(cudaMemcpy(d_J, J, size_I * sizeof(float), cudaMemcpyHostToDevice));\n\n\t\tdim3 block(BLOCK_SIZE, BLOCK_SIZE);\n\t\tdim3 grid((cols + block.x - 1) / block.x, (rows + block.y - 1) / block.y);\n\n\t\tcompute_coeff_kernel<<<grid, block>>>(d_J, d_dN, d_dS, d_dW, d_dE, d_c, rows, cols, q0sqr);\n\t\tCUDA_CHECK(cudaGetLastError());\n\n\t\tupdate_kernel<<<grid, block>>>(d_J, d_c, d_dN, d_dS, d_dW, d_dE, rows, cols, lambda);\n\t\tCUDA_CHECK(cudaGetLastError());\n\n\t\tCUDA_CHECK(cudaMemcpy(J, d_J, size_I * sizeof(float), cudaMemcpyDeviceToHost));\n#ifdef ITERATION\n\t}\n#endif\n\n#ifdef OUTPUT\n\tfor (int ii = 0; ii < rows; ii++) {\n\t\tfor (int jj = 0; jj < cols; jj++) {\n\t\t\tprintf(\"%.5f \", J[ii * cols + jj]);\n\t\t}\n\t\tprintf(\"\\n\");\n\t}\n#endif\n\n\tprintf(\"Computation Done\\n\");\n\n\tCUDA_CHECK(cudaFree(d_J));\n\tCUDA_CHECK(cudaFree(d_c));\n\tCUDA_CHECK(cudaFree(d_dN));\n\tCUDA_CHECK(cudaFree(d_dS));\n\tCUDA_CHECK(cudaFree(d_dW));\n\tCUDA_CHECK(cudaFree(d_dE));\n\n\tfree(I);\n\tfree(J);\n\tfree(iN);\n\tfree(iS);\n\tfree(jW);\n\tfree(jE);\n\tfree(dN);\n\tfree(dS);\n\tfree(dW);\n\tfree(dE);\n\tfree(c);\n\n\treturn 0;\n}\n",
+    "srad_kernel.cu": "#include <stdlib.h>\n\nvoid random_matrix(float *I, int rows, int cols)\n{\n\tsrand(7);\n\n\tfor (int i = 0; i < rows; i++) {\n\t\tfor (int j = 0; j < cols; j++) {\n\t\t\tI[i * cols + j] = rand() / (float)RAND_MAX;\n#ifdef OUTPUT\n#endif\n\t\t}\n#ifdef OUTPUT\n#endif\n\t}\n}\n"
+  },
+  "target_files_expected": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "target_files_extracted": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 43.8,
+      "prompt_tokens": 2301,
+      "completion_tokens": 3684,
+      "finish_reason": "completed",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "srad.cu(107): warning #550-D: variable \"nthreads\" was set but never used\n   int nthreads;\n       ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\n/usr/bin/ld: /tmp/tmpxft_0000b1eb_00000000-11_srad.o: in function `main':\ntmpxft_0000b1eb_00000000-6_srad.cudafe1.cpp:(.text+0x5c0): undefined reference to `random_matrix(float*, int, int)'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:12: release] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

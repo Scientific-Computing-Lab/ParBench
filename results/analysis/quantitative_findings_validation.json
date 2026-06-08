@@ -1,0 +1,293 @@
+{
+  "timestamp": "2026-04-25T05:35:52.954225+00:00",
+  "spot_checks": [
+    {
+      "check": "total_file_count",
+      "expected": 708,
+      "actual": 708,
+      "status": "PASS"
+    },
+    {
+      "check": "canonical_count",
+      "expected": 626,
+      "actual": 626,
+      "status": "PASS"
+    },
+    {
+      "check": "known_fail_exclusion_count",
+      "expected": 82,
+      "actual": 82,
+      "status": "PASS"
+    },
+    {
+      "check": "rodinia_c1_pass_count",
+      "expected": 0,
+      "actual": 0,
+      "status": "PASS"
+    },
+    {
+      "check": "overall_c1_pass_rate",
+      "expected": 0,
+      "actual": 0,
+      "status": "PASS",
+      "tolerance": 0.001
+    },
+    {
+      "check": "direction_count",
+      "expected": 0,
+      "actual": 0,
+      "status": "PASS"
+    },
+    {
+      "check": "per_suite_count_sum",
+      "expected": 0,
+      "actual": 0,
+      "status": "PASS"
+    },
+    {
+      "check": "augmentation_level_sum",
+      "expected": 0,
+      "actual": 0,
+      "status": "PASS"
+    },
+    {
+      "check": "canonical_seed_count",
+      "expected": "142 tasks, all with 3 seeds",
+      "actual": "142 tasks, all_have_3=False",
+      "status": "FAIL"
+    },
+    {
+      "check": "build_fail_count",
+      "expected": 0,
+      "actual": 0,
+      "status": "PASS"
+    }
+  ],
+  "cross_checks": [
+    {
+      "check": "vs_paper_data_overall_rate",
+      "our_value": null,
+      "their_value": 0.0,
+      "discrepancy_pct": null,
+      "status": "WARNING",
+      "note": "One or both values are None. paper_data uses 6 KNOWN_FAIL exclusions, we use 8"
+    },
+    {
+      "check": "vs_stat_wilson_overall_rate",
+      "our_value": null,
+      "their_value": 0.3674,
+      "discrepancy_pct": null,
+      "status": "WARNING",
+      "note": "One or both values are None. statistical_analysis uses 6 KNOWN_FAIL exclusions, we use 8"
+    },
+    {
+      "check": "vs_error_taxonomy_build_fail",
+      "our_value": 0,
+      "their_value": 290,
+      "discrepancy_pct": 100.0,
+      "status": "DIFFERENT_SCOPE",
+      "note": "error_taxonomy includes ALL records from the model dir; we exclude 9 KF specs"
+    },
+    {
+      "check": "vs_selfrepair_rate",
+      "our_value": null,
+      "their_value": 0,
+      "discrepancy_pct": null,
+      "status": "WARNING",
+      "note": "One or both values are None. selfrepair_analysis includes ALL records (no KF exclusion + both campaigns), we use C1-only with 8 KF exclusions"
+    },
+    {
+      "check": "vs_token_analysis_cost",
+      "our_value": 0,
+      "their_value": 19.1506,
+      "discrepancy_pct": 100.0,
+      "status": "DIFFERENT_SCOPE",
+      "note": "token_analysis includes ALL records (no KF exclusion + both campaigns), we use C1-only with 8 KF exclusions"
+    }
+  ],
+  "consistency_checks": [
+    {
+      "check": "wilson_ci_bounds_all",
+      "status": "PASS",
+      "detail": "95 CIs checked, 0 violations"
+    },
+    {
+      "check": "per_suite_sum_matches_overall",
+      "status": "PASS",
+      "detail": "sum(per_suite.n)=0, overall.n=0"
+    },
+    {
+      "check": "no_nan_or_inf",
+      "status": "PASS",
+      "detail": "0 NaN/Inf fields"
+    },
+    {
+      "check": "augmentation_level_counts_sum",
+      "status": "PASS",
+      "detail": "sum(per_level.n)=0, C1_total=0"
+    },
+    {
+      "check": "pass_at_1_gte_pass_at_3",
+      "status": "PASS",
+      "detail": "pass@1=0.3521, pass@3=0.1338"
+    },
+    {
+      "check": "token_cost_sum",
+      "status": "PASS",
+      "detail": "total_cost=0, recomputed=0.0"
+    },
+    {
+      "check": "failure_taxonomy_sum",
+      "status": "PASS",
+      "detail": "sum(status_counts)=0, total_records=0"
+    }
+  ],
+  "paper_claims_audit": [
+    {
+      "claim_id": "overall_pass_rate_rodinia",
+      "paper_value": null,
+      "findings_value": "0.0% [0.0%, 0.0%]",
+      "status": "NOT_FOUND",
+      "paper_location": "abstract/line~71, S6.1/line~707"
+    },
+    {
+      "claim_id": "primary_campaign_task_counts",
+      "paper_value": null,
+      "findings_value": "0 Rodinia, 0 all-suite",
+      "status": "NOT_FOUND",
+      "paper_location": "abstract/line~61, S5.2/line~630"
+    },
+    {
+      "claim_id": "passk_task_count",
+      "paper_value": null,
+      "findings_value": "142 pass@k tasks",
+      "status": "NOT_FOUND",
+      "paper_location": "S1/line~106, S5.5/line~689"
+    },
+    {
+      "claim_id": "build_fail_percentage",
+      "paper_value": null,
+      "findings_value": "0/0 = 0.0%",
+      "status": "NOT_FOUND",
+      "paper_location": "abstract/line~66, S1/line~107, S6.2/line~714"
+    },
+    {
+      "claim_id": "verify_fail_percentage",
+      "paper_value": null,
+      "findings_value": "0/0 = 0.0%",
+      "status": "NOT_FOUND",
+      "paper_location": "abstract/line~66, S6.2/line~714"
+    },
+    {
+      "claim_id": "cuda_to_omp_pass_rate",
+      "paper_value": null,
+      "findings_value": "?",
+      "status": "NOT_FOUND",
+      "paper_location": "S6.1/line~909, S7.1/line~1041"
+    },
+    {
+      "claim_id": "l0_pass_rate",
+      "paper_value": null,
+      "findings_value": "?",
+      "status": "NOT_FOUND",
+      "paper_location": "S6.4/line~899"
+    },
+    {
+      "claim_id": "cochran_armitage_trend",
+      "paper_value": null,
+      "findings_value": "z=None, p=None",
+      "status": "NOT_FOUND",
+      "paper_location": "abstract/line~71, S6.4/line~899, S6.8/line~1003"
+    },
+    {
+      "claim_id": "self_repair_rate",
+      "paper_value": null,
+      "findings_value": "0.0%",
+      "status": "NOT_FOUND",
+      "paper_location": "S6.3/line~859, S7.1/line~1049"
+    },
+    {
+      "claim_id": "repair_count",
+      "paper_value": null,
+      "findings_value": "0 of 0 repaired",
+      "status": "NOT_FOUND",
+      "paper_location": "S6.3/line~849, S6.3/line~859"
+    },
+    {
+      "claim_id": "regression_count",
+      "paper_value": null,
+      "findings_value": "0 regressions",
+      "status": "NOT_FOUND",
+      "paper_location": "S6.3/line~853"
+    },
+    {
+      "claim_id": "cohens_h_range",
+      "paper_value": null,
+      "findings_value": "h range [0.0000, 0.0000]",
+      "status": "NOT_FOUND",
+      "paper_location": "S6.4/implied"
+    },
+    {
+      "claim_id": "spec_count",
+      "paper_value": null,
+      "findings_value": "96 specs (60+25+4+4+3)",
+      "status": "NOT_FOUND",
+      "paper_location": "abstract/line~60, S3.2/line~297, S4.3/line~511"
+    },
+    {
+      "claim_id": "opencl_to_cuda_pass_rate",
+      "paper_value": null,
+      "findings_value": "?",
+      "status": "NOT_FOUND",
+      "paper_location": "S6.1/line~941"
+    },
+    {
+      "claim_id": "multi_file_percentage",
+      "paper_value": null,
+      "findings_value": "76/206 = 36.9%",
+      "status": "NOT_FOUND",
+      "paper_location": "S1/implied, S4/implied"
+    },
+    {
+      "claim_id": "overall_pass_rate_all_suite",
+      "paper_value": null,
+      "findings_value": "0.0% [0.0%, 0.0%]",
+      "status": "NOT_FOUND",
+      "paper_location": "S6.1 (all-suite scope)"
+    },
+    {
+      "claim_id": "first_attempt_pass",
+      "paper_value": null,
+      "findings_value": "0",
+      "status": "NOT_FOUND",
+      "paper_location": "S6.3/line~848"
+    },
+    {
+      "claim_id": "pass_at_k_rates",
+      "paper_value": null,
+      "findings_value": "pass@1=35.2%, pass@3=13.4%",
+      "status": "NOT_FOUND",
+      "paper_location": "S6.5/line~955"
+    },
+    {
+      "claim_id": "token_cost",
+      "paper_value": null,
+      "findings_value": "$0.00",
+      "status": "NOT_FOUND",
+      "paper_location": "S5.2/implied"
+    },
+    {
+      "claim_id": "sloc_correlation",
+      "paper_value": null,
+      "findings_value": "None",
+      "status": "NOT_FOUND",
+      "paper_location": "S7/implied"
+    }
+  ],
+  "summary": {
+    "total": 42,
+    "passed": 16,
+    "failed": 1,
+    "warnings": 25
+  }
+}

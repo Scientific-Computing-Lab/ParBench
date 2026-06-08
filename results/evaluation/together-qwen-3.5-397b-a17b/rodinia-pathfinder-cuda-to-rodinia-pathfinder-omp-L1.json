@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-pathfinder-cuda",
+  "target_spec": "rodinia-pathfinder-omp",
+  "kernel": "pathfinder",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1919182792,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-24T03:34:15Z",
+  "prompt_tokens": 2397,
+  "completion_tokens": 2420,
+  "llm_response_time_seconds": 34.237,
+  "build_status": "fail",
+  "build_time_seconds": 0.02,
+  "build_error_snippet": "pathfinder.cpp: In function \u2018void dynproc_kernel(int, int*, int*, int*, int, int, int, int, int)\u2019:\npathfinder.cpp:135:56: error: \u2018xidx\u2019 was not declared in this scope\n  135 |                         int index = cols*(startStep+i)+xidx;\n      |                                                        ^~~~\npathfinder.cpp: In function \u2018void run(int, char**)\u2019:\npathfinder.cpp:199:5: error: \u2018memcpy\u2019 was not declared in this scope\n  199 |     memcpy(gpuResult[0], data, sizeof(int)*cols);\n      |     ^~~~~~\npathfinder.cpp:6:1: note: \u2018memcpy\u2019 is defined in header \u2018<cstring>\u2019; did you forget to \u2018#include <cstring>\u2019?\n    5 | #include <omp.h>\n  +++ |+#include <cstring>\n    6 | \nmake: *** [Makefile:7: release] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: .cpp:6:1: note: \u2018memcpy\u2019 is defined in header \u2018<cstring>\u2019; did you forget to \u2018#include <cstring>\u2019?\n    5 | #include <omp.h>\n  +++ |+#include <cstring>\n    6 | \nmake: *** [Makefile:7: release] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "pathfinder.cpp": "#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <assert.h>\n#include <omp.h>\n\n#ifdef TIMING\n#include \"timing.h\"\n\nstruct timeval tv;\nstruct timeval tv_total_start, tv_total_end;\nstruct timeval tv_h2d_start, tv_h2d_end;\nstruct timeval tv_d2h_start, tv_d2h_end;\nstruct timeval tv_kernel_start, tv_kernel_end;\nstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\nstruct timeval tv_close_start, tv_close_end;\nfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n      d2h_time = 0, close_time = 0, total_time = 0;\n#endif\n\n#define BLOCK_SIZE 256\n#define STR_SIZE 256\n#define DEVICE 0\n#define HALO 1 \n\n#define IN_RANGE(x, min, max)   ((x)>= (min) && (x)<= (max))\n#define CLAMP_RANGE(x, min, max) x = (x< (min)) ? min : ((x> (max)) ? max : x )\n#define MIN(a, b) ((a)<= (b) ? (a) : (b))\n\nvoid run(int argc, char** argv);\n\nint rows, cols;\nint* data;\nint** wall;\nint* result;\n#define M_SEED 9\nint pyramid_height;\n\nvoid\ninit(int argc, char** argv)\n{\n\tif(argc==4){\n\t\tcols = atoi(argv[1]);\n\t\trows = atoi(argv[2]);\n                pyramid_height=atoi(argv[3]);\n\t}else{\n                printf(\"Usage: dynproc row_len col_len pyramid_height\\n\");\n                exit(0);\n        }\n\tdata = new int[rows*cols];\n\twall = new int*[rows];\n\tfor(int n=0; n<rows; n++)\n\t\twall[n]=data+cols*n;\n\tresult = new int[cols];\n\t\n\tint seed = M_SEED;\n\tsrand(seed);\n\n\tfor (int i = 0; i < rows; i)\n    {\n        for (int j = 0; j < cols; j++)\n        {\n            wall[i][j] = rand() % 10;\n        }\n    }\n#ifdef BENCH_PRINT\n    for (int i = 0; i < rows; i++)\n    {\n        for (int j = 0; j < cols; j++)\n        {\n            printf(\"%d \",wall[i][j]) ;\n        }\n        printf(\"\\n\") ;\n    }\n#endif\n}\n\nvoid \nfatal(char *s)\n{\n\tfprintf(stderr, \"error: %s\\n\", s);\n\n}\n\nvoid dynproc_kernel(\n                int iteration, \n                int *gpuWall,\n                int *gpuSrc,\n                int *gpuResults,\n                int cols, \n                int rows,\n                int startStep,\n                int border,\n                int blockCols)\n{\n        int small_block_cols = BLOCK_SIZE-iteration*HALO*2;\n\n#pragma omp parallel for\n        for (int bx = 0; bx < blockCols; bx++) {\n            int prev[BLOCK_SIZE];\n            int result_local[BLOCK_SIZE];\n            \n            int blkX = small_block_cols*bx-border;\n            int blkXmax = blkX+BLOCK_SIZE-1;\n\n            int validXmin = (blkX < 0) ? -blkX : 0;\n            int validXmax = (blkXmax > cols-1) ? BLOCK_SIZE-1-(blkXmax-cols+1) : BLOCK_SIZE-1;\n\n            for (int tx = 0; tx < BLOCK_SIZE; tx++) {\n                int xidx = blkX+tx;\n                if(IN_RANGE(xidx, 0, cols-1)){\n                    prev[tx] = gpuSrc[xidx];\n                }\n            }\n\n            bool computed = false;\n            for (int i=0; i<iteration ; i++){ \n                computed = false;\n                for (int tx = 0; tx < BLOCK_SIZE; tx++) {\n                    int W = tx-1;\n                    int E = tx+1;\n                    \n                    W = (W < validXmin) ? validXmin : W;\n                    E = (E > validXmax) ? validXmax : E;\n\n                    bool isValid = IN_RANGE(tx, validXmin, validXmax);\n\n                    if( IN_RANGE(tx, i+1, BLOCK_SIZE-i-2) && isValid){\n                        computed = true;\n                        int left = prev[W];\n                        int up = prev[tx];\n                        int right = prev[E];\n                        int shortest = MIN(left, up);\n                        shortest = MIN(shortest, right);\n                        int index = cols*(startStep+i)+xidx;\n                        int xidx = blkX+tx;\n                        if(IN_RANGE(xidx, 0, cols-1)){\n                            result_local[tx] = shortest + gpuWall[index];\n                        }\n                    }\n                }\n                if(i==iteration-1)\n                    break;\n                if(computed)\t \n                    for (int tx = 0; tx < BLOCK_SIZE; tx++) {\n                        prev[tx] = result_local[tx];\n                    }\n            }\n\n            for (int tx = 0; tx < BLOCK_SIZE; tx++) {\n                int xidx = blkX+tx;\n                if (computed && IN_RANGE(xidx, 0, cols-1)){\n                    gpuResults[xidx]=result_local[tx];\t\t\n                }\n            }\n        }\n}\n\nint calc_path(int *gpuWall, int *gpuResult[2], int rows, int cols, \\\n\t int pyramid_height, int blockCols, int borderCols)\n{\n        int src = 1, dst = 0;\n\tfor (int t = 0; t < rows-1; t+=pyramid_height) {\n            int temp = src;\n            src = dst;\n            dst = temp;\n            dynproc_kernel(\n                MIN(pyramid_height, rows-t-1), \n                gpuWall, gpuResult[src], gpuResult[dst],\n                cols,rows, t, borderCols, blockCols);\n\t}\n        return dst;\n}\n\nint main(int argc, char** argv)\n{\n    run(argc,argv);\n\n    return EXIT_SUCCESS;\n}\n\nvoid run(int argc, char** argv)\n{\n    init(argc, argv);\n\n    \n    int borderCols = (pyramid_height)*HALO;\n    int smallBlockCol = BLOCK_SIZE-(pyramid_height)*HALO*2;\n    int blockCols = cols/smallBlockCol+((cols%smallBlockCol==0)?0:1);\n\n    printf(\"pyramidHeight: %d\\ngridSize: [%d]\\nborder:[%d]\\nblockSize: %d\\nblockGrid:[%d]\\ntargetBlock:[%d]\\n\",\\\n\tpyramid_height, cols, borderCols, BLOCK_SIZE, blockCols, smallBlockCol);\n\t\n    int *gpuWall, *gpuResult[2];\n    int size = rows*cols;\n\n    gpuResult[0] = (int*)malloc(sizeof(int)*cols);\n    gpuResult[1] = (int*)malloc(sizeof(int)*cols);\n    memcpy(gpuResult[0], data, sizeof(int)*cols);\n    gpuWall = (int*)malloc(sizeof(int)*(size-cols));\n    memcpy(gpuWall, data+cols, sizeof(int)*(size-cols));\n\n#ifdef  TIMING\n    gettimeofday(&tv_kernel_start, NULL);\n#endif\n\n    int final_ret = calc_path(gpuWall, gpuResult, rows, cols, \\\n\t pyramid_height, blockCols, borderCols);\n\n#ifdef  TIMING\n    gettimeofday(&tv_kernel_end, NULL);\n    tvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n    kernel_time += tv.tv_sec * 1000.0 + (float) tv.tv_usec / 1000.0;\n#endif\n\n    memcpy(result, gpuResult[final_ret], sizeof(int)*cols);\n\n#ifdef BENCH_PRINT\n    for (int i = 0; i < cols; i++)\n            printf(\"%d \",data[i]) ;\n    printf(\"\\n\") ;\n    for (int i = 0; i < cols; i++)\n            printf(\"%d \",result[i]) ;\n    printf(\"\\n\") ;\n#endif\n\n    free(gpuWall);\n    free(gpuResult[0]);\n    free(gpuResult[1]);\n\n    delete [] data;\n    delete [] wall;\n    delete [] result;\n\n#ifdef  TIMING\n    printf(\"Exec: %f\\n\", kernel_time);\n#endif\n}\n"
+  },
+  "target_files_expected": [
+    "pathfinder.cpp"
+  ],
+  "target_files_extracted": [
+    "pathfinder.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 34.237,
+      "prompt_tokens": 2397,
+      "completion_tokens": 2420,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "pathfinder.cpp: In function \u2018void dynproc_kernel(int, int*, int*, int*, int, int, int, int, int)\u2019:\npathfinder.cpp:135:56: error: \u2018xidx\u2019 was not declared in this scope\n  135 |                         int index = cols*(startStep+i)+xidx;\n      |                                                        ^~~~\npathfinder.cpp: In function \u2018void run(int, char**)\u2019:\npathfinder.cpp:199:5: error: \u2018memcpy\u2019 was not declared in this scope\n  199 |     memcpy(gpuResult[0], data, sizeof(int)*cols);\n      |     ^~~~~~\npathfinder.cpp:6:1: note: \u2018memcpy\u2019 is defined in header \u2018<cstring>\u2019; did you forget to \u2018#include <cstring>\u2019?\n    5 | #include <omp.h>\n  +++ |+#include <cstring>\n    6 | \nmake: *** [Makefile:7: release] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

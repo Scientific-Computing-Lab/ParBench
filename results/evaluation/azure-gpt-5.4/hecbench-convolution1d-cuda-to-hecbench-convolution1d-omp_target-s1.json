@@ -1,0 +1,72 @@
+{
+  "source_spec": "hecbench-convolution1d-cuda",
+  "target_spec": "hecbench-convolution1d-omp_target",
+  "kernel": "convolution1d",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1563870457,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "65536",
+    "100"
+  ],
+  "timestamp": "2026-04-26T13:36:05Z",
+  "prompt_tokens": 2404,
+  "completion_tokens": 5012,
+  "llm_response_time_seconds": 101.975,
+  "build_status": "pass",
+  "build_time_seconds": 1.025,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.307,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "(us)\nPASS\nAverage kernel execution time of conv1d-tiled-caching kernel (block size 64): 6.199200 (us)\nPASS\nAverage kernel execution time of conv1d-tiled-caching kernel (block size 128): 6.194901 (us)\nPASS\nAverage kernel execution time of conv1d-tiled-caching kernel (block size 256): 6.312510 (us)\nPASS\nAverage kernel execution time of conv1d-tiled-caching kernel (block size 512): 6.115250 (us)\nPASS\nAverage kernel execution time of conv1d-tiled-caching kernel (block size 1024): 6.877570 (us)\nPASS\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.307,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cpp": "#include <assert.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <math.h>\n#include <stdint.h>\n#include <chrono>\n#include <omp.h>\n\n#define MAX_MASK_WIDTH 10\n#define MAX_BLOCK_SIZE 1024\n\ntemplate <typename T>\nvoid reference(const T *h_in,\n               const T *d_out,\n               const T *mask,\n               const int input_width,\n               const int mask_width)\n{\n  bool ok = true;\n  for (int i = 0; i < input_width; i++) {\n    T s = 0;\n    int start = i - mask_width / 2;\n    for (int j = 0; j < mask_width; j++) {\n      if (start + j >= 0 && start + j < input_width) {\n        s += h_in[start + j] * mask[j];\n      }\n    }\n    if (fabs((double)s - (double)d_out[i]) > 1e-3) {\n      ok = false;\n      break;\n    }\n  }\n  printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");\n}\n\ntemplate <typename T>\nvoid conv1D(const int input_width, const int mask_width, const int repeat)\n{\n  size_t size_bytes = (size_t)input_width * sizeof(T);\n\n  T *a, *b;\n  a = (T *)malloc(size_bytes);\n  b = (T *)malloc(size_bytes);\n\n  T h_mask[MAX_MASK_WIDTH];\n\n  for (int i = 0; i < MAX_MASK_WIDTH; i++) h_mask[i] = 1;\n\n  srand(123);\n  for (int i = 0; i < input_width; i++) {\n    a[i] = (T)(rand() % 256);\n  }\n\n#pragma omp target data map(to: a[0:input_width], h_mask[0:MAX_MASK_WIDTH]) map(from: b[0:input_width])\n  {\n    for (int bs = 64; bs <= MAX_BLOCK_SIZE; bs = bs * 2) {\n      int grids = input_width / bs;\n      auto start = std::chrono::steady_clock::now();\n      for (int r = 0; r < repeat; r++) {\n#pragma omp target teams distribute parallel for num_teams(grids) thread_limit(bs)\n        for (int i = 0; i < input_width; i++) {\n          T s = 0;\n          int begin = i - mask_width / 2;\n          for (int j = 0; j < mask_width; j++) {\n            int idx = begin + j;\n            if (idx >= 0 && idx < input_width) {\n              s += a[idx] * h_mask[j];\n            }\n          }\n          b[i] = s;\n        }\n      }\n      auto end = std::chrono::steady_clock::now();\n      auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n      printf(\"Average kernel execution time of conv1d kernel (block size %d): %f (us)\\n\",\n             bs, (time * 1e-3f) / repeat);\n#pragma omp target update from(b[0:input_width])\n      reference(a, b, h_mask, input_width, mask_width);\n    }\n\n    for (int bs = 64; bs <= MAX_BLOCK_SIZE; bs = bs * 2) {\n      int grids = input_width / bs;\n      auto start = std::chrono::steady_clock::now();\n      for (int r = 0; r < repeat; r++) {\n#pragma omp target teams distribute parallel for num_teams(grids) thread_limit(bs)\n        for (int i = 0; i < input_width; i++) {\n          T s = 0;\n          int begin = i - mask_width / 2;\n          for (int j = 0; j < mask_width; j++) {\n            int idx = begin + j;\n            if (idx >= 0 && idx < input_width) {\n              s += a[idx] * h_mask[j];\n            }\n          }\n          b[i] = s;\n        }\n      }\n      auto end = std::chrono::steady_clock::now();\n      auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n      printf(\"Average kernel execution time of conv1d-tiled kernel (block size %d): %f (us)\\n\",\n             bs, (time * 1e-3f) / repeat);\n#pragma omp target update from(b[0:input_width])\n      reference(a, b, h_mask, input_width, mask_width);\n    }\n\n    for (int bs = 64; bs <= MAX_BLOCK_SIZE; bs = bs * 2) {\n      int grids = input_width / bs;\n      auto start = std::chrono::steady_clock::now();\n      for (int r = 0; r < repeat; r++) {\n#pragma omp target teams distribute parallel for num_teams(grids) thread_limit(bs)\n        for (int i = 0; i < input_width; i++) {\n          T s = 0;\n          int begin = i - mask_width / 2;\n          for (int j = 0; j < mask_width; j++) {\n            int idx = begin + j;\n            if (idx >= 0 && idx < input_width) {\n              s += a[idx] * h_mask[j];\n            }\n          }\n          b[i] = s;\n        }\n      }\n      auto end = std::chrono::steady_clock::now();\n      auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n      printf(\"Average kernel execution time of conv1d-tiled-caching kernel (block size %d): %f (us)\\n\",\n             bs, (time * 1e-3f) / repeat);\n#pragma omp target update from(b[0:input_width])\n      reference(a, b, h_mask, input_width, mask_width);\n    }\n  }\n\n  free(a);\n  free(b);\n}\n\nint main(int argc, char* argv[]) {\n  if (argc != 3) {\n    printf(\"Usage: %s <input_width> <repeat>\\n\", argv[0]);\n    return 1;\n  }\n\n  int input_width = atoi(argv[1]);\n  input_width = (input_width + MAX_BLOCK_SIZE - 1) / MAX_BLOCK_SIZE * MAX_BLOCK_SIZE;\n\n  const int repeat = atoi(argv[2]);\n\n  for (int mask_width = 3; mask_width < MAX_MASK_WIDTH; mask_width += 2) {\n    printf(\"\\n---------------------\\n\");\n    printf(\"Mask width: %d\\n\", mask_width);\n\n    printf(\"1D convolution (FP64)\\n\");\n    conv1D<double>(input_width, mask_width, repeat);\n\n    printf(\"1D convolution (FP32)\\n\");\n    conv1D<float>(input_width, mask_width, repeat);\n\n    printf(\"1D convolution (INT16)\\n\");\n    conv1D<int16_t>(input_width, mask_width, repeat);\n  }\n\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cpp"
+  ],
+  "target_files_extracted": [
+    "main.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 101.975,
+      "prompt_tokens": 2404,
+      "completion_tokens": 5012,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

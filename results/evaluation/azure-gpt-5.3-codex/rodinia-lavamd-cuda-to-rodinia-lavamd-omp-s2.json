@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lavamd-cuda",
+  "target_spec": "rodinia-lavamd-omp",
+  "kernel": "lavamd",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1823547756,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "-boxes1d",
+    "10"
+  ],
+  "timestamp": "2026-04-30T01:30:33Z",
+  "prompt_tokens": 6878,
+  "completion_tokens": 3122,
+  "llm_response_time_seconds": 56.793,
+  "build_status": "pass",
+  "build_time_seconds": 0.144,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.196,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Configuration used: cores = 1, boxes1d = 10\n",
+  "verify_status": "fail",
+  "verify_strategy": "stdout_pattern",
+  "overall_status": "VERIFY_FAIL",
+  "error_message": "Verify failed: Pattern '(?:Total time:)' NOT found in stdout. ",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": 1.196,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0008,
+  "translated_files": {
+    "kernel/kernel_cpu.c": "#include <math.h>\n#include <omp.h>\n\n#define fp double\n#define NUMBER_PAR_PER_BOX 100\n#define DOT(A,B) ((A.x)*(B.x)+(A.y)*(B.y)+(A.z)*(B.z))\n\ntypedef struct {\n\tfp x, y, z;\n} THREE_VECTOR;\n\ntypedef struct {\n\tfp v, x, y, z;\n} FOUR_VECTOR;\n\ntypedef struct nei_str {\n\tint x, y, z;\n\tint number;\n\tlong offset;\n} nei_str;\n\ntypedef struct box_str {\n\tint x, y, z;\n\tint number;\n\tlong offset;\n\tint nn;\n\tnei_str nei[26];\n} box_str;\n\ntypedef struct par_str {\n\tfp alpha;\n} par_str;\n\ntypedef struct dim_str {\n\tint cur_arg;\n\tint arch_arg;\n\tint cores_arg;\n\tint boxes1d_arg;\n\tlong number_boxes;\n\tlong box_mem;\n\tlong space_elem;\n\tlong space_mem;\n\tlong space_mem2;\n} dim_str;\n\nvoid kernel_cpu(par_str par,\n                dim_str dim,\n                box_str* box,\n                FOUR_VECTOR* rv,\n                fp* qv,\n                FOUR_VECTOR* fv)\n{\n\tconst fp a2 = (fp)2.0 * par.alpha * par.alpha;\n\n\tif (dim.cores_arg > 0) {\n\t\tomp_set_num_threads(dim.cores_arg);\n\t}\n\n\t#pragma omp parallel for schedule(static)\n\tfor (long bx = 0; bx < dim.number_boxes; bx++) {\n\n\t\tint first_i = (int)box[bx].offset;\n\t\tFOUR_VECTOR* rA = &rv[first_i];\n\t\tFOUR_VECTOR* fA = &fv[first_i];\n\n\t\tFOUR_VECTOR rA_shared[NUMBER_PAR_PER_BOX];\n\t\tfor (int wtx = 0; wtx < NUMBER_PAR_PER_BOX; wtx++) {\n\t\t\trA_shared[wtx] = rA[wtx];\n\t\t}\n\n\t\tfor (int k = 0; k < (1 + box[bx].nn); k++) {\n\n\t\t\tint pointer = (k == 0) ? (int)bx : box[bx].nei[k - 1].number;\n\t\t\tint first_j = (int)box[pointer].offset;\n\n\t\t\tFOUR_VECTOR* rB = &rv[first_j];\n\t\t\tfp* qB = &qv[first_j];\n\n\t\t\tFOUR_VECTOR rB_shared[NUMBER_PAR_PER_BOX];\n\t\t\tfp qB_shared[NUMBER_PAR_PER_BOX];\n\n\t\t\tfor (int wtx = 0; wtx < NUMBER_PAR_PER_BOX; wtx++) {\n\t\t\t\trB_shared[wtx] = rB[wtx];\n\t\t\t\tqB_shared[wtx] = qB[wtx];\n\t\t\t}\n\n\t\t\tfor (int wtx = 0; wtx < NUMBER_PAR_PER_BOX; wtx++) {\n\t\t\t\tfor (int j = 0; j < NUMBER_PAR_PER_BOX; j++) {\n\t\t\t\t\tfp r2 = (fp)rA_shared[wtx].v + (fp)rB_shared[j].v -\n\t\t\t\t\t        DOT((rA_shared[wtx]), (rB_shared[j]));\n\t\t\t\t\tfp u2 = a2 * r2;\n\t\t\t\t\tfp vij = exp(-u2);\n\t\t\t\t\tfp fs = (fp)2.0 * vij;\n\n\t\t\t\t\tTHREE_VECTOR d;\n\t\t\t\t\td.x = (fp)rA_shared[wtx].x - (fp)rB_shared[j].x;\n\t\t\t\t\tfp fxij = fs * d.x;\n\t\t\t\t\td.y = (fp)rA_shared[wtx].y - (fp)rB_shared[j].y;\n\t\t\t\t\tfp fyij = fs * d.y;\n\t\t\t\t\td.z = (fp)rA_shared[wtx].z - (fp)rB_shared[j].z;\n\t\t\t\t\tfp fzij = fs * d.z;\n\n\t\t\t\t\tfA[wtx].v += (double)((fp)qB_shared[j] * vij);\n\t\t\t\t\tfA[wtx].x += (double)((fp)qB_shared[j] * fxij);\n\t\t\t\t\tfA[wtx].y += (double)((fp)qB_shared[j] * fyij);\n\t\t\t\t\tfA[wtx].z += (double)((fp)qB_shared[j] * fzij);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_cpu.c"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_cpu.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 56.793,
+      "prompt_tokens": 6878,
+      "completion_tokens": 3122,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "fail",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

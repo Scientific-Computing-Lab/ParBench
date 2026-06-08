@@ -1,0 +1,82 @@
+{
+  "source_spec": "hecbench-iso2dfd-cuda",
+  "target_spec": "hecbench-iso2dfd-omp_target",
+  "kernel": "iso2dfd",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 773490332,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "1000",
+    "1000",
+    "100"
+  ],
+  "timestamp": "2026-05-01T01:57:20Z",
+  "prompt_tokens": 2916,
+  "completion_tokens": 3651,
+  "llm_response_time_seconds": 32.301,
+  "build_status": "pass",
+  "build_time_seconds": 0.842,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.167,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Initializing ... \nGrid Sizes: 1000 1000\nIterations: 100\n\nComputing wavefield in device ..\nRunning on:: OpenMP Target Device 0\nThe Device Max Work Group Size is : 24\nTotal kernel execution time 90.5119 (ms)\nAverage kernel execution time 905.119 (us)\nComputing wavefield in CPU ..\nInitializing ... \nHost time: 16 ms\n\nCheck difference between final wavefields computed in device and host\nPASS\nFinal wavefields (from device and CPU) written to disk\nFinished.  \n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "total_kernel_time": {
+      "value": 90.5119,
+      "unit": "ms"
+    },
+    "avg_kernel_time": {
+      "value": 905.119,
+      "unit": "us"
+    }
+  },
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.167,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "iso2dfd.cpp": "#include <chrono>\n#include <cmath>\n#include <cstring>\n#include <fstream>\n#include <iostream>\n#include <string>\n#include <cstdio>\n#include <omp.h>\n\n#define DT 0.002f\n#define DXY 20.0f\n#define HALF_LENGTH 1\n\n#define BLOCK_SIZE 16\n#define MIN(a, b) (a) < (b) ? (a) : (b)\n\nvoid usage(std::string programName) {\n  std::cout << \" Incorrect parameters \" << std::endl;\n  std::cout << \" Usage: \";\n  std::cout << programName << \" n1 n2 Iterations \" << std::endl << std::endl;\n  std::cout << \" n1 n2      : Grid sizes for the stencil \" << std::endl;\n  std::cout << \" Iterations : No. of timesteps. \" << std::endl;\n}\n\nvoid initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, size_t nRows,\n                size_t nCols) {\n  std::cout << \"Initializing ... \" << std::endl;\n\n  float wavelet[12] = {0.016387336, -0.041464937, -0.067372555, 0.386110067,\n                       0.812723635, 0.416998396,  0.076488599,  -0.059434419,\n                       0.023680172, 0.005611435,  0.001823209,  -0.000720549};\n\n  for (size_t i = 0; i < nRows; i++) {\n    size_t offset = i * nCols;\n    for (size_t k = 0; k < nCols; k++) {\n      ptr_prev[offset + k] = 0.0f;\n      ptr_next[offset + k] = 0.0f;\n      ptr_vel[offset + k] = 2250000.0f;\n    }\n  }\n\n  for (int s = 11; s >= 0; s--) {\n    for (size_t i = nRows / 2 - s; i < nRows / 2 + s; i++) {\n      size_t offset = i * nCols;\n      for (size_t k = nCols / 2 - s; k < nCols / 2 + s; k++) {\n        ptr_prev[offset + k] = wavelet[s];\n      }\n    }\n  }\n}\n\nbool within_epsilon(float* output, float* reference, const size_t dimx,\n                    const size_t dimy, const unsigned int radius,\n                    const float delta = 0.01f) {\n  FILE* fp = fopen(\"./error_diff.txt\", \"w\");\n  if (!fp) fp = stderr;\n\n  bool error = false;\n  double norm2 = 0;\n\n  for (size_t iy = 0; iy < dimy; iy++) {\n    for (size_t ix = 0; ix < dimx; ix++) {\n      if (ix >= radius && ix < (dimx - radius) && iy >= radius &&\n          iy < (dimy - radius)) {\n        float difference = fabsf(*reference - *output);\n        norm2 += difference * difference;\n        if (difference > delta) {\n          error = true;\n          fprintf(fp, \" ERROR: (%zu,%zu)\\t%e instead of %e (|e|=%e)\\n\", ix, iy,\n                  *output, *reference, difference);\n        }\n      }\n      ++output;\n      ++reference;\n    }\n  }\n\n  if (fp != stderr) fclose(fp);\n  norm2 = sqrt(norm2);\n  if (error) printf(\"error (Euclidean norm): %.9e\\n\", norm2);\n  return error;\n}\n\nvoid iso_2dfd_iteration_cpu(float* next, float* prev, float* vel,\n                            const float dtDIVdxy, size_t nRows, size_t nCols,\n                            int nIterations) {\n  float* swap;\n  float value = 0.f;\n  for (int k = 0; k < nIterations; k += 1) {\n    for (size_t i = 1; i < nRows - HALF_LENGTH; i += 1) {\n      for (size_t j = 1; j < nCols - HALF_LENGTH; j += 1) {\n        size_t gid = j + (i * nCols);\n        value = 0.f;\n        value += prev[gid + 1] - 2.f * prev[gid] + prev[gid - 1];\n        value += prev[gid + nCols] - 2.f * prev[gid] + prev[gid - nCols];\n        value *= dtDIVdxy * vel[gid];\n        next[gid] = 2.f * prev[gid] - next[gid] + value;\n      }\n    }\n    swap = next;\n    next = prev;\n    prev = swap;\n  }\n}\n\nint main(int argc, char* argv[]) {\n  float* prev_base;\n  float* next_base;\n  float* next_cpu;\n  float* vel_base;\n\n  bool error = false;\n\n  size_t nRows, nCols;\n  unsigned int nIterations;\n\n  try {\n    nRows = std::stoi(argv[1]);\n    nCols = std::stoi(argv[2]);\n    nIterations = std::stoi(argv[3]);\n  } catch (...) {\n    usage(argv[0]);\n    return 1;\n  }\n\n  size_t nsize = nRows * nCols;\n\n  prev_base = new float[nsize];\n  next_base = new float[nsize];\n  next_cpu = new float[nsize];\n  vel_base = new float[nsize];\n\n  float dtDIVdxy = (DT * DT) / (DXY * DXY);\n\n  initialize(prev_base, next_base, vel_base, nRows, nCols);\n\n  std::cout << \"Grid Sizes: \" << nRows << \" \" << nCols << std::endl;\n  std::cout << \"Iterations: \" << nIterations << std::endl;\n  std::cout << std::endl;\n\n  std::cout << \"Computing wavefield in device ..\" << std::endl;\n\n  std::cout << \"Running on:: \"\n            << \"OpenMP Target Device \" << omp_get_default_device() << std::endl;\n  std::cout << \"The Device Max Work Group Size is : \" << omp_get_max_threads()\n            << std::endl;\n\n  auto kstart = std::chrono::steady_clock::now();\n\n#pragma omp target data map(tofrom : next_base[0:nsize], prev_base[0:nsize]) map(to : vel_base[0:nsize])\n  {\n    for (unsigned int k = 0; k < nIterations; k += 1) {\n#pragma omp target teams distribute parallel for collapse(2)\n      for (size_t gidRow = 0; gidRow < nRows; ++gidRow) {\n        for (size_t gidCol = 0; gidCol < nCols; ++gidCol) {\n          size_t gid = gidRow * nCols + gidCol;\n          if ((gidCol >= HALF_LENGTH && gidCol < nCols - HALF_LENGTH) &&\n              (gidRow >= HALF_LENGTH && gidRow < nRows - HALF_LENGTH)) {\n            float value = 0.f;\n            if (k % 2) {\n              value += next_base[gid + 1] - 2.f * next_base[gid] + next_base[gid - 1];\n              value += next_base[gid + nCols] - 2.f * next_base[gid] + next_base[gid - nCols];\n              value *= dtDIVdxy * vel_base[gid];\n              prev_base[gid] = 2.f * next_base[gid] - prev_base[gid] + value;\n            } else {\n              value += prev_base[gid + 1] - 2.f * prev_base[gid] + prev_base[gid - 1];\n              value += prev_base[gid + nCols] - 2.f * prev_base[gid] + prev_base[gid - nCols];\n              value *= dtDIVdxy * vel_base[gid];\n              next_base[gid] = 2.f * prev_base[gid] - next_base[gid] + value;\n            }\n          }\n        }\n      }\n    }\n  }\n\n  auto kend = std::chrono::steady_clock::now();\n  auto ktime =\n      std::chrono::duration_cast<std::chrono::nanoseconds>(kend - kstart).count();\n  std::cout << \"Total kernel execution time \" << ktime * 1e-6f << \" (ms)\\n\";\n  std::cout << \"Average kernel execution time \" << (ktime * 1e-3f) / nIterations\n            << \" (us)\\n\";\n\n  std::ofstream outFile;\n  outFile.open(\"wavefield_snapshot.bin\", std::ios::out | std::ios::binary);\n  outFile.write(reinterpret_cast<char*>(next_base), nsize * sizeof(float));\n  outFile.close();\n\n  std::cout << \"Computing wavefield in CPU ..\" << std::endl;\n\n  initialize(prev_base, next_cpu, vel_base, nRows, nCols);\n\n  auto start = std::chrono::steady_clock::now();\n  iso_2dfd_iteration_cpu(next_cpu, prev_base, vel_base, dtDIVdxy, nRows, nCols,\n                         nIterations);\n\n  auto end = std::chrono::steady_clock::now();\n  auto time =\n      std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();\n  std::cout << \"Host time: \" << time << \" ms\" << std::endl;\n  std::cout << std::endl;\n\n  std::cout << \"Check difference between final wavefields computed in device and host\"\n            << std::endl;\n  error = within_epsilon(next_base, next_cpu, nRows, nCols, HALF_LENGTH, 0.1f);\n  std::cout << (error ? \"FAIL\" : \"PASS\") << std::endl;\n\n  outFile.open(\"wavefield_snapshot_cpu.bin\", std::ios::out | std::ios::binary);\n  outFile.write(reinterpret_cast<char*>(next_cpu), nsize * sizeof(float));\n  outFile.close();\n\n  std::cout << \"Final wavefields (from device and CPU) written to disk\"\n            << std::endl;\n  std::cout << \"Finished.  \" << std::endl;\n\n  delete[] prev_base;\n  delete[] next_base;\n  delete[] vel_base;\n  delete[] next_cpu;\n\n  return error ? 1 : 0;\n}\n"
+  },
+  "target_files_expected": [
+    "iso2dfd.cpp"
+  ],
+  "target_files_extracted": [
+    "iso2dfd.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 32.301,
+      "prompt_tokens": 2916,
+      "completion_tokens": 3651,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

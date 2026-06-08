@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-pathfinder-opencl",
+  "target_spec": "rodinia-pathfinder-omp",
+  "kernel": "pathfinder",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 362661482,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-30T05:06:52Z",
+  "prompt_tokens": 6162,
+  "completion_tokens": 5207,
+  "llm_response_time_seconds": 61.483,
+  "build_status": "fail",
+  "build_time_seconds": 0.028,
+  "build_error_snippet": "pathfinder.cpp:8:10: fatal error: timing.h: No such file or directory\n    8 | #include \"timing.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:7: release] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: pathfinder.cpp:8:10: fatal error: timing.h: No such file or directory\n    8 | #include \"timing.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:7: release] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "pathfinder.cpp": "#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <assert.h>\n#include <iostream>\n#include <cstring>\n#include <omp.h>\n#include \"timing.h\"\n\nusing namespace std;\n\n#define HALO     1\n#define STR_SIZE 256\n#define DEVICE   0\n#define M_SEED   9\n\n#define IN_RANGE(x, min, max) ((x) >= (min) && (x) <= (max))\n#define CLAMP_RANGE(x, min, max) x = (x < (min)) ? (min) : ((x > (max)) ? (max) : (x))\n#define MIN(a, b) ((a) <= (b) ? (a) : (b))\n\nint   rows = -1, cols = -1;\nint   Ne = rows * cols;\nint*  data;\nint** wall;\nint*  result;\nint   pyramid_height = -1;\nint   verbose = 0;\n\nint platform_id_inuse = 0;\nint device_id_inuse = 0;\n\n#ifdef TIMING\nstruct timeval tv;\nstruct timeval tv_total_start, tv_total_end;\nstruct timeval tv_init_end;\nstruct timeval tv_h2d_start, tv_h2d_end;\nstruct timeval tv_d2h_start, tv_d2h_end;\nstruct timeval tv_kernel_start, tv_kernel_end;\nstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\nstruct timeval tv_close_start, tv_close_end;\nfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n      d2h_time = 0, close_time = 0, total_time = 0;\n#endif\n\nvoid init(int argc, char** argv)\n{\n    int cur_arg;\n    for (cur_arg = 1; cur_arg < argc; cur_arg++) {\n        if (strcmp(argv[cur_arg], \"-c\") == 0) {\n            if (argc >= cur_arg + 1) {\n                cols = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        } else if (strcmp(argv[cur_arg], \"-r\") == 0) {\n            if (argc >= cur_arg + 1) {\n                rows = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        } else if (strcmp(argv[cur_arg], \"-h\") == 0) {\n            if (argc >= cur_arg + 1) {\n                pyramid_height = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        }\n        if (strcmp(argv[cur_arg], \"-v\") == 0) {\n            verbose = 1;\n        } else if (strcmp(argv[cur_arg], \"-p\") == 0) {\n            if (argc >= cur_arg + 1) {\n                platform_id_inuse = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        } else if (strcmp(argv[cur_arg], \"-d\") == 0) {\n            if (argc >= cur_arg + 1) {\n                device_id_inuse = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        }\n    }\n\n    if (cols < 0 || rows < 0 || pyramid_height < 0) {\n        fprintf(stderr, \"usage: %s <-r rows> <-c cols> <-h pyramid_height> [-v] [-p platform_id] [-d device_id] [-t device_type]\\n\", argv[0]);\n        exit(0);\n    }\n\n    data = new int[rows * cols];\n    wall = new int*[rows];\n    for (int n = 0; n < rows; n++) {\n        wall[n] = data + cols * n;\n    }\n    result = new int[cols];\n\n    int seed = M_SEED;\n    srand(seed);\n\n    for (int i = 0; i < rows; i++) {\n        for (int j = 0; j < cols; j++) {\n            wall[i][j] = rand() % 10;\n        }\n    }\n\n#ifdef BENCH_PRINT\n    for (int i = 0; i < rows; i++) {\n        for (int j = 0; j < cols; j++) {\n            printf(\"%d \", wall[i][j]);\n        }\n        printf(\"\\n\");\n    }\n#endif\n}\n\nvoid fatal(char *s)\n{\n    fprintf(stderr, \"error: %s\\n\", s);\n}\n\nstatic void dynproc_kernel_omp(\n    int iteration,\n    int* gpuWall,\n    int* gpuSrc,\n    int* gpuResults,\n    int cols,\n    int rows,\n    int startStep,\n    int border,\n    int HALO_VAL,\n    int* outputBuffer,\n    int BLOCK_SIZE)\n{\n    int small_block_cols = BLOCK_SIZE - (iteration * HALO_VAL * 2);\n    if (small_block_cols <= 0) return;\n\n    int num_groups = ((cols - 1 + border) / small_block_cols) + 1;\n\n    #pragma omp parallel for schedule(static)\n    for (int bx = 0; bx < num_groups; bx++) {\n        int* prev = new int[BLOCK_SIZE];\n        int* result_local = new int[BLOCK_SIZE];\n        bool* computed = new bool[BLOCK_SIZE];\n\n        int blkX = (small_block_cols * bx) - border;\n        int blkXmax = blkX + BLOCK_SIZE - 1;\n\n        int validXmin = (blkX < 0) ? -blkX : 0;\n        int validXmax = (blkXmax > cols - 1) ? BLOCK_SIZE - 1 - (blkXmax - cols + 1) : BLOCK_SIZE - 1;\n\n        for (int tx = 0; tx < BLOCK_SIZE; tx++) {\n            int xidx = blkX + tx;\n            if (IN_RANGE(xidx, 0, cols - 1)) {\n                prev[tx] = gpuSrc[xidx];\n            }\n        }\n\n        for (int i = 0; i < iteration; i++) {\n            for (int tx = 0; tx < BLOCK_SIZE; tx++) {\n                computed[tx] = false;\n\n                int xidx = blkX + tx;\n                int W = tx - 1;\n                int E = tx + 1;\n\n                W = (W < validXmin) ? validXmin : W;\n                E = (E > validXmax) ? validXmax : E;\n\n                bool isValid = IN_RANGE(tx, validXmin, validXmax);\n\n                if (IN_RANGE(tx, i + 1, BLOCK_SIZE - i - 2) && isValid) {\n                    computed[tx] = true;\n                    int left = prev[W];\n                    int up = prev[tx];\n                    int right = prev[E];\n                    int shortest = MIN(left, up);\n                    shortest = MIN(shortest, right);\n\n                    int index = cols * (startStep + i) + xidx;\n                    result_local[tx] = shortest + gpuWall[index];\n\n                    if (tx == 11 && i == 0) {\n                        int bufIndex = gpuSrc[xidx];\n                        if (bufIndex >= 0 && bufIndex < 16384) {\n                            outputBuffer[bufIndex] = 1;\n                        }\n                    }\n                }\n            }\n\n            if (i == iteration - 1) {\n                break;\n            }\n\n            for (int tx = 0; tx < BLOCK_SIZE; tx++) {\n                if (computed[tx]) {\n                    prev[tx] = result_local[tx];\n                }\n            }\n        }\n\n        for (int tx = 0; tx < BLOCK_SIZE; tx++) {\n            if (computed[tx]) {\n                int xidx = blkX + tx;\n                gpuResults[xidx] = result_local[tx];\n            }\n        }\n\n        delete[] prev;\n        delete[] result_local;\n        delete[] computed;\n    }\n}\n\nint main(int argc, char** argv)\n{\n    init(argc, argv);\n\n    int borderCols = (pyramid_height) * HALO;\n    int size = rows * cols;\n\n#ifdef TIMING\n    gettimeofday(&tv_total_start, NULL);\n    gettimeofday(&tv_init_end, NULL);\n    tvsub(&tv_init_end, &tv_total_start, &tv);\n    init_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n#endif\n\n    int* h_outputBuffer = (int*)malloc(16384 * sizeof(int));\n    for (int i = 0; i < 16384; i++) {\n        h_outputBuffer[i] = 0;\n    }\n\n#ifdef TIMING\n    gettimeofday(&tv_mem_alloc_start, NULL);\n#endif\n\n    int* d_gpuWall = new int[size - cols];\n    int* d_gpuResult[2];\n    d_gpuResult[0] = new int[cols];\n    d_gpuResult[1] = new int[cols];\n\n#ifdef TIMING\n    gettimeofday(&tv_mem_alloc_end, NULL);\n    tvsub(&tv_mem_alloc_end, &tv_mem_alloc_start, &tv);\n    mem_alloc_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n#endif\n\n    memcpy(d_gpuWall, data + cols, sizeof(int) * (size - cols));\n    memcpy(d_gpuResult[0], data, sizeof(int) * cols);\n    memcpy(h_outputBuffer, h_outputBuffer, sizeof(int) * 16384);\n\n    int src = 1, final_ret = 0;\n\n#ifdef TIMING\n    gettimeofday(&tv_kernel_start, NULL);\n#endif\n\n    const int BLOCK_SIZE = 256;\n\n    for (int t = 0; t < rows - 1; t += pyramid_height) {\n        int temp = src;\n        src = final_ret;\n        final_ret = temp;\n\n        int arg0 = MIN(pyramid_height, rows - t - 1);\n        int theHalo = HALO;\n\n        dynproc_kernel_omp(\n            arg0,\n            d_gpuWall,\n            d_gpuResult[src],\n            d_gpuResult[final_ret],\n            cols,\n            rows,\n            t,\n            borderCols,\n            theHalo,\n            h_outputBuffer,\n            BLOCK_SIZE\n        );\n    }\n\n#ifdef TIMING\n    gettimeofday(&tv_kernel_end, NULL);\n    tvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n    kernel_time += tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n#endif\n\n    memcpy(result, d_gpuResult[final_ret], sizeof(int) * cols);\n\n#ifdef TIMING\n    gettimeofday(&tv_d2h_start, NULL);\n    gettimeofday(&tv_d2h_end, NULL);\n    tvsub(&tv_d2h_end, &tv_d2h_start, &tv);\n    d2h_time += tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n#endif\n\n    h_outputBuffer[16383] = '\\0';\n\n#ifdef BENCH_PRINT\n    for (int i = 0; i < cols; i++)\n        printf(\"%d \", data[i]);\n    printf(\"\\n\");\n    for (int i = 0; i < cols; i++)\n        printf(\"%d \", result[i]);\n    printf(\"\\n\");\n#endif\n\n#ifdef TIMING\n    gettimeofday(&tv_close_start, NULL);\n#endif\n\n    delete[] d_gpuWall;\n    delete[] d_gpuResult[0];\n    delete[] d_gpuResult[1];\n    free(h_outputBuffer);\n\n#ifdef TIMING\n    gettimeofday(&tv_close_end, NULL);\n    tvsub(&tv_close_end, &tv_close_start, &tv);\n    close_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n    tvsub(&tv_close_end, &tv_total_start, &tv);\n    total_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\n    printf(\"Init: %f\\n\", init_time);\n    printf(\"MemAlloc: %f\\n\", mem_alloc_time);\n    printf(\"HtoD: %f\\n\", h2d_time);\n    printf(\"Exec: %f\\n\", kernel_time);\n    printf(\"DtoH: %f\\n\", d2h_time);\n    printf(\"Close: %f\\n\", close_time);\n    printf(\"Total: %f\\n\", total_time);\n#endif\n\n    delete[] data;\n    delete[] wall;\n    delete[] result;\n\n    return EXIT_SUCCESS;\n}\n"
+  },
+  "target_files_expected": [
+    "pathfinder.cpp"
+  ],
+  "target_files_extracted": [
+    "pathfinder.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 61.483,
+      "prompt_tokens": 6162,
+      "completion_tokens": 5207,
+      "finish_reason": "completed",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "pathfinder.cpp:8:10: fatal error: timing.h: No such file or directory\n    8 | #include \"timing.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\nmake: *** [Makefile:7: release] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

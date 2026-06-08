@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-nn-cuda",
+  "target_spec": "rodinia-nn-opencl",
+  "kernel": "nn",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1282757488,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "../../data/nn/filelist.txt",
+    "-r",
+    "5",
+    "-lat",
+    "30",
+    "-lng",
+    "90",
+    "-f",
+    "../../data/nn"
+  ],
+  "timestamp": "2026-04-21T23:20:35Z",
+  "prompt_tokens": 12214,
+  "completion_tokens": 748,
+  "llm_response_time_seconds": 7.753,
+  "build_status": "pass",
+  "build_time_seconds": 0.666,
+  "build_error_snippet": null,
+  "run_status": "timeout",
+  "run_time_seconds": 300.106,
+  "run_exit_code": -1,
+  "run_stderr_snippet": "Execution timed out after 300s",
+  "run_stdout_snippet": "",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code -1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 300.039,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "nearestNeighbor_kernel.cl": "kernel void euclid(\n    const global LatLong* d_locations,\n    global float* d_distances,\n    int numRecords,\n    float lat,\n    float lng)\n{\n    int globalId = get_global_id(0);\n    \n    if (globalId < numRecords) {\n        LatLong latLong = d_locations[globalId];\n        d_distances[globalId] = sqrt((lat - latLong.lat) * (lat - latLong.lat) + \n                                     (lng - latLong.lng) * (lng - latLong.lng));\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "nearestNeighbor_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "nearestNeighbor_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 7.753,
+      "prompt_tokens": 12214,
+      "completion_tokens": 748,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "timeout",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "Execution timed out after 300s",
+      "run_stdout_snippet": "",
+      "extraction_fail": null
+    }
+  ]
+}

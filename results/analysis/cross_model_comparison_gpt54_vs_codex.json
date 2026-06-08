@@ -1,0 +1,232 @@
+{
+  "generated_at": "2026-05-06T03:37:05.609585+00:00",
+  "models": [
+    "azure-gpt-5.4",
+    "azure-gpt-5.3-codex"
+  ],
+  "common_directions": [
+    "cuda-to-omp",
+    "cuda-to-omp_target",
+    "cuda-to-opencl",
+    "omp-to-cuda",
+    "omp-to-omp_target",
+    "omp-to-opencl",
+    "omp_target-to-cuda",
+    "omp_target-to-omp",
+    "opencl-to-cuda",
+    "opencl-to-omp"
+  ],
+  "missing_directions": {},
+  "overall": {
+    "mcnemar": {
+      "both_pass": 94,
+      "both_fail": 40,
+      "a_only": 5,
+      "b_only": 3,
+      "total": 142,
+      "mcnemar_chi2": 0.125,
+      "p_value": 0.723674
+    },
+    "azure-gpt-5.4": {
+      "pass": 267,
+      "total": 426,
+      "rate": 0.6268
+    },
+    "azure-gpt-5.3-codex": {
+      "pass": 267,
+      "total": 426,
+      "rate": 0.6268
+    },
+    "cohens_h": 0.0,
+    "effect_size": "negligible"
+  },
+  "per_direction": {
+    "cuda-to-omp": {
+      "azure-gpt-5.4": {
+        "pass": 60,
+        "total": 72,
+        "rate": 0.8333
+      },
+      "azure-gpt-5.3-codex": {
+        "pass": 55,
+        "total": 72,
+        "rate": 0.7639
+      },
+      "cohens_h": 0.1736,
+      "effect_size": "negligible"
+    },
+    "cuda-to-omp_target": {
+      "azure-gpt-5.4": {
+        "pass": 23,
+        "total": 24,
+        "rate": 0.9583
+      },
+      "azure-gpt-5.3-codex": {
+        "pass": 24,
+        "total": 24,
+        "rate": 1.0
+      },
+      "cohens_h": -0.4113,
+      "effect_size": "small"
+    },
+    "cuda-to-opencl": {
+      "azure-gpt-5.4": {
+        "pass": 34,
+        "total": 57,
+        "rate": 0.5965
+      },
+      "azure-gpt-5.3-codex": {
+        "pass": 33,
+        "total": 57,
+        "rate": 0.5789
+      },
+      "cohens_h": 0.0358,
+      "effect_size": "negligible"
+    },
+    "omp-to-cuda": {
+      "azure-gpt-5.4": {
+        "pass": 40,
+        "total": 72,
+        "rate": 0.5556
+      },
+      "azure-gpt-5.3-codex": {
+        "pass": 40,
+        "total": 72,
+        "rate": 0.5556
+      },
+      "cohens_h": 0.0,
+      "effect_size": "negligible"
+    },
+    "omp-to-omp_target": {
+      "azure-gpt-5.4": {
+        "pass": 9,
+        "total": 9,
+        "rate": 1.0
+      },
+      "azure-gpt-5.3-codex": {
+        "pass": 9,
+        "total": 9,
+        "rate": 1.0
+      },
+      "cohens_h": 0.0,
+      "effect_size": "negligible"
+    },
+    "omp-to-opencl": {
+      "azure-gpt-5.4": {
+        "pass": 37,
+        "total": 51,
+        "rate": 0.7255
+      },
+      "azure-gpt-5.3-codex": {
+        "pass": 42,
+        "total": 51,
+        "rate": 0.8235
+      },
+      "cohens_h": -0.2358,
+      "effect_size": "small"
+    },
+    "omp_target-to-cuda": {
+      "azure-gpt-5.4": {
+        "pass": 23,
+        "total": 24,
+        "rate": 0.9583
+      },
+      "azure-gpt-5.3-codex": {
+        "pass": 24,
+        "total": 24,
+        "rate": 1.0
+      },
+      "cohens_h": -0.4113,
+      "effect_size": "small"
+    },
+    "omp_target-to-omp": {
+      "azure-gpt-5.4": {
+        "pass": 9,
+        "total": 9,
+        "rate": 1.0
+      },
+      "azure-gpt-5.3-codex": {
+        "pass": 9,
+        "total": 9,
+        "rate": 1.0
+      },
+      "cohens_h": 0.0,
+      "effect_size": "negligible"
+    },
+    "opencl-to-cuda": {
+      "azure-gpt-5.4": {
+        "pass": 11,
+        "total": 57,
+        "rate": 0.193
+      },
+      "azure-gpt-5.3-codex": {
+        "pass": 11,
+        "total": 57,
+        "rate": 0.193
+      },
+      "cohens_h": 0.0,
+      "effect_size": "negligible"
+    },
+    "opencl-to-omp": {
+      "azure-gpt-5.4": {
+        "pass": 21,
+        "total": 51,
+        "rate": 0.4118
+      },
+      "azure-gpt-5.3-codex": {
+        "pass": 20,
+        "total": 51,
+        "rate": 0.3922
+      },
+      "cohens_h": 0.04,
+      "effect_size": "negligible"
+    }
+  },
+  "per_kernel_matrix": {
+    "total_common_kernels": 31,
+    "both_pass": [
+      "bfs",
+      "bptree",
+      "cfd",
+      "convolution1d",
+      "dwt2d",
+      "floydwarshall",
+      "heartwall",
+      "heat2d",
+      "hotspot",
+      "hotspot3d",
+      "iso2dfd",
+      "jacobi",
+      "lavamd",
+      "lud",
+      "md",
+      "mixbench",
+      "myocyte",
+      "nn",
+      "nqueen",
+      "nw",
+      "page-rank",
+      "particlefilter",
+      "pathfinder",
+      "rsbench",
+      "scan",
+      "srad",
+      "stencil1d",
+      "streamcluster",
+      "xsbench"
+    ],
+    "both_fail": [
+      "gaussian"
+    ],
+    "azure-gpt-5.4_only_pass": [
+      "backprop"
+    ],
+    "azure-gpt-5.3-codex_only_pass": [],
+    "counts": {
+      "both_pass": 29,
+      "both_fail": 1,
+      "azure-gpt-5.4_only_pass": 1,
+      "azure-gpt-5.3-codex_only_pass": 0
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-pathfinder-omp",
+  "target_spec": "rodinia-pathfinder-opencl",
+  "kernel": "pathfinder",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1595481995,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-c",
+    "100000",
+    "-r",
+    "100",
+    "-h",
+    "20"
+  ],
+  "timestamp": "2026-04-22T02:15:19Z",
+  "prompt_tokens": 4330,
+  "completion_tokens": 1863,
+  "llm_response_time_seconds": 14.961,
+  "build_status": "pass",
+  "build_time_seconds": 0.481,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.238,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Init: 121.959999\nMemAlloc: 0.003000\nHtoD: 2.179520\nExec: 0.152448\nDtoH: 0.017536\nClose: 0.838000\nTotal: 127.306000\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.238,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernels.cl": "__kernel void dynproc_kernel(\n    int pyramid_height,\n    __global int* wall,\n    __global int* src_result,\n    __global int* dst_result,\n    int cols,\n    int rows,\n    int t,\n    int borderCols,\n    int theHalo,\n    __local int* local_scratch1,\n    __local int* local_scratch2,\n    __global int* outputBuffer\n)\n{\n    int n = get_global_id(0);\n    \n    if (n >= cols) return;\n    \n    int min = src_result[n];\n    if (n > 0) {\n        int left = src_result[n-1];\n        min = min < left ? min : left;\n    }\n    if (n < cols-1) {\n        int right = src_result[n+1];\n        min = min < right ? min : right;\n    }\n    \n    // wall is stored from row 1 onwards (data + cols in host code)\n    // t goes from 0 to rows-2, so wall row index is t (0-based in wall buffer)\n    dst_result[n] = wall[t * cols + n] + min;\n}\n"
+  },
+  "target_files_expected": [
+    "kernels.cl"
+  ],
+  "target_files_extracted": [
+    "kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 14.961,
+      "prompt_tokens": 4330,
+      "completion_tokens": 1863,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

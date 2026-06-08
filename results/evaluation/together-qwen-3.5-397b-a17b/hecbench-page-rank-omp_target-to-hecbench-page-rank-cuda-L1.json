@@ -1,0 +1,79 @@
+{
+  "source_spec": "hecbench-page-rank-omp_target",
+  "target_spec": "hecbench-page-rank-cuda",
+  "kernel": "page-rank",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1665820010,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "-n",
+    "10000",
+    "-i",
+    "50"
+  ],
+  "timestamp": "2026-04-24T07:12:42Z",
+  "prompt_tokens": 2323,
+  "completion_tokens": 3400,
+  "llm_response_time_seconds": 27.688,
+  "build_status": "pass",
+  "build_time_seconds": 0.758,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 3.708,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "\"Options\": \"-n 10000 -i 50 -t 0.000000\". Total kernel execution time: 0.354935 (s)\nPASS\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 0.354935,
+      "unit": "seconds"
+    }
+  },
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 3.708,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <time.h>\n#include <math.h>\n#include <getopt.h>\n#include <chrono>\n#include <cuda_runtime.h>\n#include \"reference.h\"\n\n#define D_FACTOR (0.85f)\n#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 256\n#endif\n\nconst int max_iter = 1000;\nconst float threshold= 1e-16f;\n\n__global__ void map_kernel(const int *pages, const float *page_ranks, float *maps, \n                           const unsigned int *noutlinks, int n) {\n    int i = blockIdx.x * blockDim.x + threadIdx.x;\n    if (i < n) {\n        float outbound_rank = page_ranks[i] / (float)noutlinks[i];\n        for(int j = 0; j < n; ++j) {\n            maps[i * n + j] = pages[i * n + j] * outbound_rank;\n        }\n    }\n}\n\n__global__ void reduce_kernel(float *page_ranks, const float *maps, int n, float *diffs) {\n    int j = blockIdx.x * blockDim.x + threadIdx.x;\n    if (j < n) {\n        float old_rank = page_ranks[j];\n        float new_rank = 0.0f;\n        for(int i = 0; i < n; ++i) {\n            new_rank += maps[i * n + j];\n        }\n        new_rank = ((1.0f - D_FACTOR) / n) + (D_FACTOR * new_rank);\n        diffs[j] = fmaxf(fabsf(new_rank - old_rank), diffs[j]);\n        page_ranks[j] = new_rank;\n    }\n}\n\nint *random_pages(int n, unsigned int *noutlinks, int divisor){\n  int i, j, k;\n  int *pages = (int*) malloc((size_t)n * n * sizeof(int)); \n\n  if (divisor <= 0) {\n    fprintf(stderr, \"ERROR: Invalid divisor '%d' for random initialization, divisor should be greater or equal to 1\\n\", divisor);\n    exit(1);\n  }\n\n  for(i=0; i<n; ++i){\n    noutlinks[i] = 0;\n    for(j=0; j<n; ++j){\n      if(i!=j && (abs(rand())%divisor == 0)){\n        pages[(size_t)i*n+j] = 1;\n        noutlinks[i] += 1;\n      }\n    }\n\n    \n    if(noutlinks[i] == 0){\n      do { k = abs(rand()) % n; } while ( k == i);\n      pages[(size_t)i*n + k] = 1;\n      noutlinks[i] = 1;\n    }\n  }\n  return pages;\n}\n\nvoid init_array(float *a, int n, float val){\n  int i;\n  for(i=0; i<n; ++i){\n    a[i] = val;\n  }\n}\n\nvoid usage(char *argv[]){\n  fprintf(stderr, \"Usage: %s [-n number of pages] [-i max iterations]\"\n      \" [-t threshold] [-q divsor for zero density]\\n\", argv[0]);\n}\n\nstatic struct option size_opts[] =\n{\n  \n  {\"number of pages\", 1, NULL, 'n'},\n  {\"max number of iterations\", 1, NULL, 'i'},\n  {\"minimum threshold\", 1, NULL, 't'},\n  {\"divisor for zero density\", 1, NULL, 'q'},\n  { 0, 0, 0}\n};\n\nfloat maximum_dif(float *difs, int n){\n  int i;\n  float max = 0.0f;\n  for(i=0; i<n; ++i){\n    max = difs[i] > max ? difs[i] : max;\n  }\n  return max;\n}\n\nint main(int argc, char *argv[]) {\n  int *pages;\n  float *maps;\n  float *page_ranks;\n  unsigned int *noutlinks;\n  int t;\n  float max_diff, max_diff_ref;\n\n  int i = 0;\n  int j;\n  int n = 1000;\n  int iter = max_iter;\n  float thresh = threshold;\n  int divisor = 2;\n\n  int opt, opt_index = 0;\n  while((opt = getopt_long(argc, argv, \"::n:i:t:q:\", size_opts, &opt_index)) != -1){\n    switch(opt){\n      case 'n':\n        n = atoi(optarg);\n        break;\n      case 'i':\n        iter = atoi(optarg);\n        break;\n      case 't':\n        thresh = atof(optarg);\n        break;\n      case 'q':\n        divisor = atoi(optarg);\n        break;\n      default:\n        usage(argv);\n        exit(EXIT_FAILURE);\n    }\n  }\n\n  size_t rank_size = (size_t)n * sizeof(float);\n  size_t map_size = (size_t)n * n * sizeof(float);\n  \n  size_t link_size = (size_t)n * sizeof(unsigned int);\n\n  page_ranks = (float*)malloc(rank_size);\n  maps = (float*)malloc(map_size);\n  noutlinks = (unsigned int*)malloc(link_size);\n\n  max_diff=max_diff_ref=99.0f;\n\n  for (i=0; i<n; ++i) {\n    noutlinks[i] = 0;\n  }\n  pages = random_pages(n,noutlinks,divisor);\n  init_array(page_ranks, n, 1.0f / (float) n);\n\n  float *diffs;\n  diffs  = (float*) malloc(rank_size);\n  memset(diffs, 0, rank_size);\n\n  size_t block_size  = n < BLOCK_SIZE ? n : BLOCK_SIZE;\n\n  double ktime = 0.0;\n\n  int *d_pages;\n  float *d_page_ranks, *d_maps, *d_diffs;\n  unsigned int *d_noutlinks;\n\n  cudaMalloc(&d_pages, (size_t)n * n * sizeof(int));\n  cudaMalloc(&d_page_ranks, rank_size);\n  cudaMalloc(&d_noutlinks, link_size);\n  cudaMalloc(&d_maps, map_size);\n  cudaMalloc(&d_diffs, rank_size);\n\n  cudaMemcpy(d_pages, pages, (size_t)n * n * sizeof(int), cudaMemcpyHostToDevice);\n  cudaMemcpy(d_page_ranks, page_ranks, rank_size, cudaMemcpyHostToDevice);\n  cudaMemcpy(d_noutlinks, noutlinks, link_size, cudaMemcpyHostToDevice);\n  cudaMemset(d_diffs, 0, rank_size);\n\n  for (t=1; t<=iter && max_diff>=thresh; ++t) {\n    auto start = std::chrono::high_resolution_clock::now();\n\n    map_kernel<<<n / block_size + 1, block_size>>>(d_pages, d_page_ranks, d_maps, d_noutlinks, n);\n    cudaDeviceSynchronize();\n\n    reduce_kernel<<<n / block_size + 1, block_size>>>(d_page_ranks, d_maps, n, d_diffs);\n    cudaDeviceSynchronize();\n\n    auto end = std::chrono::high_resolution_clock::now();\n    ktime += std::chrono::duration_cast<std::chrono::duration<double> >(end - start).count();\n\n    cudaMemcpy(diffs, d_diffs, rank_size, cudaMemcpyDeviceToHost);\n    max_diff = maximum_dif(diffs, n);\n  }\n\n  fprintf(stderr, \"Max difference %f is reached at iteration %d\\n\", max_diff, t);\n  printf(\"\\\"Options\\\": \\\"-n %d -i %d -t %f\\\". Total kernel execution time: %lf (s)\\n\",\n         n, iter, thresh, ktime);\n\n  cudaFree(d_pages);\n  cudaFree(d_page_ranks);\n  cudaFree(d_noutlinks);\n  cudaFree(d_maps);\n  cudaFree(d_diffs);\n\n  memset(diffs, 0, rank_size);\n  for (t=1; t<=iter && max_diff_ref>=thresh; ++t) {\n    map_ref(pages, page_ranks, maps, noutlinks, n);\n    reduce_ref(page_ranks, maps, n, diffs);\n    max_diff_ref = maximum_dif(diffs, n);\n  }\n  bool ok = fabsf(max_diff - max_diff_ref) < 1e-3f;\n  printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");\n\n  free(pages);\n  free(maps);\n  free(page_ranks);\n  free(noutlinks);\n  free(diffs);\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cu"
+  ],
+  "target_files_extracted": [
+    "main.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 27.688,
+      "prompt_tokens": 2323,
+      "completion_tokens": 3400,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

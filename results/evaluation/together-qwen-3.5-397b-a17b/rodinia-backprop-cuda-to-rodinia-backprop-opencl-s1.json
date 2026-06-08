@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-backprop-cuda",
+  "target_spec": "rodinia-backprop-opencl",
+  "kernel": "backprop",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1061115997,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-n",
+    "65536"
+  ],
+  "timestamp": "2026-04-21T22:42:27Z",
+  "prompt_tokens": 16066,
+  "completion_tokens": 2312,
+  "llm_response_time_seconds": 16.103,
+  "build_status": "pass",
+  "build_time_seconds": 0.644,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.166,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Random number generator seed: 7\nInput layer size : 65536\nStarting training kernel\nnum_devices = 1\nERROR: clBuildProgram() => -11\n\nFinish the training for one iteration\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "VERIFY_FAIL",
+  "error_message": "False positive rejected: OpenCL kernel build failure: clBuildProgram() => -11",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": 0.166,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.006,
+  "translated_files": {
+    "backprop_kernel.cl": "#define WIDTH 16\n#define HEIGHT 16\n#define ETA 0.3f\n#define MOMENTUM 0.3f\n\nkernel void bpnn_layerforward_ocl(float *input_cuda,\n                                  float *output_hidden_cuda,\n                                  float *input_hidden_cuda,\n                                  float *hidden_partial_sum,\n                                  local float *input_node,\n                                  local float *weight_matrix,\n                                  int in,\n                                  int hid)\n{\n    int by = get_group_id(1);\n    int tx = get_local_id(0);\n    int ty = get_local_id(1);\n\n    int index = (hid + 1) * HEIGHT * by + (hid + 1) * ty + tx + 1 + (hid + 1);\n    int index_in = HEIGHT * by + ty + 1;\n\n    if (tx == 0)\n        input_node[ty] = input_cuda[index_in];\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    weight_matrix[ty * WIDTH + tx] = input_hidden_cuda[index];\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    weight_matrix[ty * WIDTH + tx] = weight_matrix[ty * WIDTH + tx] * input_node[ty];\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    for (int i = 1; i <= 4; i++) {\n        int power_two = 1 << i;\n        if (ty % power_two == 0)\n            weight_matrix[ty * WIDTH + tx] = weight_matrix[ty * WIDTH + tx] + weight_matrix[(ty + power_two/2) * WIDTH + tx];\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    input_hidden_cuda[index] = weight_matrix[ty * WIDTH + tx];\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (tx == 0) {\n        hidden_partial_sum[by * hid + ty] = weight_matrix[tx * WIDTH + ty];\n    }\n}\n\nkernel void bpnn_adjust_weights_ocl(float *delta,\n                                    int hid,\n                                    float *ly,\n                                    int in,\n                                    float *w,\n                                    float *oldw)\n{\n    int by = get_group_id(1);\n    int tx = get_local_id(0);\n    int ty = get_local_id(1);\n\n    int index = (hid + 1) * HEIGHT * by + (hid + 1) * ty + tx + 1 + (hid + 1);\n    int index_y = HEIGHT * by + ty + 1;\n    int index_x = tx + 1;\n\n    w[index] += ((ETA * delta[index_x] * ly[index_y]) + (MOMENTUM * oldw[index]));\n    oldw[index] = ((ETA * delta[index_x] * ly[index_y]) + (MOMENTUM * oldw[index]));\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (ty == 0 && by == 0) {\n        w[index_x] += ((ETA * delta[index_x]) + (MOMENTUM * oldw[index_x]));\n        oldw[index_x] = ((ETA * delta[index_x]) + (MOMENTUM * oldw[index_x]));\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "backprop_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "backprop_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 16.103,
+      "prompt_tokens": 16066,
+      "completion_tokens": 2312,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

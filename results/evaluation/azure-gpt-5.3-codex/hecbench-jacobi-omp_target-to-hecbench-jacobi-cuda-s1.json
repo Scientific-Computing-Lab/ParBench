@@ -1,0 +1,74 @@
+{
+  "source_spec": "hecbench-jacobi-omp_target",
+  "target_spec": "hecbench-jacobi-cuda",
+  "kernel": "jacobi",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 853467354,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-30T07:23:41Z",
+  "prompt_tokens": 1121,
+  "completion_tokens": 2293,
+  "llm_response_time_seconds": 33.76,
+  "build_status": "pass",
+  "build_time_seconds": 1.066,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 34.421,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Error after iteration 0 = 0.00781058\nError after iteration 1000 = 3.91046e-05\nError after iteration 2000 = 2.3202e-05\nError after iteration 3000 = 1.70789e-05\nError after iteration 4000 = 1.37312e-05\nError after iteration 5000 = 1.15878e-05\nError after iteration 6000 = 1.00829e-05\nAverage execution time per iteration: 0.00564788 (s)\nPASS\nTotal elapsed time: 34.37 seconds\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 0.00564788,
+      "unit": "s"
+    }
+  },
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 34.421,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cu": "#include <cstdio>\n#include <cstdlib>\n#include <iostream>\n#include <iomanip>\n#include <cmath>\n#include <limits>\n#include <ctime>\n#include <chrono>\n#include <cuda_runtime.h>\n\n#define N 2048\n#define IDX(i, j) ((i) + (j) * N)\n\n#ifndef M_PI\n#define M_PI 3.14159265358979323846\n#endif\n\n#define CUDA_CHECK(call)                                                       \\\n  do {                                                                         \\\n    cudaError_t err__ = (call);                                                \\\n    if (err__ != cudaSuccess) {                                                \\\n      std::fprintf(stderr, \"CUDA error at %s:%d: %s\\n\", __FILE__, __LINE__,   \\\n                   cudaGetErrorString(err__));                                 \\\n      std::exit(EXIT_FAILURE);                                                 \\\n    }                                                                          \\\n  } while (0)\n\nvoid initialize_data(float* f) {\n  for (int j = 0; j < N; ++j) {\n    for (int i = 0; i < N; ++i) {\n      if (i == 0 || i == N - 1) {\n        f[IDX(i, j)] = sinf(j * 2.0f * static_cast<float>(M_PI) / (N - 1));\n      } else if (j == 0 || j == N - 1) {\n        f[IDX(i, j)] = sinf(i * 2.0f * static_cast<float>(M_PI) / (N - 1));\n      } else {\n        f[IDX(i, j)] = 0.0f;\n      }\n    }\n  }\n}\n\n__global__ void jacobi_kernel(const float* f_old, float* f, float* error) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x + 1;\n  int j = blockIdx.y * blockDim.y + threadIdx.y + 1;\n\n  if (i <= N - 2 && j <= N - 2) {\n    float t = 0.25f * (f_old[IDX(i - 1, j)] +\n                       f_old[IDX(i + 1, j)] +\n                       f_old[IDX(i, j - 1)] +\n                       f_old[IDX(i, j + 1)]);\n    float df = t - f_old[IDX(i, j)];\n    f[IDX(i, j)] = t;\n    atomicAdd(error, df * df);\n  }\n}\n\n__global__ void copy_kernel(const float* f, float* f_old) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x + 1;\n  int j = blockIdx.y * blockDim.y + threadIdx.y + 1;\n\n  if (i <= N - 2 && j <= N - 2) {\n    f_old[IDX(i, j)] = f[IDX(i, j)];\n  }\n}\n\nint main() {\n  auto start_time = std::chrono::steady_clock::now();\n\n  float* f = (float*)std::malloc(N * N * sizeof(float));\n  float* f_old = (float*)std::malloc(N * N * sizeof(float));\n\n  float error = {std::numeric_limits<float>::max()};\n  const float tolerance = 1.e-5f;\n\n  initialize_data(f);\n  initialize_data(f_old);\n\n  const int max_iters = 10000;\n  int num_iters = 0;\n\n  float *d_f = nullptr, *d_f_old = nullptr, *d_error = nullptr;\n  CUDA_CHECK(cudaMalloc((void**)&d_f, N * N * sizeof(float)));\n  CUDA_CHECK(cudaMalloc((void**)&d_f_old, N * N * sizeof(float)));\n  CUDA_CHECK(cudaMalloc((void**)&d_error, sizeof(float)));\n\n  CUDA_CHECK(cudaMemcpy(d_f, f, N * N * sizeof(float), cudaMemcpyHostToDevice));\n  CUDA_CHECK(cudaMemcpy(d_f_old, f_old, N * N * sizeof(float), cudaMemcpyHostToDevice));\n\n  auto start = std::chrono::steady_clock::now();\n\n  dim3 block(16, 16);\n  dim3 grid((N - 2 + block.x - 1) / block.x, (N - 2 + block.y - 1) / block.y);\n\n  while (error > tolerance && num_iters < max_iters) {\n    error = 0.f;\n    CUDA_CHECK(cudaMemcpy(d_error, &error, sizeof(float), cudaMemcpyHostToDevice));\n\n    jacobi_kernel<<<grid, block>>>(d_f_old, d_f, d_error);\n    CUDA_CHECK(cudaGetLastError());\n\n    copy_kernel<<<grid, block>>>(d_f, d_f_old);\n    CUDA_CHECK(cudaGetLastError());\n\n    CUDA_CHECK(cudaMemcpy(&error, d_error, sizeof(float), cudaMemcpyDeviceToHost));\n\n    error = sqrtf(error / (N * N));\n\n    if (num_iters % 1000 == 0) {\n      std::cout << \"Error after iteration \" << num_iters << \" = \" << error << std::endl;\n    }\n\n    ++num_iters;\n  }\n\n  CUDA_CHECK(cudaDeviceSynchronize());\n\n  auto end = std::chrono::steady_clock::now();\n  auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n  std::cout << \"Average execution time per iteration: \" << (time * 1e-9f) / num_iters << \" (s)\\n\";\n\n  if (error <= tolerance && num_iters < max_iters) {\n    std::cout << \"PASS\" << std::endl;\n  } else {\n    std::cout << \"FAIL\" << std::endl;\n    CUDA_CHECK(cudaFree(d_f));\n    CUDA_CHECK(cudaFree(d_f_old));\n    CUDA_CHECK(cudaFree(d_error));\n    std::free(f);\n    std::free(f_old);\n    return -1;\n  }\n\n  CUDA_CHECK(cudaFree(d_f));\n  CUDA_CHECK(cudaFree(d_f_old));\n  CUDA_CHECK(cudaFree(d_error));\n\n  std::free(f);\n  std::free(f_old);\n\n  auto end_time = std::chrono::steady_clock::now();\n  auto total_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();\n  double duration = total_time * 1e-9;\n  std::cout << \"Total elapsed time: \" << std::setprecision(4) << duration << \" seconds\" << std::endl;\n\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cu"
+  ],
+  "target_files_extracted": [
+    "main.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 33.76,
+      "prompt_tokens": 1121,
+      "completion_tokens": 2293,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

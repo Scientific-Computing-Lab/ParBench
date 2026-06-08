@@ -1,0 +1,187 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "gaussian",
+        "parallel_api": "opencl",
+        "unique_id": "rodinia-gaussian-opencl",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "opencl/gaussian",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "gaussianElim_kernels.cl",
+            "OriginalParallel.c",
+            "clutils.cpp",
+            "gaussianElim.cpp",
+            "gettimeofday.cpp",
+            "utils.cpp"
+        ],
+        "support_files": [
+            "clutils.h",
+            "gaussianElim.h",
+            "gettimeofday.h",
+            "utils.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "gaussianElim_kernels.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl>=2.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl/gaussian",
+        "commands": {
+            "configure": null,
+            "build": "make OPENCL_INC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include OPENCL_LIB=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+            "clean": "make clean"
+        },
+        "variables": {
+            "OPENCL_INC": {
+                "description": "Path to OpenCL headers",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include",
+                "detection": "find /usr -name 'cl.h' -path '*/CL/cl.h' | head -1 | xargs dirname | xargs dirname"
+            },
+            "OPENCL_LIB": {
+                "description": "Path to OpenCL libraries",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+                "detection": "find /usr -name 'libOpenCL.so' | head -1 | xargs dirname"
+            }
+        },
+        "outputs": {
+            "executable": "./gaussian.out"
+        }
+    },
+    "run": {
+        "executable": "./gaussian.out",
+        "default_arguments": [
+            "-s",
+            "16"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-s",
+                    "16"
+                ],
+                "description": "Small input for correctness verification of gaussian (OPENCL)",
+                "input_files": [],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "-f",
+                    "../../data/gaussian/matrix1024.txt"
+                ],
+                "description": "Large input for performance measurement of gaussian (OPENCL)",
+                "input_files": [
+                    "../../data/gaussian/matrix1024.txt"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Total:",
+                "description": "Gaussian elimination completed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.274268+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "WG size of kernel 1 = 0, WG size of kernel 2= 0 X 0\nCreate matrix internally in parse, size = 16 \nNumber of platforms detected:1\nChecking For OpenCl Compatible Devices\nPlatform 0\nvendor: NVIDIA Corporation\nno of devices: 1\n\tdevice 0: NVIDIA Corporation NVIDIA GeForce RTX 4070\n\nUsing Platform 0 Device 0 \nCreating GPU Context\nProfiling enabled\ncreate input internally before create, size = 16 \n\tgaussianElim_kernels.cl\nMatrix Size\tWrite(s) [size]\t\tKernel(s)\tRead(s)  [size]\t\tTotal(s)\n16x16      \t0.002784 [0.00MB]\t0.088192\t0.002944 [0.00MB]\t0.093920\n\nInit: 47.863998\nMemAlloc: 0.002000\nHtoD: 0.002784\nExec: 0.088192\nDtoH: 0.002944\nClose: 0.048000\nTotal: 51.435001\n",
+                "wall_time_seconds": 0.073,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Gaussian elimination with partial pivoting on GPU",
+        "domain": "linear algebra",
+        "complexity": "Gaussian elimination",
+        "tags": [
+            "gaussian",
+            "gaussian-elimination",
+            "linear-algebra",
+            "opencl",
+            "rodinia"
+        ],
+        "multi_file": true,
+        "translation_complexity": "single_file"
+    }
+}

@@ -1,0 +1,20 @@
+# ParBench — Python dependencies
+# Install: pip install -r requirements.txt
+# For exact reproduction: pip install -r requirements-lock.txt
+
+# Core — harness build/run/verify + schema validation + augmentation
+pydantic>=2.0
+jsonschema>=4.20
+libclang>=18.1
+
+# Eval — LLM evaluation pipeline (lazy-imported; only needed when running evals)
+anthropic>=0.40.0
+openai>=1.50.0
+
+# Analysis — results analysis and figure generation
+matplotlib>=3.9
+numpy>=1.26
+
+# Dev — testing and linting
+pytest>=8.0
+ruff>=0.6.0

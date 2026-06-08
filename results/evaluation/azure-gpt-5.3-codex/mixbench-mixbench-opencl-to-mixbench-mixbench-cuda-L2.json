@@ -1,0 +1,74 @@
+{
+  "source_spec": "mixbench-mixbench-opencl",
+  "target_spec": "mixbench-mixbench-cuda",
+  "kernel": "mixbench",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 548637377,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-05-01T00:13:12Z",
+  "prompt_tokens": 8861,
+  "completion_tokens": 6945,
+  "llm_response_time_seconds": 64.725,
+  "build_status": "pass",
+  "build_time_seconds": 11.853,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.98,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "7.35, 237.62\n          192,     96.250,    0.45,28578.63, 296.92,     48.125,   30.29,  426.47,   8.86,    192.500,    0.83,30950.81, 160.78,    96.250,    0.84,15443.44, 160.45\n          256,    128.250,    0.62,27877.73, 217.37,     64.125,   40.35,  426.55,   6.65,    256.500,    1.11,31139.21, 121.40,   128.250,    1.10,15599.10, 121.63\n------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "single_precision_gflops": {
+      "value": 111.16,
+      "unit": "GFLOPS"
+    }
+  },
+  "baseline_wall_time_seconds": 15.0,
+  "translated_wall_time_seconds": 0.98,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 15.3061,
+  "translated_files": {
+    "mix_kernels_cuda.cu": "#include <cuda.h>\n#include <cuda_runtime.h>\n#include <cuda_fp16.h>\n\n#include <cstdio>\n#include <cstdlib>\n#include <cstdarg>\n\n#include \"lcutil.h\"\n#include \"mix_kernels_cuda.h\"\n\nenum KrnDataType { kdt_int, kdt_float, kdt_double, kdt_half };\n\nconst int compute_iterations[] = {\n    0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,  14,  15, 16,\n    17, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256};\nconst int compute_iterations_len =\n    sizeof(compute_iterations) / sizeof(*compute_iterations);\n\nvoid flushed_printf(const char* format, ...) {\n  va_list args;\n  va_start(args, format);\n  vprintf(format, args);\n  va_end(args);\n  fflush(stdout);\n}\n\nvoid show_progress_init(int length) {\n  flushed_printf(\"[\");\n  for (int i = 0; i < length; i++) flushed_printf(\" \");\n  flushed_printf(\"]\");\n  for (int i = 0; i <= length; i++) flushed_printf(\"\\b\");\n}\nvoid show_progress_step(int domove, char newchar) {\n  flushed_printf(\"%c\", newchar);\n  if (!domove) flushed_printf(\"\\b\");\n}\nvoid show_progress_done(void) { flushed_printf(\"\\n\"); }\n\ntemplate <typename T>\nstruct Ops {\n  __device__ static inline T add(T a, T b) { return a + b; }\n  __device__ static inline T mul(T a, T b) { return a * b; }\n  __device__ static inline T zero() { return (T)0; }\n  __device__ static inline T negone() { return (T)-1; }\n  __device__ static inline bool equal(T a, T b) { return a == b; }\n};\n\ntemplate <>\nstruct Ops<__half2> {\n  __device__ static inline __half2 add(__half2 a, __half2 b) { return __hadd2(a, b); }\n  __device__ static inline __half2 mul(__half2 a, __half2 b) { return __hmul2(a, b); }\n  __device__ static inline __half2 zero() { return __float2half2_rn(0.0f); }\n  __device__ static inline __half2 negone() { return __float2half2_rn(-1.0f); }\n  __device__ static inline bool equal(__half2 a, __half2 b) {\n    __half2_raw ra = reinterpret_cast<const __half2_raw&>(a);\n    __half2_raw rb = reinterpret_cast<const __half2_raw&>(b);\n    return ra.x == rb.x && ra.y == rb.y;\n  }\n};\n\ntemplate <typename T, int COMPUTE_ITERATIONS, int ELEMENTS_PER_THREAD, int FUSION_DEGREE, bool BLOCK_STRIDED>\n__global__ void benchmark_func(T seed, T* g_data) {\n  const unsigned int blockSize = blockDim.x;\n  const int gid = (int)blockIdx.x * (int)blockDim.x + (int)threadIdx.x;\n\n  const int stride = BLOCK_STRIDED ? (int)blockSize : (int)(blockDim.x * gridDim.x);\n  const int idx = BLOCK_STRIDED\n                      ? (int)blockIdx.x * (int)blockSize * ELEMENTS_PER_THREAD + (int)threadIdx.x\n                      : gid;\n  const int big_stride = (int)gridDim.x * (int)blockSize * ELEMENTS_PER_THREAD;\n\n  T tmps[ELEMENTS_PER_THREAD];\n#pragma unroll\n  for (int k = 0; k < FUSION_DEGREE; k++) {\n#pragma unroll\n    for (int j = 0; j < ELEMENTS_PER_THREAD; j++) {\n      tmps[j] = g_data[idx + j * stride + k * big_stride];\n#pragma unroll\n      for (int i = 0; i < COMPUTE_ITERATIONS; i++) {\n        tmps[j] = Ops<T>::add(Ops<T>::mul(tmps[j], tmps[j]), seed);\n      }\n    }\n\n    T sum = Ops<T>::zero();\n#pragma unroll\n    for (int j = 0; j < ELEMENTS_PER_THREAD; j += 2) {\n      sum = Ops<T>::add(sum, Ops<T>::mul(tmps[j], tmps[j + 1]));\n    }\n\n    if (Ops<T>::equal(sum, Ops<T>::negone())) {\n      g_data[idx + k * big_stride] = sum;\n    }\n  }\n}\n\ntemplate <typename T, int EPW, int FD, bool BS, int CI>\nstatic inline void launch_ci_kernel(T seed, T* ptr, long size, size_t wg) {\n  const long compute_grid_size = size / EPW / FD;\n  dim3 block((unsigned)wg);\n  dim3 grid((unsigned)(compute_grid_size / (long)wg));\n  benchmark_func<T, CI, EPW, FD, BS><<<grid, block>>>(seed, ptr);\n}\n\n#define CI_SWITCH(LAUNCH) \\\n  switch (ci) { \\\n    case 0: LAUNCH(0); break; case 1: LAUNCH(1); break; case 2: LAUNCH(2); break; case 3: LAUNCH(3); break; \\\n    case 4: LAUNCH(4); break; case 5: LAUNCH(5); break; case 6: LAUNCH(6); break; case 7: LAUNCH(7); break; \\\n    case 8: LAUNCH(8); break; case 9: LAUNCH(9); break; case 10: LAUNCH(10); break; case 11: LAUNCH(11); break; \\\n    case 12: LAUNCH(12); break; case 13: LAUNCH(13); break; case 14: LAUNCH(14); break; case 15: LAUNCH(15); break; \\\n    case 16: LAUNCH(16); break; case 17: LAUNCH(17); break; case 18: LAUNCH(18); break; case 20: LAUNCH(20); break; \\\n    case 22: LAUNCH(22); break; case 24: LAUNCH(24); break; case 28: LAUNCH(28); break; case 32: LAUNCH(32); break; \\\n    case 40: LAUNCH(40); break; case 48: LAUNCH(48); break; case 56: LAUNCH(56); break; case 64: LAUNCH(64); break; \\\n    case 80: LAUNCH(80); break; case 96: LAUNCH(96); break; case 128: LAUNCH(128); break; case 192: LAUNCH(192); break; \\\n    case 256: LAUNCH(256); break; default: break; \\\n  }\n\ntemplate <typename T, int EPW, int FD, bool BS>\nstatic inline void launch_by_ci(int ci, T seed, T* ptr, long size, size_t wg) {\n#define DO_LAUNCH(CI) launch_ci_kernel<T, EPW, FD, BS, CI>(seed, ptr, size, wg)\n  CI_SWITCH(DO_LAUNCH);\n#undef DO_LAUNCH\n}\n\ntemplate <typename F>\ndouble benchmark3(F&& fn) {\n  double sum = 0.0;\n  for (int i = 0; i < 3; i++) sum += fn();\n  return sum / 3.0;\n}\n\ntemplate <typename T, int EPW, int FD, bool BS>\ndouble time_kernel(int ci, T seed, T* ptr, long size, size_t wg) {\n  return benchmark3([&]() {\n    cudaEvent_t ev_start, ev_stop;\n    CUDA_SAFE_CALL(cudaEventCreate(&ev_start));\n    CUDA_SAFE_CALL(cudaEventCreate(&ev_stop));\n    CUDA_SAFE_CALL(cudaEventRecord(ev_start, 0));\n    launch_by_ci<T, EPW, FD, BS>(ci, seed, ptr, size, wg);\n    CUDA_SAFE_CALL(cudaEventRecord(ev_stop, 0));\n    CUDA_SAFE_CALL(cudaEventSynchronize(ev_stop));\n    float ms = 0.0f;\n    CUDA_SAFE_CALL(cudaEventElapsedTime(&ms, ev_start, ev_stop));\n    CUDA_SAFE_CALL(cudaEventDestroy(ev_start));\n    CUDA_SAFE_CALL(cudaEventDestroy(ev_stop));\n    CUDA_SAFE_CALL(cudaGetLastError());\n    return (double)ms;\n  });\n}\n\nextern \"C\" void mixbenchGPU(double* c, long size) {\n  const bool block_strided = false;\n  const bool host_allocated = false;\n  const bool use_os_timer = false;\n  const size_t workgroupsize = 256;\n  const unsigned int elements_per_wi = 8;\n  const unsigned int fusion_degree = 4;\n\n  printf(\"Workgroup size:         %zu\\n\", workgroupsize);\n  printf(\"Elements per workitem:  %u\\n\", elements_per_wi);\n  printf(\"Workitem fusion degree: %u\\n\", fusion_degree);\n\n  const char* benchtype = block_strided ? \"Workgroup\" : \"NDRange\";\n  printf(\"Workitem stride:        %s\\n\", benchtype);\n  const char* buffer_allocation = host_allocated ? \"Host allocated\" : \"Device allocated\";\n  printf(\"Buffer allocation:      %s\\n\", buffer_allocation);\n  printf(\"Timer:                  %s\\n\", use_os_timer ? \"OS based\" : \"CL event based\");\n\n  cudaDeviceProp prop = GetDeviceProperties();\n  bool enable_dp = (prop.major > 1) || (prop.major == 1 && prop.minor >= 3);\n  if (!enable_dp) {\n    printf(\"Warning:                Double precision computations are not supported\\n\");\n  }\n  bool enable_hp = IsFP16Supported();\n  if (!enable_hp) {\n    printf(\"Warning:                Half precision computations are not supported\\n\");\n  }\n\n  double* d_buffer = nullptr;\n  CUDA_SAFE_CALL(cudaMalloc((void**)&d_buffer, (size_t)size * sizeof(double)));\n  CUDA_SAFE_CALL(cudaMemset(d_buffer, 0, (size_t)size * sizeof(double)));\n\n  printf(\"Loading kernel source file...\\n\");\n  printf(\"Precompilation of kernels... \");\n  show_progress_init(compute_iterations_len);\n  for (int i = 0; i < compute_iterations_len; i++) {\n    show_progress_step(0, '\\\\');\n    show_progress_step(0, '|');\n    if (enable_dp) show_progress_step(0, '/');\n    if (enable_hp) show_progress_step(0, '-');\n    show_progress_step(1, '>');\n  }\n  show_progress_done();\n\n  {\n    const long reduced_grid_size = size / 256;\n    short* p = reinterpret_cast<short*>(d_buffer);\n    launch_ci_kernel<short, 1, 1, false, 0>((short)1, p, reduced_grid_size, workgroupsize);\n    CUDA_SAFE_CALL(cudaDeviceSynchronize());\n  }\n\n  printf(\"------------------------------------------------------------------------------------------------ CSV data -----------------------------------------------------------------------------------------------------\\n\");\n  printf(\"Experiment ID, Single Precision ops,,,,              Double precision ops,,,,              Half precision ops,,,,                Integer operations,,, \\n\");\n  printf(\"Compute iters, Flops/byte, ex.time,  GFLOPS, GB/sec, Flops/byte, ex.time,  GFLOPS, GB/sec, Flops/byte, ex.time,  GFLOPS, GB/sec, Iops/byte, ex.time,   GIOPS, GB/sec\\n\");\n\n  for (int i = 0; i < compute_iterations_len; i++) {\n    const int current_compute_iterations = compute_iterations[i];\n    const long compute_grid_size = size / elements_per_wi / fusion_degree;\n    const long long computations =\n        (elements_per_wi * (long long)compute_grid_size +\n         (2LL * elements_per_wi * current_compute_iterations) * (long long)compute_grid_size) *\n        fusion_degree;\n    const long long memoryoperations = size;\n\n    double kernel_time_mad_sp = time_kernel<float, 8, 4, false>(\n        current_compute_iterations, 1.0f, reinterpret_cast<float*>(d_buffer), size, workgroupsize);\n\n    double kernel_time_mad_dp = 0.0;\n    if (enable_dp) {\n      kernel_time_mad_dp = time_kernel<double, 8, 4, false>(\n          current_compute_iterations, 1.0, reinterpret_cast<double*>(d_buffer), size, workgroupsize);\n    }\n\n    double kernel_time_mad_hp = 0.0;\n    if (enable_hp) {\n      kernel_time_mad_hp = time_kernel<__half2, 8, 4, false>(\n          current_compute_iterations, __float2half2_rn(1.0f), reinterpret_cast<__half2*>(d_buffer), size,\n          workgroupsize);\n    }\n\n    double kernel_time_mad_int = time_kernel<int, 8, 4, false>(\n        current_compute_iterations, 1, reinterpret_cast<int*>(d_buffer), size, workgroupsize);\n\n    printf(\n        \"         %4d,   %8.3f,%8.2f,%8.2f,%7.2f,   %8.3f,%8.2f,%8.2f,%7.2f,   \"\n        \"%8.3f,%8.2f,%8.2f,%7.2f,  %8.3f,%8.2f,%8.2f,%7.2f\\n\",\n        current_compute_iterations,\n        ((double)computations) / ((double)memoryoperations * sizeof(float)),\n        kernel_time_mad_sp,\n        ((double)computations) / kernel_time_mad_sp * 1000. / (double)(1000 * 1000 * 1000),\n        ((double)memoryoperations * sizeof(float)) / kernel_time_mad_sp * 1000. /\n            (1000. * 1000. * 1000.),\n        ((double)computations) / ((double)memoryoperations * sizeof(double)),\n        kernel_time_mad_dp,\n        ((double)computations) / kernel_time_mad_dp * 1000. / (double)(1000 * 1000 * 1000),\n        ((double)memoryoperations * sizeof(double)) / kernel_time_mad_dp * 1000. /\n            (1000. * 1000. * 1000.),\n        ((double)2 * computations) / ((double)memoryoperations * sizeof(__half2)),\n        kernel_time_mad_hp,\n        ((double)2 * computations) / kernel_time_mad_hp * 1000. / (double)(1000 * 1000 * 1000),\n        ((double)memoryoperations * sizeof(__half2)) / kernel_time_mad_hp * 1000. /\n            (1000. * 1000. * 1000.),\n        ((double)computations) / ((double)memoryoperations * sizeof(int)),\n        kernel_time_mad_int,\n        ((double)computations) / kernel_time_mad_int * 1000. / (double)(1000 * 1000 * 1000),\n        ((double)memoryoperations * sizeof(int)) / kernel_time_mad_int * 1000. /\n            (1000. * 1000. * 1000.));\n  }\n\n  printf(\"------------------------------------------------------------------------------------------------------------------------------------------------------------\\n\");\n\n  CUDA_SAFE_CALL(cudaMemcpy(c, d_buffer, (size_t)size * sizeof(double), cudaMemcpyDeviceToHost));\n  CUDA_SAFE_CALL(cudaFree(d_buffer));\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels_cuda.cu"
+  ],
+  "target_files_extracted": [
+    "mix_kernels_cuda.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 64.725,
+      "prompt_tokens": 8861,
+      "completion_tokens": 6945,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

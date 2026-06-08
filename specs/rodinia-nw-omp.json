@@ -1,0 +1,170 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "nw",
+        "parallel_api": "omp",
+        "unique_id": "rodinia-nw-omp",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "openmp/nw",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "needle.cpp"
+        ],
+        "support_files": [
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "needle.cpp"
+        ]
+    },
+    "implementation": {
+        "api": "omp",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "gcc>=9.0 (with OpenMP support)"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "openmp/nw",
+        "commands": {
+            "configure": null,
+            "build": "make needle CC_FLAGS='-g -O3 -fopenmp -I../../cuda/nw'",
+            "clean": "make clean"
+        },
+        "variables": null,
+        "outputs": {
+            "executable": "./needle"
+        }
+    },
+    "run": {
+        "executable": "./needle",
+        "default_arguments": [
+            "2048",
+            "10",
+            "4"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "2048",
+                    "10",
+                    "4"
+                ],
+                "description": "Small input for correctness verification of nw (OMP)",
+                "input_files": [],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "8192",
+                    "10",
+                    "4"
+                ],
+                "description": "Large input for performance measurement of nw (OMP)",
+                "input_files": [],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Processing bottom-right matrix",
+                "description": "NW alignment progress banner. file_hash downgraded 2026-04-19 (S7b): CUDA needle.cu:194 comments out `#define TRACEBACK` — CUDA variant does NOT produce result.txt. OMP needle.cpp:314 has TRACEBACK active — only OMP writes result.txt. LLM translation from omp-to-cuda is faithful to source semantics and does not produce result.txt; cross-API file_hash on the OMP target also punishes CUDA->OMP translators who correctly preserve the `//#define TRACEBACK` comment. stdout_pattern is the honest oracle until TRACEBACK asymmetry is resolved upstream. See .planning/phases/03-oracle-framework/04-S7b-ORACLE-AUDIT.md."
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak",
+        "reference_files": []
+    },
+    "performance": null,
+    "hardware": {
+        "target": "cpu",
+        "requirements": {
+            "cpu": {
+                "min_cores": 4,
+                "min_memory_gb": 8
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.280204+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "Start Needleman-Wunsch\nNum of threads: 4\nProcessing top-left matrix\nProcessing bottom-right matrix\nTotal time: 0.003 seconds\n",
+                "wall_time_seconds": 0.015,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Needleman-Wunsch global sequence alignment on GPU",
+        "domain": "bioinformatics",
+        "complexity": "Needleman-Wunsch sequence alignment",
+        "tags": [
+            "dynamic-programming",
+            "needleman-wunsch",
+            "nw",
+            "omp",
+            "rodinia",
+            "sequence-alignment"
+        ],
+        "multi_file": false,
+        "translation_complexity": "multi_to_single"
+    }
+}

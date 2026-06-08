@@ -1,0 +1,183 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "huffman",
+        "parallel_api": "cuda",
+        "unique_id": "rodinia-huffman-cuda",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "cuda/huffman",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "hist.cu",
+            "main_test_cu.cu",
+            "pabio_kernels_v2.cu",
+            "pack_kernels.cu",
+            "scan.cu",
+            "scanLargeArray_kernel.cu",
+            "vlc_kernel_sm64huff.cu"
+        ],
+        "support_files": [
+            "cpuencode.cpp",
+            "stats_logger.cpp",
+            "comparison_helpers.h",
+            "cpuencode.h",
+            "cuda_helpers.h",
+            "cutil.h",
+            "huffTree.h",
+            "load_data.h",
+            "parameters.h",
+            "print_helpers.h",
+            "stats_logger.h",
+            "stdafx.h",
+            "testdatagen.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "hist.cu",
+            "main_test_cu.cu",
+            "pack_kernels.cu",
+            "scan.cu",
+            "scanLargeArray_kernel.cu",
+            "vlc_kernel_sm64huff.cu"
+        ]
+    },
+    "implementation": {
+        "api": "cuda",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "cuda-toolkit>=11.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "cuda/huffman",
+        "commands": {
+            "configure": null,
+            "build": "make NVCC_OPTS='-O3 -arch=sm_89 -Xcompiler -m64'",
+            "clean": "make clean"
+        },
+        "variables": null,
+        "outputs": {
+            "executable": "./pavle"
+        }
+    },
+    "run": {
+        "executable": "./pavle",
+        "default_arguments": [
+            "../../data/huffman/test1024_H2.206587175259.in"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": {
+            "LD_LIBRARY_PATH": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64:$LD_LIBRARY_PATH"
+        },
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "../../data/huffman/test1024_H2.206587175259.in"
+                ],
+                "description": "Small input for correctness verification of huffman (CUDA)",
+                "input_files": [
+                    "../../data/huffman/test1024_H2.206587175259.in"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "PASS!",
+                "description": "Self-checking Huffman verification passed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "vendor": "NVIDIA",
+                "min_compute_capability": "sm_60",
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.276184+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "CUDA initialized.\nCUDA! Starting VLC Tests!\nParameters: num_elements: 262144, num_blocks: 1024, num_block_threads: 256\n----------------------------\nTime to generate:  0.3 ms\n\n../../data/huffman/test1024_H2.206587175259.in, 1048576 bytes, entropy 2.206587\n\nCPU Encoding time (CPU): 5.854000 (ms)\nCPU Encoded to 291334 [B]\nGPU Encoding time (SM64HUFF): 0.012886 (ms)\nNum_blocks to be passed to scan is 1024.\nComparing vectors: \nPASS! vectors are matching!\n",
+                "wall_time_seconds": 0.09,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Huffman encoding and decoding on GPU",
+        "domain": "data compression",
+        "complexity": "Huffman encoding/decoding",
+        "tags": [
+            "compression",
+            "cuda",
+            "encoding",
+            "huffman",
+            "rodinia"
+        ],
+        "multi_file": true,
+        "translation_complexity": null
+    }
+}

@@ -1,0 +1,81 @@
+{
+  "source_spec": "rodinia-streamcluster-omp",
+  "target_spec": "rodinia-streamcluster-opencl",
+  "kernel": "streamcluster",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 219716437,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "10",
+    "20",
+    "256",
+    "65536",
+    "65536",
+    "1000",
+    "none",
+    "output.txt",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-24T05:52:40Z",
+  "prompt_tokens": 28383,
+  "completion_tokens": 1640,
+  "llm_response_time_seconds": 16.977,
+  "build_status": "pass",
+  "build_time_seconds": 0.751,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.152,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "2 errors generated.\nInitCL()::Error: In clBuildProgram\n<kernel>:103:31: error: read-only variable is not assignable\n            is_center_flag[i] = 0;\n            ~~~~~~~~~~~~~~~~~ ^\n<kernel>:107:31: error: read-only variable is not assignable\n            is_center_flag[i] = 1;\n            ~~~~~~~~~~~~~~~~~ ^\n\n",
+  "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Building Program (clBuildProgram)\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 2.092,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "Kernels.cl": "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n\ntypedef struct {\n  float weight;\n  long assign;  \n  float cost;  \n} Point_Struct;\n\n// Distance calculation kernel\nkernel void dist_kernel(\n    const global Point_Struct* p,\n    const global float* coord,\n    global float* work_mem,\n    const global int* center_table,\n    global char* switch_membership,\n    const int num,\n    const int dim,\n    const long x,\n    const int K)\n{\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    // Calculate distance from point i to point x\n    float x_cost = 0.0f;\n    for (int d = 0; d < dim; d++) {\n        float diff = coord[d * num + i] - coord[d * num + x];\n        x_cost += diff * diff;\n    }\n    x_cost *= p[i].weight;\n    \n    float current_cost = p[i].cost;\n    \n    if (x_cost < current_cost) {\n        switch_membership[i] = 1;\n        work_mem[i * (K + 1) + K] += x_cost - current_cost;\n    } else {\n        int assign = p[i].assign;\n        int ct = center_table[assign];\n        if (ct >= 0 && ct < K) {\n            work_mem[i * (K + 1) + ct] += current_cost - x_cost;\n        }\n    }\n}\n\n// Center evaluation kernel\nkernel void center_eval_kernel(\n    const global float* work_mem,\n    global float* gl_lower,\n    const global int* center_table,\n    const global char* is_center,\n    const int num,\n    const int K,\n    const float z)\n{\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    if (is_center[i]) {\n        float low = z;\n        int ct = center_table[i];\n        if (ct >= 0 && ct < K) {\n            for (int j = 0; j < num; j++) {\n                low += work_mem[j * (K + 1) + ct];\n            }\n            gl_lower[ct] = low;\n        }\n    }\n}\n\n// Update assignments kernel\nkernel void update_assign_kernel(\n    global Point_Struct* p,\n    const global float* coord,\n    const global char* switch_membership,\n    const global float* gl_lower,\n    const global int* center_table,\n    const global int* is_center_flag,\n    const int num,\n    const int dim,\n    const long x,\n    const int gl_cost_negative)\n{\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    if (gl_cost_negative) {\n        int assign = p[i].assign;\n        int ct = center_table[assign];\n        bool close_center = (ct >= 0 && gl_lower[ct] > 0);\n        \n        if (switch_membership[i] || close_center) {\n            float new_cost = 0.0f;\n            for (int d = 0; d < dim; d++) {\n                float diff = coord[d * num + i] - coord[d * num + x];\n                new_cost += diff * diff;\n            }\n            p[i].cost = new_cost * p[i].weight;\n            p[i].assign = x;\n        }\n        \n        if (is_center_flag[i] && ct >= 0 && gl_lower[ct] > 0) {\n            is_center_flag[i] = 0;\n        }\n        \n        if (i == x) {\n            is_center_flag[i] = 1;\n        }\n    }\n}\n\n// Aggregate work_mem kernel\nkernel void aggregate_kernel(\n    global float* work_mem,\n    const int num,\n    const int K)\n{\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    // Each thread processes one row of work_mem\n    for (int k = 0; k < K + 1; k++) {\n        work_mem[i * (K + 1) + k] = 0.0f;\n    }\n}\n\n// Copy coordinates to device format kernel\nkernel void copy_coord_kernel(\n    global float* coord_d,\n    const global float* coord_h,\n    const int num,\n    const int dim)\n{\n    int idx = get_global_id(0);\n    int total = num * dim;\n    if (idx >= total) return;\n    \n    coord_d[idx] = coord_h[idx];\n}\n\n// Initialize point structure kernel\nkernel void init_point_kernel(\n    global Point_Struct* p_d,\n    const global float* weights,\n    const global long* assigns,\n    const global float* costs,\n    const int num)\n{\n    int i = get_global_id(0);\n    if (i >= num) return;\n    \n    p_d[i].weight = weights[i];\n    p_d[i].assign = assigns[i];\n    p_d[i].cost = costs[i];\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 16.977,
+      "prompt_tokens": 28383,
+      "completion_tokens": 1640,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "2 errors generated.\nInitCL()::Error: In clBuildProgram\n<kernel>:103:31: error: read-only variable is not assignable\n            is_center_flag[i] = 0;\n            ~~~~~~~~~~~~~~~~~ ^\n<kernel>:107:31: error: read-only variable is not assignable\n            is_center_flag[i] = 1;\n            ~~~~~~~~~~~~~~~~~ ^\n\n",
+      "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Building Program (clBuildProgram)\n",
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-hotspot3d-omp",
+  "target_spec": "rodinia-hotspot3d-cuda",
+  "kernel": "hotspot3d",
+  "model": "azure-gpt-5.4",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 2133933020,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "512",
+    "8",
+    "100",
+    "../../data/hotspot3D/power_512x8",
+    "../../data/hotspot3D/temp_512x8",
+    "output.out"
+  ],
+  "timestamp": "2026-04-27T00:27:57Z",
+  "prompt_tokens": 2556,
+  "completion_tokens": 5645,
+  "llm_response_time_seconds": 91.811,
+  "build_status": "pass",
+  "build_time_seconds": 0.56,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.986,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "1 threads running\nTime: 0.000 (s)\nAccuracy: 4.110550e-05\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+numeric_comparison+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.869,
+  "translated_wall_time_seconds": 1.986,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.9411,
+  "translated_files": {
+    "3D.cu": "#include <stdio.h>\n#include <time.h>\n#include <assert.h>\n#include <stdlib.h>\n#include <math.h>\n#include <sys/time.h>\n#include <string.h>\n#include <cuda_runtime.h>\n\n#define STR_SIZE (256)\n#define MAX_PD (3.0e6)\n\n#define PRECISION 0.001\n#define SPEC_HEAT_SI 1.75e6\n#define K_SI 100\n\n#define FACTOR_CHIP 0.5\n\nfloat t_chip = 0.0005f;\nfloat chip_height = 0.016f;\nfloat chip_width = 0.016f;\n\nfloat amb_temp = 80.0f;\n\nstatic void cudaCheck(cudaError_t err, const char *msg)\n{\n    if (err != cudaSuccess)\n    {\n        fprintf(stderr, \"CUDA Error: %s: %s\\n\", msg, cudaGetErrorString(err));\n        exit(1);\n    }\n}\n\nvoid fatal(const char *s)\n{\n    fprintf(stderr, \"Error: %s\\n\", s);\n}\n\nvoid readinput(float *vect, int grid_rows, int grid_cols, int layers, const char *file)\n{\n    int i, j, k;\n    FILE *fp;\n    char str[STR_SIZE];\n    float val;\n\n    if ((fp = fopen(file, \"r\")) == 0)\n        fatal(\"The file was not opened\");\n\n    for (i = 0; i <= grid_rows - 1; i++)\n        for (j = 0; grid_cols - 1 >= j; j++)\n            for (k = 0; k <= layers - 1; k++)\n            {\n                if (fgets(str, STR_SIZE, fp) == NULL)\n                    fatal(\"Error reading file\\n\");\n                if (feof(fp))\n                    fatal(\"not enough lines in file\");\n                if ((sscanf(str, \"%f\", &val) != 1))\n                    fatal(\"invalid file format\");\n                vect[i * grid_cols + j + k * grid_rows * grid_cols] = val;\n            }\n\n    fclose(fp);\n}\n\nvoid writeoutput(float *vect, int grid_rows, int grid_cols, int layers, const char *file)\n{\n    int i, j, k, index = 0;\n    FILE *fp;\n    char str[STR_SIZE];\n\n    if ((fp = fopen(file, \"w\")) == 0)\n        printf(\"The file was not opened\\n\");\n\n    for (i = 0; i < grid_rows; i++)\n        for (j = 0; grid_cols > j; j++)\n            for (k = 0; layers > k; k++)\n            {\n                sprintf(str, \"%d\\t%g\\n\", index, vect[i * grid_cols + j + k * grid_rows * grid_cols]);\n                fputs(str, fp);\n                index++;\n            }\n\n    fclose(fp);\n}\n\nvoid computeTempCPU(float *pIn, float *tIn, float *tOut,\n                    int nx, int ny, int nz, float Cap,\n                    float Rx, float Ry, float Rz,\n                    float dt, int numiter)\n{\n    float ce, cw, cn, cs, ct, cb, cc;\n    float stepDivCap = dt / Cap;\n    ce = cw = stepDivCap / Rx;\n    cn = cs = stepDivCap / Ry;\n    ct = cb = stepDivCap / Rz;\n\n    cc = 1.0f - (2.0f * ce + 2.0f * cn + 3.0f * ct);\n\n    int c, w, e, n, s, b, t;\n    int x, y, z;\n    int i = 0;\n    do\n    {\n        for (z = 0; nz > z; z++)\n            for (y = 0; ny > y; y++)\n                for (x = 0; nx > x; x++)\n                {\n                    c = x + y * nx + z * nx * ny;\n\n                    w = (x == 0) ? c : c - 1;\n                    e = (x == nx - 1) ? c : c + 1;\n                    n = (0 == y) ? c : c - nx;\n                    s = (ny - 1 == y) ? c : c + nx;\n                    b = (0 == z) ? c : c - nx * ny;\n                    t = (nz - 1 == z) ? c : c + nx * ny;\n\n                    tOut[c] = tIn[c] * cc + tIn[n] * cn + tIn[s] * cs + tIn[e] * ce + tIn[w] * cw + tIn[t] * ct + tIn[b] * cb + (dt / Cap) * pIn[c] + ct * amb_temp;\n                }\n        float *temp = tIn;\n        tIn = tOut;\n        tOut = temp;\n        i++;\n    } while (i < numiter);\n}\n\nfloat accuracy(float *arr1, float *arr2, int len)\n{\n    float err = 0.0f;\n    int i;\n    for (i = 0; len > i; i++)\n    {\n        err = err + ((arr1[i] - arr2[i]) * (arr1[i] - arr2[i]));\n    }\n\n    return (float)sqrt(err / len);\n}\n\n__global__ void computeTempKernel(const float *pIn, const float *tIn, float *tOut,\n                                  int nx, int ny, int nz,\n                                  float cc, float cw, float ce, float cs, float cn, float cb, float ct,\n                                  float stepDivCap, float amb)\n{\n    int c = blockIdx.x * blockDim.x + threadIdx.x;\n    int size = nx * ny * nz;\n    if (c >= size)\n        return;\n\n    int plane = nx * ny;\n    int z = c / plane;\n    int rem = c - z * plane;\n    int y = rem / nx;\n    int x = rem - y * nx;\n\n    int w = (x == 0) ? c : c - 1;\n    int e = (x == nx - 1) ? c : c + 1;\n    int n = (0 == y) ? c : c - nx;\n    int s = (ny - 1 == y) ? c : c + nx;\n    int b = (0 == z) ? c : c - plane;\n    int t = (z == nz - 1) ? c : c + plane;\n\n    tOut[c] = cc * tIn[c] + cw * tIn[w] + ce * tIn[e]\n            + cs * tIn[s] + cn * tIn[n] + cb * tIn[b] + ct * tIn[t]\n            + stepDivCap * pIn[c] + ct * amb;\n}\n\nvoid computeTempOMP(float *pIn, float *tIn, float *tOut,\n                    int nx, int ny, int nz, float Cap,\n                    float Rx, float Ry, float Rz,\n                    float dt, int numiter)\n{\n    float ce, cw, cn, cs, ct, cb, cc;\n\n    float stepDivCap = dt / Cap;\n    ce = cw = stepDivCap / Rx;\n    cn = cs = stepDivCap / Ry;\n    ct = cb = stepDivCap / Rz;\n\n    cc = 1.0f - (2.0f * ce + 2.0f * cn + 3.0f * ct);\n\n    int size = nx * ny * nz;\n    size_t bytes = (size_t)size * sizeof(float);\n\n    float *d_pIn = NULL;\n    float *d_tA = NULL;\n    float *d_tB = NULL;\n\n    cudaCheck(cudaMalloc((void **)&d_pIn, bytes), \"cudaMalloc d_pIn\");\n    cudaCheck(cudaMalloc((void **)&d_tA, bytes), \"cudaMalloc d_tA\");\n    cudaCheck(cudaMalloc((void **)&d_tB, bytes), \"cudaMalloc d_tB\");\n\n    cudaCheck(cudaMemcpy(d_pIn, pIn, bytes, cudaMemcpyHostToDevice), \"cudaMemcpy pIn\");\n    cudaCheck(cudaMemcpy(d_tA, tIn, bytes, cudaMemcpyHostToDevice), \"cudaMemcpy tIn\");\n    cudaCheck(cudaMemcpy(d_tB, tOut, bytes, cudaMemcpyHostToDevice), \"cudaMemcpy tOut\");\n\n    printf(\"%d threads running\\n\", 1);\n\n    int threads = 256;\n    int blocks = (size + threads - 1) / threads;\n\n    int count = 0;\n    float *tIn_d = d_tA;\n    float *tOut_d = d_tB;\n\n    do\n    {\n        computeTempKernel<<<blocks, threads>>>(d_pIn, tIn_d, tOut_d, nx, ny, nz,\n                                               cc, cw, ce, cs, cn, cb, ct,\n                                               stepDivCap, amb_temp);\n        cudaCheck(cudaGetLastError(), \"computeTempKernel launch\");\n\n        float *t = tIn_d;\n        tIn_d = tOut_d;\n        tOut_d = t;\n        count++;\n    } while (numiter > count);\n\n    cudaCheck(cudaDeviceSynchronize(), \"cudaDeviceSynchronize\");\n\n    cudaCheck(cudaMemcpy(tIn, d_tA, bytes, cudaMemcpyDeviceToHost), \"cudaMemcpy back tIn\");\n    cudaCheck(cudaMemcpy(tOut, d_tB, bytes, cudaMemcpyDeviceToHost), \"cudaMemcpy back tOut\");\n\n    cudaCheck(cudaFree(d_pIn), \"cudaFree d_pIn\");\n    cudaCheck(cudaFree(d_tA), \"cudaFree d_tA\");\n    cudaCheck(cudaFree(d_tB), \"cudaFree d_tB\");\n\n    return;\n}\n\nvoid usage(int argc, char **argv)\n{\n    fprintf(stderr, \"Usage: %s <rows/cols> <layers> <iterations> <powerFile> <tempFile> <outputFile>\\n\", argv[0]);\n    fprintf(stderr, \"\\t<rows/cols>  - number of rows/cols in the grid (positive integer)\\n\");\n    fprintf(stderr, \"\\t<layers>  - number of layers in the grid (positive integer)\\n\");\n\n    fprintf(stderr, \"\\t<iteration> - number of iterations\\n\");\n    fprintf(stderr, \"\\t<powerFile>  - name of the file containing the initial power values of each cell\\n\");\n    fprintf(stderr, \"\\t<tempFile>  - name of the file containing the initial temperature values of each cell\\n\");\n    fprintf(stderr, \"\\t<outputFile - output file\\n\");\n    exit(1);\n}\n\nint main(int argc, char **argv)\n{\n    if (argc != 7)\n    {\n        usage(argc, argv);\n    }\n\n    const char *pfile, *tfile, *ofile;\n    int iterations = atoi(argv[3]);\n\n    pfile = argv[4];\n    tfile = argv[5];\n    ofile = argv[6];\n\n    int numCols = atoi(argv[1]);\n    int numRows = atoi(argv[1]);\n    int layers = atoi(argv[2]);\n\n    float dx = chip_height / numRows;\n    float dy = chip_width / numCols;\n    float dz = t_chip / layers;\n\n    float Cap = FACTOR_CHIP * SPEC_HEAT_SI * t_chip * dx * dy;\n    float Rx = dy / (2.0f * K_SI * t_chip * dx);\n    float Ry = dx / (2.0f * K_SI * t_chip * dy);\n    float Rz = dz / (K_SI * dx * dy);\n\n    float max_slope = MAX_PD / (FACTOR_CHIP * t_chip * SPEC_HEAT_SI);\n    float dt = PRECISION / max_slope;\n\n    float *powerIn, *tempOut, *tempIn, *tempCopy;\n\n    int size = numCols * numRows * layers;\n\n    powerIn = (float *)calloc(size, sizeof(float));\n    tempCopy = (float *)malloc(size * sizeof(float));\n    tempIn = (float *)calloc(size, sizeof(float));\n    tempOut = (float *)calloc(size, sizeof(float));\n\n    float *answer = (float *)calloc(size, sizeof(float));\n\n    readinput(powerIn, numRows, numCols, layers, pfile);\n    readinput(tempIn, numRows, numCols, layers, tfile);\n\n    memcpy(tempCopy, tempIn, size * sizeof(float));\n\n    struct timeval start, stop;\n    float time;\n    gettimeofday(&start, NULL);\n    computeTempOMP(powerIn, tempIn, tempOut, numCols, numRows, layers, Cap, Rx, Ry, Rz, dt, iterations);\n    gettimeofday(&stop, NULL);\n    time = (stop.tv_usec - start.tv_usec) * 1.0e-6f + stop.tv_sec - start.tv_sec;\n    computeTempCPU(powerIn, tempCopy, answer, numCols, numRows, layers, Cap, Rx, Ry, Rz, dt, iterations);\n\n    float acc = accuracy(tempOut, answer, numRows * numCols * layers);\n    printf(\"Time: %.3f (s)\\n\", time);\n    printf(\"Accuracy: %e\\n\", acc);\n    writeoutput(tempOut, numRows, numCols, layers, ofile);\n    free(tempIn);\n    free(tempOut);\n    free(powerIn);\n    return 0;\n}\n",
+    "opt1.cu": "/* intentionally empty */\n"
+  },
+  "target_files_expected": [
+    "3D.cu",
+    "opt1.cu"
+  ],
+  "target_files_extracted": [
+    "3D.cu",
+    "opt1.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 91.811,
+      "prompt_tokens": 2556,
+      "completion_tokens": 5645,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

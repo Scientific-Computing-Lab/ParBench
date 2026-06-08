@@ -1,0 +1,81 @@
+{
+  "source_spec": "xsbench-xsbench-cuda",
+  "target_spec": "xsbench-xsbench-opencl",
+  "kernel": "xsbench",
+  "model": "azure-gpt-5.4",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1222490178,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-m",
+    "event",
+    "-s",
+    "small",
+    "-G",
+    "nuclide"
+  ],
+  "timestamp": "2026-04-27T01:59:18Z",
+  "prompt_tokens": 28542,
+  "completion_tokens": 4411,
+  "llm_response_time_seconds": 71.483,
+  "build_status": "pass",
+  "build_time_seconds": 0.467,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.447,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "================================================================\nNOTE: Timings are estimated -- use nvprof/nsys/iprof/rocprof for formal analysis\nTotal Time Statistics (OpenCL Init / JIT Compilation + Simulation Kernel)\nRuntime:     0.309 seconds\nLookups:     17,000,000\nLookups/s:   55,016,178\nSimulation Kernel Only Statistics\nRuntime:     0.141 seconds\nLookups/s:   120,567,348\nVerification checksum: 945990 (Valid)\n================================================================================\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "runtime": {
+      "value": 0.141,
+      "unit": "seconds"
+    }
+  },
+  "baseline_wall_time_seconds": 0.44,
+  "translated_wall_time_seconds": 0.447,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.9843,
+  "translated_files": {
+    "kernel.cl": "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n\n#define UNIONIZED 0\n#define NUCLIDE 1\n#define HASH 2\n\n#define HISTORY_BASED 1\n#define EVENT_BASED 2\n\n#define NONE 0\n#define READ 1\n#define WRITE 2\n\n#define STARTING_SEED 1070UL\n\ntypedef struct{\n\tdouble energy;\n\tdouble total_xs;\n\tdouble elastic_xs;\n\tdouble absorbtion_xs;\n\tdouble fission_xs;\n\tdouble nu_fission_xs;\n} NuclideGridPoint;\n\ntypedef struct{\n\tint nthreads;\n\tlong n_isotopes;\n\tlong n_gridpoints;\n\tint lookups;\n\tint HM;\n\tint grid_type;\n\tint hash_bins;\n\tint particles;\n\tint simulation_method;\n\tint binary_mode;\n\tint kernel_id;\n\tint platform_id;\n\tint device_id;\n} Inputs;\n\nstatic inline long grid_search(long n, double quarry, __global const double *A)\n{\n\tlong lowerLimit = 0;\n\tlong upperLimit = n - 1;\n\tlong examinationPoint;\n\tlong length = upperLimit - lowerLimit;\n\n\twhile( length > 1 )\n\t{\n\t\texaminationPoint = lowerLimit + ( length / 2 );\n\t\tif( A[examinationPoint] > quarry )\n\t\t\tupperLimit = examinationPoint;\n\t\telse\n\t\t\tlowerLimit = examinationPoint;\n\n\t\tlength = upperLimit - lowerLimit;\n\t}\n\n\treturn lowerLimit;\n}\n\nstatic inline long grid_search_nuclide(long n, double quarry, __global const NuclideGridPoint *A, long low, long high)\n{\n\tlong lowerLimit = low;\n\tlong upperLimit = high;\n\tlong examinationPoint;\n\tlong length = upperLimit - lowerLimit;\n\n\twhile( length > 1 )\n\t{\n\t\texaminationPoint = lowerLimit + ( length / 2 );\n\t\tif( A[examinationPoint].energy > quarry )\n\t\t\tupperLimit = examinationPoint;\n\t\telse\n\t\t\tlowerLimit = examinationPoint;\n\n\t\tlength = upperLimit - lowerLimit;\n\t}\n\n\treturn lowerLimit;\n}\n\nstatic inline double LCG_random_double(ulong *seed)\n{\n\tconst ulong m = 9223372036854775808UL;\n\tconst ulong a = 2806196910506780709UL;\n\tconst ulong c = 1UL;\n\t*seed = (a * (*seed) + c) % m;\n\treturn (double)(*seed) / (double)m;\n}\n\nstatic inline ulong fast_forward_LCG(ulong seed, ulong n)\n{\n\tconst ulong m = 9223372036854775808UL;\n\tulong a = 2806196910506780709UL;\n\tulong c = 1UL;\n\n\tn = n % m;\n\n\tulong a_new = 1UL;\n\tulong c_new = 0UL;\n\n\twhile(n > 0UL)\n\t{\n\t\tif(n & 1UL)\n\t\t{\n\t\t\ta_new *= a;\n\t\t\tc_new = c_new * a + c;\n\t\t}\n\t\tc *= (a + 1UL);\n\t\ta *= a;\n\t\tn >>= 1UL;\n\t}\n\n\treturn (a_new * seed + c_new) % m;\n}\n\nstatic inline int pick_mat(ulong *seed)\n{\n\tconst double dist[12] = {\n\t\t0.140, 0.052, 0.275, 0.134, 0.154, 0.064,\n\t\t0.066, 0.055, 0.008, 0.015, 0.025, 0.013\n\t};\n\n\tdouble roll = LCG_random_double(seed);\n\n\tfor( int i = 0; i < 12; i++ )\n\t{\n\t\tdouble running = 0.0;\n\t\tfor( int j = i; j > 0; j-- )\n\t\t\trunning += dist[j];\n\t\tif( roll < running )\n\t\t\treturn i;\n\t}\n\n\treturn 0;\n}\n\nstatic inline void calculate_micro_xs(\n\tdouble p_energy,\n\tint nuc,\n\tlong n_isotopes,\n\tlong n_gridpoints,\n\t__global const double *egrid,\n\t__global const int *index_data,\n\t__global const NuclideGridPoint *nuclide_grids,\n\tlong idx,\n\tdouble *xs_vector,\n\tint grid_type,\n\tint hash_bins)\n{\n\tdouble f;\n\t__global const NuclideGridPoint *low;\n\t__global const NuclideGridPoint *high;\n\n\tif( grid_type == NUCLIDE )\n\t{\n\t\tidx = grid_search_nuclide(n_gridpoints, p_energy, &nuclide_grids[nuc * n_gridpoints], 0, n_gridpoints - 1);\n\n\t\tif( idx == n_gridpoints - 1 )\n\t\t\tlow = &nuclide_grids[nuc * n_gridpoints + idx - 1];\n\t\telse\n\t\t\tlow = &nuclide_grids[nuc * n_gridpoints + idx];\n\t}\n\telse if( grid_type == UNIONIZED )\n\t{\n\t\tif( index_data[idx * n_isotopes + nuc] == n_gridpoints - 1 )\n\t\t\tlow = &nuclide_grids[nuc * n_gridpoints + index_data[idx * n_isotopes + nuc] - 1];\n\t\telse\n\t\t\tlow = &nuclide_grids[nuc * n_gridpoints + index_data[idx * n_isotopes + nuc]];\n\t}\n\telse\n\t{\n\t\tint u_low = index_data[idx * n_isotopes + nuc];\n\n\t\tint u_high;\n\t\tif( idx == hash_bins - 1 )\n\t\t\tu_high = (int)n_gridpoints - 1;\n\t\telse\n\t\t\tu_high = index_data[(idx + 1) * n_isotopes + nuc] + 1;\n\n\t\tdouble e_low = nuclide_grids[nuc * n_gridpoints + u_low].energy;\n\t\tdouble e_high = nuclide_grids[nuc * n_gridpoints + u_high].energy;\n\t\tint lower;\n\t\tif( p_energy <= e_low )\n\t\t\tlower = 0;\n\t\telse if( p_energy >= e_high )\n\t\t\tlower = (int)n_gridpoints - 1;\n\t\telse\n\t\t\tlower = (int)grid_search_nuclide(n_gridpoints, p_energy, &nuclide_grids[nuc * n_gridpoints], u_low, u_high);\n\n\t\tif( lower == n_gridpoints - 1 )\n\t\t\tlow = &nuclide_grids[nuc * n_gridpoints + lower - 1];\n\t\telse\n\t\t\tlow = &nuclide_grids[nuc * n_gridpoints + lower];\n\t}\n\n\thigh = low + 1;\n\n\tf = (high->energy - p_energy) / (high->energy - low->energy);\n\n\txs_vector[0] = high->total_xs - f * (high->total_xs - low->total_xs);\n\txs_vector[1] = high->elastic_xs - f * (high->elastic_xs - low->elastic_xs);\n\txs_vector[2] = high->absorbtion_xs - f * (high->absorbtion_xs - low->absorbtion_xs);\n\txs_vector[3] = high->fission_xs - f * (high->fission_xs - low->fission_xs);\n\txs_vector[4] = high->nu_fission_xs - f * (high->nu_fission_xs - low->nu_fission_xs);\n}\n\nstatic inline void calculate_macro_xs(\n\tdouble p_energy,\n\tint mat,\n\tlong n_isotopes,\n\tlong n_gridpoints,\n\t__global const int *num_nucs,\n\t__global const double *concs,\n\t__global const double *egrid,\n\t__global const int *index_data,\n\t__global const NuclideGridPoint *nuclide_grids,\n\t__global const int *mats,\n\tdouble *macro_xs_vector,\n\tint grid_type,\n\tint hash_bins,\n\tint max_num_nucs)\n{\n\tint p_nuc;\n\tlong idx = -1;\n\tdouble conc;\n\n\tfor( int k = 0; k < 5; k++ )\n\t\tmacro_xs_vector[k] = 0.0;\n\n\tif( grid_type == UNIONIZED )\n\t\tidx = grid_search(n_isotopes * n_gridpoints, p_energy, egrid);\n\telse if( grid_type == HASH )\n\t{\n\t\tdouble du = 1.0 / (double)hash_bins;\n\t\tidx = (long)(p_energy / du);\n\t}\n\n\tfor( int j = 0; j < num_nucs[mat]; j++ )\n\t{\n\t\tdouble xs_vector[5];\n\t\tp_nuc = mats[mat * max_num_nucs + j];\n\t\tconc = concs[mat * max_num_nucs + j];\n\t\tcalculate_micro_xs(\n\t\t\tp_energy,\n\t\t\tp_nuc,\n\t\t\tn_isotopes,\n\t\t\tn_gridpoints,\n\t\t\tegrid,\n\t\t\tindex_data,\n\t\t\tnuclide_grids,\n\t\t\tidx,\n\t\t\txs_vector,\n\t\t\tgrid_type,\n\t\t\thash_bins\n\t\t);\n\t\tfor( int k = 0; k < 5; k++ )\n\t\t\tmacro_xs_vector[k] += xs_vector[k] * conc;\n\t}\n}\n\n__kernel void macro_xs_lookup_kernel(\n\tInputs in,\n\tint max_num_nucs,\n\t__global const int *num_nucs,\n\t__global const double *concs,\n\t__global const double *unionized_energy_array,\n\t__global const int *index_grid,\n\t__global const NuclideGridPoint *nuclide_grid,\n\t__global const int *mats,\n\t__global int *verification)\n{\n\tconst int i = (int)get_global_id(0);\n\n\tif( i >= in.lookups )\n\t\treturn;\n\n\tulong seed = STARTING_SEED;\n\tseed = fast_forward_LCG(seed, 2UL * (ulong)i);\n\n\tdouble p_energy = LCG_random_double(&seed);\n\tint mat = pick_mat(&seed);\n\n\tdouble macro_xs_vector[5];\n\tcalculate_macro_xs(\n\t\tp_energy,\n\t\tmat,\n\t\tin.n_isotopes,\n\t\tin.n_gridpoints,\n\t\tnum_nucs,\n\t\tconcs,\n\t\tunionized_energy_array,\n\t\tindex_grid,\n\t\tnuclide_grid,\n\t\tmats,\n\t\tmacro_xs_vector,\n\t\tin.grid_type,\n\t\tin.hash_bins,\n\t\tmax_num_nucs\n\t);\n\n\tdouble max = -1.0;\n\tint max_idx = 0;\n\tfor( int j = 0; j < 5; j++ )\n\t{\n\t\tif( macro_xs_vector[j] > max )\n\t\t{\n\t\t\tmax = macro_xs_vector[j];\n\t\t\tmax_idx = j;\n\t\t}\n\t}\n\n\tverification[i] = max_idx + 1;\n}\n"
+  },
+  "target_files_expected": [
+    "kernel.cl"
+  ],
+  "target_files_extracted": [
+    "kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 71.483,
+      "prompt_tokens": 28542,
+      "completion_tokens": 4411,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

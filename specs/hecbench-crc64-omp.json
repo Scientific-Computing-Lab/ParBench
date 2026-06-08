@@ -1,0 +1,184 @@
+{
+  "spec_version": "1.0.0",
+  "identity": {
+    "kernel_name": "crc64",
+    "parallel_api": "omp",
+    "unique_id": "hecbench-crc64-omp",
+    "source_suite": "hecbench"
+  },
+  "provenance": {
+    "repository": {
+      "url": "https://github.com/zjin-lcf/HeCBench",
+      "commit": "archive-download",
+      "branch": "master"
+    },
+    "repo_root": "HeCBench-master/",
+    "source_path": "src/crc64-omp",
+    "license": "MIT"
+  },
+  "files": {
+    "prompt_payload": [
+      "CRC64.cpp",
+      "CRC64Test.cpp"
+    ],
+    "support_files": [
+      "Makefile",
+      "Makefile.aomp",
+      "Makefile.nvc",
+      "CMakeLists.txt",
+      "CRC64.h"
+    ],
+    "verification_only": [],
+    "translation_targets": [
+      "CRC64.cpp",
+      "CRC64Test.cpp"
+    ]
+  },
+  "implementation": {
+    "api": "omp",
+    "api_version": null,
+    "language": "C++",
+    "language_standard": "C++17"
+  },
+  "build": {
+    "environment": {
+      "preferred": "system",
+      "conda": null,
+      "system": {
+        "dependencies": [
+          "GCC >= 9.0 with OpenMP support"
+        ]
+      }
+    },
+    "build_system": "make",
+    "working_directory": "src/crc64-omp",
+    "commands": {
+      "configure": null,
+      "build": "make -f Makefile.aomp CC=g++ DEVICE=cpu",
+      "clean": "make -f Makefile.aomp clean"
+    },
+    "variables": null,
+    "outputs": {
+      "executable": "main"
+    }
+  },
+  "run": {
+    "executable": "./main",
+    "default_arguments": [
+      "10",
+      "5",
+      "33554432"
+    ],
+    "timeout_seconds": 300,
+    "environment_variables": null,
+    "input_configurations": {
+      "correctness": {
+        "arguments": [
+          "1",
+          "1",
+          "33554432"
+        ],
+        "description": "Single iteration for correctness; verifies CRC-64 checksums match CPU reference",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      },
+      "performance": {
+        "arguments": [
+          "10",
+          "5",
+          "33554432"
+        ],
+        "description": "10 iterations, 5 passes for performance measurement",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      }
+    }
+  },
+  "verification": {
+    "method": "self_checking",
+    "strategies": [
+      {
+        "type": "stdout_pattern",
+        "pattern": "(?i)pass",
+        "description": "CRC-64 checksum matches CPU reference (case-insensitive)"
+      },
+      {
+        "type": "exit_code",
+        "expected": 0,
+        "description": "Process exits cleanly"
+      }
+    ],
+    "floating_point": null
+  },
+  "performance": {
+    "metrics": [
+      {
+        "name": "throughput",
+        "extraction": {
+          "type": "regex",
+          "pattern": "([\\d.eE+-]+)\\s+MB/s",
+          "capture_group": 1
+        },
+        "unit": "MB/s"
+      }
+    ],
+    "warmup_runs": 1,
+    "measurement_runs": 5
+  },
+  "hardware": {
+    "target": "cpu",
+    "requirements": null,
+    "reference_platform": {
+      "platform_id": "rtx4070-r9-7900x",
+      "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+      },
+      "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+      },
+      "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+      }
+    }
+  },
+  "baseline_results": {
+    "reference_platform": "rtx4070-r9-7900x",
+    "timestamp": "2026-03-03T18:52:35Z",
+    "configurations": {
+      "correctness": {
+        "status": "pass",
+        "exit_code": 0,
+        "stdout_snippet": "Running 1 tests with seed 1\n1 34951314 pass pass\n-nan MB/s\n",
+        "wall_time_seconds": 0.197
+      }
+    }
+  },
+  "metadata": {
+    "description": "CRC-64 cyclic redundancy check computation on GPU. Processes data blocks in parallel using lookup tables, verified against CPU CRC-64 reference via PASS/FAIL comparison.",
+    "domain": "error detection / hashing",
+    "complexity": "O(n)",
+    "tags": [
+      "crc64",
+      "cyclic-redundancy-check",
+      "error-detection",
+      "checksum"
+    ],
+    "multi_file": true,
+    "translation_complexity": "multi_to_multi"
+  }
+}

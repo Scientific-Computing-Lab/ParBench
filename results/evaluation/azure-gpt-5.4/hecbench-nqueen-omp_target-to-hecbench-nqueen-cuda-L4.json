@@ -1,0 +1,78 @@
+{
+  "source_spec": "hecbench-nqueen-omp_target",
+  "target_spec": "hecbench-nqueen-cuda",
+  "kernel": "nqueen",
+  "model": "azure-gpt-5.4",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1434146904,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "15",
+    "7",
+    "1"
+  ],
+  "timestamp": "2026-04-27T08:10:56Z",
+  "prompt_tokens": 2303,
+  "completion_tokens": 4464,
+  "llm_response_time_seconds": 110.625,
+  "build_status": "pass",
+  "build_time_seconds": 0.711,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.32,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "\n### Initial depth: 7 - Size: 15:\n### Regular BP-DFS search. ###\nAverage kernel execution time: 0.107360 (s)\n\nTree size: 2466109\nNumber of solutions found: 2279184 \nTree size: 171129071\nPASS\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 0.10736,
+      "unit": "s"
+    }
+  },
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.32,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <stdint.h>\n#include <chrono>\n#include <cuda_runtime.h>\n\n#define _QUEENS_BLOCK_SIZE_ 128\n#define _EMPTY_ -1\n\ntypedef struct queen_root {\n  unsigned int control;\n  int8_t board[12];\n} QueenRoot;\n\ninline void prefixesHandleSol(QueenRoot *elem_11, unsigned int item_3,\n                              const int8_t *x_17, int elem_15, int v_45)\n{\n  elem_11[v_45].control = item_3;\n  for (int i = 0; elem_15 > i; ++i)\n    elem_11[v_45].board[i] = x_17[i];\n}\n\ninline bool MCstillLegal(const int8_t *var_28, const int r)\n{\n  for (int i = 0; r > i; ++i)\n    if (var_28[r] == var_28[i]) return false;\n\n  int val_48 = var_28[r];\n  int v_35 = var_28[r];\n  for (int i = r - 1; 0 <= i; --i) {\n    --val_48;\n    ++v_35;\n    if (val_48 == var_28[i] || v_35 == var_28[i]) return false;\n  }\n  return true;\n}\n\n__device__ bool queens_stillLegal(const int8_t *elem_2, const int r)\n{\n  bool v_49 = true;\n\n  for (int i = 0; r > i; ++i)\n    if (elem_2[r] == elem_2[i]) v_49 = false;\n\n  int tmp_14 = elem_2[r];\n  int item_40 = elem_2[r];\n  for (int i = r - 1; 0 <= i; --i) {\n    --tmp_14;\n    ++item_40;\n    if (tmp_14 == elem_2[i] || item_40 == elem_2[i]) v_49 = false;\n  }\n  return v_49;\n}\n\n__global__ void BP_queens_root_dfs_kernel(\n    int N, unsigned int v_16, int data_36,\n    const QueenRoot *__restrict__ tmp_10,\n    unsigned long long *__restrict__ val_34,\n    unsigned long long *__restrict__ elem_26)\n{\n  unsigned int elem_29 = blockIdx.x * blockDim.x + threadIdx.x;\n  if (elem_29 >= v_16) return;\n\n  unsigned int var_31 = 0;\n  unsigned int var_38 = 0;\n  int8_t v_33[20];\n  int var_43 = N;\n  int i, x_46;\n  unsigned long long item_30 = 0ULL;\n  int v_39 = data_36;\n  unsigned long long v_41 = 0ULL;\n\n#pragma unroll 2\n  for (i = 0; var_43 > i; ++i) {\n    v_33[i] = _EMPTY_;\n  }\n\n  var_31 = tmp_10[elem_29].control;\n\n#pragma unroll 2\n  for (i = 0; v_39 > i; ++i)\n    v_33[i] = tmp_10[elem_29].board[i];\n\n  x_46 = v_39;\n\n  do {\n    v_33[x_46]++;\n    var_38 = 0;\n    var_38 = var_38 | (1u << v_33[x_46]);\n    if (var_43 == v_33[x_46]) {\n      v_33[x_46] = _EMPTY_;\n    } else if (!(var_31 & var_38) && queens_stillLegal(v_33, x_46)) {\n      ++v_41;\n      var_31 = var_31 | (1ULL << v_33[x_46]);\n      x_46++;\n      if (var_43 == x_46) {\n        ++item_30;\n      } else continue;\n    } else continue;\n    x_46--;\n    var_31 = var_31 & (~(1ULL << v_33[x_46]));\n  } while (v_39 <= x_46);\n\n  elem_26[elem_29] = item_30;\n  val_34[elem_29] = v_41;\n}\n\nvoid BP_queens_root_dfs(\n    int N, unsigned int v_16, int data_36,\n    const QueenRoot *__restrict__ tmp_10_d,\n    unsigned long long *__restrict__ val_34_d,\n    unsigned long long *__restrict__ elem_26_d)\n{\n  if (v_16 == 0) return;\n  dim3 block(_QUEENS_BLOCK_SIZE_);\n  dim3 grid((v_16 + block.x - 1) / block.x);\n  BP_queens_root_dfs_kernel<<<grid, block>>>(N, v_16, data_36, tmp_10_d, val_34_d, elem_26_d);\n}\n\nunsigned long long BP_queens_prefixes(int size, int elem_21,\n                                      unsigned long long *x_1,\n                                      QueenRoot *x_0)\n{\n  unsigned int data_42 = 0;\n  int val_19 = 0;\n  int8_t var_7[20];\n  int i, tmp_4;\n  unsigned long long var_23 = 0ULL;\n  unsigned long long elem_9 = 0;\n\n  for (i = 0; size > i; ++i) {\n    var_7[i] = -1;\n  }\n\n  tmp_4 = 0;\n\n  do {\n    var_7[tmp_4]++;\n    val_19 = 0;\n    val_19 = val_19 | (1 << var_7[tmp_4]);\n\n    if (size == var_7[tmp_4]) {\n      var_7[tmp_4] = _EMPTY_;\n    } else if (MCstillLegal(var_7, tmp_4) && !(data_42 & val_19)) {\n      data_42 = data_42 | (1ULL << var_7[tmp_4]);\n      tmp_4++;\n      ++var_23;\n      if (elem_21 == tmp_4) {\n        prefixesHandleSol(x_0, data_42, var_7, elem_21, (int)elem_9);\n        elem_9++;\n      } else continue;\n    } else continue;\n\n    tmp_4--;\n    data_42 = data_42 & (~(1ULL << var_7[tmp_4]));\n\n  } while (0 <= tmp_4);\n\n  *x_1 = var_23;\n\n  return elem_9;\n}\n\nvoid nqueens(short size, int data_22, unsigned int n_explorers, QueenRoot *root_prefixes_h,\n             unsigned long long *tmp_47, unsigned long long *elem_13, const int item_8)\n{\n  printf(\"\\n### Regular BP-DFS search. ###\\n\");\n\n  QueenRoot *root_prefixes_d = nullptr;\n  unsigned long long *tmp_47_d = nullptr;\n  unsigned long long *elem_13_d = nullptr;\n\n  if (n_explorers > 0) {\n    cudaMalloc((void **)&root_prefixes_d, sizeof(QueenRoot) * (size_t)n_explorers);\n    cudaMalloc((void **)&tmp_47_d, sizeof(unsigned long long) * (size_t)n_explorers);\n    cudaMalloc((void **)&elem_13_d, sizeof(unsigned long long) * (size_t)n_explorers);\n    cudaMemcpy(root_prefixes_d, root_prefixes_h, sizeof(QueenRoot) * (size_t)n_explorers, cudaMemcpyHostToDevice);\n  }\n\n  auto v_25 = std::chrono::steady_clock::now();\n\n  for (int i = 0; item_8 > i; i++) {\n    BP_queens_root_dfs(size,\n                       n_explorers,\n                       data_22,\n                       root_prefixes_d,\n                       tmp_47_d,\n                       elem_13_d);\n    cudaDeviceSynchronize();\n  }\n\n  auto end = std::chrono::steady_clock::now();\n  auto val_27 = std::chrono::duration_cast<std::chrono::nanoseconds>(end - v_25).count();\n  printf(\"Average kernel execution time: %f (s)\\n\", (val_27 * 1e-9f) / item_8);\n\n  if (n_explorers > 0) {\n    cudaMemcpy(tmp_47, tmp_47_d, sizeof(unsigned long long) * (size_t)n_explorers, cudaMemcpyDeviceToHost);\n    cudaMemcpy(elem_13, elem_13_d, sizeof(unsigned long long) * (size_t)n_explorers, cudaMemcpyDeviceToHost);\n  }\n\n  cudaFree(root_prefixes_d);\n  cudaFree(tmp_47_d);\n  cudaFree(elem_13_d);\n}\n\nint main(int argc, char *argv[])\n{\n  if (4 != argc) {\n    printf(\"Usage: %s <size> <initial depth> <repeat>\\n\", argv[0]);\n    return 1;\n  }\n  const short size = atoi(argv[1]);\n  const int tmp_5 = atoi(argv[2]);\n  const int x_20 = atoi(argv[3]);\n  printf(\"\\n### Initial depth: %d - Size: %d:\", tmp_5, size);\n\n  unsigned long long data_24 = 0ULL;\n  unsigned long long elem_6 = 0ULL;\n  unsigned int var_32 = 75580635;\n\n  QueenRoot *elem_37 = (QueenRoot *)malloc(sizeof(QueenRoot) * (size_t)var_32);\n  unsigned long long *elem_44 = (unsigned long long *)malloc(sizeof(unsigned long long) * (size_t)var_32);\n  unsigned long long *v_18 = (unsigned long long *)malloc(sizeof(unsigned long long) * (size_t)var_32);\n\n  if (NULL == elem_37 || NULL == elem_44 || NULL == v_18) {\n    printf(\"Error: host out of memory\\n\");\n    if (elem_37) free(elem_37);\n    if (elem_44) free(elem_44);\n    if (v_18) free(v_18);\n    return 1;\n  }\n\n  unsigned long long var_12 = BP_queens_prefixes(size, tmp_5, &data_24, elem_37);\n\n  nqueens(size, tmp_5, (unsigned int)var_12, elem_37, elem_44, v_18, x_20);\n\n  printf(\"\\nTree size: %llu\", data_24);\n\n  for (unsigned long long i = 0; var_12 > i; ++i) {\n    if (0 < v_18[i])\n      elem_6 = elem_6 + (v_18[i]);\n    if (0 < elem_44[i])\n      data_24 = data_24 + (elem_44[i]);\n  }\n\n  printf(\"\\nNumber of solutions found: %llu \\nTree size: %llu\\n\", elem_6, data_24);\n\n  if (15 == size && 7 == tmp_5) {\n    if (2279184 == elem_6 && 171129071 == data_24)\n      printf(\"PASS\\n\");\n    else\n      printf(\"FAIL\\n\");\n  }\n\n  free(elem_37);\n  free(elem_44);\n  free(v_18);\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cu"
+  ],
+  "target_files_extracted": [
+    "main.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 110.625,
+      "prompt_tokens": 2303,
+      "completion_tokens": 4464,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,204 @@
+{
+  "spec_version": "1.0.0",
+  "identity": {
+    "kernel_name": "triad",
+    "parallel_api": "omp",
+    "unique_id": "hecbench-triad-omp",
+    "source_suite": "hecbench"
+  },
+  "provenance": {
+    "repository": {
+      "url": "https://github.com/zjin-lcf/HeCBench",
+      "commit": "archive-download",
+      "branch": "master"
+    },
+    "repo_root": "HeCBench-master/",
+    "source_path": "src/triad-omp",
+    "license": "MIT"
+  },
+  "files": {
+    "prompt_payload": [
+      "main.cpp",
+      "triad.cpp"
+    ],
+    "support_files": [
+      "Makefile",
+      "Makefile.aomp",
+      "Makefile.nvc",
+      "CMakeLists.txt",
+      "LICENSE",
+      "Option.cpp",
+      "Option.h",
+      "OptionParser.cpp",
+      "OptionParser.h",
+      "Timer.cpp",
+      "Timer.h",
+      "Utility.h",
+      "config.h"
+    ],
+    "verification_only": [],
+    "translation_targets": [
+      "main.cpp",
+      "triad.cpp"
+    ]
+  },
+  "implementation": {
+    "api": "omp",
+    "api_version": null,
+    "language": "C++",
+    "language_standard": "C++17"
+  },
+  "build": {
+    "environment": {
+      "preferred": "system",
+      "conda": null,
+      "system": {
+        "dependencies": [
+          "GCC >= 9.0 with OpenMP support"
+        ]
+      }
+    },
+    "build_system": "make",
+    "working_directory": "src/triad-omp",
+    "commands": {
+      "configure": null,
+      "build": "make -f Makefile.aomp CC=g++ DEVICE=cpu",
+      "clean": "make -f Makefile.aomp clean"
+    },
+    "variables": null,
+    "outputs": {
+      "executable": "triad"
+    }
+  },
+  "run": {
+    "executable": "./triad",
+    "default_arguments": [
+      "--passes",
+      "100",
+      "-v"
+    ],
+    "timeout_seconds": 300,
+    "environment_variables": null,
+    "input_configurations": {
+      "correctness": {
+        "arguments": [
+          "--passes",
+          "1",
+          "-v"
+        ],
+        "description": "Single pass for correctness; verifies element-wise triad results",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      },
+      "performance": {
+        "arguments": [
+          "--passes",
+          "100",
+          "-v"
+        ],
+        "description": "100 passes for performance measurement",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      }
+    }
+  },
+  "verification": {
+    "method": "self_checking",
+    "strategies": [
+      {
+        "type": "stdout_pattern",
+        "pattern": "PASS",
+        "description": "Element-wise comparison of GPU triad result vs CPU reference"
+      },
+      {
+        "type": "exit_code",
+        "expected": 0,
+        "description": "Process exits cleanly"
+      }
+    ],
+    "floating_point": {
+      "tolerance": 1e-06,
+      "tolerance_type": "relative",
+      "note": "Element-wise comparison of floating-point triad results"
+    }
+  },
+  "performance": {
+    "metrics": [
+      {
+        "name": "triad_gflops",
+        "extraction": {
+          "type": "regex",
+          "pattern": "Average TriadFlops\\s+([\\d.eE+-]+)\\s+GFLOPS/s",
+          "capture_group": 1
+        },
+        "unit": "GFLOPS/s"
+      }
+    ],
+    "warmup_runs": 1,
+    "measurement_runs": 5
+  },
+  "hardware": {
+    "target": "cpu",
+    "requirements": null,
+    "reference_platform": {
+      "platform_id": "rtx4070-r9-7900x",
+      "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+      },
+      "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+      },
+      "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+      }
+    }
+  },
+  "baseline_results": {
+    "reference_platform": "rtx4070-r9-7900x",
+    "timestamp": "2026-03-03T18:52:35Z",
+    "configurations": {
+      "correctness": {
+        "status": "pass",
+        "exit_code": 0,
+        "stdout_snippet": ">> Executing Triad with vectors of length 4194304 and block size of 16384 elements.\nBlock: 64KB\nAverage TriadFlops 167.057 GFLOPS/s\nAverage TriadBdwth 1002.34 GB/s\nPASS\n>> Executing Triad with vectors of length 4194304 and block size of 32768 elements.\nBlock: 128KB\nAverage TriadFlops 247.795 GFLOPS/s\nAverage TriadBdwth 1486.77 GB/s\nPASS\n>> Executing Triad with vectors of length 4194304 and block size of 65536 elements.\nBlock: 256KB\nAverage TriadFlops 435.41 GFLOPS/s\nAverage TriadBdwth 2612.46 GB",
+        "wall_time_seconds": 0.361
+      },
+      "performance": {
+        "status": "pass",
+        "wall_time_seconds": 0.361,
+        "metrics": {
+          "triad_gflops_GFLOPS/s": 167.057
+        }
+      }
+    }
+  },
+  "metadata": {
+    "description": "STREAM Triad memory bandwidth benchmark on GPU. Performs a[i] = b[i] + scalar*c[i] to measure sustained memory throughput, verified via element-wise comparison with CPU reference.",
+    "domain": "memory bandwidth",
+    "complexity": "O(n)",
+    "tags": [
+      "triad",
+      "stream",
+      "memory-bandwidth",
+      "benchmark",
+      "throughput"
+    ],
+    "multi_file": true,
+    "translation_complexity": "multi_to_multi"
+  }
+}

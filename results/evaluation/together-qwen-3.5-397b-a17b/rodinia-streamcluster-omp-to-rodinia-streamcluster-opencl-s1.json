@@ -1,0 +1,81 @@
+{
+  "source_spec": "rodinia-streamcluster-omp",
+  "target_spec": "rodinia-streamcluster-opencl",
+  "kernel": "streamcluster",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 872407046,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "10",
+    "20",
+    "256",
+    "65536",
+    "65536",
+    "1000",
+    "none",
+    "output.txt",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-22T02:17:08Z",
+  "prompt_tokens": 28382,
+  "completion_tokens": 1753,
+  "llm_response_time_seconds": 18.559,
+  "build_status": "pass",
+  "build_time_seconds": 0.742,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.15,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "           ^\n<kernel>:106:11: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    char* dest,\n          ^\n<kernel>:116:18: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    const float* src,\n                 ^\n<kernel>:117:12: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    float* dest,\n           ^\n\n",
+  "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Building Program (clBuildProgram)\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 2.092,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "Kernels.cl": "// OpenCL kernel for streamcluster pgain computation\n\n// Kernel to compute distance costs and update work memory\n__kernel void pgain_kernel(\n    const Point_Struct* p,\n    const float* coord,\n    float* work_mem,\n    const int* center_table,\n    char* switch_membership,\n    local float* local_coord,\n    int num,\n    int dim,\n    long x,\n    int K\n) {\n    int i = get_global_id(0);\n    \n    if (i >= num) return;\n    \n    // Load point x coordinates to local memory\n    for (int d = 0; d < dim; d++) {\n        local_coord[d] = coord[d * num + x];\n    }\n    \n    // Calculate distance from point i to point x\n    float x_cost = 0.0f;\n    for (int d = 0; d < dim; d++) {\n        float diff = coord[d * num + i] - local_coord[d];\n        x_cost += diff * diff;\n    }\n    x_cost *= p[i].weight;\n    \n    float current_cost = p[i].cost;\n    \n    if (x_cost < current_cost) {\n        switch_membership[i] = 1;\n        work_mem[i * (K + 1) + K] += x_cost - current_cost;\n    } else {\n        int assign = p[i].assign;\n        int center_idx = center_table[assign];\n        work_mem[i * (K + 1) + center_idx] += current_cost - x_cost;\n    }\n}\n\n// Kernel to initialize work memory\n__kernel void init_work_mem_kernel(\n    float* work_mem,\n    int num,\n    int K\n) {\n    int i = get_global_id(0);\n    if (i >= num * (K + 1)) return;\n    work_mem[i] = 0.0f;\n}\n\n// Kernel to initialize switch membership\n__kernel void init_switch_kernel(\n    char* switch_membership,\n    int num\n) {\n    int i = get_global_id(0);\n    if (i >= num) return;\n    switch_membership[i] = 0;\n}\n\n// Kernel to copy coordinates to device\n__kernel void copy_coord_kernel(\n    const float* src,\n    float* dest,\n    int num,\n    int dim\n) {\n    int idx = get_global_id(0);\n    int total = num * dim;\n    if (idx >= total) return;\n    dest[idx] = src[idx];\n}\n\n// Kernel to copy point structures to device\n__kernel void copy_point_kernel(\n    const Point_Struct* src,\n    Point_Struct* dest,\n    int num\n) {\n    int i = get_global_id(0);\n    if (i >= num) return;\n    dest[i].weight = src[i].weight;\n    dest[i].assign = src[i].assign;\n    dest[i].cost = src[i].cost;\n}\n\n// Kernel to copy center table to device\n__kernel void copy_center_table_kernel(\n    const int* src,\n    int* dest,\n    int num\n) {\n    int i = get_global_id(0);\n    if (i >= num) return;\n    dest[i] = src[i];\n}\n\n// Kernel to copy switch membership to device\n__kernel void copy_switch_kernel(\n    const char* src,\n    char* dest,\n    int num\n) {\n    int i = get_global_id(0);\n    if (i >= num) return;\n    dest[i] = src[i];\n}\n\n// Kernel to copy work memory to host\n__kernel void copy_work_mem_kernel(\n    const float* src,\n    float* dest,\n    int total\n) {\n    int i = get_global_id(0);\n    if (i >= total) return;\n    dest[i] = src[i];\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 18.559,
+      "prompt_tokens": 28382,
+      "completion_tokens": 1753,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "           ^\n<kernel>:106:11: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    char* dest,\n          ^\n<kernel>:116:18: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    const float* src,\n                 ^\n<kernel>:117:12: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    float* dest,\n           ^\n\n",
+      "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Building Program (clBuildProgram)\n",
+      "extraction_fail": null
+    }
+  ]
+}

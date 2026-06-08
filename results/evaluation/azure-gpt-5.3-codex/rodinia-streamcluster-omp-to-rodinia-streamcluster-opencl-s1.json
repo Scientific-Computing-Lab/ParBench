@@ -1,0 +1,81 @@
+{
+  "source_spec": "rodinia-streamcluster-omp",
+  "target_spec": "rodinia-streamcluster-opencl",
+  "kernel": "streamcluster",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 872407046,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "10",
+    "20",
+    "256",
+    "65536",
+    "65536",
+    "1000",
+    "none",
+    "output.txt",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-30T04:23:35Z",
+  "prompt_tokens": 26083,
+  "completion_tokens": 1984,
+  "llm_response_time_seconds": 25.442,
+  "build_status": "pass",
+  "build_time_seconds": 0.739,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.193,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "",
+  "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Creating Kernel (clCreateKernel) \"memset_kernel\"\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 2.092,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "Kernels.cl": "typedef struct {\n    float weight;\n    long assign;\n    float cost;\n} Point_Struct;\n\n/* kernel 0 (placeholder to preserve kernel indexing expected by host code) */\n__kernel void sc_placeholder_kernel(__global int *dummy) {\n    size_t gid = get_global_id(0);\n    if (dummy && gid == 0) {\n        dummy[0] = dummy[0];\n    }\n}\n\n/* kernel 1: pgain distance/cost contribution */\n__kernel void sc_pgain_kernel(\n    __global const Point_Struct *p,\n    __global const float *coord,\n    __global float *work_mem,\n    __global const int *center_table,\n    __global char *switch_membership,\n    __local float *x_coord,\n    const int num,\n    const int dim,\n    const long x,\n    const int K\n) {\n    const int lid = get_local_id(0);\n    const int lsize = get_local_size(0);\n    const int gid = get_global_id(0);\n\n    /* cache coordinates of candidate center x into local memory */\n    for (int d = lid; d < dim; d += lsize) {\n        x_coord[d] = coord[(long)d * (long)num + x];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    if (gid >= num) return;\n\n    float x_cost = 0.0f;\n    for (int d = 0; d < dim; d++) {\n        float diff = coord[(long)d * (long)num + (long)gid] - x_coord[d];\n        x_cost += diff * diff;\n    }\n    x_cost *= p[gid].weight;\n\n    const float current_cost = p[gid].cost;\n    const long row = (long)gid * (long)(K + 1);\n\n    if (x_cost < current_cost) {\n        switch_membership[gid] = '1';\n        work_mem[row + K] += (x_cost - current_cost);\n    } else {\n        long assign = p[gid].assign;\n        int cidx = center_table[assign];\n        work_mem[row + cidx] += (current_cost - x_cost);\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "Kernels.cl"
+  ],
+  "target_files_extracted": [
+    "Kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 25.442,
+      "prompt_tokens": 26083,
+      "completion_tokens": 1984,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "",
+      "run_stdout_snippet": "PARSEC Benchmark Suite\n--cambine: device name=NVIDIA GeForce RTX 4070\nexception caught in main function->InitCL()::Error: Creating Kernel (clCreateKernel) \"memset_kernel\"\n",
+      "extraction_fail": null
+    }
+  ]
+}

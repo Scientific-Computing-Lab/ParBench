@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lavamd-omp",
+  "target_spec": "rodinia-lavamd-opencl",
+  "kernel": "lavamd",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1589062325,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-boxes1d",
+    "10"
+  ],
+  "timestamp": "2026-04-26T07:23:47Z",
+  "prompt_tokens": 9212,
+  "completion_tokens": 2532,
+  "llm_response_time_seconds": 41.79,
+  "build_status": "pass",
+  "build_time_seconds": 0.207,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.176,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 128 \nConfiguration used: arch = 0, cores = 1, boxes1d = 10\nPlatform: NVIDIA Corporation\nDevice: NVIDIA GeForce RTX 4070\n# of blocks = 1000, # of threads/block = 128 (ensure that device can handle)\nTime spent in different stages of the application:\nInit: 116.821999\nMemAlloc: 0.004000\nHtoD: 0.190016\nExec: 0.982016\nDtoH: 0.061728\nClose: 46.334000\nTotal: 164.914993\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": 0.176,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0057,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#define fp float\n\n#define NUMBER_PAR_PER_BOX 100\n#define DOT(A,B) ((A).x*(B).x+(A).y*(B).y+(A).z*(B).z)\n\ntypedef struct\n{\n\tfp x, y, z;\n} THREE_VECTOR;\n\ntypedef struct\n{\n\tfp v, x, y, z;\n} FOUR_VECTOR;\n\ntypedef struct nei_str\n{\n\tint x, y, z;\n\tint number;\n\tlong offset;\n} nei_str;\n\ntypedef struct box_str\n{\n\tint x, y, z;\n\tint number;\n\tlong offset;\n\n\tint nn;\n\tnei_str nei[26];\n} box_str;\n\ntypedef struct par_str\n{\n\tfp alpha;\n} par_str;\n\ntypedef struct dim_str\n{\n\tint cur_arg;\n\tint arch_arg;\n\tint cores_arg;\n\tint boxes1d_arg;\n\n\tlong number_boxes;\n\tlong box_mem;\n\tlong space_elem;\n\tlong space_mem;\n\tlong space_mem2;\n} dim_str;\n\n__kernel void kernel_gpu_opencl(par_str par,\n\t\t\t\t\t\t\t\tdim_str dim,\n\t\t\t\t\t\t\t\t__global box_str* box,\n\t\t\t\t\t\t\t\t__global FOUR_VECTOR* rv,\n\t\t\t\t\t\t\t\t__global fp* qv,\n\t\t\t\t\t\t\t\t__global FOUR_VECTOR* fv)\n{\n\tconst int i = (int)get_local_id(0);\n\tconst long l = (long)get_group_id(0);\n\n\tif (l >= dim.number_boxes || i >= NUMBER_PAR_PER_BOX) {\n\t\treturn;\n\t}\n\n\tconst fp alpha = par.alpha;\n\tconst fp a2 = 2.0f * alpha * alpha;\n\n\tconst long first_i = box[l].offset;\n\tconst FOUR_VECTOR rA = rv[first_i + i];\n\tFOUR_VECTOR fA = fv[first_i + i];\n\n\tfor (int k = 0; k < (1 + box[l].nn); k++) {\n\n\t\tint pointer;\n\t\tif (k == 0) {\n\t\t\tpointer = (int)l;\n\t\t}\n\t\telse {\n\t\t\tpointer = box[l].nei[k - 1].number;\n\t\t}\n\n\t\tconst long first_j = box[pointer].offset;\n\t\t__global FOUR_VECTOR* rB = &rv[first_j];\n\t\t__global fp* qB = &qv[first_j];\n\n\t\tfor (int j = 0; j < NUMBER_PAR_PER_BOX; j++) {\n\n\t\t\tconst fp r2 = rA.v + rB[j].v - DOT(rA, rB[j]);\n\t\t\tconst fp u2 = a2 * r2;\n\t\t\tconst fp vij = exp(-u2);\n\t\t\tconst fp fs = 2.0f * vij;\n\n\t\t\tconst fp dx = rA.x - rB[j].x;\n\t\t\tconst fp dy = rA.y - rB[j].y;\n\t\t\tconst fp dz = rA.z - rB[j].z;\n\n\t\t\tconst fp fxij = fs * dx;\n\t\t\tconst fp fyij = fs * dy;\n\t\t\tconst fp fzij = fs * dz;\n\n\t\t\tconst fp q = qB[j];\n\t\t\tfA.v += q * vij;\n\t\t\tfA.x += q * fxij;\n\t\t\tfA.y += q * fyij;\n\t\t\tfA.z += q * fzij;\n\t\t}\n\t}\n\n\tfv[first_i + i] = fA;\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 41.79,
+      "prompt_tokens": 9212,
+      "completion_tokens": 2532,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

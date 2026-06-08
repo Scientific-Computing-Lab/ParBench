@@ -1,0 +1,69 @@
+{
+  "source_spec": "hecbench-heat2d-cuda",
+  "target_spec": "hecbench-heat2d-omp_target",
+  "kernel": "heat2d",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1470464139,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T05:38:48Z",
+  "prompt_tokens": 1821,
+  "completion_tokens": 2585,
+  "llm_response_time_seconds": 40.793,
+  "build_status": "fail",
+  "build_time_seconds": 0.123,
+  "build_error_snippet": "\"main.cpp\", line 111: error: expected a \"(\"\n    #pragma omp target enter data map alloc(d_in[0:Lx*Ly], d_out[0:Lx*Ly])\n                                      ^\n\n\"main.cpp\", line 112: error: invalid text in pragma\n    #pragma omp target update(d_in[0:Lx*Ly]) init(buffer[0:Lx*Ly])\n                             ^\n\n\"main.cpp\", line 112: error: extra text after expected end of preprocessing directive\n    #pragma omp target update(d_in[0:Lx*Ly]) init(buffer[0:Lx*Ly])\n                              ^\n\n\"main.cpp\", line 115: error: invalid text in pragma\n    #pragma omp target barrier\n                       ^\n\n\"main.cpp\", line 115: error: a structured block must follow this OMP pragma\n    #pragma omp target barrier\n                       ^\n\n\"main.cpp\",\n...[truncated]...\n simd\n                                                           ^\n\n\"main.cpp\", line 126: error: invalid text in pragma\n    #pragma omp target barrier\n                       ^\n\n\"main.cpp\", line 135: error: invalid text in pragma\n    #pragma omp target update(d_res[0:Lx*Ly]) init(d_in[0:Lx*Ly])\n                             ^\n\n\"main.cpp\", line 135: error: extra text after expected end of preprocessing directive\n    #pragma omp target update(d_res[0:Lx*Ly]) init(d_in[0:Lx*Ly])\n                              ^\n\n\"main.cpp\", line 136: error: expected a \"(\"\n    #pragma omp target exit data map delete(d_in, d_out)\n                                     ^\n\n10 errors detected in the compilation of \"main.cpp\".\nmake: *** [Makefile.nvc:57: main.o] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: a \"(\"\n    #pragma omp target exit data map delete(d_in, d_out)\n                                     ^\n\n10 errors detected in the compilation of \"main.cpp\".\nmake: *** [Makefile.nvc:57: main.o] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cpp": "#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <assert.h>\n#include <sys/time.h>\n#include <math.h>\n#include <utility>\n#include <omp.h>\n\n#define NTX 16\n#define NTY 16\n\ndouble stop_watch(double t0)\n{\n  double time;\n  struct timeval t;\n  gettimeofday(&t, NULL);\n  time = t.tv_sec * 1e6 + t.tv_usec;\n  return time-t0;\n}\n\nvoid usage(char *argv[]) {\n  fprintf(stderr, \" Usage: %s LX LY NITER\\n\", argv[0]);\n  return;\n}\n\nvoid reference(float *out, const float *in, const float delta, const float norm, const int Lx, const int Ly)\n{\n  #pragma omp parallel for collapse(2)\n  for (int y = 0; y < Ly; y++) {\n    for (int x = 0; x < Lx; x++) {\n      int v00 = y*Lx + x;\n      int v0p = y*Lx + (x + 1)%Lx;\n      int v0m = y*Lx + (Lx + x - 1)%Lx;\n      int vp0 = ((y+1)%Ly)*Lx + x;\n      int vm0 = ((Ly+y-1)%Ly)*Lx + x;\n      out[v00] = norm*in[v00] + delta*(in[v0p] + in[v0m] + in[vp0] + in[vm0]);\n    }\n  }\n}\n\nvoid dev_lapl_iter(float *out, const float *in, const float delta, const float norm, const int Lx, const int Ly)\n{\n  #pragma omp target teams distribute parallel for collapse(2)\n  for (int i = 0; i < Lx * Ly; i++) {\n    int x = i % Lx;\n    int y = i / Lx;\n    int v00 = y*Lx + x;\n    int v0p = y*Lx + (x + 1)%Lx;\n    int v0m = y*Lx + (Lx + x - 1)%Lx;\n    int vp0 = ((y+1)%Ly)*Lx + x;\n    int vm0 = ((Ly+y-1)%Ly)*Lx + x;\n    out[v00] = norm*in[v00] + delta*(in[v0p] + in[v0m] + in[vp0] + in[vm0]);\n  }\n}\n\nint main(int argc, char *argv[]) {\n  \n  if(argc != 4) {\n    usage(argv);\n    exit(1);\n  }\n  \n\n  int Lx = atoi(argv[1]);\n  int Ly = atoi(argv[2]);\n  if (Lx % NTX != 0 ||  Ly % NTY != 0) {\n    printf(\"Array length LX and LY must be a multiple of block size %d and %d, respectively\\n\",\n          NTX, NTY);\n    exit(1);\n  }\n  \n  int niter = atoi(argv[3]);\n  assert(niter >= 1);\n\n  \n  const float sigma = 0.01;\n  const float xdelta = sigma / (1.0+4.0*sigma);\n  const float xnorm = 1.0/(1.0+4.0*sigma);\n\n  printf(\" Ly,Lx = %d,%d\\n\", Ly, Lx);\n  printf(\" niter = %d\\n\", niter);\n\n  \n  srand(123);\n  float *buffer = (float*) malloc(sizeof(float)*Lx*Ly);\n  float *h_out = (float*) malloc(sizeof(float)*Lx*Ly);\n  float *h_in  = (float*) malloc(sizeof(float)*Lx*Ly);\n  float *d_res = (float*) malloc(sizeof(float)*Lx*Ly);\n\n  int i, j, x, y;\n  for (i = 0; i < Lx; i += 16) {\n    x = rand() % Lx;\n    for (j = 0; j < Ly; j++)\n       buffer[x + j*Lx] = 1.f;\n  }\n  for (i = 0; i < Ly; i += 16) {\n    y = rand() % Ly;\n    for (j = 0; j < Lx; j++)\n       buffer[j + y*Lx] = 1.f;\n  }\n  memcpy(h_in, buffer, sizeof(float)*Lx*Ly);\n\n  for(i=0; i<niter; i++) {\n    reference (h_out, h_in, xdelta, xnorm, Lx, Ly);\n    std::swap(h_out, h_in);\n  }\n\n  \n  float *d_in, *d_out;\t\n  #pragma omp target enter data map alloc(d_in[0:Lx*Ly], d_out[0:Lx*Ly])\n  #pragma omp target update(d_in[0:Lx*Ly]) init(buffer[0:Lx*Ly])\n\n  \n  #pragma omp target barrier\n  double t0 = stop_watch(0);\n\n  \n\n  for(i=0; i<niter; i++) {\n    #pragma omp target teams distribute parallel for simd\n    dev_lapl_iter(d_out, d_in, xdelta, xnorm, Lx, Ly);\n    std::swap(d_out, d_in);\n  }\n\n  #pragma omp target barrier\n  t0 = stop_watch(t0)/(double)niter;\n\n  printf(\"Device: iters = %8d, (Lx,Ly) = %6d, %6d, t = %8.1f usec/iter, BW = %6.3f GB/s, P = %6.3f Gflop/s\\n\",\n  \t niter, Lx, Ly, t0,\n  \t Lx*Ly*sizeof(float)*2.0/(t0*1.0e3),\n  \t (Lx*Ly*6.0)/(t0*1.0e3));\n\n  \n  #pragma omp target update(d_res[0:Lx*Ly]) init(d_in[0:Lx*Ly])\n  #pragma omp target exit data map delete(d_in, d_out)\n\n  \n  bool ok = true;\n  for (i = 0; i < Lx*Ly; i++) {\n    \n    if ( fabs(h_in[i] - d_res[i]) > 1e-2 ) {\n      printf(\"Mismatch at %d cpu=%f gpu=%f\\n\", i, h_in[i], d_res[i]);\n      ok = false;\n      break;\n    }\n  }\n  printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");\n\n  free(buffer);\n  free(h_out);\n  free(h_in);\n  free(d_res);\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cpp"
+  ],
+  "target_files_extracted": [
+    "main.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 40.793,
+      "prompt_tokens": 1821,
+      "completion_tokens": 2585,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "\"main.cpp\", line 111: error: expected a \"(\"\n    #pragma omp target enter data map alloc(d_in[0:Lx*Ly], d_out[0:Lx*Ly])\n                                      ^\n\n\"main.cpp\", line 112: error: invalid text in pragma\n    #pragma omp target update(d_in[0:Lx*Ly]) init(buffer[0:Lx*Ly])\n                             ^\n\n\"main.cpp\", line 112: error: extra text after expected end of preprocessing directive\n    #pragma omp target update(d_in[0:Lx*Ly]) init(buffer[0:Lx*Ly])\n                              ^\n\n\"main.cpp\", line 115: error: invalid text in pragma\n    #pragma omp target barrier\n                       ^\n\n\"main.cpp\", line 115: error: a structured block must follow this OMP pragma\n    #pragma omp target barrier\n                       ^\n\n\"main.cpp\",\n...[truncated]...\n simd\n                                                           ^\n\n\"main.cpp\", line 126: error: invalid text in pragma\n    #pragma omp target barrier\n                       ^\n\n\"main.cpp\", line 135: error: invalid text in pragma\n    #pragma omp target update(d_res[0:Lx*Ly]) init(d_in[0:Lx*Ly])\n                             ^\n\n\"main.cpp\", line 135: error: extra text after expected end of preprocessing directive\n    #pragma omp target update(d_res[0:Lx*Ly]) init(d_in[0:Lx*Ly])\n                              ^\n\n\"main.cpp\", line 136: error: expected a \"(\"\n    #pragma omp target exit data map delete(d_in, d_out)\n                                     ^\n\n10 errors detected in the compilation of \"main.cpp\".\nmake: *** [Makefile.nvc:57: main.o] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

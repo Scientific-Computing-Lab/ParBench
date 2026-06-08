@@ -1,0 +1,181 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "cfd",
+        "parallel_api": "opencl",
+        "unique_id": "rodinia-cfd-opencl",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "opencl/cfd",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "Kernels.cl",
+            "euler3d.cpp"
+        ],
+        "support_files": [
+            "CLHelper.h",
+            "util.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "Kernels.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl>=2.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl/cfd",
+        "commands": {
+            "configure": null,
+            "build": "make OPENCL_INC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include OPENCL_LIB=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64 FLAGS='-O3 -std=c++14 -DCL_TARGET_OPENCL_VERSION=120'",
+            "clean": "make clean"
+        },
+        "variables": {
+            "OPENCL_INC": {
+                "description": "Path to OpenCL headers",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include",
+                "detection": "find /usr -name 'cl.h' -path '*/CL/cl.h' | head -1 | xargs dirname | xargs dirname"
+            },
+            "OPENCL_LIB": {
+                "description": "Path to OpenCL libraries",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+                "detection": "find /usr -name 'libOpenCL.so' | head -1 | xargs dirname"
+            }
+        },
+        "outputs": {
+            "executable": "./euler3d.out"
+        }
+    },
+    "run": {
+        "executable": "./euler3d.out",
+        "default_arguments": [
+            "../../data/cfd/fvcorr.domn.097K"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "../../data/cfd/fvcorr.domn.097K"
+                ],
+                "description": "Small input for correctness verification of cfd (OPENCL)",
+                "input_files": [
+                    "../../data/cfd/fvcorr.domn.097K"
+                ],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "../../data/cfd/missile.domn.0.2M"
+                ],
+                "description": "Large input for performance measurement of cfd (OPENCL)",
+                "input_files": [
+                    "../../data/cfd/missile.domn.0.2M"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "nel=\\d+, nelr=\\d+",
+                "description": "CFD mesh loaded and computation initialized"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.273447+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "fail",
+                "exit_code": null,
+                "stdout_snippet": null,
+                "wall_time_seconds": null,
+                "metrics": {},
+                "fail_reason": "build failed: ream<char>\u2019} to \u2018const std::error_condition&\u2019\n  513 |   operator==(const error_condition& __lhs, const error_code& __rhs) noexcept\n      |              ~~~~~~~~~~~~~~~~~~~~~~~^~~~~\nIn file included from ../util/timing.h:5,\n                 from ../util/timing.c:3:\n/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include/CL/cl.h:26:104: note: \u2018#pragma message: cl_version.h: CL_TARGET_OPENCL_VERSION is not defined. Defaulting to 300 (OpenCL 3.0)\u2019\n   26 | #pragma message(\"cl_version.h: CL_TARGET_OPENCL_VERSION is not defined. Defaulting to 300 (OpenCL 3.0)\")\n      |                                                                                                        ^\nmake: *** [Makefile:24: release] Error 1\nharness.builder WARNING: Command exited 2: make OPENCL_INC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include OPENCL_LIB=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64 FLAGS='-O3 -std=c++14'\nBuilding rodinia-cfd-opencl ...\n[rodinia-cfd-opencl] | BUILD: FAIL (0.245s) | RUN: \u2014 | VERIFY: \u2014\n",
+                "fail_category": "build_failure"
+            }
+        }
+    },
+    "metadata": {
+        "description": "Computational fluid dynamics Euler solver on GPU",
+        "domain": "computational fluid dynamics",
+        "complexity": "computational fluid dynamics (Euler solver)",
+        "tags": [
+            "cfd",
+            "euler",
+            "fluid-dynamics",
+            "opencl",
+            "rodinia"
+        ],
+        "multi_file": false,
+        "translation_complexity": "single_file"
+    }
+}

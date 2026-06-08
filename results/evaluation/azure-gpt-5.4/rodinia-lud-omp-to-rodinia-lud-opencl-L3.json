@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-omp",
+  "target_spec": "rodinia-lud-opencl",
+  "kernel": "lud",
+  "model": "azure-gpt-5.4",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 55408477,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-27T04:01:39Z",
+  "prompt_tokens": 11497,
+  "completion_tokens": 4448,
+  "llm_response_time_seconds": 105.878,
+  "build_status": "pass",
+  "build_time_seconds": 0.468,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.258,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nInit: 200.432007\nMemAlloc: 0.003000\nHtoD: 0.011584\nExec: 2.712512\nDtoH: 0.010656\nClose: 0.063000\nTotal: 203.783005\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.07,
+  "translated_wall_time_seconds": 0.258,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.2713,
+  "translated_files": {
+    "lud_kernel.cl": "#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\n__kernel void lud_diagonal(__global float *a,\n                           __local float *shadow,\n                           const int size,\n                           const int offset)\n{\n    const int tx = (int)get_local_id(0);\n\n    if (tx == 0) {\n        int i, j, k;\n\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < BLOCK_SIZE; j++) {\n                shadow[i * BLOCK_SIZE + j] = a[(offset + i) * size + (offset + j)];\n            }\n        }\n\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            for (j = i; j < BLOCK_SIZE; j++) {\n                for (k = 0; k < i; k++) {\n                    shadow[i * BLOCK_SIZE + j] -=\n                        shadow[i * BLOCK_SIZE + k] * shadow[k * BLOCK_SIZE + j];\n                }\n            }\n\n            {\n                float temp = 1.0f / shadow[i * BLOCK_SIZE + i];\n                for (j = i + 1; j < BLOCK_SIZE; j++) {\n                    for (k = 0; k < i; k++) {\n                        shadow[j * BLOCK_SIZE + i] -=\n                            shadow[j * BLOCK_SIZE + k] * shadow[k * BLOCK_SIZE + i];\n                    }\n                    shadow[j * BLOCK_SIZE + i] *= temp;\n                }\n            }\n        }\n\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < BLOCK_SIZE; j++) {\n                a[(offset + i) * size + (offset + j)] = shadow[i * BLOCK_SIZE + j];\n            }\n        }\n    }\n}\n\n__kernel void lud_perimeter(__global float *a,\n                            __local float *temp_diag,\n                            __local float *temp_top,\n                            __local float *temp_left,\n                            const int size,\n                            const int offset)\n{\n    const int lid = (int)get_local_id(0);\n    const int group = (int)get_group_id(0);\n\n    if (lid == 0) {\n        int i, j, k;\n        int block = offset + BLOCK_SIZE * (group + 1);\n\n        for (j = 0; j < BLOCK_SIZE; j++) {\n            for (i = 0; i < BLOCK_SIZE; i++) {\n                float sum = 0.0f;\n                for (k = 0; k < i; k++) {\n                    sum += a[(offset + i) * size + (offset + k)] *\n                           a[(offset + k) * size + (block + j)];\n                }\n                a[(offset + i) * size + (block + j)] -= sum;\n            }\n        }\n\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < BLOCK_SIZE; j++) {\n                float sum = 0.0f;\n                for (k = 0; k < j; k++) {\n                    sum += a[(block + i) * size + (offset + k)] *\n                           a[(offset + k) * size + (offset + j)];\n                }\n                a[(block + i) * size + (offset + j)] =\n                    (a[(block + i) * size + (offset + j)] - sum) /\n                    a[(offset + j) * size + (offset + j)];\n            }\n        }\n    }\n}\n\n__kernel void lud_internal(__global float *a,\n                           __local float *temp_top,\n                           __local float *temp_left,\n                           const int size,\n                           const int offset)\n{\n    const int lx = (int)get_local_id(0);\n    const int ly = (int)get_local_id(1);\n    const int gx = (int)get_group_id(0);\n    const int gy = (int)get_group_id(1);\n\n    if (lx == 0 && ly == 0) {\n        int i, j, k;\n        int row = offset + BLOCK_SIZE * (gy + 1);\n        int col = offset + BLOCK_SIZE * (gx + 1);\n\n        for (i = 0; i < BLOCK_SIZE; i++) {\n            for (j = 0; j < BLOCK_SIZE; j++) {\n                float sum = 0.0f;\n                for (k = 0; k < BLOCK_SIZE; k++) {\n                    sum += a[(row + i) * size + (offset + k)] *\n                           a[(offset + k) * size + (col + j)];\n                }\n                a[(row + i) * size + (col + j)] -= sum;\n            }\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "lud_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "lud_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 105.878,
+      "prompt_tokens": 11497,
+      "completion_tokens": 4448,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-dwt2d-cuda",
+  "target_spec": "rodinia-dwt2d-opencl",
+  "kernel": "dwt2d",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 59059947,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "rgb.bmp",
+    "-i",
+    "../../data/dwt2d",
+    "-D",
+    "1024x1024",
+    "-f",
+    "-5",
+    "-l",
+    "3"
+  ],
+  "timestamp": "2026-04-30T23:54:33Z",
+  "prompt_tokens": 30827,
+  "completion_tokens": 6394,
+  "llm_response_time_seconds": 96.221,
+  "build_status": "pass",
+  "build_time_seconds": 0.311,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.371,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "\nsliding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 3 , gx = 4 , gy = 11 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\n\nWriting to rgb.bmp.dwt.r (1024 x 1024)\n\nWriting to rgb.bmp.dwt.g (1024 x 1024)\n\nWriting to rgb.bmp.dwt.b (1024 x 1024)\nInit: 294.562012\nMemAlloc: 9.614000\nHtoD: 0.000000\nExec: 0.021792\nDtoH: 1.038000\nClose: 0.637000\nTotal: 316.411011\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.1,
+  "translated_wall_time_seconds": 0.371,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.2695,
+  "translated_files": {
+    "com_dwt.cl": "#define THREADS 256\n\ninline int mirrorIndex(int d, int sizeD)\n{\n    if (sizeD <= 1) return 0;\n    while (d >= sizeD || d < 0) {\n        if (d >= sizeD) d = 2 * sizeD - 2 - d;\n        else d = -d;\n    }\n    return d;\n}\n\ninline int loadPixel(__global const int *input, int sx, int sy, int x, int y)\n{\n    x = mirrorIndex(x, sx);\n    y = mirrorIndex(y, sy);\n    return input[y * sx + x];\n}\n\ninline int rowHigh53(__global const int *input, int sx, int sy, int y, int k)\n{\n    int c = loadPixel(input, sx, sy, 2 * k + 1, y);\n    int p = loadPixel(input, sx, sy, 2 * k + 0, y);\n    int n = loadPixel(input, sx, sy, 2 * k + 2, y);\n    return c - ((p + n) / 2);\n}\n\ninline int rowLow53(__global const int *input, int sx, int sy, int y, int k, int hx)\n{\n    int s = loadPixel(input, sx, sy, 2 * k, y);\n    if (hx <= 0) return s;\n\n    int km1 = mirrorIndex(k - 1, hx);\n    int k0  = mirrorIndex(k, hx);\n    int dm1 = rowHigh53(input, sx, sy, y, km1);\n    int d0  = rowHigh53(input, sx, sy, y, k0);\n    return s + ((dm1 + d0 + 2) / 4);\n}\n\ninline int colHighLowX53(__global const int *input, int sx, int sy, int j, int cx, int hx)\n{\n    int c = rowLow53(input, sx, sy, 2 * j + 1, cx, hx);\n    int p = rowLow53(input, sx, sy, 2 * j + 0, cx, hx);\n    int n = rowLow53(input, sx, sy, 2 * j + 2, cx, hx);\n    return c - ((p + n) / 2);\n}\n\ninline int colLowLowX53(__global const int *input, int sx, int sy, int i, int cx, int hx, int hy)\n{\n    int a = rowLow53(input, sx, sy, 2 * i, cx, hx);\n    if (hy <= 0) return a;\n\n    int im1 = mirrorIndex(i - 1, hy);\n    int i0  = mirrorIndex(i, hy);\n    int hm1 = colHighLowX53(input, sx, sy, im1, cx, hx);\n    int h0  = colHighLowX53(input, sx, sy, i0, cx, hx);\n    return a + ((hm1 + h0 + 2) / 4);\n}\n\ninline int colHighHighX53(__global const int *input, int sx, int sy, int j, int cx)\n{\n    int c = rowHigh53(input, sx, sy, 2 * j + 1, cx);\n    int p = rowHigh53(input, sx, sy, 2 * j + 0, cx);\n    int n = rowHigh53(input, sx, sy, 2 * j + 2, cx);\n    return c - ((p + n) / 2);\n}\n\ninline int colLowHighX53(__global const int *input, int sx, int sy, int i, int cx, int hy)\n{\n    int a = rowHigh53(input, sx, sy, 2 * i, cx);\n    if (hy <= 0) return a;\n\n    int im1 = mirrorIndex(i - 1, hy);\n    int i0  = mirrorIndex(i, hy);\n    int hm1 = colHighHighX53(input, sx, sy, im1, cx);\n    int h0  = colHighHighX53(input, sx, sy, i0, cx);\n    return a + ((hm1 + h0 + 2) / 4);\n}\n\n__kernel void c_CopySrcToComponents(__global int *d_r, __global int *d_g, __global int *d_b,\n                                    __global const uchar *d_src, int pixels)\n{\n    int gid = (int)get_global_id(0);\n    if (gid < pixels) {\n        int base = gid * 3;\n        d_r[gid] = (int)d_src[base + 0] - 128;\n        d_g[gid] = (int)d_src[base + 1] - 128;\n        d_b[gid] = (int)d_src[base + 2] - 128;\n    }\n}\n\n__kernel void c_CopySrcToComponent(__global int *d_c, __global const uchar *d_src, int pixels)\n{\n    int gid = (int)get_global_id(0);\n    if (gid < pixels) {\n        d_c[gid] = (int)d_src[gid] - 128;\n    }\n}\n\n__kernel void cl_fdwt53Kernel(__global const int *input, __global int *output,\n                              int sizeX, int sizeY, int winSteps,\n                              int WIN_SX, int WIN_SY)\n{\n    (void)winSteps;\n    (void)WIN_SX;\n    (void)WIN_SY;\n\n    int xg = (int)get_global_id(0);\n    int gy = (int)get_num_groups(1);\n    int by = (int)get_group_id(1);\n\n    int lx = (sizeX + 1) >> 1;\n    int hx = sizeX - lx;\n    int ly = (sizeY + 1) >> 1;\n    int hy = sizeY - ly;\n\n    int offLL = 0;\n    int offHL = lx * ly;\n    int offLH = offHL + hx * ly;\n    int offHH = offLH + lx * hy;\n\n    if (xg < lx) {\n        for (int i = by; i < ly; i += gy) {\n            int v = colLowLowX53(input, sizeX, sizeY, i, xg, hx, hy);\n            output[offLL + i * lx + xg] = v;\n        }\n        for (int j = by; j < hy; j += gy) {\n            int v = colHighLowX53(input, sizeX, sizeY, j, xg, hx);\n            output[offLH + j * lx + xg] = v;\n        }\n    }\n\n    if (xg < hx) {\n        for (int i = by; i < ly; i += gy) {\n            int v = colLowHighX53(input, sizeX, sizeY, i, xg, hy);\n            output[offHL + i * hx + xg] = v;\n        }\n        for (int j = by; j < hy; j += gy) {\n            int v = colHighHighX53(input, sizeX, sizeY, j, xg);\n            output[offHH + j * hx + xg] = v;\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "com_dwt.cl"
+  ],
+  "target_files_extracted": [
+    "com_dwt.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 96.221,
+      "prompt_tokens": 30827,
+      "completion_tokens": 6394,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

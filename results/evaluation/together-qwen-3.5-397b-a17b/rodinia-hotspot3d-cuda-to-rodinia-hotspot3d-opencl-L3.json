@@ -1,0 +1,82 @@
+{
+  "source_spec": "rodinia-hotspot3d-cuda",
+  "target_spec": "rodinia-hotspot3d-opencl",
+  "kernel": "hotspot3d",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1604894664,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-n",
+    "512",
+    "-l",
+    "8",
+    "-i",
+    "100",
+    "-f",
+    "../../data/hotspot3D/power_512x8",
+    "../../data/hotspot3D/temp_512x8",
+    "output.out",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-24T05:11:54Z",
+  "prompt_tokens": 7580,
+  "completion_tokens": 2280,
+  "llm_response_time_seconds": 52.478,
+  "build_status": "pass",
+  "build_time_seconds": 0.191,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.53,
+  "run_exit_code": 1,
+  "run_stderr_snippet": "3 errors generated.\n",
+  "run_stdout_snippet": " pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\nkernel void hotspotOpt1(const float *p, const float *tIn, float *tOut, \n                                                     ^\n<kernel>:1:66: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\nkernel void hotspotOpt1(const float *p, const float *tIn, float *tOut, \n                                                                 ^\n\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.156,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "hotspotKernel.cl": "kernel void hotspotOpt1(const float *p, const float *tIn, float *tOut, \n        float sdc, int nx, int ny, int nz,\n        float ce, float cw, \n        float cn, float cs,\n        float ct, float cb, \n        float cc) \n{\n    float amb_temp = 80.0f;\n\n    int i = get_global_id(0);  \n    int j = get_global_id(1);\n\n    int c = i + j * nx;\n    int xy = nx * ny;\n\n    int W = (i == 0)        ? c : c - 1;\n    int E = (i == nx-1)     ? c : c + 1;\n    int N = (j == 0)        ? c : c - nx;\n    int S = (j == ny-1)     ? c : c + nx;\n\n    float temp1, temp2, temp3;\n    temp1 = temp2 = tIn[c];\n    temp3 = tIn[c+xy];\n    tOut[c] = cc * temp2 + cw * tIn[W] + ce * tIn[E] + cs * tIn[S]\n        + cn * tIn[N] + cb * temp1 + ct * temp3 + sdc * p[c] + ct * amb_temp;\n    c += xy;\n    W += xy;\n    E += xy;\n    N += xy;\n    S += xy;\n\n    for (int k = 1; k < nz-1; ++k) {\n        temp1 = temp2;\n        temp2 = temp3;\n        temp3 = tIn[c+xy];\n        tOut[c] = cc * temp2 + cw * tIn[W] + ce * tIn[E] + cs * tIn[S]\n            + cn * tIn[N] + cb * temp1 + ct * temp3 + sdc * p[c] + ct * amb_temp;\n        c += xy;\n        W += xy;\n        E += xy;\n        N += xy;\n        S += xy;\n    }\n    temp1 = temp2;\n    temp2 = temp3;\n    tOut[c] = cc * temp2 + cw * tIn[W] + ce * tIn[E] + cs * tIn[S]\n        + cn * tIn[N] + cb * temp1 + ct * temp3 + sdc * p[c] + ct * amb_temp;\n    return;\n}\n"
+  },
+  "target_files_expected": [
+    "hotspotKernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspotKernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 52.478,
+      "prompt_tokens": 7580,
+      "completion_tokens": 2280,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "3 errors generated.\n",
+      "run_stdout_snippet": " pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\nkernel void hotspotOpt1(const float *p, const float *tIn, float *tOut, \n                                                     ^\n<kernel>:1:66: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\nkernel void hotspotOpt1(const float *p, const float *tIn, float *tOut, \n                                                                 ^\n\n",
+      "extraction_fail": null
+    }
+  ]
+}

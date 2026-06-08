@@ -1,0 +1,82 @@
+{
+  "source_spec": "rodinia-hotspot3d-omp",
+  "target_spec": "rodinia-hotspot3d-opencl",
+  "kernel": "hotspot3d",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1898139338,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-n",
+    "512",
+    "-l",
+    "8",
+    "-i",
+    "100",
+    "-f",
+    "../../data/hotspot3D/power_512x8",
+    "../../data/hotspot3D/temp_512x8",
+    "output.out",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-22T01:34:06Z",
+  "prompt_tokens": 7049,
+  "completion_tokens": 1865,
+  "llm_response_time_seconds": 19.565,
+  "build_status": "pass",
+  "build_time_seconds": 0.192,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.526,
+  "run_exit_code": 1,
+  "run_stderr_snippet": "3 errors generated.\n",
+  "run_stdout_snippet": "LURE \n<kernel>:4:18: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    const float* pIn,\n                 ^\n<kernel>:5:18: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    const float* tIn,\n                 ^\n<kernel>:6:12: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    float* tOut,\n           ^\n\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.156,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "hotspotKernel.cl": "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n\nkernel void hotspotOpt1(\n    const float* pIn,\n    const float* tIn,\n    float* tOut,\n    const float stepDivCap,\n    const int numCols,\n    const int numRows,\n    const int layers,\n    const float ce,\n    const float cw,\n    const float cn,\n    const float cs,\n    const float ct,\n    const float cb,\n    const float cc)\n{\n    int x = get_global_id(0);\n    int y = get_global_id(1);\n    \n    if (x >= numCols || y >= numRows) return;\n    \n    for (int z = 0; z < layers; z++) {\n        int c = x + y * numCols + z * numCols * numRows;\n        \n        int w = (x == 0) ? c : c - 1;\n        int e = (x == numCols - 1) ? c : c + 1;\n        int n = (y == 0) ? c : c - numCols;\n        int s = (y == numRows - 1) ? c : c + numCols;\n        int b = (z == 0) ? c : c - numCols * numRows;\n        int t_idx = (z == layers - 1) ? c : c + numCols * numRows;\n        \n        tOut[c] = cc * tIn[c] + cw * tIn[w] + ce * tIn[e]\n            + cs * tIn[s] + cn * tIn[n] + cb * tIn[b] + ct * tIn[t_idx]\n            + stepDivCap * pIn[c] + ct * 80.0f;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "hotspotKernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspotKernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 19.565,
+      "prompt_tokens": 7049,
+      "completion_tokens": 1865,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "3 errors generated.\n",
+      "run_stdout_snippet": "LURE \n<kernel>:4:18: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    const float* pIn,\n                 ^\n<kernel>:5:18: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    const float* tIn,\n                 ^\n<kernel>:6:12: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    float* tOut,\n           ^\n\n",
+      "extraction_fail": null
+    }
+  ]
+}

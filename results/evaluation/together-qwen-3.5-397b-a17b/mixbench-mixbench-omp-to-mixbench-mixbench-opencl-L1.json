@@ -1,0 +1,69 @@
+{
+  "source_spec": "mixbench-mixbench-omp",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1825021715,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-24T05:13:41Z",
+  "prompt_tokens": 11193,
+  "completion_tokens": 1662,
+  "llm_response_time_seconds": 34.931,
+  "build_status": "pass",
+  "build_time_seconds": 0.469,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 3.801,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "6.77\n          192,     96.250,    0.20,63395.38, 658.65,     48.125,    4.48, 2886.37,  59.98,    192.500,    0.00,     inf,    inf,    96.250,    0.20,65366.22, 679.13\n          256,    128.250,    0.21,83217.74, 648.87,     64.125,    5.50, 3130.44,  48.82,    256.500,    0.00,     inf,    inf,   128.250,    0.21,81146.40, 632.72\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": 3.801,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 7.8927,
+  "translated_files": {
+    "mix_kernels.cl": "#pragma once\n\n#ifdef ENABLE_DP\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n\n#ifdef ENABLE_HP\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n\n#ifndef class_T\n#define class_T float\n#endif\n\n#ifndef BLOCKDIM\n#define BLOCKDIM 256\n#endif\n\n#ifndef COMPUTE_ITERATIONS\n#define COMPUTE_ITERATIONS 1\n#endif\n\n#ifndef ELEMENTS_PER_THREAD\n#define ELEMENTS_PER_THREAD 1\n#endif\n\n#ifndef FUSION_DEGREE\n#define FUSION_DEGREE 1\n#endif\n\n#ifdef BLOCK_STRIDED\n#define STRIDE_TYPE block_stride\n#else\n#define STRIDE_TYPE ndrange\n#endif\n\ntypedef class_T data_type;\n\n#ifdef ENABLE_HP\ntypedef short half2[2];\n#endif\n\n__attribute__((noinline))\ndata_type bench_block(data_type* data, data_type f, size_t static_chunk_size) {\n  data_type sum = 0;\n  \n#ifdef BASELINE_IMPL\n  data_type t = data[0];\n  for (size_t j = 0; j < COMPUTE_ITERATIONS; j++) {\n    t = t * t + f;\n  }\n  sum += t;\n#else\n  data_type f_arr[8];\n  data_type t_arr[8];\n  \n  for (int k = 0; k < 8; k++) {\n    f_arr[k] = data[k];\n    t_arr[k] = data[0];\n  }\n  \n  for (size_t j = 0; j < COMPUTE_ITERATIONS / 8; j++) {\n    for (int k = 0; k < 8; k++) {\n      t_arr[k] = t_arr[k] * t_arr[k] + f_arr[k];\n    }\n  }\n  \n  for (int k = 0; k < COMPUTE_ITERATIONS % 8; k++) {\n    t_arr[k] = t_arr[k] * t_arr[k] + f_arr[k];\n  }\n  \n  for (int k = 0; k < 8; k++) {\n    sum += t_arr[k];\n  }\n#endif\n  \n  return sum;\n}\n\n#ifdef BLOCK_STRIDED\n__kernel void benchmark_func(data_type seed, __global data_type* src) {\n  const size_t local_id = get_local_id(0);\n  const size_t local_size = get_local_size(0);\n  const size_t group_id = get_group_id(0);\n  \n  const size_t static_chunk_size = ELEMENTS_PER_THREAD;\n  const size_t stride = local_size * static_chunk_size * FUSION_DEGREE;\n  const size_t base_idx = group_id * stride;\n  \n  data_type sum = 0;\n  \n  for (size_t fusion = 0; fusion < FUSION_DEGREE; fusion++) {\n    for (size_t chunk = 0; chunk < static_chunk_size; chunk++) {\n      size_t idx = base_idx + fusion * (local_size * static_chunk_size) + \n                   local_id * static_chunk_size + chunk;\n      \n      data_type f = src[idx];\n      data_type t = f;\n      \n      for (size_t j = 0; j < COMPUTE_ITERATIONS; j++) {\n        t = t * t + seed;\n      }\n      \n      sum += t;\n    }\n  }\n  \n  src[base_idx + local_id * static_chunk_size] = sum;\n}\n#else\n__kernel void benchmark_func(data_type seed, __global data_type* src) {\n  const size_t global_id = get_global_id(0);\n  const size_t global_size = get_global_size(0);\n  \n  const size_t static_chunk_size = ELEMENTS_PER_THREAD;\n  const size_t idx = global_id * static_chunk_size * FUSION_DEGREE;\n  \n  data_type sum = 0;\n  \n  for (size_t fusion = 0; fusion < FUSION_DEGREE; fusion++) {\n    for (size_t chunk = 0; chunk < static_chunk_size; chunk++) {\n      size_t element_idx = idx + fusion * (static_chunk_size) + chunk;\n      \n      if (element_idx < global_size * static_chunk_size * FUSION_DEGREE / static_chunk_size) {\n        data_type f = src[element_idx];\n        data_type t = f;\n        \n        for (size_t j = 0; j < COMPUTE_ITERATIONS; j++) {\n          t = t * t + seed;\n        }\n        \n        sum += t;\n      }\n    }\n  }\n  \n  if (global_id == 0) {\n    src[0] = sum;\n  } else {\n    src[idx] = sum;\n  }\n}\n#endif\n\n__kernel void benchmark_func_warmup(short seed, __global data_type* src) {\n  const size_t idx = get_global_id(0);\n  const size_t global_size = get_global_size(0);\n  \n  if (idx < global_size) {\n    src[idx] = (data_type)seed;\n  }\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 34.931,
+      "prompt_tokens": 11193,
+      "completion_tokens": 1662,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

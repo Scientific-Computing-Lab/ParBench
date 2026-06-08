@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-hybridsort-cuda",
+  "target_spec": "rodinia-hybridsort-opencl",
+  "kernel": "hybridsort",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 856153026,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "r",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-21T23:09:54Z",
+  "prompt_tokens": 30579,
+  "completion_tokens": 3769,
+  "llm_response_time_seconds": 22.851,
+  "build_status": "pass",
+  "build_time_seconds": 0.148,
+  "build_error_snippet": null,
+  "run_status": "error",
+  "run_time_seconds": 0.269,
+  "run_exit_code": -1,
+  "run_stderr_snippet": "UnicodeDecodeError: 'utf-8' codec can't decode byte 0xf0 in position 82: invalid continuation byte",
+  "run_stdout_snippet": "",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code -1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.272,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "bucketsort_kernels.cl": "#define BUCKET_WARP_LOG_SIZE\t5\n#define BUCKET_WARP_N\t\t\t1\n\n#ifdef BUCKET_WG_SIZE_1\n#define BUCKET_THREAD_N BUCKET_WG_SIZE_1\n#else\n#define BUCKET_THREAD_N\t\t\t(BUCKET_WARP_N << BUCKET_WARP_LOG_SIZE)\n#endif\n#define BUCKET_BLOCK_MEMORY\t\t(DIVISIONS * BUCKET_WARP_N)\n#define BUCKET_BAND\t\t\t\t128\n#define LOG_DIVISIONS 10\n#define DIVISIONS (1 << LOG_DIVISIONS)\n\n#pragma OPENCL EXTENSION cl_khr_int64 : enable\n\n__device__ int addOffset(volatile unsigned int *s_offset, unsigned int data, unsigned int threadTag){\n    unsigned int count;\n\n    do{\n        count = s_offset[data] & 0x07FFFFFFU;\n        count = threadTag | (count + 1);\n        s_offset[data] = count;\n    }while(s_offset[data] != count);\n\n\treturn (count & 0x07FFFFFFU) - 1;\n}\n\n__kernel void\nbucketcount( read_only image1d_float input, write_only image1d_int indice, write_only image1d_uint d_prefixoffsets, int size, read_only image1d_float texPivot)\n{\n\tvolatile __local unsigned int s_offset[BUCKET_BLOCK_MEMORY]; \n\n    const unsigned int threadTag = get_local_id(0) << (32 - BUCKET_WARP_LOG_SIZE);\n    const int warpBase = (get_local_id(0) >> BUCKET_WARP_LOG_SIZE) * DIVISIONS; \n    const int numThreads = get_global_size(0);\n\tfor (int i = get_local_id(0); i < BUCKET_BLOCK_MEMORY; i += get_local_size(0))\n\t\ts_offset[i] = 0; \n\n\tbarrier(CLK_LOCAL_MEM_FENCE); \n\n\tfor (int tid = get_global_id(0); tid < size; tid += numThreads) {\n\t\tfloat elem = read_imagef(input, tid).x; \n\n\t\tint idx  = DIVISIONS/2 - 1; \n\t\tint jump = DIVISIONS/4; \n\t\tfloat piv = read_imagef(texPivot, idx).x; \n\n\t\twhile(jump >= 1){\n\t\t\tidx = (elem < piv) ? (idx - jump) : (idx + jump);\n\t\t\tpiv = read_imagef(texPivot, idx).x; \n\t\t\tjump /= 2; \n\t\t}\n\t\tidx = (elem < piv) ? idx : (idx + 1); \n\n\t\tint indice_val = (addOffset(s_offset + warpBase, idx, threadTag) << LOG_DIVISIONS) + idx;\n\t\twrite_imagef(indice, tid, (int4){indice_val, 0, 0, 0});\n\t}\n\n\tbarrier(CLK_LOCAL_MEM_FENCE); \n\n\tint prefixBase = get_group_id(0) * BUCKET_BLOCK_MEMORY; \n\n\tfor (int i = get_local_id(0); i < BUCKET_BLOCK_MEMORY; i += get_local_size(0))\n\t\twrite_imageui(d_prefixoffsets, prefixBase + i, (uint4){s_offset[i] & 0x07FFFFFFU, 0, 0, 0});\n}\n\n__kernel void bucketprefixoffset(read_only image1d_uint d_prefixoffsets, write_only image1d_uint d_offsets, int blocks) {\n\tint tid = get_global_id(0); \n\tint size = blocks * BUCKET_BLOCK_MEMORY; \n\tint sum = 0; \n\n\tfor (int i = tid; i < size; i += DIVISIONS) {\n\t\tuint4 x = read_imageui(d_prefixoffsets, i);\n\t\twrite_imageui(d_prefixoffsets, i, (uint4){sum, 0, 0, 0});\n\t\tsum += x.x; \n\t}\n\n\twrite_imageui(d_offsets, tid, (uint4){sum, 0, 0, 0});\n}\n\n__kernel void\nbucketsort(read_only image1d_float input, read_only image1d_int indice, write_only image1d_float output, int size, read_only image1d_uint d_prefixoffsets, \n\t\t   read_only image1d_uint l_offsets)\n{\n\tvolatile __local unsigned int s_offset[BUCKET_BLOCK_MEMORY]; \n\n\tint prefixBase = get_group_id(0) * BUCKET_BLOCK_MEMORY; \n    const int warpBase = (get_local_id(0) >> BUCKET_WARP_LOG_SIZE) * DIVISIONS; \n    const int numThreads = get_global_size(0);\n\tfor (int i = get_local_id(0); i < BUCKET_BLOCK_MEMORY; i += get_local_size(0))\n\t\ts_offset[i] = read_imageui(l_offsets, i & (DIVISIONS - 1)).x + read_imageui(d_prefixoffsets, prefixBase + i).x; \n\n\tbarrier(CLK_LOCAL_MEM_FENCE); \n\n\tfor (int tid = get_global_id(0); tid < size; tid += numThreads) {\n\n\t\tfloat elem = read_imagef(input, tid).x; \n\t\tint4 id = read_imagei(indice, tid);\n\t\tint id_val = id.x;\n\n\t\tint out_idx = s_offset[warpBase + (id_val & (DIVISIONS - 1))] + (id_val >> LOG_DIVISIONS);\n\t\twrite_imagef(output, out_idx, (float4){elem, 0, 0, 0});\n\t}\n}\n",
+    "histogram1024.cl": "#define BIN_COUNT 1024 \n#define HISTOGRAM_SIZE (BIN_COUNT * sizeof(unsigned int))\n\n#define WARP_LOG_SIZE 5\n\n#define  WARP_N 3\n\n#ifdef HISTO_WG_SIZE_0\n#define THREAD_N HISTO_WG_SIZE_0\n#else\n#define     THREAD_N (WARP_N << WARP_LOG_SIZE)\n#endif\n\n\n#define BLOCK_MEMORY (WARP_N * BIN_COUNT)\n\n__device__ void addData1024(volatile unsigned int *s_WarpHist, unsigned int data, unsigned int threadTag){\n    unsigned int count;\n    do{\n        count = s_WarpHist[data] & 0x07FFFFFFU;\n        count = threadTag | (count + 1);\n        s_WarpHist[data] = count;\n    }while(s_WarpHist[data] != count);\n}\n\n\n__kernel void histogram1024Kernel(write_only image1d_uint d_Result, read_only image1d_float d_Data, float minimum, float maximum, int dataN){\n\n    \n    const int    globalTid = get_global_id(0);\n    \n    const int   numThreads = get_global_size(0);\n    \n    \n\t\n    const unsigned int threadTag = get_local_id(0) << (32 - WARP_LOG_SIZE);\n\t\n    \n    volatile __local unsigned int s_Hist[BLOCK_MEMORY];\n    \n    const int warpBase = (get_local_id(0) >> WARP_LOG_SIZE) * BIN_COUNT;\n    \n    \n    for(int pos = get_local_id(0); pos < BLOCK_MEMORY; pos += get_local_size(0))\n       s_Hist[pos] = 0;\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n    \n    \n    \n    for(int pos = globalTid; pos < dataN; pos += numThreads){\n        float val = read_imagef(d_Data, pos).x;\n        unsigned int data4 = ((val - minimum)/(maximum - minimum)) * BIN_COUNT;\n\t\taddData1024(s_Hist + warpBase, data4 & 0x3FFU, threadTag);\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n    \n    for(int pos = get_local_id(0); pos < BIN_COUNT; pos += get_local_size(0)){\n        unsigned int sum = 0;\n\n        for(int base = 0; base < BLOCK_MEMORY; base += BIN_COUNT)\n            sum += s_Hist[base + pos] & 0x07FFFFFFU;\n         atomic_add(&d_result[pos], sum);\n    }\n}\n",
+    "mergesort.cl": "#define DIVISIONS 1024\n\n#pragma OPENCL EXTENSION cl_khr_int64 : enable\n\n__constant int constStartAddr[DIVISIONS + 1]; \n__constant int finalStartAddr[DIVISIONS + 1]; \n__constant int nullElems[DIVISIONS]; \n\n__device__ float4 sortElem(float4 r) {\n\tfloat4 nr;\n\n\tnr.x = (r.x > r.y) ? r.y : r.x; \n\tnr.y = (r.y > r.x) ? r.y : r.x; \n\tnr.z = (r.z > r.w) ? r.w : r.z; \n\tnr.w = (r.w > r.z) ? r.w : r.z; \n\n\tr.x = (nr.x > nr.z) ? nr.z : nr.x; \n\tr.y = (nr.y > nr.w) ? nr.w : nr.y; \n\tr.z = (nr.z > nr.x) ? nr.z : nr.x; \n\tr.w = (nr.w > nr.y) ? nr.w : nr.y; \n\n\tnr.x = r.x; \n\tnr.y = (r.y > r.z) ? r.z : r.y; \n\tnr.z = (r.z > r.y) ? r.z : r.y; \n\tnr.w = r.w; \n\treturn nr; \n}\n\n__device__ float4 getLowest(float4 a, float4 b)\n{\n\t\n\ta.x = (a.x < b.w) ? a.x : b.w; \n\ta.y = (a.y < b.z) ? a.y : b.z; \n\ta.z = (a.z < b.y) ? a.z : b.y; \n\ta.w = (a.w < b.x) ? a.w : b.x; \n\treturn a; \n}\n\n__device__ float4 getHighest(float4 a, float4 b)\n{\n\tb.x = (a.w >= b.x) ? a.w : b.x; \n\tb.y = (a.z >= b.y) ? a.z : b.y; \n\tb.z = (a.y >= b.z) ? a.y : b.z; \n\tb.w = (a.x >= b.w) ? a.x : b.w; \n\treturn b; \n}\n\n\n__kernel void\nmergeSortFirst(write_only image1d_float4 result, int listsize, read_only image1d_float4 tex) \n{\n    \n    int bx = get_group_id(0);\n    \n    \n\t\tif(bx*get_local_size(0) + get_local_id(0) < listsize/4){\n\t\t\tfloat4 r = read_imagef(tex, (int)(bx*get_local_size(0) + get_local_id(0)));\n\t\t\twrite_imagef(result, bx * get_local_size(0) + get_local_id(0), sortElem(r)); \n\t\t}\n}\n\n__kernel void\nmergeSortPass(write_only image1d_float4 result, int nrElems, int threadsPerDiv, read_only image1d_float4 tex) \n{\n\tint tid = (get_group_id(0) * get_local_size(0)) + get_local_id(0); \n\t\n\tint division = tid / threadsPerDiv; \n\tif(division >= DIVISIONS) return; \n\t\n\tint int_tid = tid - division * threadsPerDiv; \n\tint Astart = constStartAddr[division] + int_tid * nrElems; \n\n\tint Bstart = Astart + nrElems/2;\n\n\tif(Astart >= constStartAddr[division + 1]) \n\t\treturn; \n\tif(Bstart >= constStartAddr[division + 1]){\n\t\tfor(int i=0; i<(constStartAddr[division + 1] - Astart); i++)\n\t\t{\n\t\t\twrite_imagef(result, Astart + i, read_imagef(tex, Astart + i)); \n\t\t}\n\t\treturn; \n\t}\n\n\tint aidx = 0; \n\tint bidx = 0; \n\tint outidx = 0; \n\tfloat4 a, b;\n\ta = read_imagef(tex, Astart + aidx);  \n\tb = read_imagef(tex, Bstart + bidx); \n\t\n\twhile(true)\n\t{\n\n\t\tfloat4 nextA = read_imagef(tex, Astart + aidx + 1); \n\t\tfloat4 nextB = read_imagef(tex, Bstart + bidx + 1); \n\n\t\tfloat4 na = getLowest(a,b); \n\t\tfloat4 nb = getHighest(a,b); \n\t\ta = sortElem(na); \n\t\tb = sortElem(nb); \n\t\t\n\t\twrite_imagef(result, Astart + outidx, a);\n\t\toutidx++;\n\n\t\tbool elemsLeftInA; \n\t\tbool elemsLeftInB;\n\n\t\telemsLeftInA = (aidx + 1 < nrElems/2); \n\t\telemsLeftInB = (bidx + 1 < nrElems/2) && (Bstart + bidx + 1 < constStartAddr[division + 1]); \n\n\t\tif(elemsLeftInA){\n\t\t\tif(elemsLeftInB){\n\t\t\t\tif(nextA.x < nextB.x) { aidx += 1; a = nextA; }  \n\t\t\t\telse { bidx += 1;  a = nextB; }\n\t\t\t}\n\t\t\telse {\n\t\t\t\taidx += 1; a = nextA;\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\tif(elemsLeftInB){\n\t\t\t\tbidx += 1;  a = nextB;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tbreak; \n\t\t\t}\n\t\t}\n\n\t}\n\twrite_imagef(result, Astart + outidx, b);\n}\n\n__kernel void\nmergepack(read_only image1d_float orig, write_only image1d_float result) \n{\n\tint idx = get_global_id(0); \n\tint division = get_group_id(1); \n\n\tif((finalStartAddr[division] + idx) >= finalStartAddr[division + 1]) return; \n\tfloat val = read_imagef(orig, constStartAddr[division]*4 + nullElems[division] + idx);\n\twrite_imagef(result, finalStartAddr[division] + idx, (float4){val, 0, 0, 0});\n}\n"
+  },
+  "target_files_expected": [
+    "bucketsort_kernels.cl",
+    "histogram1024.cl",
+    "mergesort.cl"
+  ],
+  "target_files_extracted": [
+    "bucketsort_kernels.cl",
+    "histogram1024.cl",
+    "mergesort.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 22.851,
+      "prompt_tokens": 30579,
+      "completion_tokens": 3769,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "error",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "UnicodeDecodeError: 'utf-8' codec can't decode byte 0xf0 in position 82: invalid continuation byte",
+      "run_stdout_snippet": "",
+      "extraction_fail": null
+    }
+  ]
+}

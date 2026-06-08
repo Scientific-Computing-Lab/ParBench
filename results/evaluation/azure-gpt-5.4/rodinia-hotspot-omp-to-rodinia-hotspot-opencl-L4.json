@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-hotspot-omp",
+  "target_spec": "rodinia-hotspot-opencl",
+  "kernel": "hotspot",
+  "model": "azure-gpt-5.4",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 325865020,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-04-27T03:42:19Z",
+  "prompt_tokens": 7488,
+  "completion_tokens": 4235,
+  "llm_response_time_seconds": 100.416,
+  "build_status": "pass",
+  "build_time_seconds": 0.178,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.36,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nPlatform: NVIDIA Corporation\nnum_devices = 1\nDevice: NVIDIA GeForce RTX 4070\nUse GPU device\nInit: 159.190002\nMemAlloc: 0.002000\nHtoD: 0.434000\nExec: 61.319008\nDtoH: 0.039808\nClose: 0.313000\nTotal: 263.984009\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.159,
+  "translated_wall_time_seconds": 0.36,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.4417,
+  "translated_files": {
+    "hotspot_kernel.cl": "#define MAX_PD      (3.0e6f)\n#define PRECISION   0.001f\n#define AMB_TEMP    80.0f\n\n__kernel void hotspot(const int iteration,\n                      __global const float *power,\n                      __global float *temp_src,\n                      __global float *temp_dst,\n                      const int col,\n                      const int row,\n                      const int borderCols,\n                      const int borderRows,\n                      const float Cap,\n                      const float Rx,\n                      const float Ry,\n                      const float Rz,\n                      const float step)\n{\n    if (get_global_id(0) != 0 || get_global_id(1) != 0)\n        return;\n\n    (void)borderCols;\n    (void)borderRows;\n\n    const float step_div_Cap = (step / 1000.0f) / Cap;\n    const float Rx_1 = 1.0f / Rx;\n    const float Ry_1 = 1.0f / Ry;\n    const float Rz_1 = 1.0f / Rz;\n\n    for (int it = 0; it < iteration; ++it) {\n        __global float *src = (it & 1) ? temp_dst : temp_src;\n        __global float *dst = (it & 1) ? temp_src : temp_dst;\n\n        for (int r = 0; r < row; ++r) {\n            int base = r * col;\n            for (int c = 0; c < col; ++c) {\n                int idx = base + c;\n                float center = src[idx];\n\n                float horiz = 0.0f;\n                float vert = 0.0f;\n\n                if (c > 0)       horiz += src[idx - 1] - center;\n                if (c < col - 1) horiz += src[idx + 1] - center;\n                if (r > 0)       vert  += src[idx - col] - center;\n                if (r < row - 1) vert  += src[idx + col] - center;\n\n                float delta = step_div_Cap *\n                              (power[idx] +\n                               horiz * Rx_1 +\n                               vert * Ry_1 +\n                               (AMB_TEMP - center) * Rz_1);\n\n                dst[idx] = center + delta;\n            }\n        }\n    }\n\n    if ((iteration & 1) == 0) {\n        int size = row * col;\n        for (int i = 0; i < size; ++i) {\n            temp_dst[i] = temp_src[i];\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "hotspot_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspot_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 100.416,
+      "prompt_tokens": 7488,
+      "completion_tokens": 4235,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

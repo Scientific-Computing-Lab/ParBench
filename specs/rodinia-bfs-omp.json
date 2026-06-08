@@ -1,0 +1,158 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "bfs",
+        "parallel_api": "omp",
+        "unique_id": "rodinia-bfs-omp",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "openmp/bfs",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "bfs.cpp"
+        ],
+        "support_files": [
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "bfs.cpp"
+        ]
+    },
+    "implementation": {
+        "api": "omp",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "gcc>=9.0 (with OpenMP support)"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "openmp/bfs",
+        "commands": {
+            "configure": null,
+            "build": "make bfs",
+            "clean": "make clean"
+        },
+        "variables": null,
+        "outputs": {
+            "executable": "./bfs"
+        }
+    },
+    "run": {
+        "executable": "./bfs",
+        "default_arguments": [
+            "4",
+            "../../data/bfs/graph1MW_6.txt"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "4",
+                    "../../data/bfs/graph1MW_6.txt"
+                ],
+                "description": "Small input for correctness verification of bfs (OMP)",
+                "input_files": [
+                    "../../data/bfs/graph1MW_6.txt"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Result stored in result\\.txt",
+                "description": "BFS completion banner. file_hash downgraded 2026-04-19 (S7 BUG-3): Rodinia CUDA and OMP BFS implementations diverge in source-node selection — cuda/bfs/bfs.cu:130 hardcodes 'source=0' as leftover debug code; openmp/bfs/bfs.cpp:87 reads source from input file (override commented out, labeled 'tesing code line'). LLM translations between APIs cannot match both baselines via file_hash because benchmark sources differ. stdout_pattern is the honest oracle until this asymmetry is resolved upstream. See .planning/phases/03-oracle-framework/04-S7-LIVE-v2.log."
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "cpu",
+        "requirements": {
+            "cpu": {
+                "min_cores": 4,
+                "min_memory_gb": 8
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.272005+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "",
+                "wall_time_seconds": 0.001,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Breadth-first search on a large sparse graph",
+        "domain": "graph traversal",
+        "complexity": "graph traversal (breadth-first search)",
+        "tags": [
+            "bfs",
+            "graph",
+            "omp",
+            "rodinia",
+            "sparse"
+        ],
+        "multi_file": false,
+        "translation_complexity": "multi_to_single"
+    }
+}

@@ -1,0 +1,83 @@
+{
+  "source_spec": "rodinia-bptree-omp",
+  "target_spec": "rodinia-bptree-cuda",
+  "kernel": "bptree",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 839690219,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-04-30T02:08:21Z",
+  "prompt_tokens": 18044,
+  "completion_tokens": 8286,
+  "llm_response_time_seconds": 113.241,
+  "build_status": "pass",
+  "build_time_seconds": 1.902,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.499,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": " \nCommand Buffer: \nj 6000 3000\nk 10000\n\n\nGetting input from file ../../data/b+tree/mil.txt...\nTransforming data to a GPU suitable structure...\nTree transformation took 0.068844\nWaiting for command\n> \n******command: j count=6000, rSize=6000 \nknodes_elem=7874, knodes_unit_mem=2068, knodes_mem=16283432\n> > > > > > > > > > > > \n ******command: k count=10000 \nrecords_elem=1000000, records_unit_mem=4, records_mem=4000000\nknodes_elem=7874, knodes_unit_mem=2068, knodes_mem=16283432\n> > > > > > > > > > \n",
+  "verify_status": "pass",
+  "verify_strategy": "file_hash+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.434,
+  "translated_wall_time_seconds": 0.499,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.8697,
+  "translated_files": {
+    "kernel/kernel_gpu_cuda.cu": "#include <stdlib.h>\n#include <stdio.h>\n\n#include \"../common.h\"\n#include \"../util/timer/timer.h\"\n\n#include \"./kernel_cpu.h\"\n#include \"./kernel_gpu_cuda_wrapper.h\"\n\nvoid\nkernel_cpu(\tint cores_arg,\n\t\t\trecord *records,\n\t\t\tknode *knodes,\n\t\t\tlong knodes_elem,\n\t\t\tint order,\n\t\t\tlong maxheight,\n\t\t\tint count,\n\t\t\tlong *currKnode,\n\t\t\tlong *offset,\n\t\t\tint *keys,\n\t\t\trecord *ans)\n{\n\t(void)cores_arg;\n\n\tlong long time0;\n\tlong long time1;\n\tlong long time2;\n\n\ttime0 = get_time();\n\n\tint threadsPerBlock;\n\tthreadsPerBlock = order < 1024 ? order : 1024;\n\t(void)threadsPerBlock;\n\n\ttime1 = get_time();\n\n\tlong records_mem = (long)((char*)knodes - (char*)records);\n\tlong knodes_mem = knodes_elem * (long)sizeof(knode);\n\n\tkernel_gpu_cuda_wrapper(records,\n\t\t\t\t\t\t\trecords_mem,\n\t\t\t\t\t\t\tknodes,\n\t\t\t\t\t\t\tknodes_elem,\n\t\t\t\t\t\t\tknodes_mem,\n\t\t\t\t\t\t\torder,\n\t\t\t\t\t\t\tmaxheight,\n\t\t\t\t\t\t\tcount,\n\t\t\t\t\t\t\tcurrKnode,\n\t\t\t\t\t\t\toffset,\n\t\t\t\t\t\t\tkeys,\n\t\t\t\t\t\t\tans);\n\n\ttime2 = get_time();\n\n\tprintf(\"Time spent in different stages of CPU/MCPU KERNEL:\\n\");\n\tprintf(\"%15.12f s, %15.12f % : MCPU: SET DEVICE\\n\",\n\t\t\t(float)(time1 - time0) / 1000000,\n\t\t\t(float)(time1 - time0) / (float)(time2 - time0) * 100);\n\tprintf(\"%15.12f s, %15.12f % : CPU/MCPU: KERNEL\\n\",\n\t\t\t(float)(time2 - time1) / 1000000,\n\t\t\t(float)(time2 - time1) / (float)(time2 - time0) * 100);\n\n\tprintf(\"Total time:\\n\");\n\tprintf(\"%.12f s\\n\", (float)(time2 - time0) / 1000000);\n}\n",
+    "kernel/kernel_gpu_cuda_2.cu": "#include <stdlib.h>\n#include <stdio.h>\n\n#include \"../common.h\"\n#include \"../util/timer/timer.h\"\n\n#include \"./kernel_cpu_2.h\"\n#include \"./kernel_gpu_cuda_wrapper_2.h\"\n\nvoid\nkernel_cpu_2(\tint cores_arg,\n\t\t\t\tknode *knodes,\n\t\t\t\tlong knodes_elem,\n\t\t\t\tint order,\n\t\t\t\tlong maxheight,\n\t\t\t\tint count,\n\t\t\t\tlong *currKnode,\n\t\t\t\tlong *offset,\n\t\t\t\tlong *lastKnode,\n\t\t\t\tlong *offset_2,\n\t\t\t\tint *start,\n\t\t\t\tint *end,\n\t\t\t\tint *recstart,\n\t\t\t\tint *reclength)\n{\n\t(void)cores_arg;\n\n\tlong long time0;\n\tlong long time1;\n\tlong long time2;\n\n\ttime0 = get_time();\n\n\tint threadsPerBlock;\n\tthreadsPerBlock = order < 1024 ? order : 1024;\n\t(void)threadsPerBlock;\n\n\ttime1 = get_time();\n\n\tlong knodes_mem = knodes_elem * (long)sizeof(knode);\n\n\tkernel_gpu_cuda_wrapper_2(knodes,\n\t\t\t\t\t\t\t  knodes_elem,\n\t\t\t\t\t\t\t  knodes_mem,\n\t\t\t\t\t\t\t  order,\n\t\t\t\t\t\t\t  maxheight,\n\t\t\t\t\t\t\t  count,\n\t\t\t\t\t\t\t  currKnode,\n\t\t\t\t\t\t\t  offset,\n\t\t\t\t\t\t\t  lastKnode,\n\t\t\t\t\t\t\t  offset_2,\n\t\t\t\t\t\t\t  start,\n\t\t\t\t\t\t\t  end,\n\t\t\t\t\t\t\t  recstart,\n\t\t\t\t\t\t\t  reclength);\n\n\ttime2 = get_time();\n\n\tprintf(\"Time spent in different stages of CPU/MCPU KERNEL:\\n\");\n\tprintf(\"%15.12f s, %15.12f % : MCPU: SET DEVICE\\n\",\n\t\t\t(float)(time1 - time0) / 1000000,\n\t\t\t(float)(time1 - time0) / (float)(time2 - time0) * 100);\n\tprintf(\"%15.12f s, %15.12f % : CPU/MCPU: KERNEL\\n\",\n\t\t\t(float)(time2 - time1) / 1000000,\n\t\t\t(float)(time2 - time1) / (float)(time2 - time0) * 100);\n\n\tprintf(\"Total time:\\n\");\n\tprintf(\"%.12f s\\n\", (float)(time2 - time0) / 1000000);\n}\n",
+    "kernel/kernel_gpu_cuda_wrapper.cu": "#include <cuda_runtime.h>\n#include <stdio.h>\n\n#include \"../common.h\"\n#include \"./kernel_gpu_cuda_wrapper.h\"\n\n__global__ static void find_k_kernel(record *records,\n\t\t\t\t\t\t\t\t\t knode *knodes,\n\t\t\t\t\t\t\t\t\t long knodes_elem,\n\t\t\t\t\t\t\t\t\t int order,\n\t\t\t\t\t\t\t\t\t long maxheight,\n\t\t\t\t\t\t\t\t\t int count,\n\t\t\t\t\t\t\t\t\t long *currKnode,\n\t\t\t\t\t\t\t\t\t long *offset,\n\t\t\t\t\t\t\t\t\t int *keys,\n\t\t\t\t\t\t\t\t\t record *ans)\n{\n\tint bid = blockIdx.x * blockDim.x + threadIdx.x;\n\tif (bid >= count) return;\n\n\tint threadsPerBlock = order < 1024 ? order : 1024;\n\n\tfor (long i = 0; i < maxheight; i++) {\n\t\tfor (int thid = 0; thid < threadsPerBlock; thid++) {\n\t\t\tif ((knodes[currKnode[bid]].keys[thid] <= keys[bid]) &&\n\t\t\t\t(knodes[currKnode[bid]].keys[thid + 1] > keys[bid])) {\n\t\t\t\tif (knodes[offset[bid]].indices[thid] < knodes_elem) {\n\t\t\t\t\toffset[bid] = knodes[offset[bid]].indices[thid];\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tcurrKnode[bid] = offset[bid];\n\t}\n\n\tfor (int thid = 0; thid < threadsPerBlock; thid++) {\n\t\tif (knodes[currKnode[bid]].keys[thid] == keys[bid]) {\n\t\t\tans[bid].value = records[knodes[currKnode[bid]].indices[thid]].value;\n\t\t}\n\t}\n}\n\nvoid\nkernel_gpu_cuda_wrapper(record *records,\n\t\t\t\t\t\tlong records_mem,\n\t\t\t\t\t\tknode *knodes,\n\t\t\t\t\t\tlong knodes_elem,\n\t\t\t\t\t\tlong knodes_mem,\n\t\t\t\t\t\tint order,\n\t\t\t\t\t\tlong maxheight,\n\t\t\t\t\t\tint count,\n\t\t\t\t\t\tlong *currKnode,\n\t\t\t\t\t\tlong *offset,\n\t\t\t\t\t\tint *keys,\n\t\t\t\t\t\trecord *ans)\n{\n\trecord *d_records = NULL;\n\tknode *d_knodes = NULL;\n\tlong *d_currKnode = NULL;\n\tlong *d_offset = NULL;\n\tint *d_keys = NULL;\n\trecord *d_ans = NULL;\n\n\tcudaMalloc((void **)&d_records, (size_t)records_mem);\n\tcudaMalloc((void **)&d_knodes, (size_t)knodes_mem);\n\tcudaMalloc((void **)&d_currKnode, (size_t)(count * sizeof(long)));\n\tcudaMalloc((void **)&d_offset, (size_t)(count * sizeof(long)));\n\tcudaMalloc((void **)&d_keys, (size_t)(count * sizeof(int)));\n\tcudaMalloc((void **)&d_ans, (size_t)(count * sizeof(record)));\n\n\tcudaMemcpy(d_records, records, (size_t)records_mem, cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_knodes, knodes, (size_t)knodes_mem, cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_currKnode, currKnode, (size_t)(count * sizeof(long)), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_offset, offset, (size_t)(count * sizeof(long)), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_keys, keys, (size_t)(count * sizeof(int)), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_ans, ans, (size_t)(count * sizeof(record)), cudaMemcpyHostToDevice);\n\n\tint threads = 256;\n\tint blocks = (count + threads - 1) / threads;\n\n\tfind_k_kernel<<<blocks, threads>>>(d_records, d_knodes, knodes_elem, order, maxheight, count,\n\t\t\t\t\t\t\t\t\t   d_currKnode, d_offset, d_keys, d_ans);\n\tcudaDeviceSynchronize();\n\n\tcudaMemcpy(ans, d_ans, (size_t)(count * sizeof(record)), cudaMemcpyDeviceToHost);\n\n\tcudaFree(d_records);\n\tcudaFree(d_knodes);\n\tcudaFree(d_currKnode);\n\tcudaFree(d_offset);\n\tcudaFree(d_keys);\n\tcudaFree(d_ans);\n}\n",
+    "kernel/kernel_gpu_cuda_wrapper_2.cu": "#include <cuda_runtime.h>\n#include <stdio.h>\n\n#include \"../common.h\"\n#include \"./kernel_gpu_cuda_wrapper_2.h\"\n\n__global__ static void find_range_kernel(knode *knodes,\n\t\t\t\t\t\t\t\t\t\t long knodes_elem,\n\t\t\t\t\t\t\t\t\t\t int order,\n\t\t\t\t\t\t\t\t\t\t long maxheight,\n\t\t\t\t\t\t\t\t\t\t int count,\n\t\t\t\t\t\t\t\t\t\t long *currKnode,\n\t\t\t\t\t\t\t\t\t\t long *offset,\n\t\t\t\t\t\t\t\t\t\t long *lastKnode,\n\t\t\t\t\t\t\t\t\t\t long *offset_2,\n\t\t\t\t\t\t\t\t\t\t int *start,\n\t\t\t\t\t\t\t\t\t\t int *end,\n\t\t\t\t\t\t\t\t\t\t int *recstart,\n\t\t\t\t\t\t\t\t\t\t int *reclength)\n{\n\tint bid = blockIdx.x * blockDim.x + threadIdx.x;\n\tif (bid >= count) return;\n\n\tint threadsPerBlock = order < 1024 ? order : 1024;\n\n\tfor (long i = 0; i < maxheight; i++) {\n\t\tfor (int thid = 0; thid < threadsPerBlock; thid++) {\n\t\t\tif ((knodes[currKnode[bid]].keys[thid] <= start[bid]) &&\n\t\t\t\t(knodes[currKnode[bid]].keys[thid + 1] > start[bid])) {\n\t\t\t\tif (knodes[currKnode[bid]].indices[thid] < knodes_elem) {\n\t\t\t\t\toffset[bid] = knodes[currKnode[bid]].indices[thid];\n\t\t\t\t}\n\t\t\t}\n\t\t\tif ((knodes[lastKnode[bid]].keys[thid] <= end[bid]) &&\n\t\t\t\t(knodes[lastKnode[bid]].keys[thid + 1] > end[bid])) {\n\t\t\t\tif (knodes[lastKnode[bid]].indices[thid] < knodes_elem) {\n\t\t\t\t\toffset_2[bid] = knodes[lastKnode[bid]].indices[thid];\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\tcurrKnode[bid] = offset[bid];\n\t\tlastKnode[bid] = offset_2[bid];\n\t}\n\n\tfor (int thid = 0; thid < threadsPerBlock; thid++) {\n\t\tif (knodes[currKnode[bid]].keys[thid] == start[bid]) {\n\t\t\trecstart[bid] = knodes[currKnode[bid]].indices[thid];\n\t\t}\n\t}\n\n\tfor (int thid = 0; thid < threadsPerBlock; thid++) {\n\t\tif (knodes[lastKnode[bid]].keys[thid] == end[bid]) {\n\t\t\treclength[bid] = knodes[lastKnode[bid]].indices[thid] - recstart[bid] + 1;\n\t\t}\n\t}\n}\n\nvoid\nkernel_gpu_cuda_wrapper_2(knode *knodes,\n\t\t\t\t\t\t  long knodes_elem,\n\t\t\t\t\t\t  long knodes_mem,\n\t\t\t\t\t\t  int order,\n\t\t\t\t\t\t  long maxheight,\n\t\t\t\t\t\t  int count,\n\t\t\t\t\t\t  long *currKnode,\n\t\t\t\t\t\t  long *offset,\n\t\t\t\t\t\t  long *lastKnode,\n\t\t\t\t\t\t  long *offset_2,\n\t\t\t\t\t\t  int *start,\n\t\t\t\t\t\t  int *end,\n\t\t\t\t\t\t  int *recstart,\n\t\t\t\t\t\t  int *reclength)\n{\n\tknode *d_knodes = NULL;\n\tlong *d_currKnode = NULL;\n\tlong *d_offset = NULL;\n\tlong *d_lastKnode = NULL;\n\tlong *d_offset_2 = NULL;\n\tint *d_start = NULL;\n\tint *d_end = NULL;\n\tint *d_recstart = NULL;\n\tint *d_reclength = NULL;\n\n\tcudaMalloc((void **)&d_knodes, (size_t)knodes_mem);\n\tcudaMalloc((void **)&d_currKnode, (size_t)(count * sizeof(long)));\n\tcudaMalloc((void **)&d_offset, (size_t)(count * sizeof(long)));\n\tcudaMalloc((void **)&d_lastKnode, (size_t)(count * sizeof(long)));\n\tcudaMalloc((void **)&d_offset_2, (size_t)(count * sizeof(long)));\n\tcudaMalloc((void **)&d_start, (size_t)(count * sizeof(int)));\n\tcudaMalloc((void **)&d_end, (size_t)(count * sizeof(int)));\n\tcudaMalloc((void **)&d_recstart, (size_t)(count * sizeof(int)));\n\tcudaMalloc((void **)&d_reclength, (size_t)(count * sizeof(int)));\n\n\tcudaMemcpy(d_knodes, knodes, (size_t)knodes_mem, cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_currKnode, currKnode, (size_t)(count * sizeof(long)), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_offset, offset, (size_t)(count * sizeof(long)), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_lastKnode, lastKnode, (size_t)(count * sizeof(long)), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_offset_2, offset_2, (size_t)(count * sizeof(long)), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_start, start, (size_t)(count * sizeof(int)), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_end, end, (size_t)(count * sizeof(int)), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_recstart, recstart, (size_t)(count * sizeof(int)), cudaMemcpyHostToDevice);\n\tcudaMemcpy(d_reclength, reclength, (size_t)(count * sizeof(int)), cudaMemcpyHostToDevice);\n\n\tint threads = 256;\n\tint blocks = (count + threads - 1) / threads;\n\n\tfind_range_kernel<<<blocks, threads>>>(d_knodes, knodes_elem, order, maxheight, count,\n\t\t\t\t\t\t\t\t\t\t   d_currKnode, d_offset, d_lastKnode, d_offset_2,\n\t\t\t\t\t\t\t\t\t\t   d_start, d_end, d_recstart, d_reclength);\n\tcudaDeviceSynchronize();\n\n\tcudaMemcpy(recstart, d_recstart, (size_t)(count * sizeof(int)), cudaMemcpyDeviceToHost);\n\tcudaMemcpy(reclength, d_reclength, (size_t)(count * sizeof(int)), cudaMemcpyDeviceToHost);\n\n\tcudaFree(d_knodes);\n\tcudaFree(d_currKnode);\n\tcudaFree(d_offset);\n\tcudaFree(d_lastKnode);\n\tcudaFree(d_offset_2);\n\tcudaFree(d_start);\n\tcudaFree(d_end);\n\tcudaFree(d_recstart);\n\tcudaFree(d_reclength);\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_cuda.cu",
+    "kernel/kernel_gpu_cuda_2.cu",
+    "kernel/kernel_gpu_cuda_wrapper.cu",
+    "kernel/kernel_gpu_cuda_wrapper_2.cu"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_cuda.cu",
+    "kernel/kernel_gpu_cuda_2.cu",
+    "kernel/kernel_gpu_cuda_wrapper.cu",
+    "kernel/kernel_gpu_cuda_wrapper_2.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 113.241,
+      "prompt_tokens": 18044,
+      "completion_tokens": 8286,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-hotspot-omp",
+  "target_spec": "rodinia-hotspot-cuda",
+  "kernel": "hotspot",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1273677049,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "512",
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-04-24T04:43:10Z",
+  "prompt_tokens": 3740,
+  "completion_tokens": 6607,
+  "llm_response_time_seconds": 196.092,
+  "build_status": "pass",
+  "build_time_seconds": 0.549,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.245,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Start computing the transient temperature\nEnding simulation\nTotal time: 0.110 seconds\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.149,
+  "translated_wall_time_seconds": 0.245,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.6082,
+  "translated_files": {
+    "hotspot.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <cuda_runtime.h>\n#include <sys/time.h>\n\nlong long get_time()\n{\n    struct timeval tv;\n    gettimeofday(&tv, NULL);\n    return (tv.tv_sec * 1000000) + tv.tv_usec;\n}\n\n#define BLOCK_SIZE 16\n#define BLOCK_SIZE_C BLOCK_SIZE\n#define BLOCK_SIZE_R BLOCK_SIZE\n\n#define STR_SIZE\t256\n\n#define MAX_PD\t(3.0e6)\n\n#define PRECISION\t0.001\n#define SPEC_HEAT_SI 1.75e6\n#define K_SI 100\n\n#define FACTOR_CHIP\t0.5\n\ntypedef float FLOAT;\n\nconst float t_chip = 0.0005;\nconst float chip_height = 0.016;\nconst float chip_width = 0.016;\n\nconst float amb_temp = 80.0;\n\n__global__ void single_iteration_kernel(float *result, float *temp, float *power, int row, int col,\n\t\t\t\t\t  float v_41, float var_23, float elem_44, float var_32, \n\t\t\t\t\t  float elem_2)\n{\n    int r = blockIdx.y * BLOCK_SIZE_R + threadIdx.y;\n    int c = blockIdx.x * BLOCK_SIZE_C + threadIdx.x;\n    \n    if (r >= row || c >= col) return;\n    \n    float delta;\n    \n    if ((0 == r) && (0 == c)) {\n        delta = (v_41) * (power[0] +\n            (temp[1] - temp[0]) * var_23 +\n            (temp[col] - temp[0]) * elem_44 +\n            (amb_temp - temp[0]) * var_32);\n    }\t\n    else if ((0 == r) && (col-1 == c)) {\n        delta = (v_41) * (power[c] +\n            (temp[c-1] - temp[c]) * var_23 +\n            (temp[c+col] - temp[c]) * elem_44 +\n            (amb_temp - temp[c]) * var_32);\n    }\t\n    else if ((row-1 == r) && (col-1 == c)) {\n        delta = (v_41) * (power[r*col+c] + \n            (temp[r*col+c-1] - temp[r*col+c]) * var_23 + \n            (temp[(r-1)*col+c] - temp[r*col+c]) * elem_44 + \n            (amb_temp - temp[r*col+c]) * var_32);\t\t\t\t\t\n    }\t\n    else if ((row-1 == r) && (0 == c)) {\n        delta = (v_41) * (power[r*col] + \n            (temp[r*col+1] - temp[r*col]) * var_23 + \n            (temp[(r-1)*col] - temp[r*col]) * elem_44 + \n            (amb_temp - temp[r*col]) * var_32);\n    }\t\n    else if (0 == r) {\n        delta = (v_41) * (power[c] + \n            (temp[c+1] + temp[c-1] - 2.0*temp[c]) * var_23 + \n            (temp[col+c] - temp[c]) * elem_44 + \n            (amb_temp - temp[c]) * var_32);\n    }\t\n    else if (col-1 == c) {\n        delta = (v_41) * (power[r*col+c] + \n            (temp[(r+1)*col+c] + temp[(r-1)*col+c] - 2.0*temp[r*col+c]) * elem_44 + \n            (temp[r*col+c-1] - temp[r*col+c]) * var_23 + \n            (amb_temp - temp[r*col+c]) * var_32);\n    }\t\n    else if (row-1 == r) {\n        delta = (v_41) * (power[r*col+c] + \n            (temp[r*col+c+1] + temp[r*col+c-1] - 2.0*temp[r*col+c]) * var_23 + \n            (temp[(r-1)*col+c] - temp[r*col+c]) * elem_44 + \n            (amb_temp - temp[r*col+c]) * var_32);\n    }\t\n    else if (0 == c) {\n        delta = (v_41) * (power[r*col] + \n            (temp[(r+1)*col] + temp[(r-1)*col] - 2.0*temp[r*col]) * elem_44 + \n            (temp[r*col+1] - temp[r*col]) * var_23 + \n            (amb_temp - temp[r*col]) * var_32);\n    }\n    else {\n        delta = (v_41) * (power[r*col+c] + \n            (temp[(r+1)*col+c] + temp[(r-1)*col+c] - 2.0f*temp[r*col+c]) * elem_44 + \n            (temp[r*col+c+1] + temp[r*col+c-1] - 2.0f*temp[r*col+c]) * var_23 + \n            (amb_temp - temp[r*col+c]) * var_32);\n    }\n    \n    result[r*col+c] = temp[r*col+c] + delta;\n}\n\nvoid compute_tran_temp(float *result, int val_27, float *v_35, float *elem_29, int data_50, int data_42) \n{\n    float v_25 = chip_height / data_50;\n    float data_36 = chip_width / data_42;\n\n    float elem_37 = FACTOR_CHIP * SPEC_HEAT_SI * t_chip * data_36 * v_25;\n    float v_16 = data_36 / (2.0 * K_SI * t_chip * v_25);\n    float tmp_52 = v_25 / (2.0 * K_SI * t_chip * data_36);\n    float val_48 = t_chip / (K_SI * v_25 * data_36);\n\n    float var_38 = MAX_PD / (FACTOR_CHIP * t_chip * SPEC_HEAT_SI);\n    float tmp_14 = PRECISION / var_38 / 1000.0;\n\n    float elem_6=1.f/v_16;\n    float v_49=1.f/tmp_52;\n    float v_18=1.f/val_48;\n    float item_8 = tmp_14/elem_37;\n\n    int array_size = data_50 * data_42;\n    \n    float *d_result, *d_temp, *d_power;\n    \n    cudaMalloc(&d_result, array_size * sizeof(float));\n    cudaMalloc(&d_temp, array_size * sizeof(float));\n    cudaMalloc(&d_power, array_size * sizeof(float));\n    \n    cudaMemcpy(d_temp, v_35, array_size * sizeof(float), cudaMemcpyHostToDevice);\n    cudaMemcpy(d_power, elem_29, array_size * sizeof(float), cudaMemcpyHostToDevice);\n    \n    dim3 dimBlock(BLOCK_SIZE_C, BLOCK_SIZE_R);\n    dim3 dimGrid((data_42 + BLOCK_SIZE_C - 1) / BLOCK_SIZE_C, \n                 (data_50 + BLOCK_SIZE_R - 1) / BLOCK_SIZE_R);\n    \n    float *d_r = d_result;\n    float *d_t = d_temp;\n    \n    for (int i = 0; i < val_27; i++)\n    {\n        single_iteration_kernel<<<dimGrid, dimBlock>>>(d_r, d_t, d_power, data_50, data_42, \n                                                        item_8, elem_6, v_49, v_18, tmp_14);\n        \n        float *x_17 = d_t;\n        d_t = d_r;\n        d_r = x_17;\n    }\n    \n    cudaMemcpy(result, d_r, array_size * sizeof(float), cudaMemcpyDeviceToHost);\n    \n    cudaFree(d_result);\n    cudaFree(d_temp);\n    cudaFree(d_power);\n}\n\nvoid fatal(char *s)\n{\n    fprintf(stderr, \"error: %s\\n\", s);\n    exit(1);\n}\n\nvoid writeoutput(float *tmp_10, int var_31, int var_43, char *tmp_5) {\n\n    int i,j, var_12=0;\n    FILE *var_7;\n    char x_20[STR_SIZE];\n\n    if( (var_7 = fopen(tmp_5, \"w\" )) == 0 )\n        printf( \"The file was not opened\\n\" );\n\n    for (i=0; var_31 > i; i++) \n        for (j=0; var_43 > j; j++)\n        {\n\n            sprintf(x_20, \"%d\\t%g\\n\", var_12, tmp_10[i*var_43+j]);\n            fputs(x_20,var_7);\n            var_12++;\n        }\n\n    fclose(var_7);\t\n}\n\nvoid read_input(float *data_22, int tmp_4, int x_46, char *val_19)\n{\n    int i, elem_26;\n    FILE *var_28;\n    char tmp_47[STR_SIZE];\n    float item_40;\n\n    var_28 = fopen (val_19, \"r\");\n    if (!var_28)\n        fatal (\"file could not be opened for reading\");\n\n    for (i=0; tmp_4 * x_46 > i; i++) {\n        fgets(tmp_47, STR_SIZE, var_28);\n        if (feof(var_28))\n            fatal(\"not enough lines in file\");\n        if ((sscanf(tmp_47, \"%f\", &item_40) != 1) )\n            fatal(\"invalid file format\");\n        data_22[i] = item_40;\n    }\n\n    fclose(var_28);\t\n}\n\nvoid usage(int argc, char **argv)\n{\n    fprintf(stderr, \"Usage: %s <grid_rows> <grid_cols> <sim_time> <no. of threads><temp_file> <power_file>\\n\", argv[0]);\n    fprintf(stderr, \"\\t<grid_rows>  - number of rows in the grid (positive integer)\\n\");\n    fprintf(stderr, \"\\t<grid_cols>  - number of columns in the grid (positive integer)\\n\");\n    fprintf(stderr, \"\\t<sim_time>   - number of iterations\\n\");\n    fprintf(stderr, \"\\t<no. of threads>   - number of threads\\n\");\n    fprintf(stderr, \"\\t<temp_file>  - name of the file containing the initial temperature values of each cell\\n\");\n    fprintf(stderr, \"\\t<power_file> - name of the file containing the dissipated power values of each cell\\n\");\n    fprintf(stderr, \"\\t<output_file> - name of the output file\\n\");\n    exit(1);\n}\n\nint main(int argc, char **argv)\n{\n    int elem_13, elem_11, data_24, i;\n    float *elem_15, *val_34, *result;\n    char *x_0, *item_3, *v_39;\n    \n    if (8 != argc)\n        usage(argc, argv);\n    if ((elem_13 = atoi(argv[1])) <= 0 ||\n        (elem_11 = atoi(argv[2])) <= 0 ||\n        (data_24 = atoi(argv[3])) <= 0 || \n        (atoi(argv[4])) <= 0\n        )\n        usage(argc, argv);\n\n    elem_15 = (float *) calloc (elem_13 * elem_11, sizeof(float));\n    val_34 = (float *) calloc (elem_13 * elem_11, sizeof(float));\n    result = (float *) calloc (elem_13 * elem_11, sizeof(float));\n    if(!elem_15 || !val_34)\n        fatal(\"unable to allocate memory\");\n\n    x_0 = argv[5];\n    item_3 = argv[6];\n    v_39 = argv[7];\n\n    read_input(elem_15, elem_13, elem_11, x_0);\n    read_input(val_34, elem_13, elem_11, item_3);\n\n    printf(\"Start computing the transient temperature\\n\");\n    \n    long long elem_9 = get_time();\n\n    compute_tran_temp(result, data_24, elem_15, val_34, elem_13, elem_11);\n\n    long long x_1 = get_time();\n\n    printf(\"Ending simulation\\n\");\n    printf(\"Total time: %.3f seconds\\n\", ((float) (x_1 - elem_9)) / (1000*1000));\n\n    writeoutput((1&data_24) ? result : elem_15, elem_13, elem_11, v_39);\n\n#ifdef VERBOSE\n    fprintf(stdout, \"Final Temperatures:\\n\");\n#endif\n\n#ifdef OUTPUT\n    for(i=0; i < elem_13 * elem_11; i++)\n    fprintf(stdout, \"%d\\t%g\\n\", i, elem_15[i]);\n#endif\n    \n    free(elem_15);\n    free(val_34);\n    free(result);\n\n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "hotspot.cu"
+  ],
+  "target_files_extracted": [
+    "hotspot.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 196.092,
+      "prompt_tokens": 3740,
+      "completion_tokens": 6607,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

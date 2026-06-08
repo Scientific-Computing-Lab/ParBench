@@ -1,0 +1,69 @@
+{
+  "source_spec": "hecbench-stencil1d-cuda",
+  "target_spec": "hecbench-stencil1d-omp",
+  "kernel": "stencil1d",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 568875222,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-24T01:56:24Z",
+  "prompt_tokens": 1109,
+  "completion_tokens": 1410,
+  "llm_response_time_seconds": 238.225,
+  "build_status": "fail",
+  "build_time_seconds": 0.05,
+  "build_error_snippet": "stencil_1d.cpp: In function \u2018void stencil_1d(const int*, int*, int)\u2019:\nstencil_1d.cpp:19:33: error: invalid exit from OpenMP structured block\n   19 |     if (block_id >= num_blocks) return;\n      |                                 ^~~~~~\nstencil_1d.cpp:16:9: warning: unused variable \u2018num_threads\u2019 [-Wunused-variable]\n   16 |     int num_threads = omp_get_num_threads();\n      |         ^~~~~~~~~~~\nmake: *** [Makefile.aomp:60: stencil_1d.o] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: pp:16:9: warning: unused variable \u2018num_threads\u2019 [-Wunused-variable]\n   16 |     int num_threads = omp_get_num_threads();\n      |         ^~~~~~~~~~~\nmake: *** [Makefile.aomp:60: stencil_1d.o] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 4.97,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "stencil_1d.cpp": "#include <stdio.h>\n#include <stdlib.h>\n#include <chrono>\n#include <omp.h>\n\n#define RADIUS 7\n#define BLOCK_SIZE 256\n\nvoid stencil_1d(const int *in, int *out, int length)\n{\n  int num_blocks = length / BLOCK_SIZE;\n  \n  #pragma omp parallel\n  {\n    int thread_id = omp_get_thread_num();\n    int num_threads = omp_get_num_threads();\n    \n    int block_id = thread_id;\n    if (block_id >= num_blocks) return;\n    \n    int gindex_start = block_id * BLOCK_SIZE;\n    \n    int temp[BLOCK_SIZE + 2 * RADIUS];\n    \n    for (int t = 0; t < BLOCK_SIZE; t++) {\n      int gindex = gindex_start + t;\n      int lindex = t + RADIUS;\n      temp[lindex] = in[gindex];\n    }\n    \n    for (int t = 0; t < RADIUS; t++) {\n      int gindex = gindex_start + t;\n      int lindex = t + RADIUS;\n      temp[lindex - RADIUS] = (gindex < RADIUS) ? 0 : in[gindex - RADIUS];\n      temp[lindex + BLOCK_SIZE] = in[gindex + BLOCK_SIZE];\n    }\n    \n    #pragma omp barrier\n    \n    for (int t = 0; t < BLOCK_SIZE; t++) {\n      int gindex = gindex_start + t;\n      int lindex = t + RADIUS;\n      \n      int result = 0;\n      for (int offset = -RADIUS; offset <= RADIUS; offset++)\n        result += temp[lindex + offset];\n      \n      out[gindex] = result;\n    }\n  }\n}\n\nint main(int argc, char* argv[]) {\n  if (argc != 3) {\n    printf(\"Usage: %s <length> <repeat>\\n\", argv[0]);\n    printf(\"length is a multiple of %d\\n\", BLOCK_SIZE);\n    return 1;\n  }\n  const int length = atoi(argv[1]);\n  const int repeat = atoi(argv[2]);\n\n  int size = length * sizeof(int);\n  int pad_size = (length + RADIUS) * sizeof(int);\n\n  int *a, *b;\n  \n  a = (int *)malloc(pad_size); \n  b = (int *)malloc(size);\n\n  for (int i = 0; i < length+RADIUS; i++) a[i] = i;\n\n  int num_blocks = length / BLOCK_SIZE;\n  omp_set_num_threads(num_blocks);\n\n  auto start = std::chrono::steady_clock::now();\n\n  for (int i = 0; i < repeat; i++)\n    stencil_1d(a, b, length);\n\n  auto end = std::chrono::steady_clock::now();\n  auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n  printf(\"Average kernel execution time: %f (s)\\n\", (time * 1e-9f) / repeat);\n\n  bool ok = true;\n  for (int i = 0; i < 2*RADIUS; i++) {\n    int s = 0;\n    for (int j = i; j <= i+2*RADIUS; j++)\n      s += j < RADIUS ? 0 : (a[j] - RADIUS);\n    if (s != b[i]) {\n      printf(\"Error at %d: %d (host) != %d (device)\\n\", i, s, b[i]);\n      ok = false;\n      break;\n    }\n  }\n\n  for (int i = 2*RADIUS; i < length; i++) {\n    int s = 0;\n    for (int j = i-RADIUS; j <= i+RADIUS; j++)\n      s += a[j];\n    if (s != b[i]) {\n      printf(\"Error at %d: %d (host) != %d (device)\\n\", i, s, b[i]);\n      ok = false;\n      break;\n    }\n  }\n  printf(\"%s\\n\", ok ? \"PASS\" : \"FAIL\");\n\n  free(a);\n  free(b); \n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "stencil_1d.cpp"
+  ],
+  "target_files_extracted": [
+    "stencil_1d.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 238.225,
+      "prompt_tokens": 1109,
+      "completion_tokens": 1410,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "stencil_1d.cpp: In function \u2018void stencil_1d(const int*, int*, int)\u2019:\nstencil_1d.cpp:19:33: error: invalid exit from OpenMP structured block\n   19 |     if (block_id >= num_blocks) return;\n      |                                 ^~~~~~\nstencil_1d.cpp:16:9: warning: unused variable \u2018num_threads\u2019 [-Wunused-variable]\n   16 |     int num_threads = omp_get_num_threads();\n      |         ^~~~~~~~~~~\nmake: *** [Makefile.aomp:60: stencil_1d.o] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

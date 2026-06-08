@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-opencl",
+  "target_spec": "rodinia-lud-omp",
+  "kernel": "lud",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1434173136,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-26T09:00:32Z",
+  "prompt_tokens": 11410,
+  "completion_tokens": 4474,
+  "llm_response_time_seconds": 90.127,
+  "build_status": "pass",
+  "build_time_seconds": 0.222,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.03,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Generate input matrix internally, size =256\nCreating matrix internally size=256\nTime consumed(ms): 29.147000\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.004,
+  "translated_wall_time_seconds": 0.03,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.1333,
+  "translated_files": {
+    "omp/lud_omp.c": "#include <omp.h>\n#include \"common.h\"\n\n#ifdef RD_WG_SIZE_0_0\n#define BLOCK_SIZE RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n#define BLOCK_SIZE RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n#define BLOCK_SIZE RD_WG_SIZE\n#else\n#define BLOCK_SIZE 16\n#endif\n\nextern int omp_num_threads;\n\nvoid lud_omp(float *m, int matrix_dim)\n{\n    int offset, bs;\n\n    if (m == 0 || matrix_dim <= 0)\n        return;\n\n    omp_set_num_threads(omp_num_threads);\n    bs = BLOCK_SIZE;\n\n    for (offset = 0; offset < matrix_dim; offset += bs) {\n        int b = MIN(bs, matrix_dim - offset);\n        int r, c, i, j, k;\n\n        /* diagonal block */\n        for (i = 0; i < b; i++) {\n#pragma omp parallel for private(k) schedule(static)\n            for (j = i; j < b; j++) {\n                float sum = m[(offset + i) * matrix_dim + (offset + j)];\n                for (k = 0; k < i; k++)\n                    sum -= m[(offset + i) * matrix_dim + (offset + k)] *\n                           m[(offset + k) * matrix_dim + (offset + j)];\n                m[(offset + i) * matrix_dim + (offset + j)] = sum;\n            }\n\n#pragma omp parallel for private(k) schedule(static)\n            for (j = i + 1; j < b; j++) {\n                float sum = m[(offset + j) * matrix_dim + (offset + i)];\n                for (k = 0; k < i; k++)\n                    sum -= m[(offset + j) * matrix_dim + (offset + k)] *\n                           m[(offset + k) * matrix_dim + (offset + i)];\n                m[(offset + j) * matrix_dim + (offset + i)] =\n                    sum / m[(offset + i) * matrix_dim + (offset + i)];\n            }\n        }\n\n        if (offset + b >= matrix_dim)\n            continue;\n\n        /* perimeter row blocks */\n#pragma omp parallel for private(c, i, j, k) schedule(static)\n        for (c = offset + b; c < matrix_dim; c += bs) {\n            int w = MIN(bs, matrix_dim - c);\n            for (i = 1; i < b; i++) {\n                for (j = 0; j < w; j++) {\n                    float sum = m[(offset + i) * matrix_dim + (c + j)];\n                    for (k = 0; k < i; k++)\n                        sum -= m[(offset + i) * matrix_dim + (offset + k)] *\n                               m[(offset + k) * matrix_dim + (c + j)];\n                    m[(offset + i) * matrix_dim + (c + j)] = sum;\n                }\n            }\n        }\n\n        /* perimeter column blocks */\n#pragma omp parallel for private(r, i, j, k) schedule(static)\n        for (r = offset + b; r < matrix_dim; r += bs) {\n            int h = MIN(bs, matrix_dim - r);\n            for (i = 0; i < h; i++) {\n                for (j = 0; j < b; j++) {\n                    float sum = m[(r + i) * matrix_dim + (offset + j)];\n                    for (k = 0; k < j; k++)\n                        sum -= m[(r + i) * matrix_dim + (offset + k)] *\n                               m[(offset + k) * matrix_dim + (offset + j)];\n                    m[(r + i) * matrix_dim + (offset + j)] =\n                        sum / m[(offset + j) * matrix_dim + (offset + j)];\n                }\n            }\n        }\n\n        /* internal blocks */\n#pragma omp parallel for collapse(2) private(r, c, i, j, k) schedule(static)\n        for (r = offset + b; r < matrix_dim; r += bs) {\n            for (c = offset + b; c < matrix_dim; c += bs) {\n                int h = MIN(bs, matrix_dim - r);\n                int w = MIN(bs, matrix_dim - c);\n                for (i = 0; i < h; i++) {\n                    for (j = 0; j < w; j++) {\n                        float sum = 0.0f;\n                        for (k = 0; k < b; k++)\n                            sum += m[(r + i) * matrix_dim + (offset + k)] *\n                                   m[(offset + k) * matrix_dim + (c + j)];\n                        m[(r + i) * matrix_dim + (c + j)] -= sum;\n                    }\n                }\n            }\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "omp/lud_omp.c"
+  ],
+  "target_files_extracted": [
+    "omp/lud_omp.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 90.127,
+      "prompt_tokens": 11410,
+      "completion_tokens": 4474,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

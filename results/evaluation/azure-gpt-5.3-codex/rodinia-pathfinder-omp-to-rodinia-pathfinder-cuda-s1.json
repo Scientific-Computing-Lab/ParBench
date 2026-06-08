@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-pathfinder-omp",
+  "target_spec": "rodinia-pathfinder-cuda",
+  "kernel": "pathfinder",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 2024913104,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "100000",
+    "100"
+  ],
+  "timestamp": "2026-04-30T03:02:41Z",
+  "prompt_tokens": 1209,
+  "completion_tokens": 2476,
+  "llm_response_time_seconds": 35.765,
+  "build_status": "pass",
+  "build_time_seconds": 0.55,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.502,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "51 149 147 147 144 140 141 137 152 154 151 148 147 151 155 148 155 148 153 143 141 139 143 142 145 137 135 135 132 138 130 141 132 135 133 131 137 131 134 134 137 143 144 145 137 139 141 150 139 137 144 143 138 147 151 144 140 147 144 151 151 145 144 150 147 146 151 153 149 153 138 142 137 141 141 143 134 135 138 137 135 137 141 140 135 139 136 135 143 148 154 146 153 155 147 146 146 150 147 152 153 154 150 145 142 153 146 147 144 158 160 158 156 153 147 154 147 148 149 141 148 145 142 144 145 \n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.128,
+  "translated_wall_time_seconds": 0.502,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.255,
+  "translated_files": {
+    "pathfinder.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <assert.h>\n#include <stdint.h>\n#include <unistd.h>\n#include <cuda_runtime.h>\n\nvoid run(int argc, char** argv);\n\n__inline__ uint64_t rdtsc() {\n    uint32_t lo, hi;\n    __asm__ __volatile__ (\"rdtsc\" : \"=a\" (lo), \"=d\" (hi));\n    return ((uint64_t)hi << 32) | lo;\n}\n\nunsigned long long start_cycles;\n#define startCycle() (start_cycles = rdtsc())\n#define stopCycle(cycles) (cycles = rdtsc() - start_cycles)\n\n#define pin_stats_reset()   startCycle()\n#define pin_stats_pause(cycles)   stopCycle(cycles)\n#define pin_stats_dump(cycles)    printf(\"timer: %Lu\\n\", cycles)\n\n#define BENCH_PRINT\n\nint rows, cols;\nint* data;\nint** wall;\nint* result;\n#define M_SEED 9\n\nvoid init(int argc, char** argv) {\n    if (argc == 3) {\n        cols = atoi(argv[1]);\n        rows = atoi(argv[2]);\n    } else {\n        printf(\"Usage: pathfiner width num_of_steps\\n\");\n        exit(0);\n    }\n\n    data = new int[rows * cols];\n    wall = new int*[rows];\n    for (int n = 0; n < rows; n++)\n        wall[n] = data + cols * n;\n    result = new int[cols];\n\n    int seed = M_SEED;\n    srand(seed);\n\n    for (int i = 0; i < rows; i++) {\n        for (int j = 0; j < cols; j++) {\n            wall[i][j] = rand() % 10;\n        }\n    }\n\n    for (int j = 0; j < cols; j++)\n        result[j] = wall[0][j];\n\n#ifdef BENCH_PRINT\n    for (int i = 0; i < rows; i++) {\n        for (int j = 0; j < cols; j++) {\n            printf(\"%d \", wall[i][j]);\n        }\n        printf(\"\\n\");\n    }\n#endif\n}\n\nvoid fatal(char *s) {\n    fprintf(stderr, \"error: %s\\n\", s);\n}\n\n#define IN_RANGE(x, min, max)   ((x) >= (min) && (x) <= (max))\n#define CLAMP_RANGE(x, min, max) x = (x < (min)) ? (min) : ((x > (max)) ? (max) : (x))\n#define MIN(a, b) ((a) <= (b) ? (a) : (b))\n\n__global__ void path_kernel(const int* src, int* dst, const int* d_wall, int cols, int row) {\n    int n = blockIdx.x * blockDim.x + threadIdx.x;\n    if (n < cols) {\n        int minv = src[n];\n        if (n > 0) minv = MIN(minv, src[n - 1]);\n        if (n < cols - 1) minv = MIN(minv, src[n + 1]);\n        dst[n] = d_wall[row * cols + n] + minv;\n    }\n}\n\nint main(int argc, char** argv) {\n    run(argc, argv);\n    return EXIT_SUCCESS;\n}\n\nvoid run(int argc, char** argv) {\n    init(argc, argv);\n\n    unsigned long long cycles;\n\n    int *d_data = NULL;\n    int *d_src = NULL, *d_dst = NULL, *d_temp = NULL;\n\n    cudaMalloc((void**)&d_data, (size_t)rows * (size_t)cols * sizeof(int));\n    cudaMalloc((void**)&d_src, (size_t)cols * sizeof(int));\n    cudaMalloc((void**)&d_dst, (size_t)cols * sizeof(int));\n\n    cudaMemcpy(d_data, data, (size_t)rows * (size_t)cols * sizeof(int), cudaMemcpyHostToDevice);\n    cudaMemcpy(d_dst, result, (size_t)cols * sizeof(int), cudaMemcpyHostToDevice);\n\n    int threads = 256;\n    int blocks = (cols + threads - 1) / threads;\n\n    pin_stats_reset();\n    for (int t = 0; t < rows - 1; t++) {\n        d_temp = d_src;\n        d_src = d_dst;\n        d_dst = d_temp;\n        path_kernel<<<blocks, threads>>>(d_src, d_dst, d_data, cols, t + 1);\n    }\n    cudaDeviceSynchronize();\n    pin_stats_pause(cycles);\n    pin_stats_dump(cycles);\n\n    cudaMemcpy(result, d_dst, (size_t)cols * sizeof(int), cudaMemcpyDeviceToHost);\n\n#ifdef BENCH_PRINT\n    for (int i = 0; i < cols; i++)\n        printf(\"%d \", data[i]);\n    printf(\"\\n\");\n\n    for (int i = 0; i < cols; i++)\n        printf(\"%d \", result[i]);\n    printf(\"\\n\");\n#endif\n\n    delete [] data;\n    delete [] wall;\n    delete [] result;\n\n    cudaFree(d_data);\n    cudaFree(d_src);\n    cudaFree(d_dst);\n}\n"
+  },
+  "target_files_expected": [
+    "pathfinder.cu"
+  ],
+  "target_files_extracted": [
+    "pathfinder.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 35.765,
+      "prompt_tokens": 1209,
+      "completion_tokens": 2476,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

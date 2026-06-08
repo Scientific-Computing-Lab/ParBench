@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-srad-omp",
+  "target_spec": "rodinia-srad-cuda",
+  "kernel": "srad",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 965158283,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-30T03:04:32Z",
+  "prompt_tokens": 2301,
+  "completion_tokens": 4232,
+  "llm_response_time_seconds": 49.265,
+  "build_status": "fail",
+  "build_time_seconds": 0.526,
+  "build_error_snippet": "srad.cu(37): warning #550-D: variable \"nthreads\" was set but never used\n   int nthreads;\n       ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\n/usr/bin/ld: /tmp/tmpxft_0000b190_00000000-11_srad.o: in function `main':\ntmpxft_0000b190_00000000-6_srad.cudafe1.cpp:(.text+0x3d3): undefined reference to `srad_cuda_init(int, int)'\n/usr/bin/ld: tmpxft_0000b190_00000000-6_srad.cudafe1.cpp:(.text+0x4f7): undefined reference to `srad_cuda_step(float*, int, int, float, float)'\n/usr/bin/ld: tmpxft_0000b190_00000000-6_srad.cudafe1.cpp:(.text+0x51b): undefined reference to `srad_cuda_cleanup()'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:12: release] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: usr/bin/ld: tmpxft_0000b190_00000000-6_srad.cudafe1.cpp:(.text+0x51b): undefined reference to `srad_cuda_cleanup()'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:12: release] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.068,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "srad.cu": "#define OPEN\n#define ITERATION\n#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n\nvoid random_matrix(float *I, int rows, int cols);\n\nvoid srad_cuda_init(int rows, int cols);\nvoid srad_cuda_step(float *h_J, int rows, int cols, float q0sqr, float lambda_);\nvoid srad_cuda_cleanup();\n\nvoid usage(int argc, char **argv)\n{\n\tfprintf(stderr, \"Usage: %s <rows> <cols> <y1> <y2> <x1> <x2> <no. of threads><lamda> <no. of iter>\\n\", argv[0]);\n\tfprintf(stderr, \"\\t<rows>   - number of rows\\n\");\n\tfprintf(stderr, \"\\t<cols>    - number of cols\\n\");\n\tfprintf(stderr, \"\\t<y1> \\t - y1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<y2>      - y2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x1>       - x1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x2>       - x2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<no. of threads>  - no. of threads\\n\");\n\tfprintf(stderr, \"\\t<lamda>   - lambda (0,1)\\n\");\n\tfprintf(stderr, \"\\t<no. of iter>   - number of iterations\\n\");\n\n\texit(1);\n}\n\nint main(int argc, char* argv[])\n{\n\tint rows, cols, size_I, size_R, niter = 10, iter, k;\n\tfloat *I, *J, q0sqr, sum, sum2, tmp, meanROI, varROI;\n\tint r1, r2, c1, c2;\n\tfloat lambda_;\n\tint i, j;\n\tint nthreads;\n\n\tif (argc == 10)\n\t{\n\t\trows = atoi(argv[1]);\n\t\tcols = atoi(argv[2]);\n\t\tif ((rows % 16 != 0) || (cols % 16 != 0)) {\n\t\t\tfprintf(stderr, \"rows and cols must be multiples of 16\\n\");\n\t\t\texit(1);\n\t\t}\n\t\tr1 = atoi(argv[3]);\n\t\tr2 = atoi(argv[4]);\n\t\tc1 = atoi(argv[5]);\n\t\tc2 = atoi(argv[6]);\n\t\tnthreads = atoi(argv[7]);\n\t\tlambda_ = (float)atof(argv[8]);\n\t\tniter = atoi(argv[9]);\n\t}\n\telse {\n\t\tusage(argc, argv);\n\t}\n\n\t(void)nthreads;\n\n\tsize_I = cols * rows;\n\tsize_R = (r2 - r1 + 1) * (c2 - c1 + 1);\n\n\tI = (float *)malloc(size_I * sizeof(float));\n\tJ = (float *)malloc(size_I * sizeof(float));\n\n\tprintf(\"Randomizing the input matrix\\n\");\n\n\trandom_matrix(I, rows, cols);\n\n\tfor (k = 0; k < size_I; k++) {\n\t\tJ[k] = (float)exp(I[k]);\n\t}\n\n\tsrad_cuda_init(rows, cols);\n\n\tprintf(\"Start the SRAD main loop\\n\");\n\n#ifdef ITERATION\n\tfor (iter = 0; iter < niter; iter++) {\n#endif\n\t\tsum = 0;\n\t\tsum2 = 0;\n\t\tfor (i = r1; i <= r2; i++) {\n\t\t\tfor (j = c1; j <= c2; j++) {\n\t\t\t\ttmp = J[i * cols + j];\n\t\t\t\tsum += tmp;\n\t\t\t\tsum2 += tmp * tmp;\n\t\t\t}\n\t\t}\n\t\tmeanROI = sum / size_R;\n\t\tvarROI = (sum2 / size_R) - meanROI * meanROI;\n\t\tq0sqr = varROI / (meanROI * meanROI);\n\n\t\tsrad_cuda_step(J, rows, cols, q0sqr, lambda_);\n#ifdef ITERATION\n\t}\n#endif\n\n#ifdef OUTPUT\n\tfor (int i = 0; i < rows; i++) {\n\t\tfor (int j = 0; j < cols; j++) {\n\t\t\tprintf(\"%.5f \", J[i * cols + j]);\n\t\t}\n\t\tprintf(\"\\n\");\n\t}\n#endif\n\n\tprintf(\"Computation Done\\n\");\n\n\tsrad_cuda_cleanup();\n\tfree(I);\n\tfree(J);\n\n\treturn 0;\n}\n\nvoid random_matrix(float *I, int rows, int cols) {\n\tsrand(7);\n\n\tfor (int i = 0; i < rows; i++) {\n\t\tfor (int j = 0; j < cols; j++) {\n\t\t\tI[i * cols + j] = rand() / (float)RAND_MAX;\n#ifdef OUTPUT\n#endif\n\t\t}\n#ifdef OUTPUT\n#endif\n\t}\n}\n",
+    "srad_kernel.cu": "#include <cuda_runtime.h>\n#include <stdlib.h>\n\n#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\nstatic float *d_J = NULL;\nstatic float *dN = NULL;\nstatic float *dS = NULL;\nstatic float *dW = NULL;\nstatic float *dE = NULL;\nstatic float *d_c = NULL;\nstatic int g_rows = 0;\nstatic int g_cols = 0;\n\n__global__ void srad_kernel_1(const float *J, float *dN, float *dS, float *dW, float *dE, float *c,\n                              int rows, int cols, float q0sqr) {\n\tint j = blockIdx.x * blockDim.x + threadIdx.x;\n\tint i = blockIdx.y * blockDim.y + threadIdx.y;\n\n\tif (i < rows && j < cols) {\n\t\tint k = i * cols + j;\n\t\tfloat Jc = J[k];\n\n\t\tint iN = (i == 0) ? 0 : (i - 1);\n\t\tint iS = (i == rows - 1) ? (rows - 1) : (i + 1);\n\t\tint jW = (j == 0) ? 0 : (j - 1);\n\t\tint jE = (j == cols - 1) ? (cols - 1) : (j + 1);\n\n\t\tdN[k] = J[iN * cols + j] - Jc;\n\t\tdS[k] = J[iS * cols + j] - Jc;\n\t\tdW[k] = J[i * cols + jW] - Jc;\n\t\tdE[k] = J[i * cols + jE] - Jc;\n\n\t\tfloat G2 = (dN[k] * dN[k] + dS[k] * dS[k] + dW[k] * dW[k] + dE[k] * dE[k]) / (Jc * Jc);\n\t\tfloat L = (dN[k] + dS[k] + dW[k] + dE[k]) / Jc;\n\n\t\tfloat num = (0.5f * G2) - ((1.0f / 16.0f) * (L * L));\n\t\tfloat den = 1.0f + (0.25f * L);\n\t\tfloat qsqr = num / (den * den);\n\n\t\tden = (qsqr - q0sqr) / (q0sqr * (1.0f + q0sqr));\n\t\tc[k] = 1.0f / (1.0f + den);\n\n\t\tif (c[k] < 0.0f) c[k] = 0.0f;\n\t\telse if (c[k] > 1.0f) c[k] = 1.0f;\n\t}\n}\n\n__global__ void srad_kernel_2(float *J, const float *c, const float *dN, const float *dS, const float *dW, const float *dE,\n                              int rows, int cols, float lambda_) {\n\tint j = blockIdx.x * blockDim.x + threadIdx.x;\n\tint i = blockIdx.y * blockDim.y + threadIdx.y;\n\n\tif (i < rows && j < cols) {\n\t\tint k = i * cols + j;\n\t\tint iS = (i == rows - 1) ? (rows - 1) : (i + 1);\n\t\tint jE = (j == cols - 1) ? (cols - 1) : (j + 1);\n\n\t\tfloat cN = c[k];\n\t\tfloat cS = c[iS * cols + j];\n\t\tfloat cW = c[k];\n\t\tfloat cE = c[i * cols + jE];\n\n\t\tfloat D = cN * dN[k] + cS * dS[k] + cW * dW[k] + cE * dE[k];\n\t\tJ[k] = J[k] + 0.25f * lambda_ * D;\n\t}\n}\n\nvoid srad_cuda_init(int rows, int cols) {\n\tg_rows = rows;\n\tg_cols = cols;\n\tsize_t bytes = (size_t)rows * (size_t)cols * sizeof(float);\n\n\tcudaMalloc((void**)&d_J, bytes);\n\tcudaMalloc((void**)&dN, bytes);\n\tcudaMalloc((void**)&dS, bytes);\n\tcudaMalloc((void**)&dW, bytes);\n\tcudaMalloc((void**)&dE, bytes);\n\tcudaMalloc((void**)&d_c, bytes);\n}\n\nvoid srad_cuda_step(float *h_J, int rows, int cols, float q0sqr, float lambda_) {\n\tsize_t bytes = (size_t)rows * (size_t)cols * sizeof(float);\n\tcudaMemcpy(d_J, h_J, bytes, cudaMemcpyHostToDevice);\n\n\tdim3 block(BLOCK_SIZE, BLOCK_SIZE);\n\tdim3 grid((cols + block.x - 1) / block.x, (rows + block.y - 1) / block.y);\n\n\tsrad_kernel_1<<<grid, block>>>(d_J, dN, dS, dW, dE, d_c, rows, cols, q0sqr);\n\tsrad_kernel_2<<<grid, block>>>(d_J, d_c, dN, dS, dW, dE, rows, cols, lambda_);\n\n\tcudaMemcpy(h_J, d_J, bytes, cudaMemcpyDeviceToHost);\n}\n\nvoid srad_cuda_cleanup() {\n\tif (d_J) cudaFree(d_J);\n\tif (dN) cudaFree(dN);\n\tif (dS) cudaFree(dS);\n\tif (dW) cudaFree(dW);\n\tif (dE) cudaFree(dE);\n\tif (d_c) cudaFree(d_c);\n\n\td_J = NULL;\n\tdN = NULL;\n\tdS = NULL;\n\tdW = NULL;\n\tdE = NULL;\n\td_c = NULL;\n\tg_rows = 0;\n\tg_cols = 0;\n}\n"
+  },
+  "target_files_expected": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "target_files_extracted": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 49.265,
+      "prompt_tokens": 2301,
+      "completion_tokens": 4232,
+      "finish_reason": "completed",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "srad.cu(37): warning #550-D: variable \"nthreads\" was set but never used\n   int nthreads;\n       ^\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\n/usr/bin/ld: /tmp/tmpxft_0000b190_00000000-11_srad.o: in function `main':\ntmpxft_0000b190_00000000-6_srad.cudafe1.cpp:(.text+0x3d3): undefined reference to `srad_cuda_init(int, int)'\n/usr/bin/ld: tmpxft_0000b190_00000000-6_srad.cudafe1.cpp:(.text+0x4f7): undefined reference to `srad_cuda_step(float*, int, int, float, float)'\n/usr/bin/ld: tmpxft_0000b190_00000000-6_srad.cudafe1.cpp:(.text+0x51b): undefined reference to `srad_cuda_cleanup()'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:12: release] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

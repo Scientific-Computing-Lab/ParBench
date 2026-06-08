@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-dwt2d-cuda",
+  "target_spec": "rodinia-dwt2d-opencl",
+  "kernel": "dwt2d",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1922236906,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "rgb.bmp",
+    "-i",
+    "../../data/dwt2d",
+    "-D",
+    "1024x1024",
+    "-f",
+    "-5",
+    "-l",
+    "3"
+  ],
+  "timestamp": "2026-04-30T03:18:27Z",
+  "prompt_tokens": 30828,
+  "completion_tokens": 5828,
+  "llm_response_time_seconds": 76.556,
+  "build_status": "pass",
+  "build_time_seconds": 0.31,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.664,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "iding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 3 , gx = 4 , gy = 11 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\n\nWriting to rgb.bmp.dwt.r (1024 x 1024)\n\nWriting to rgb.bmp.dwt.g (1024 x 1024)\n\nWriting to rgb.bmp.dwt.b (1024 x 1024)\nInit: 190.095993\nMemAlloc: 9.476000\nHtoD: 0.000000\nExec: 0.021504\nDtoH: 463.953979\nClose: 0.613000\nTotal: 1611.927979\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.1,
+  "translated_wall_time_seconds": 1.664,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0601,
+  "translated_files": {
+    "com_dwt.cl": "#define THREADS 256\n\ninline int mirror_coord(int d, int size)\n{\n    if (size <= 1) return 0;\n    while (d >= size || d < 0) {\n        if (d >= size) d = 2 * size - 2 - d;\n        else d = -d;\n    }\n    return d;\n}\n\ninline int sample_mirrored(__global const int *in, int x, int y, int sx, int sy)\n{\n    x = mirror_coord(x, sx);\n    y = mirror_coord(y, sy);\n    return in[y * sx + x];\n}\n\ninline int vt53_at(__global const int *in, int x, int y, int sx, int sy)\n{\n    int c = sample_mirrored(in, x, y, sx, sy);\n\n    if (y & 1) {\n        int p = sample_mirrored(in, x, y - 1, sx, sy);\n        int n = sample_mirrored(in, x, y + 1, sx, sy);\n        return c - ((p + n) / 2);\n    } else {\n        int ym1 = sample_mirrored(in, x, y - 1, sx, sy);\n        int ym2 = sample_mirrored(in, x, y - 2, sx, sy);\n        int yp1 = sample_mirrored(in, x, y + 1, sx, sy);\n        int yp2 = sample_mirrored(in, x, y + 2, sx, sy);\n\n        int odd_prev = ym1 - ((ym2 + c) / 2);\n        int odd_next = yp1 - ((c + yp2) / 2);\n\n        return c + ((odd_prev + odd_next + 2) / 4);\n    }\n}\n\ninline int dwt53_coeff(__global const int *in, int x, int y, int sx, int sy)\n{\n    int c = vt53_at(in, x, y, sx, sy);\n\n    if (x & 1) {\n        int p = vt53_at(in, x - 1, y, sx, sy);\n        int n = vt53_at(in, x + 1, y, sx, sy);\n        return c - ((p + n) / 2);\n    } else {\n        int xm1 = vt53_at(in, x - 1, y, sx, sy);\n        int xm2 = vt53_at(in, x - 2, y, sx, sy);\n        int xp1 = vt53_at(in, x + 1, y, sx, sy);\n        int xp2 = vt53_at(in, x + 2, y, sx, sy);\n\n        int odd_prev = xm1 - ((xm2 + c) / 2);\n        int odd_next = xp1 - ((c + xp2) / 2);\n\n        return c + ((odd_prev + odd_next + 2) / 4);\n    }\n}\n\n__kernel void c_CopySrcToComponents(__global int *d_r,\n                                    __global int *d_g,\n                                    __global int *d_b,\n                                    __global const uchar *d_src,\n                                    int pixels)\n{\n    int gid = (int)get_global_id(0);\n    if (gid < pixels) {\n        int o = gid * 3;\n        d_r[gid] = ((int)d_src[o + 0]) - 128;\n        d_g[gid] = ((int)d_src[o + 1]) - 128;\n        d_b[gid] = ((int)d_src[o + 2]) - 128;\n    }\n}\n\n__kernel void c_CopySrcToComponent(__global int *d_c,\n                                   __global const uchar *d_src,\n                                   int pixels)\n{\n    int gid = (int)get_global_id(0);\n    int base = gid * 9;  // host launches alignedSize/9 work-items\n\n    for (int k = 0; k < 9; k++) {\n        int idx = base + k;\n        if (idx < pixels) {\n            d_c[idx] = ((int)d_src[idx]) - 128;\n        }\n    }\n}\n\n__kernel void cl_fdwt53Kernel(__global const int *input,\n                              __global int *output,\n                              int sizeX,\n                              int sizeY,\n                              int winSteps,\n                              int WIN_SX,\n                              int WIN_SY)\n{\n    (void)winSteps;\n    (void)WIN_SX;\n    (void)WIN_SY;\n\n    if (get_global_id(0) != 0 || get_global_id(1) != 0) return;\n\n    int llW = (sizeX + 1) / 2;\n    int llH = (sizeY + 1) / 2;\n    int hlW = sizeX - llW;\n    int hlH = llH;\n    int lhW = llW;\n    int lhH = sizeY - llH;\n    int hhW = hlW;\n    int hhH = lhH;\n\n    int offLL = 0;\n    int offHL = offLL + llW * llH;\n    int offLH = offHL + hlW * hlH;\n    int offHH = offLH + lhW * lhH;\n\n    for (int y = 0; y < sizeY; y++) {\n        for (int x = 0; x < sizeX; x++) {\n            int coeff = dwt53_coeff(input, x, y, sizeX, sizeY);\n            int outIdx;\n\n            if ((y & 1) == 0) {\n                if ((x & 1) == 0) {\n                    outIdx = offLL + (y / 2) * llW + (x / 2);\n                } else {\n                    outIdx = offHL + (y / 2) * hlW + (x / 2);\n                }\n            } else {\n                if ((x & 1) == 0) {\n                    outIdx = offLH + (y / 2) * lhW + (x / 2);\n                } else {\n                    outIdx = offHH + (y / 2) * hhW + (x / 2);\n                }\n            }\n\n            output[outIdx] = coeff;\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "com_dwt.cl"
+  ],
+  "target_files_extracted": [
+    "com_dwt.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 76.556,
+      "prompt_tokens": 30828,
+      "completion_tokens": 5828,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

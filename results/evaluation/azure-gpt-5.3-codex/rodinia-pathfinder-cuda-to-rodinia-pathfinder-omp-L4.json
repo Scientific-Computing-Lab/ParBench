@@ -1,0 +1,73 @@
+{
+  "source_spec": "rodinia-pathfinder-cuda",
+  "target_spec": "rodinia-pathfinder-omp",
+  "kernel": "pathfinder",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1919182792,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "100000",
+    "100",
+    "20"
+  ],
+  "timestamp": "2026-04-30T22:26:35Z",
+  "prompt_tokens": 2380,
+  "completion_tokens": 3419,
+  "llm_response_time_seconds": 35.77,
+  "build_status": "pass",
+  "build_time_seconds": 0.064,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.084,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "pyramidHeight: 20\ngridSize: [100000]\nborder:[20]\nblockSize: 256\nblockGrid:[463]\ntargetBlock:[216]\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": 0.084,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0119,
+  "translated_files": {
+    "pathfinder.cpp": "#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <assert.h>\n#include <string.h>\n#include <omp.h>\n\n#ifdef TIMING\n#include \"timing.h\"\n\nstruct timeval tv;\nstruct timeval tv_total_start, tv_total_end;\nstruct timeval tv_h2d_start, tv_h2d_end;\nstruct timeval tv_d2h_start, tv_d2h_end;\nstruct timeval tv_kernel_start, tv_kernel_end;\nstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\nstruct timeval tv_close_start, tv_close_end;\nfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n      d2h_time = 0, close_time = 0, total_time = 0;\n#endif\n\n#define BLOCK_SIZE 256\n#define STR_SIZE 256\n#define DEVICE 0\n#define HALO 1\n\nvoid run(int argc, char** argv);\n\nint rows, cols;\nint* data;\nint** wall;\nint* result;\n#define M_SEED 9\nint pyramid_height;\n\nvoid init(int argc, char** argv) {\n    if (4 == argc) {\n        cols = atoi(argv[1]);\n        rows = atoi(argv[2]);\n        pyramid_height = atoi(argv[3]);\n    } else {\n        printf(\"Usage: dynproc row_len col_len pyramid_height\\n\");\n        exit(0);\n    }\n    data = new int[rows * cols];\n    wall = new int*[rows];\n    for (int n = 0; rows > n; n++)\n        wall[n] = data + cols * n;\n    result = new int[cols];\n\n    int tmp_4 = M_SEED;\n    srand(tmp_4);\n\n    for (int i = 0; rows > i; i++) {\n        for (int j = 0; cols > j; j++) {\n            wall[i][j] = rand() % 10;\n        }\n    }\n#ifdef BENCH_PRINT\n    for (int i = 0; i < rows; i++) {\n        for (int j = 0; j < cols; j++) {\n            printf(\"%d \", wall[i][j]);\n        }\n        printf(\"\\n\");\n    }\n#endif\n}\n\nvoid fatal(char* s) { fprintf(stderr, \"error: %s\\n\", s); }\n\n#define IN_RANGE(x, min, max) ((x) >= (min) && (x) <= (max))\n#define CLAMP_RANGE(x, min, max) x = (x < (min)) ? min : ((x > (max)) ? max : x)\n#define MIN(a, b) ((a) <= (b) ? (a) : (b))\n\nstatic void dynproc_kernel(\n    int data_5,\n    int* var_15,\n    int* item_25,\n    int* elem_31,\n    int v_38,\n    int data_11,\n    int x_23,\n    int val_19,\n    int grid_size) {\n    (void)data_11;\n\n#pragma omp parallel for schedule(static)\n    for (int elem_16 = 0; elem_16 < grid_size; elem_16++) {\n        int var_34[BLOCK_SIZE];\n        int x_22[BLOCK_SIZE];\n        bool tmp6_arr[BLOCK_SIZE];\n\n        int elem_24 = BLOCK_SIZE - data_5 * HALO * 2;\n        int item_30 = elem_24 * elem_16 - val_19;\n        int x_10 = item_30 + BLOCK_SIZE - 1;\n\n        int tmp_27 = (0 > item_30) ? -item_30 : 0;\n        int val_41 = (v_38 - 1 < x_10) ? BLOCK_SIZE - 1 - (x_10 - v_38 + 1) : BLOCK_SIZE - 1;\n\n        int data21_arr[BLOCK_SIZE];\n        int W_arr[BLOCK_SIZE];\n        int E_arr[BLOCK_SIZE];\n        bool tmp26_arr[BLOCK_SIZE];\n\n        for (int data_3 = 0; data_3 < BLOCK_SIZE; data_3++) {\n            int data_21 = item_30 + data_3;\n            data21_arr[data_3] = data_21;\n\n            int W = data_3 - 1;\n            int E = data_3 + 1;\n            W = (tmp_27 > W) ? tmp_27 : W;\n            E = (val_41 < E) ? val_41 : E;\n            W_arr[data_3] = W;\n            E_arr[data_3] = E;\n\n            bool tmp_26 = IN_RANGE(data_3, tmp_27, val_41);\n            tmp26_arr[data_3] = tmp_26;\n\n            if (IN_RANGE(data_21, 0, v_38 - 1)) {\n                var_34[data_3] = item_25[data_21];\n            }\n            tmp6_arr[data_3] = false;\n        }\n\n        for (int i = 0; data_5 > i; i++) {\n            for (int data_3 = 0; data_3 < BLOCK_SIZE; data_3++) {\n                tmp6_arr[data_3] = false;\n                if (IN_RANGE(data_3, i + 1, BLOCK_SIZE - i - 2) && tmp26_arr[data_3]) {\n                    tmp6_arr[data_3] = true;\n                    int left = var_34[W_arr[data_3]];\n                    int x_39 = var_34[data_3];\n                    int right = var_34[E_arr[data_3]];\n                    int elem_28 = MIN(left, x_39);\n                    elem_28 = MIN(elem_28, right);\n                    int elem_35 = v_38 * (x_23 + i) + data21_arr[data_3];\n                    x_22[data_3] = elem_28 + var_15[elem_35];\n                }\n            }\n\n            if (data_5 - 1 == i)\n                break;\n\n            for (int data_3 = 0; data_3 < BLOCK_SIZE; data_3++) {\n                if (tmp6_arr[data_3]) {\n                    var_34[data_3] = x_22[data_3];\n                }\n            }\n        }\n\n        for (int data_3 = 0; data_3 < BLOCK_SIZE; data_3++) {\n            if (tmp6_arr[data_3]) {\n                elem_31[data21_arr[data_3]] = x_22[data_3];\n            }\n        }\n    }\n}\n\nint calc_path(int* val_7, int* elem_37[2], int x_0, int var_1, int x_2, int tmp_32, int tmp_36) {\n    int v_40 = 1, tmp_14 = 0;\n    for (int t = 0; x_0 - 1 > t; t += x_2) {\n        int x_42 = v_40;\n        v_40 = tmp_14;\n        tmp_14 = x_42;\n\n        dynproc_kernel(\n            MIN(pyramid_height, rows - t - 1),\n            val_7, elem_37[v_40], elem_37[tmp_14],\n            var_1, x_0, t, tmp_36, tmp_32);\n    }\n    return tmp_14;\n}\n\nint main(int argc, char** argv) {\n    run(argc, argv);\n    return EXIT_SUCCESS;\n}\n\nvoid run(int argc, char** argv) {\n    init(argc, argv);\n\n    int v_17 = (pyramid_height) * HALO;\n    int v_13 = BLOCK_SIZE - (pyramid_height) * HALO * 2;\n    int elem_9 = cols / v_13 + ((0 == cols % v_13) ? 0 : 1);\n\n    printf(\"pyramidHeight: %d\\ngridSize: [%d]\\nborder:[%d]\\nblockSize: %d\\nblockGrid:[%d]\\ntargetBlock:[%d]\\n\",\n           pyramid_height, cols, v_17, BLOCK_SIZE, elem_9, v_13);\n\n    int *val_20, *x_8[2];\n    int size = rows * cols;\n\n    x_8[0] = new int[cols];\n    x_8[1] = new int[cols];\n    memcpy(x_8[0], data, sizeof(int) * cols);\n\n    val_20 = new int[size - cols];\n    memcpy(val_20, data + cols, sizeof(int) * (size - cols));\n\n#ifdef TIMING\n    gettimeofday(&tv_kernel_start, NULL);\n#endif\n\n    int var_29 = calc_path(val_20, x_8, rows, cols, pyramid_height, elem_9, v_17);\n\n#ifdef TIMING\n    gettimeofday(&tv_kernel_end, NULL);\n    tvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n    kernel_time += tv.tv_sec * 1000.0 + (float)tv.tv_usec / 1000.0;\n#endif\n\n    memcpy(result, x_8[var_29], sizeof(int) * cols);\n\n#ifdef BENCH_PRINT\n    for (int i = 0; i < cols; i++)\n        printf(\"%d \", data[i]);\n    printf(\"\\n\");\n    for (int i = 0; i < cols; i++)\n        printf(\"%d \", result[i]);\n    printf(\"\\n\");\n#endif\n\n    delete[] val_20;\n    delete[] x_8[0];\n    delete[] x_8[1];\n\n    delete[] data;\n    delete[] wall;\n    delete[] result;\n\n#ifdef TIMING\n    printf(\"Exec: %f\\n\", kernel_time);\n#endif\n}\n"
+  },
+  "target_files_expected": [
+    "pathfinder.cpp"
+  ],
+  "target_files_extracted": [
+    "pathfinder.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 35.77,
+      "prompt_tokens": 2380,
+      "completion_tokens": 3419,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

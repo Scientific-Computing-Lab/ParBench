@@ -1,0 +1,74 @@
+{
+  "source_spec": "mixbench-mixbench-cuda",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 729461310,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-30T06:23:05Z",
+  "prompt_tokens": 11054,
+  "completion_tokens": 4445,
+  "llm_response_time_seconds": 75.848,
+  "build_status": "pass",
+  "build_time_seconds": 0.467,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 4.439,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "3.63\n          192,     96.250,    0.42,30695.09, 318.91,     48.125,   30.26,  426.96,   8.87,    192.500,    0.00,     inf,    inf,    96.250,    0.81,15888.77, 165.08\n          256,    128.250,    0.55,31097.21, 242.47,     64.125,   40.31,  427.06,   6.66,    256.500,    0.00,     inf,    inf,   128.250,    1.08,15979.07, 124.59\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "single_precision_gflops": {
+      "value": 118.72,
+      "unit": "GFLOPS"
+    }
+  },
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": 4.439,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 6.7583,
+  "translated_files": {
+    "mix_kernels.cl": "#if defined(ENABLE_DP)\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n\n#if defined(ENABLE_HP)\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n\ninline class_T madd(const class_T a, const class_T b, const class_T c) {\n  return a * b + c;\n}\n\ninline int equalv(const class_T a, const class_T b) {\n#if defined(ENABLE_HP)\n  return all(a == b);\n#else\n  return a == b;\n#endif\n}\n\n__kernel void benchmark_func(const class_T seed, __global class_T* g_data) {\n#ifdef BLOCK_STRIDED\n  const uint stride = (uint)get_local_size(0);\n  const uint idx =\n      (uint)get_group_id(0) * stride * (uint)ELEMENTS_PER_THREAD +\n      (uint)get_local_id(0);\n#else\n  const uint stride = (uint)get_global_size(0);\n  const uint idx = (uint)get_global_id(0);\n#endif\n\n  const uint big_stride = (uint)get_global_size(0) * (uint)ELEMENTS_PER_THREAD;\n\n  class_T tmps[ELEMENTS_PER_THREAD];\n\n  for (uint k = 0; k < (uint)FUSION_DEGREE; ++k) {\n    for (uint j = 0; j < (uint)ELEMENTS_PER_THREAD; ++j) {\n      const size_t pos = (size_t)idx + (size_t)j * (size_t)stride +\n                         (size_t)k * (size_t)big_stride;\n      tmps[j] = g_data[pos];\n\n      for (int i = 0; i < (int)COMPUTE_ITERATIONS; ++i) {\n        tmps[j] = madd(tmps[j], tmps[j], seed);\n      }\n    }\n\n    class_T sum = (class_T)(0);\n    for (uint j = 0; j + 1 < (uint)ELEMENTS_PER_THREAD; j += 2) {\n      sum = madd(tmps[j], tmps[j + 1], sum);\n    }\n\n#if (ELEMENTS_PER_THREAD & 1)\n    sum = sum + tmps[ELEMENTS_PER_THREAD - 1];\n#endif\n\n    if (equalv(sum, (class_T)(-1))) {\n      g_data[(size_t)idx + (size_t)k * (size_t)big_stride] = sum;\n    }\n  }\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 75.848,
+      "prompt_tokens": 11054,
+      "completion_tokens": 4445,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

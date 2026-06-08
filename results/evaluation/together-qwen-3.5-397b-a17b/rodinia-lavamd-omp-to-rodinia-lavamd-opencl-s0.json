@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lavamd-omp",
+  "target_spec": "rodinia-lavamd-opencl",
+  "kernel": "lavamd",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 98940247,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-boxes1d",
+    "10"
+  ],
+  "timestamp": "2026-04-22T01:36:48Z",
+  "prompt_tokens": 9880,
+  "completion_tokens": 2991,
+  "llm_response_time_seconds": 26.097,
+  "build_status": "pass",
+  "build_time_seconds": 0.219,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.166,
+  "run_exit_code": 245,
+  "run_stderr_snippet": "51 errors generated.\n",
+  "run_stdout_snippet": "ij'\n                fA[i].y += qB[j]*fyij;\n                                 ^\n<kernel>:52:17: error: use of undeclared identifier 'fA'\n                fA[i].z += qB[j]*fzij;\n                ^\n<kernel>:52:28: error: use of undeclared identifier 'qB'\n                fA[i].z += qB[j]*fzij;\n                           ^\n<kernel>:52:34: error: use of undeclared identifier 'fzij'\n                fA[i].z += qB[j]*fzij;\n                                 ^\n\n>>>>\nError at line 238: CL_BUILD_PROGRAM_FAILURE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 245)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "kernel void kernel_gpu_opencl(\n    par_str par,\n    dim_str dim,\n    box_str* box,\n    FOUR_VECTOR* rv,\n    fp* qv,\n    FOUR_VECTOR* fv)\n{\n    int l = get_global_id(0);\n    \n    if(l >= dim.number_boxes) return;\n    \n    fp alpha = par.alpha;\n    fp a2 = 2.0*alpha*alpha;\n    \n    long first_i = box[l].offset;\n    FOUR_VECTOR* rA = &rv[first_i];\n    FOUR_VECTOR* fA = &fv[first_i];\n    \n    for(int k=0; k<(1+box[l].nn); k++){\n        int pointer;\n        if(k==0){\n            pointer = l;\n        }\n        else{\n            pointer = box[l].nei[k-1].number;\n        }\n        \n        long first_j = box[pointer].offset;\n        FOUR_VECTOR* rB = &rv[first_j];\n        fp* qB = &qv[first_j];\n        \n        for(int i=0; i<NUMBER_PAR_PER_BOX; i++){\n            for(int j=0; j<NUMBER_PAR_PER_BOX; j++){\n                fp r2 = rA[i].v + rB[j].v - DOT(rA[i],rB[j]);\n                fp u2 = a2*r2;\n                fp vij = exp(-u2);\n                fp fs = 2.0*vij;\n                \n                THREE_VECTOR d;\n                d.x = rA[i].x - rB[j].x;\n                d.y = rA[i].y - rB[j].y;\n                d.z = rA[i].z - rB[j].z;\n                \n                fp fxij = fs*d.x;\n                fp fyij = fs*d.y;\n                fp fzij = fs*d.z;\n                \n                fA[i].v += qB[j]*vij;\n                fA[i].x += qB[j]*fxij;\n                fA[i].y += qB[j]*fyij;\n                fA[i].z += qB[j]*fzij;\n            }\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 26.097,
+      "prompt_tokens": 9880,
+      "completion_tokens": 2991,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "51 errors generated.\n",
+      "run_stdout_snippet": "ij'\n                fA[i].y += qB[j]*fyij;\n                                 ^\n<kernel>:52:17: error: use of undeclared identifier 'fA'\n                fA[i].z += qB[j]*fzij;\n                ^\n<kernel>:52:28: error: use of undeclared identifier 'qB'\n                fA[i].z += qB[j]*fzij;\n                           ^\n<kernel>:52:34: error: use of undeclared identifier 'fzij'\n                fA[i].z += qB[j]*fzij;\n                                 ^\n\n>>>>\nError at line 238: CL_BUILD_PROGRAM_FAILURE\n",
+      "extraction_fail": null
+    }
+  ]
+}

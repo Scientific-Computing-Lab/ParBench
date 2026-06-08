@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-pathfinder-omp",
+  "target_spec": "rodinia-pathfinder-opencl",
+  "kernel": "pathfinder",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 793451816,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-c",
+    "100000",
+    "-r",
+    "100",
+    "-h",
+    "20"
+  ],
+  "timestamp": "2026-05-01T01:06:26Z",
+  "prompt_tokens": 3914,
+  "completion_tokens": 2241,
+  "llm_response_time_seconds": 38.247,
+  "build_status": "pass",
+  "build_time_seconds": 0.482,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.85,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Init: 148.218994\nMemAlloc: 0.003000\nHtoD: 2.274112\nExec: 584.666016\nDtoH: 0.017408\nClose: 0.841000\nTotal: 738.442993\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.85,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernels.cl": "__kernel void dynproc_kernel(\n    const int iteration,\n    __global int* gpuWall,\n    __global int* gpuSrc,\n    __global int* gpuResults,\n    const int cols,\n    const int rows,\n    const int startStep,\n    const int border,\n    const int HALO,\n    __local int* prev,\n    __local int* result,\n    __global int* outputBuffer)\n{\n    (void)rows;\n    (void)border;\n    (void)HALO;\n    (void)prev;\n    (void)result;\n    (void)outputBuffer;\n\n    if (get_group_id(0) != 0 || get_local_id(0) != 0) {\n        return;\n    }\n\n    __global int* src = gpuSrc;\n    __global int* dst = gpuResults;\n\n    for (int i = 0; i < iteration; i++) {\n        int wall_row_offset = (startStep + i) * cols;\n\n        for (int n = 0; n < cols; n++) {\n            int m = src[n];\n            if (n > 0) {\n                int v = src[n - 1];\n                if (v < m) m = v;\n            }\n            if (n < cols - 1) {\n                int v = src[n + 1];\n                if (v < m) m = v;\n            }\n            dst[n] = gpuWall[wall_row_offset + n] + m;\n        }\n\n        __global int* temp = src;\n        src = dst;\n        dst = temp;\n    }\n\n    if (iteration > 0 && src != gpuResults) {\n        for (int n = 0; n < cols; n++) {\n            gpuResults[n] = src[n];\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernels.cl"
+  ],
+  "target_files_extracted": [
+    "kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 38.247,
+      "prompt_tokens": 3914,
+      "completion_tokens": 2241,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "source_spec": "mixbench-mixbench-omp",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1825021715,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-24T05:15:56Z",
+  "prompt_tokens": 11193,
+  "completion_tokens": 1782,
+  "llm_response_time_seconds": 37.007,
+  "build_status": "pass",
+  "build_time_seconds": 0.473,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.384,
+  "run_exit_code": 1,
+  "run_stderr_snippet": "r_t j = 0; j < COMPUTE_ITERATIONS; j++) {\n                 ^\n<kernel>:135:36: error: use of undeclared identifier 'j'\n            for (sizeiter_t j = 0; j < COMPUTE_ITERATIONS; j++) {\n                                   ^\n<kernel>:135:60: error: use of undeclared identifier 'j'\n            for (sizeiter_t j = 0; j < COMPUTE_ITERATIONS; j++) {\n                                                           ^\n----------------------------------------------------------------------------------------------\n",
+  "run_stdout_snippet": "uffer:  2962 MB\nOpenCL version:      OpenCL 3.0 CUDA\nTotal CUs:           46\n-----------------------------------------------------------------------\nBuffer size:            256MB\nWorkgroup size:         256\nElements per workitem:  8\nWorkitem fusion degree: 4\nWorkitem stride:        NDRange\nBuffer allocation:      Device allocated\nTimer:                  CL event based\nWarning:                Half precision computations are not supported\nLoading kernel source file...\nPrecompilation of kernels... ",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "mix_kernels.cl": "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n\n#ifndef class_T\n#define class_T float\n#endif\n\n#ifndef COMPUTE_ITERATIONS\n#define COMPUTE_ITERATIONS 16\n#endif\n\n#ifndef ELEMENTS_PER_THREAD\n#define ELEMENTS_PER_THREAD 8\n#endif\n\n#ifndef FUSION_DEGREE\n#define FUSION_DEGREE 4\n#endif\n\n#ifndef blockdim\n#define blockdim 256\n#endif\n\n#ifdef ENABLE_DP\n#define USE_DOUBLE\n#endif\n\n#ifdef ENABLE_HP\n#define USE_HALF\n#endif\n\n#ifdef BLOCK_STRIDED\n#define STRIDE_MODE blockdim\n#else\n#define STRIDE_MODE 1\n#endif\n\ntypedef class_T element_t;\n\n#ifdef USE_HALF\ntypedef short half2[2];\n#endif\n\n__attribute__((noinline))\nelement_t bench_block(element_t* data, element_t f, size_t static_chunk_size) {\n  element_t sum = 0;\n  \n#ifdef BASELINE_IMPL\n  for (size_t i = 0; i < static_chunk_size; i++) {\n    element_t t = data[i];\n    for (size_t j = 0; j < COMPUTE_ITERATIONS; j++) {\n      t = t * t + f;\n    }\n    sum += t;\n  }\n#else\n  element_t f_arr[8];\n  for (int k = 0; k < 8; k++) {\n    f_arr[k] = f;\n  }\n  \n  for (size_t i = 0; i < static_chunk_size; i++) {\n    element_t t[8];\n    for (int k = 0; k < 8; k++) {\n      t[k] = data[i];\n    }\n    \n    size_t main_iters = COMPUTE_ITERATIONS / 8;\n    for (size_t j = 0; j < main_iters; j++) {\n      t[0] = t[0] * t[0] + f_arr[0];\n      t[1] = t[1] * t[1] + f_arr[1];\n      t[2] = t[2] * t[2] + f_arr[2];\n      t[3] = t[3] * t[3] + f_arr[3];\n      t[4] = t[4] * t[4] + f_arr[4];\n      t[5] = t[5] * t[5] + f_arr[5];\n      t[6] = t[6] * t[6] + f_arr[6];\n      t[7] = t[7] * t[7] + f_arr[7];\n    }\n    \n    size_t remainder = COMPUTE_ITERATIONS % 8;\n    if (remainder > 0) {\n      t[0] = t[0] * t[0] + f_arr[0];\n    }\n    if (remainder > 1) {\n      t[1] = t[1] * t[1] + f_arr[1];\n    }\n    if (remainder > 2) {\n      t[2] = t[2] * t[2] + f_arr[2];\n    }\n    if (remainder > 3) {\n      t[3] = t[3] * t[3] + f_arr[3];\n    }\n    if (remainder > 4) {\n      t[4] = t[4] * t[4] + f_arr[4];\n    }\n    if (remainder > 5) {\n      t[5] = t[5] * t[5] + f_arr[5];\n    }\n    if (remainder > 6) {\n      t[6] = t[6] * t[6] + f_arr[6];\n    }\n    \n    sum += t[0] + t[1] + t[2] + t[3] + t[4] + t[5] + t[6] + t[7];\n  }\n#endif\n  \n  return sum;\n}\n\n__kernel void benchmark_func(element_t seed, __global element_t* data) {\n  size_t global_idx = get_global_id(0);\n  size_t global_size = get_global_size(0);\n  size_t local_idx = get_local_id(0);\n  size_t local_size = get_local_size(0);\n  \n  const size_t static_chunk_size = 4096;\n  const size_t stride = STRIDE_MODE * ELEMENTS_PER_THREAD * FUSION_DEGREE;\n  \n  element_t local_sum = 0;\n  \n  for (size_t fusion = 0; fusion < FUSION_DEGREE; fusion++) {\n    size_t base_idx = global_idx * ELEMENTS_PER_THREAD * FUSION_DEGREE + \n                      fusion * ELEMENTS_PER_THREAD;\n    \n    for (size_t chunk = 0; chunk < static_chunk_size; chunk++) {\n      size_t idx = base_idx + chunk * stride;\n      if (idx < global_size * ELEMENTS_PER_THREAD * FUSION_DEGREE / stride) {\n        element_t f = seed;\n        element_t t = 0;\n        \n        for (size_t ep = 0; ep < ELEMENTS_PER_THREAD; ep++) {\n          size_t data_idx = idx + ep;\n          if (data_idx < global_size) {\n            t = data[data_idx];\n            for (sizeiter_t j = 0; j < COMPUTE_ITERATIONS; j++) {\n              t = t * t + f;\n            }\n            local_sum += t;\n          }\n        }\n      }\n    }\n  }\n  \n  data[global_idx] = local_sum;\n}\n\n__kernel void benchmark_func_warmup(short seed, __global short* data) {\n  size_t idx = get_global_id(0);\n  size_t size = get_global_size(0);\n  \n  if (idx < size) {\n    data[idx] = seed;\n  }\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 37.007,
+      "prompt_tokens": 11193,
+      "completion_tokens": 1782,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "r_t j = 0; j < COMPUTE_ITERATIONS; j++) {\n                 ^\n<kernel>:135:36: error: use of undeclared identifier 'j'\n            for (sizeiter_t j = 0; j < COMPUTE_ITERATIONS; j++) {\n                                   ^\n<kernel>:135:60: error: use of undeclared identifier 'j'\n            for (sizeiter_t j = 0; j < COMPUTE_ITERATIONS; j++) {\n                                                           ^\n----------------------------------------------------------------------------------------------\n",
+      "run_stdout_snippet": "uffer:  2962 MB\nOpenCL version:      OpenCL 3.0 CUDA\nTotal CUs:           46\n-----------------------------------------------------------------------\nBuffer size:            256MB\nWorkgroup size:         256\nElements per workitem:  8\nWorkitem fusion degree: 4\nWorkitem stride:        NDRange\nBuffer allocation:      Device allocated\nTimer:                  CL event based\nWarning:                Half precision computations are not supported\nLoading kernel source file...\nPrecompilation of kernels... ",
+      "extraction_fail": null
+    }
+  ]
+}

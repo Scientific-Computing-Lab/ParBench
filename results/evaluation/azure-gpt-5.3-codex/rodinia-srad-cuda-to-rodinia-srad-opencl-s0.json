@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-srad-cuda",
+  "target_spec": "rodinia-srad-opencl",
+  "kernel": "srad",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 262673342,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "502",
+    "458",
+    "-n",
+    "2",
+    "-l",
+    "1",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-30T03:45:46Z",
+  "prompt_tokens": 13188,
+  "completion_tokens": 3433,
+  "llm_response_time_seconds": 43.427,
+  "build_status": "pass",
+  "build_time_seconds": 0.257,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.216,
+  "run_exit_code": 205,
+  "run_stderr_snippet": "",
+  "run_stdout_snippet": "WG size of kernel = 256 \nPlatform: NVIDIA Corporation\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n--------------------------------\nmax # of workgroups = 899, # of threads/workgroup = 256 (ensure that device can handle)\nIterations Progress: hiddenError at line 947: CL_INVALID_ARG_SIZE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 205)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.085,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#ifdef cl_khr_fp64\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n\ntypedef float fp;\n\n__kernel void extract_kernel(long d_Ne, __global fp *d_I) {\n    int ei = (int)get_global_id(0);\n    if ((long)ei < d_Ne) {\n        d_I[ei] = exp(d_I[ei] / (fp)255.0f);\n    }\n}\n\n__kernel void prepare_kernel(long d_Ne,\n                             __global fp *d_I,\n                             __global fp *d_sums,\n                             __global fp *d_sums2) {\n    int ei = (int)get_global_id(0);\n    if ((long)ei < d_Ne) {\n        fp v = d_I[ei];\n        d_sums[ei] = v;\n        d_sums2[ei] = v * v;\n    }\n}\n\n__kernel void reduce_kernel(long d_Ne,\n                            int d_no,\n                            int d_mul,\n                            __global fp *d_sums,\n                            __global fp *d_sums2,\n                            int blocks_work_size) {\n    (void)d_Ne;\n    (void)blocks_work_size;\n\n    int bx = (int)get_group_id(0);\n    int tx = (int)get_local_id(0);\n    int lsz = (int)get_local_size(0);\n\n    if (tx == 0) {\n        int start = bx * lsz;\n        if (start < d_no) {\n            int end = start + lsz;\n            if (end > d_no) end = d_no;\n\n            fp sum = 0.0f;\n            fp sum2 = 0.0f;\n            for (int i = start; i < end; i++) {\n                int idx = i * d_mul;\n                sum += d_sums[idx];\n                sum2 += d_sums2[idx];\n            }\n\n            int out_idx = bx * d_mul * lsz;\n            d_sums[out_idx] = sum;\n            d_sums2[out_idx] = sum2;\n        }\n    }\n}\n\n__kernel void srad_kernel(fp lambda,\n                          int Nr,\n                          int Nc,\n                          long Ne,\n                          __global int *iN,\n                          __global int *iS,\n                          __global int *jE,\n                          __global int *jW,\n                          __global fp *dN,\n                          __global fp *dS,\n                          __global fp *dW,\n                          __global fp *dE,\n                          fp q0sqr,\n                          __global fp *c,\n                          __global fp *I) {\n    (void)lambda;\n    int ei = (int)get_global_id(0);\n    if ((long)ei < Ne) {\n        int row = ei / Nc;\n        int col = ei % Nc;\n\n        fp Jc = I[ei];\n\n        int n_idx = iN[row] * Nc + col;\n        int s_idx = iS[row] * Nc + col;\n        int w_idx = row * Nc + jW[col];\n        int e_idx = row * Nc + jE[col];\n\n        fp d_n = I[n_idx] - Jc;\n        fp d_s = I[s_idx] - Jc;\n        fp d_w = I[w_idx] - Jc;\n        fp d_e = I[e_idx] - Jc;\n\n        fp G2 = (d_n * d_n + d_s * d_s + d_w * d_w + d_e * d_e) / (Jc * Jc);\n        fp L = (d_n + d_s + d_w + d_e) / Jc;\n\n        fp num = (fp)0.5f * G2 - (fp)0.0625f * (L * L);\n        fp den = (fp)1.0f + (fp)0.25f * L;\n        fp qsqr = num / (den * den);\n\n        den = (qsqr - q0sqr) / (q0sqr * ((fp)1.0f + q0sqr));\n        fp c_val = (fp)1.0f / ((fp)1.0f + den);\n\n        if (c_val < (fp)0.0f) c_val = (fp)0.0f;\n        else if (c_val > (fp)1.0f) c_val = (fp)1.0f;\n\n        dN[ei] = d_n;\n        dS[ei] = d_s;\n        dW[ei] = d_w;\n        dE[ei] = d_e;\n        c[ei] = c_val;\n    }\n}\n\n__kernel void srad2_kernel(fp lambda,\n                           int Nr,\n                           int Nc,\n                           long Ne,\n                           __global int *iN,\n                           __global int *iS,\n                           __global int *jE,\n                           __global int *jW,\n                           __global fp *dN,\n                           __global fp *dS,\n                           __global fp *dW,\n                           __global fp *dE,\n                           __global fp *c,\n                           __global fp *I) {\n    (void)Nr;\n    (void)iN;\n    (void)jW;\n\n    int ei = (int)get_global_id(0);\n    if ((long)ei < Ne) {\n        int row = ei / Nc;\n        int col = ei % Nc;\n\n        fp cN = c[ei];\n        fp cS = c[iS[row] * Nc + col];\n        fp cW = c[ei];\n        fp cE = c[row * Nc + jE[col]];\n\n        fp D = cN * dN[ei] + cS * dS[ei] + cW * dW[ei] + cE * dE[ei];\n        I[ei] = I[ei] + (fp)0.25f * lambda * D;\n    }\n}\n\n__kernel void compress_kernel(long d_Ne, __global fp *d_I) {\n    int ei = (int)get_global_id(0);\n    if ((long)ei < d_Ne) {\n        d_I[ei] = log(d_I[ei]) * (fp)255.0f;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 43.427,
+      "prompt_tokens": 13188,
+      "completion_tokens": 3433,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "",
+      "run_stdout_snippet": "WG size of kernel = 256 \nPlatform: NVIDIA Corporation\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n--------------------------------\nmax # of workgroups = 899, # of threads/workgroup = 256 (ensure that device can handle)\nIterations Progress: hiddenError at line 947: CL_INVALID_ARG_SIZE\n",
+      "extraction_fail": null
+    }
+  ]
+}

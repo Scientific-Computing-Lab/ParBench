@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-hotspot-cuda",
+  "target_spec": "rodinia-hotspot-opencl",
+  "kernel": "hotspot",
+  "model": "azure-gpt-5.4",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 368292467,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "512",
+    "2",
+    "4",
+    "../../data/hotspot/temp_512",
+    "../../data/hotspot/power_512",
+    "output.out"
+  ],
+  "timestamp": "2026-04-27T01:26:35Z",
+  "prompt_tokens": 7530,
+  "completion_tokens": 2357,
+  "llm_response_time_seconds": 35.57,
+  "build_status": "pass",
+  "build_time_seconds": 0.179,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.281,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nPlatform: NVIDIA Corporation\nnum_devices = 1\nDevice: NVIDIA GeForce RTX 4070\nUse GPU device\nInit: 144.289993\nMemAlloc: 0.003000\nHtoD: 0.447000\nExec: 0.027296\nDtoH: 0.039840\nClose: 0.318000\nTotal: 185.761993\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.159,
+  "translated_wall_time_seconds": 0.281,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.5658,
+  "translated_files": {
+    "hotspot_kernel.cl": "#ifdef RD_WG_SIZE_0_0\n#define BLOCK_SIZE RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n#define BLOCK_SIZE RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n#define BLOCK_SIZE RD_WG_SIZE\n#else\n#define BLOCK_SIZE 16\n#endif\n\n#define IN_RANGE(x, min, max) ((x) >= (min) && (x) <= (max))\n\n__kernel void hotspot(int var_86,\n                      __global float *item_17,\n                      __global float *elem_14,\n                      __global float *data_19,\n                      int val_61,\n                      int elem_93,\n                      int x_23,\n                      int v_41,\n                      float elem_3,\n                      float tmp_71,\n                      float v_30,\n                      float tmp_43,\n                      float x_67)\n{\n    __local float data_84[BLOCK_SIZE][BLOCK_SIZE];\n    __local float elem_6[BLOCK_SIZE][BLOCK_SIZE];\n    __local float var_8[BLOCK_SIZE][BLOCK_SIZE];\n\n    float elem_65 = 80.0f;\n    float data_27;\n    float var_54, elem_46, v_80;\n\n    int data_51 = (int)get_group_id(0);\n    int x_49 = (int)get_group_id(1);\n\n    int elem_69 = (int)get_local_id(0);\n    int val_11 = (int)get_local_id(1);\n\n    data_27 = x_67 / elem_3;\n\n    var_54 = 1.0f / tmp_71;\n    elem_46 = 1.0f / v_30;\n    v_80 = 1.0f / tmp_43;\n\n    int elem_64 = BLOCK_SIZE - var_86 * 2;\n    int var_15 = BLOCK_SIZE - var_86 * 2;\n\n    int v_74 = elem_64 * x_49 - v_41;\n    int var_83 = var_15 * data_51 - x_23;\n    int elem_21 = v_74 + BLOCK_SIZE - 1;\n    int x_76 = var_83 + BLOCK_SIZE - 1;\n\n    int data_94 = v_74 + val_11;\n    int val_4 = var_83 + elem_69;\n\n    int elem_62 = data_94, tmp_70 = val_4;\n    int val_97 = val_61 * elem_62 + tmp_70;\n\n    if (IN_RANGE(elem_62, 0, elem_93 - 1) && IN_RANGE(tmp_70, 0, val_61 - 1)) {\n        data_84[val_11][elem_69] = elem_14[val_97];\n        elem_6[val_11][elem_69] = item_17[val_97];\n    }\n    barrier(CLK_LOCAL_MEM_FENCE);\n\n    int x_72 = (0 > v_74) ? -v_74 : 0;\n    int data_13 = (elem_93 - 1 < elem_21) ? BLOCK_SIZE - 1 - (elem_21 - elem_93 + 1) : BLOCK_SIZE - 1;\n    int v_12 = (0 > var_83) ? -var_83 : 0;\n    int x_33 = (val_61 - 1 < x_76) ? BLOCK_SIZE - 1 - (x_76 - val_61 + 1) : BLOCK_SIZE - 1;\n\n    int N = val_11 - 1;\n    int S = val_11 + 1;\n    int W = elem_69 - 1;\n    int E = elem_69 + 1;\n\n    N = (x_72 > N) ? x_72 : N;\n    S = (data_13 < S) ? data_13 : S;\n    W = (v_12 > W) ? v_12 : W;\n    E = (x_33 < E) ? x_33 : E;\n\n    int item_85 = 0;\n    for (int i = 0; i < var_86; i++) {\n        item_85 = 0;\n        if (IN_RANGE(elem_69, i + 1, BLOCK_SIZE - i - 2) &&\n            IN_RANGE(val_11, i + 1, BLOCK_SIZE - i - 2) &&\n            IN_RANGE(elem_69, v_12, x_33) &&\n            IN_RANGE(val_11, x_72, data_13)) {\n            item_85 = 1;\n            var_8[val_11][elem_69] =\n                data_84[val_11][elem_69] +\n                data_27 * (elem_6[val_11][elem_69] +\n                           (data_84[S][elem_69] + data_84[N][elem_69] - 2.0f * data_84[val_11][elem_69]) * elem_46 +\n                           (data_84[val_11][E] + data_84[val_11][W] - 2.0f * data_84[val_11][elem_69]) * var_54 +\n                           (elem_65 - data_84[val_11][elem_69]) * v_80);\n        }\n        barrier(CLK_LOCAL_MEM_FENCE);\n        if (var_86 - 1 == i)\n            break;\n        if (item_85)\n            data_84[val_11][elem_69] = var_8[val_11][elem_69];\n        barrier(CLK_LOCAL_MEM_FENCE);\n    }\n\n    if (item_85) {\n        data_19[val_97] = var_8[val_11][elem_69];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "hotspot_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "hotspot_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 35.57,
+      "prompt_tokens": 7530,
+      "completion_tokens": 2357,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

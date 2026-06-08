@@ -1,0 +1,77 @@
+{
+  "source_spec": "hecbench-stencil1d-omp",
+  "target_spec": "hecbench-stencil1d-cuda",
+  "kernel": "stencil1d",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 443695482,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "134217728",
+    "1"
+  ],
+  "timestamp": "2026-04-24T04:22:59Z",
+  "prompt_tokens": 1102,
+  "completion_tokens": 5034,
+  "llm_response_time_seconds": 92.735,
+  "build_status": "pass",
+  "build_time_seconds": 0.694,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.358,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Average kernel execution time: 0.668459 (s)\nPASS\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "kernel_time": {
+      "value": 0.668459,
+      "unit": "s"
+    }
+  },
+  "baseline_wall_time_seconds": 0.619,
+  "translated_wall_time_seconds": 1.358,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.4558,
+  "translated_files": {
+    "stencil_1d.cu": "#include <stdio.h>\n#include <stdlib.h>\n#include <chrono>\n\n#define RADIUS 7\n#define BLOCK_SIZE 256\n\n__global__ void compute_kernel(int* a, int* b, int size, int pad_size) {\n    int block_idx = blockIdx.x;\n    int i = block_idx * BLOCK_SIZE;\n    \n    if (i >= size) return;\n    \n    int data_3[BLOCK_SIZE + 2 * RADIUS];\n    \n    for (int j = 0; j < BLOCK_SIZE; j++) {\n        int elem_1 = i + j;\n        data_3[j + RADIUS] = a[elem_1];\n        if (RADIUS > j) {\n            data_3[j] = (RADIUS > elem_1) ? 0 : a[elem_1 - RADIUS];\n            data_3[j + RADIUS + BLOCK_SIZE] = a[elem_1 + BLOCK_SIZE];\n        }\n    }\n    \n    for (int j = 0; j < BLOCK_SIZE; j++) {\n        int x_7 = 0;\n        for (int tmp_6 = -RADIUS; tmp_6 <= RADIUS; tmp_6++)\n            x_7 = x_7 + data_3[j + RADIUS + tmp_6];\n        b[i + j] = x_7;\n    }\n}\n\nint main(int argc, char* argv[]) {\n    if (3 != argc) {\n        printf(\"Usage: %s <length> <repeat>\\n\", argv[0]);\n        printf(\"length is a multiple of %d\\n\", BLOCK_SIZE);\n        return 1;\n    }\n    const int val_2 = atoi(argv[1]);\n    const int data_8 = atoi(argv[2]);\n\n    int size = val_2;\n    int pad_size = (val_2 + RADIUS);\n\n    int* a_host = (int *)malloc(pad_size * sizeof(int));\n    int* b_host = (int *)malloc(size * sizeof(int));\n\n    for (int i = 0; i < val_2 + RADIUS; i++) a_host[i] = i;\n\n    int* a_device;\n    int* b_device;\n    cudaMalloc(&a_device, pad_size * sizeof(int));\n    cudaMalloc(&b_device, size * sizeof(int));\n\n    cudaMemcpy(a_device, a_host, pad_size * sizeof(int), cudaMemcpyHostToDevice);\n\n    auto item_4 = std::chrono::steady_clock::now();\n\n    int num_blocks = size / BLOCK_SIZE;\n\n    for (int i = 0; i < data_8; i++) {\n        compute_kernel<<<num_blocks, BLOCK_SIZE>>>(a_device, b_device, size, pad_size);\n    }\n\n    cudaDeviceSynchronize();\n\n    auto end = std::chrono::steady_clock::now();\n    auto x_0 = std::chrono::duration_cast<std::chrono::nanoseconds>(end - item_4).count();\n    printf(\"Average kernel execution time: %f (s)\\n\", (x_0 * 1e-9f) / data_8);\n\n    cudaMemcpy(b_host, b_device, size * sizeof(int), cudaMemcpyDeviceToHost);\n\n    bool var_5 = true;\n    for (int i = 0; 2 * RADIUS > i; i++) {\n        int s = 0;\n        for (int j = i; i + 2 * RADIUS >= j; j++)\n            s = s + (RADIUS > j ? 0 : (a_host[j] - RADIUS));\n        if (b_host[i] != s) {\n            printf(\"Error at %d: %d (host) != %d (device)\\n\", i, s, b_host[i]);\n            var_5 = false;\n            break;\n        }\n    }\n\n    for (int i = 2 * RADIUS; val_2 > i; i++) {\n        int s = 0;\n        for (int j = i - RADIUS; i + RADIUS >= j; j++)\n            s = s + (a_host[j]);\n        if (b_host[i] != s) {\n            printf(\"Error at %d: %d (host) != %d (device)\\n\", i, s, b_host[i]);\n            var_5 = false;\n            break;\n        }\n    }\n    printf(\"%s\\n\", var_5 ? \"PASS\" : \"FAIL\");\n\n    free(a_host);\n    free(b_host);\n    cudaFree(a_device);\n    cudaFree(b_device);\n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "stencil_1d.cu"
+  ],
+  "target_files_extracted": [
+    "stencil_1d.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 92.735,
+      "prompt_tokens": 1102,
+      "completion_tokens": 5034,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

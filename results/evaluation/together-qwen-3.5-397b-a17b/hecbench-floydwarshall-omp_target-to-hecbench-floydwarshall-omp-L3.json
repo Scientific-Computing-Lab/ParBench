@@ -1,0 +1,69 @@
+{
+  "source_spec": "hecbench-floydwarshall-omp_target",
+  "target_spec": "hecbench-floydwarshall-omp",
+  "kernel": "floydwarshall",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1856233712,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-24T07:37:37Z",
+  "prompt_tokens": 1815,
+  "completion_tokens": 16437,
+  "llm_response_time_seconds": 264.963,
+  "build_status": "fail",
+  "build_time_seconds": 0.053,
+  "build_error_snippet": "main.cpp: In function \u2018int main(int, char**)\u2019:\nmain.cpp:64:16: warning: variable \u2018matrixSize\u2019 set but not used [-Wunused-but-set-variable]\n   64 |   unsigned int matrixSize;\n      |                ^~~~~~~~~~\nmain.cpp:123:19: error: work-sharing region may not be closely nested inside of work-sharing, \u2018loop\u2019, \u2018critical\u2019, \u2018ordered\u2019, \u2018master\u2019, \u2018masked\u2019, explicit \u2018task\u2019 or \u2018taskloop\u2019 region\n  123 |           #pragma omp for collapse(2)\n      |                   ^~~\nmake: *** [Makefile.aomp:61: main.o] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: critical\u2019, \u2018ordered\u2019, \u2018master\u2019, \u2018masked\u2019, explicit \u2018task\u2019 or \u2018taskloop\u2019 region\n  123 |           #pragma omp for collapse(2)\n      |                   ^~~\nmake: *** [Makefile.aomp:61: main.o] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.297,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cpp": "#include <stdio.h>\n#include <stdlib.h>\n#include <assert.h>\n#include <string.h>\n#include <chrono>\n#include <omp.h>\n\n#define MAXDISTANCE    (200)\n\nunsigned int minimum(unsigned int a, unsigned int b) \n{\n  return (b < a) ? b : a;\n}\n\nvoid floydWarshallCPUReference(unsigned int * pathDistanceMatrix,\n    unsigned int * pathMatrix, unsigned int numNodes)\n{\n  unsigned int distanceYtoX, distanceYtoK, distanceKtoX, indirectDistance;\n\n  unsigned int width = numNodes;\n  unsigned int yXwidth;\n\n  for(unsigned int k = 0; numNodes > k; ++k)\n  {\n    for(unsigned int y = 0; y < numNodes; ++y)\n    {\n      yXwidth =  y*numNodes;\n      for(unsigned int x = 0; x < numNodes; ++x)\n      {\n        distanceYtoX = pathDistanceMatrix[yXwidth + x];\n        distanceYtoK = pathDistanceMatrix[yXwidth + k];\n        distanceKtoX = pathDistanceMatrix[k * width + x];\n\n        indirectDistance = distanceYtoK + distanceKtoX;\n\n        if(indirectDistance < distanceYtoX)\n        {\n          pathDistanceMatrix[yXwidth + x] = indirectDistance;\n          pathMatrix[yXwidth + x]         = k;\n        }\n      }\n    }\n  }\n}\n\nint main(int argc, char** argv) {\n  if (4 != argc) {\n    printf(\"Usage: %s <number of nodes> <iterations> <block size>\\n\", argv[0]);\n    return 1;\n  }\n  \n  unsigned int numNodes = atoi(argv[1]);\n  unsigned int numIterations = atoi(argv[2]);\n  unsigned int blockSize = atoi(argv[3]);\n\n  if(0 != numNodes % blockSize) {\n    numNodes = (numNodes / blockSize + 1) * blockSize;\n  }\n\n  unsigned int* pathMatrix = NULL;\n  unsigned int* pathDistanceMatrix = NULL;\n  unsigned int* verificationPathDistanceMatrix = NULL;\n  unsigned int* verificationPathMatrix = NULL;\n  unsigned int matrixSize;\n  unsigned int matrixSizeBytes;\n\n  matrixSize = numNodes * numNodes;\n  matrixSizeBytes = numNodes * numNodes * sizeof(unsigned int);\n  pathDistanceMatrix = (unsigned int *) malloc(matrixSizeBytes);\n  assert (pathDistanceMatrix != NULL) ;\n\n  pathMatrix = (unsigned int *) malloc(matrixSizeBytes);\n  assert (pathMatrix != NULL) ;\n\n  srand(2);\n  for(unsigned int i = 0; numNodes > i; i++)\n    for(unsigned int j = 0; numNodes > j; j++)\n    {\n      int index = i*numNodes + j;\n      pathDistanceMatrix[index] = rand() % (MAXDISTANCE + 1);\n    }\n  for(unsigned int i = 0; i < numNodes; ++i)\n  {\n    unsigned int iXWidth = i * numNodes;\n    pathDistanceMatrix[iXWidth + i] = 0;\n  }\n\n  for(unsigned int i = 0; i < numNodes; ++i)\n  {\n    for(unsigned int j = 0; i > j; ++j)\n    {\n      pathMatrix[i * numNodes + j] = i;\n      pathMatrix[j * numNodes + i] = j;\n    }\n    pathMatrix[i * numNodes + i] = i;\n  }\n\n  verificationPathDistanceMatrix = (unsigned int *) malloc(matrixSizeBytes);\n  assert (verificationPathDistanceMatrix != NULL);\n\n  verificationPathMatrix = (unsigned int *) malloc(matrixSizeBytes);\n  assert(verificationPathMatrix != NULL);\n\n  memcpy(verificationPathDistanceMatrix, pathDistanceMatrix, matrixSizeBytes);\n  memcpy(verificationPathMatrix, pathMatrix, matrixSizeBytes);\n\n  unsigned int numPasses = numNodes;\n\n  float total_time = 0.f;\n\n  #pragma omp parallel\n  {\n    for (unsigned int n = 0; numIterations > n; n++) {\n      \n      #pragma omp single\n      {\n        memcpy(pathDistanceMatrix, verificationPathDistanceMatrix, matrixSizeBytes);\n        \n        auto start = std::chrono::steady_clock::now();\n\n        for(unsigned int k = 0; numPasses > k; k++)\n        {\n          #pragma omp for collapse(2)\n          for(unsigned int y = 0; numNodes > y; ++y)\n          {\n            for(unsigned int x = 0; x < numNodes; ++x)\n            {\n              unsigned int distanceYtoX = pathDistanceMatrix[y*numNodes + x];\n              unsigned int distanceYtoK = pathDistanceMatrix[y*numNodes + k];\n              unsigned int distanceKtoX = pathDistanceMatrix[k*numNodes + x];\n              unsigned int indirectDistance = distanceYtoK + distanceKtoX;\n\n              if(distanceYtoX > indirectDistance)\n              {\n                pathDistanceMatrix[y*numNodes + x] = indirectDistance;\n                pathMatrix[y*numNodes + x]         = k;\n              }\n            }\n          }\n        }\n        \n        auto end = std::chrono::steady_clock::now();\n        auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();\n        total_time = total_time + (time);\n      }\n    }\n    \n    #pragma omp single\n    {\n      printf(\"Average kernel execution time %f (s)\\n\", (total_time * 1e-9f) / numIterations);\n    }\n  }\n\n  floydWarshallCPUReference(verificationPathDistanceMatrix,\n      verificationPathMatrix, numNodes);\n  if(memcmp(pathDistanceMatrix, verificationPathDistanceMatrix,\n        numNodes*numNodes*sizeof(unsigned int)) == 0)\n  {\n    printf(\"PASS\\n\");\n  }\n  else\n  {\n    printf(\"FAIL\\n\");\n    if (8 >= numNodes) \n    {\n      for (unsigned int i = 0; numNodes > i; i++) {\n        for (unsigned int j = 0; j < numNodes; j++)\n          printf(\"host: %u \", verificationPathDistanceMatrix[i*numNodes+j]);\n        printf(\"\\n\");\n      }\n      for (unsigned int i = 0; numNodes > i; i++) {\n        for (unsigned int j = 0; numNodes > j; j++)\n          printf(\"device: %u \", pathDistanceMatrix[i*numNodes+j]);\n        printf(\"\\n\");\n      }\n    }\n  }\n\n  free(pathDistanceMatrix);\n  free(pathMatrix);\n  free(verificationPathDistanceMatrix);\n  free(verificationPathMatrix);\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cpp"
+  ],
+  "target_files_extracted": [
+    "main.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 264.963,
+      "prompt_tokens": 1815,
+      "completion_tokens": 16437,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "main.cpp: In function \u2018int main(int, char**)\u2019:\nmain.cpp:64:16: warning: variable \u2018matrixSize\u2019 set but not used [-Wunused-but-set-variable]\n   64 |   unsigned int matrixSize;\n      |                ^~~~~~~~~~\nmain.cpp:123:19: error: work-sharing region may not be closely nested inside of work-sharing, \u2018loop\u2019, \u2018critical\u2019, \u2018ordered\u2019, \u2018master\u2019, \u2018masked\u2019, explicit \u2018task\u2019 or \u2018taskloop\u2019 region\n  123 |           #pragma omp for collapse(2)\n      |                   ^~~\nmake: *** [Makefile.aomp:61: main.o] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

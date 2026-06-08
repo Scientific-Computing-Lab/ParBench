@@ -1,0 +1,180 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "hybridsort",
+        "parallel_api": "opencl",
+        "unique_id": "rodinia-hybridsort-opencl",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "opencl/hybridsort",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "bucketsort_kernels.cl",
+            "histogram1024.cl",
+            "mergesort.cl",
+            "bucketsort.c",
+            "hybridsort.c",
+            "mergesort.c"
+        ],
+        "support_files": [
+            "bucketsort.h",
+            "mergesort.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "bucketsort_kernels.cl",
+            "histogram1024.cl",
+            "mergesort.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C",
+        "language_standard": null
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl>=2.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl/hybridsort",
+        "commands": {
+            "configure": null,
+            "build": "make OPENCL_INC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include OPENCL_LIB=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+            "clean": "make clean"
+        },
+        "variables": {
+            "OPENCL_INC": {
+                "description": "Path to OpenCL headers",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include",
+                "detection": "find /usr -name 'cl.h' -path '*/CL/cl.h' | head -1 | xargs dirname | xargs dirname"
+            },
+            "OPENCL_LIB": {
+                "description": "Path to OpenCL libraries",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+                "detection": "find /usr -name 'libOpenCL.so' | head -1 | xargs dirname"
+            }
+        },
+        "outputs": {
+            "executable": "./hybridsort.out"
+        }
+    },
+    "run": {
+        "executable": "./hybridsort.out",
+        "default_arguments": [
+            "r",
+            "-p",
+            "0"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "r",
+                    "-p",
+                    "0"
+                ],
+                "description": "Small input for correctness verification of hybridsort (OPENCL)",
+                "input_files": [],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Total:",
+                "description": "Hybridsort total timing output (post-computation)"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.276572+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "Sorting list of 1000000 floats.\nNVIDIA GeForce RTX 4070 \nHistogram Kernel Time: 0.047 \nBucket Count Kernel Time: 0.095 \nBucket Prefix Kernel Time: 0.008 \nBucket Sort Kernel Time: 0.067 \nMerge First Kernel Time: 0.014 \nMerge Pass Kernel Iteration Time: 0.014 \nMerge Pass Kernel Iteration Time: 0.015 \nMerge Pass Kernel Iteration Time: 0.023 \nMerge Pass Kernel Iteration Time: 0.025 \nMerge Pass Kernel Iteration Time: 0.023 \nMerge Pass Kernel Iteration Time: 0.022 \nMerge Pass Kernel Iteration Time: 0.029 \nMerge Pass Kernel Iteration Time: 0.052 \nMerge Pass Kernel Iteration Time: 0.111 \nMerge Pass Kernel Time: 0.312 \nMerge Pack Kernel Time: 0.015 \nInit: 116.854996\nMemAlloc: 0.021000\nHtoD: 4.694687\nExec: 0.558240\nDtoH: 3.894496\nClose: 0.965000\nTotal: 132.983994\n",
+                "wall_time_seconds": 0.272,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Hybrid sorting combining merge sort and bucket sort on GPU",
+        "domain": "sorting",
+        "complexity": "hybrid sorting (merge + bucket sort)",
+        "tags": [
+            "bucket-sort",
+            "hybrid",
+            "hybridsort",
+            "merge-sort",
+            "opencl",
+            "rodinia",
+            "sort"
+        ],
+        "multi_file": true,
+        "translation_complexity": "multi_to_multi"
+    }
+}

@@ -1,0 +1,73 @@
+{
+  "source_spec": "rodinia-nw-cuda",
+  "target_spec": "rodinia-nw-opencl",
+  "kernel": "nw",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1812358542,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "2048",
+    "10",
+    "./nw.cl"
+  ],
+  "timestamp": "2026-04-21T23:37:19Z",
+  "prompt_tokens": 12549,
+  "completion_tokens": 2168,
+  "llm_response_time_seconds": 28.393,
+  "build_status": "pass",
+  "build_time_seconds": 0.354,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.242,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "2 warnings generated.\n",
+  "run_stdout_snippet": "WG size of kernel = 16 \nnum_devices = 1\nERROR: clBuildProgram() => -11\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.09,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "nw.cl": "#define LIMIT -999\n\n#ifdef RD_WG_SIZE_0_0\n\t#define BLOCK_SIZE RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n\t#define BLOCK_SIZE RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n\t#define BLOCK_SIZE RD_WG_SIZE\n#else\n\t#define BLOCK_SIZE 16\n#endif\n\nint \nmaximum( int a,\n\t\t int b,\n\t\t int c){\n\nint k;\nif( a <= b )\nk = b;\nelse \nk = a;\n\nif( k <=c )\nreturn(c);\nelse\nreturn(k);\n\n}\n\n__kernel void\nnw_kernel1(  __global int* referrence,\n\t\t\t  __global int* matrix_cuda, \n\t\t\t  __global int* output,\n\t\t\t  __local int temp[BLOCK_SIZE+1][BLOCK_SIZE+1],\n\t\t\t  __local int ref[BLOCK_SIZE][BLOCK_SIZE],\n\t\t\t  int cols,\n\t\t\t  int penalty,\n\t\t\t  int i,\n\t\t\t  int block_width,\n\t\t\t  int worksize,\n\t\t\t  int offset_r,\n\t\t\t  int offset_c) \n{\n  int bx = get_block_id(0);\n  int tx = get_local_id(0);\n\n  int b_index_x = bx;\n  int b_index_y = i - 1 - bx;\n\n  int index   = cols * BLOCK_SIZE * b_index_y + BLOCK_SIZE * b_index_x + tx + ( cols + 1 );\n  int index_n   = cols * BLOCK_SIZE * b_index_y + BLOCK_SIZE * b_index_x + tx + ( 1 );\n  int index_w   = cols * BLOCK_SIZE * b_index_y + BLOCK_SIZE * b_index_x + ( cols );\n  int index_nw =  cols * BLOCK_SIZE * b_index_y + BLOCK_SIZE * b_index_x;\n\n   if (tx == 0)\n\t\t  temp[tx][0] = matrix_cuda[index_nw];\n\n\n  for ( int ty = 0 ; ty < BLOCK_SIZE ; ty++)\n  ref[ty][tx] = referrence[index + cols * ty];\n\n  barrier(CLK_LOCAL_MEM_FENCE);\n\n  temp[tx + 1][0] = matrix_cuda[index_w + cols * tx];\n\n  barrier(CLK_LOCAL_MEM_FENCE);\n\n  temp[0][tx + 1] = matrix_cuda[index_n];\n  \n  barrier(CLK_LOCAL_MEM_FENCE);\n  \n\n  for( int m = 0 ; m < BLOCK_SIZE ; m++){\n   \n\t  if ( tx <= m ){\n\n\t\t  int t_index_x =  tx + 1;\n\t\t  int t_index_y =  m - tx + 1;\n\n          temp[t_index_y][t_index_x] = maximum( temp[t_index_y-1][t_index_x-1] + ref[t_index_y-1][t_index_x-1],\n\t\t                                        temp[t_index_y][t_index_x-1]  - penalty, \n\t\t\t\t\t\t\t\t\t\t\t\ttemp[t_index_y-1][t_index_x]  - penalty);\n\n\t\t  \n\t  \n\t  }\n\n\t  barrier(CLK_LOCAL_MEM_FENCE);\n  \n    }\n\n for( int m = BLOCK_SIZE - 2 ; m >=0 ; m--){\n   \n\t  if ( tx <= m){\n\n\t\t  int t_index_x =  tx + BLOCK_SIZE - m ;\n\t\t  int t_index_y =  BLOCK_SIZE - tx;\n\n          temp[t_index_y][t_index_x] = maximum( temp[t_index_y-1][t_index_x-1] + ref[t_index_y-1][t_index_x-1],\n\t\t                                        temp[t_index_y][t_index_x-1]  - penalty, \n\t\t\t\t\t\t\t\t\t\t\t\ttemp[t_index_y-1][t_index_x]  - penalty);\n\t   \n\t  }\n\n\t  barrier(CLK_LOCAL_MEM_FENCE);\n  }\n\n  for ( int ty = 0 ; ty < BLOCK_SIZE ; ty++)\n  matrix_cuda[index + ty * cols] = temp[ty+1][tx+1];\n\n}\n\n\n__kernel void\nnw_kernel2(  __global int* referrence,\n\t\t\t  __global int* matrix_cuda, \n\t\t\t  __global int* output,\n\t\t\t  __local int temp[BLOCK_SIZE+1][BLOCK_SIZE+1],\n\t\t\t  __local int ref[BLOCK_SIZE][BLOCK_SIZE],\n\t\t\t  int cols,\n\t\t\t  int penalty,\n\t\t\t  int i,\n\t\t\t  int block_width,\n\t\t\t  int worksize,\n\t\t\t  int offset_r,\n\t\t\t  int offset_c) \n{\n\n  int bx = get_block_id(0);\n  int tx = get_local_id(0);\n\n  int b_index_x = bx + block_width - i  ;\n  int b_index_y = block_width - bx -1;\n\n  int index   = cols * BLOCK_SIZE * b_index_y + BLOCK_SIZE * b_index_x + tx + ( cols + 1 );\n  int index_n   = cols * BLOCK_SIZE * b_index_y + BLOCK_SIZE * b_index_x + tx + ( 1 );\n  int index_w   = cols * BLOCK_SIZE * b_index_y + BLOCK_SIZE * b_index_x + ( cols );\n    int index_nw =  cols * BLOCK_SIZE * b_index_y + BLOCK_SIZE * b_index_x;\n\n  for ( int ty = 0 ; ty < BLOCK_SIZE ; ty++)\n  ref[ty][tx] = referrence[index + cols * ty];\n\n  barrier(CLK_LOCAL_MEM_FENCE);\n\n   if (tx == 0)\n\t\t  temp[tx][0] = matrix_cuda[index_nw];\n \n \n  temp[tx + 1][0] = matrix_cuda[index_w + cols * tx];\n\n  barrier(CLK_LOCAL_MEM_FENCE);\n\n  temp[0][tx + 1] = matrix_cuda[index_n];\n  \n  barrier(CLK_LOCAL_MEM_FENCE);\n  \n\n  for( int m = 0 ; m < BLOCK_SIZE ; m++){\n   \n\t  if ( tx <= m ){\n\n\t\t  int t_index_x =  tx + 1;\n\t\t  int t_index_y =  m - tx + 1;\n\n          temp[t_index_y][t_index_x] = maximum( temp[t_index_y-1][t_index_x-1] + ref[t_index_y-1][t_index_x-1],\n\t\t                                        temp[t_index_y][t_index_x-1]  - penalty, \n\t\t\t\t\t\t\t\t\t\t\t\ttemp[t_index_y-1][t_index_x]  - penalty);\t  \n\t  \n\t  }\n\n\t  barrier(CLK_LOCAL_MEM_FENCE);\n  \n    }\n\n\n for( int m = BLOCK_SIZE - 2 ; m >=0 ; m--){\n   \n\t  if ( tx <= m){\n\n\t\t  int t_index_x =  tx + BLOCK_SIZE - m ;\n\t\t  int t_index_y =  BLOCK_SIZE - tx;\n\n          temp[t_index_y][t_index_x] = maximum( temp[t_index_y-1][t_index_x-1] + ref[t_index_y-1][t_index_x-1],\n\t\t                                        temp[t_index_y][t_index_x-1]  - penalty, \n\t\t\t\t\t\t\t\t\t\t\t\ttemp[t_index_y-1][t_index_x]  - penalty);\n\n\n\t  }\n\n\t  barrier(CLK_LOCAL_MEM_FENCE);\n  }\n\n\n  for ( int ty = 0 ; ty < BLOCK_SIZE ; ty++)\n  matrix_cuda[index + ty * cols] = temp[ty+1][tx+1];\n\n}\n\n"
+  },
+  "target_files_expected": [
+    "nw.cl"
+  ],
+  "target_files_extracted": [
+    "nw.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 28.393,
+      "prompt_tokens": 12549,
+      "completion_tokens": 2168,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "2 warnings generated.\n",
+      "run_stdout_snippet": "WG size of kernel = 16 \nnum_devices = 1\nERROR: clBuildProgram() => -11\n",
+      "extraction_fail": null
+    }
+  ]
+}

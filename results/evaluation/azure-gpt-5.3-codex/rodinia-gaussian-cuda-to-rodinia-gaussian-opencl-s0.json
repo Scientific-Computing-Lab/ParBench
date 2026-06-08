@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-gaussian-cuda",
+  "target_spec": "rodinia-gaussian-opencl",
+  "kernel": "gaussian",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 708145169,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "16"
+  ],
+  "timestamp": "2026-04-30T03:19:46Z",
+  "prompt_tokens": 12333,
+  "completion_tokens": 597,
+  "llm_response_time_seconds": 9.407,
+  "build_status": "pass",
+  "build_time_seconds": 0.72,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.17,
+  "run_exit_code": 255,
+  "run_stderr_snippet": "",
+  "run_stdout_snippet": "WG size of kernel 1 = 0, WG size of kernel 2= 0 X 0\nCreate matrix internally in parse, size = 16 \nNumber of platforms detected:1\nChecking For OpenCl Compatible Devices\nPlatform 0\nvendor: NVIDIA Corporation\nno of devices: 1\n\tdevice 0: NVIDIA Corporation NVIDIA GeForce RTX 4070\n\nUsing Platform 0 Device 0 \nCreating GPU Context\nProfiling enabled\ncreate input internally before create, size = 16 \n\tgaussianElim_kernels.cl\nOpenCL Error: -49 CL_INVALID_ARG_INDEX ERROR in Setting Fan1 kernel args\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 255)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.073,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "gaussianElim_kernels.cl": "__kernel void Fan1(__global float *m_cuda, __global float *a_cuda, int Size, int t)\n{\n    int gx = (int)get_global_id(0);\n\n    if (gx >= (Size - 1 - t)) return;\n\n    m_cuda[Size * (gx + t + 1) + t] = a_cuda[Size * (gx + t + 1) + t] / a_cuda[Size * t + t];\n}\n\n__kernel void Fan2(__global float *m_cuda, __global float *a_cuda, __global float *b_cuda, int Size, int j1, int t)\n{\n    int xidx = (int)get_global_id(0);\n    int yidx = (int)get_global_id(1);\n\n    if (xidx >= (Size - 1 - t)) return;\n    if (yidx >= (Size - t)) return;\n\n    a_cuda[Size * (xidx + 1 + t) + (yidx + t)] -=\n        m_cuda[Size * (xidx + 1 + t) + t] * a_cuda[Size * t + (yidx + t)];\n\n    if (yidx == 0) {\n        b_cuda[xidx + 1 + t] -= m_cuda[Size * (xidx + 1 + t) + (yidx + t)] * b_cuda[t];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "gaussianElim_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "gaussianElim_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 9.407,
+      "prompt_tokens": 12333,
+      "completion_tokens": 597,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "",
+      "run_stdout_snippet": "WG size of kernel 1 = 0, WG size of kernel 2= 0 X 0\nCreate matrix internally in parse, size = 16 \nNumber of platforms detected:1\nChecking For OpenCl Compatible Devices\nPlatform 0\nvendor: NVIDIA Corporation\nno of devices: 1\n\tdevice 0: NVIDIA Corporation NVIDIA GeForce RTX 4070\n\nUsing Platform 0 Device 0 \nCreating GPU Context\nProfiling enabled\ncreate input internally before create, size = 16 \n\tgaussianElim_kernels.cl\nOpenCL Error: -49 CL_INVALID_ARG_INDEX ERROR in Setting Fan1 kernel args\n",
+      "extraction_fail": null
+    }
+  ]
+}

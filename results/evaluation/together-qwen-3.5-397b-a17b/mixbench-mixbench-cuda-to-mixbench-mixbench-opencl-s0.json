@@ -1,0 +1,69 @@
+{
+  "source_spec": "mixbench-mixbench-cuda",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 729461310,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-22T04:15:37Z",
+  "prompt_tokens": 12131,
+  "completion_tokens": 1752,
+  "llm_response_time_seconds": 17.175,
+  "build_status": "pass",
+  "build_time_seconds": 0.468,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.386,
+  "run_exit_code": 1,
+  "run_stderr_snippet": "_type *g_data) {\n                                                ^\n<kernel>:69:49: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n<kernel>:85:16: error: invalid value '0'; must be positive\n#pragma unroll COMPUTE_ITERATIONS\n               ^\n<built-in>:3:28: note: expanded from here\n#define COMPUTE_ITERATIONS 0\n                           ^\n----------------------------------------------------------------------------------------------\n",
+  "run_stdout_snippet": "uffer:  2962 MB\nOpenCL version:      OpenCL 3.0 CUDA\nTotal CUs:           46\n-----------------------------------------------------------------------\nBuffer size:            256MB\nWorkgroup size:         256\nElements per workitem:  8\nWorkitem fusion degree: 4\nWorkitem stride:        NDRange\nBuffer allocation:      Device allocated\nTimer:                  CL event based\nWarning:                Half precision computations are not supported\nLoading kernel source file...\nPrecompilation of kernels... ",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "mix_kernels.cl": "#pragma once\n\n#ifndef ELEMENTS_PER_THREAD\n#define ELEMENTS_PER_THREAD (8)\n#endif\n\n#ifndef FUSION_DEGREE\n#define FUSION_DEGREE (4)\n#endif\n\n#ifndef blockdim\n#define blockdim (256)\n#endif\n\n#ifndef COMPUTE_ITERATIONS\n#define COMPUTE_ITERATIONS (0)\n#endif\n\n#ifdef ENABLE_HP\n#ifdef class_T\n#if defined(__OPENCL_VERSION__) && __OPENCL_VERSION__ >= 120\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n#endif\n#endif\n\n#ifdef ENABLE_DP\n#ifdef class_T\n#if defined(__OPENCL_VERSION__) && __OPENCL_VERSION__ >= 120\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n#endif\n#endif\n\n#ifdef class_T\ntypedef class_T T_type;\n#else\ntypedef float T_type;\n#endif\n\ninline T_type conv_int(const int i) {\n    return (T_type)i;\n}\n\ninline T_type mad_op(const T_type a, const T_type b, const T_type c) {\n    return a * b + c;\n}\n\ninline int equal_op(const T_type a, const T_type b) {\n    return (a == b);\n}\n\n#ifdef ENABLE_HP\n#ifdef class_T\n#if defined(__OPENCL_VERSION__) && __OPENCL_VERSION__ >= 120\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n#endif\n#endif\n\n#ifdef ENABLE_HP\n#ifdef class_T\n#if defined(__OPENCL_VERSION__) && __OPENCL_VERSION__ >= 120\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n#endif\n#endif\n\nkernel void benchmark_func(T_type seed, T_type *g_data) {\n    const unsigned int blockSize = blockdim;\n    const int stride = blockSize;\n    int idx = get_group_id(0) * blockSize * ELEMENTS_PER_THREAD + get_local_id(0);\n    const int big_stride = get_num_groups(0) * blockSize * ELEMENTS_PER_THREAD;\n\n    T_type tmps[ELEMENTS_PER_THREAD];\n    \n    for(int k = 0; k < FUSION_DEGREE; k++) {\n        for(int j = 0; j < ELEMENTS_PER_THREAD; j++) {\n#ifdef BLOCK_STRIDED\n            tmps[j] = g_data[idx + j * stride + k * big_stride];\n#else\n            tmps[j] = g_data[idx + j + k * big_stride];\n#endif\n            \n#pragma unroll COMPUTE_ITERATIONS\n            for(int i = 0; i < COMPUTE_ITERATIONS; i++) {\n                tmps[j] = mad_op(tmps[j], tmps[j], seed);\n            }\n        }\n        \n        T_type sum = conv_int(0);\n#pragma unroll 4\n        for(int j = 0; j < ELEMENTS_PER_THREAD; j += 2) {\n            sum = mad_op(tmps[j], tmps[j + 1], sum);\n        }\n        \n        if(equal_op(sum, conv_int(-1))) {\n#ifdef BLOCK_STRIDED\n            g_data[idx + k * big_stride] = sum;\n#else\n            g_data[idx + k * big_stride] = sum;\n#endif\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 17.175,
+      "prompt_tokens": 12131,
+      "completion_tokens": 1752,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "_type *g_data) {\n                                                ^\n<kernel>:69:49: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n<kernel>:85:16: error: invalid value '0'; must be positive\n#pragma unroll COMPUTE_ITERATIONS\n               ^\n<built-in>:3:28: note: expanded from here\n#define COMPUTE_ITERATIONS 0\n                           ^\n----------------------------------------------------------------------------------------------\n",
+      "run_stdout_snippet": "uffer:  2962 MB\nOpenCL version:      OpenCL 3.0 CUDA\nTotal CUs:           46\n-----------------------------------------------------------------------\nBuffer size:            256MB\nWorkgroup size:         256\nElements per workitem:  8\nWorkitem fusion degree: 4\nWorkitem stride:        NDRange\nBuffer allocation:      Device allocated\nTimer:                  CL event based\nWarning:                Half precision computations are not supported\nLoading kernel source file...\nPrecompilation of kernels... ",
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "rsbench",
+        "parallel_api": "opencl",
+        "unique_id": "rsbench-rsbench-opencl",
+        "source_suite": "rsbench"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/ANL-CESAR/RSBench",
+            "commit": "34b644787ea9af4fb188e1253da72e09bbed9989",
+            "branch": "master"
+        },
+        "repo_root": "rsbench/rsbench-src",
+        "source_path": "opencl",
+        "license": "MIT"
+    },
+    "files": {
+        "prompt_payload": [
+            "main.c",
+            "io.c",
+            "simulation.c",
+            "init.c",
+            "material.c",
+            "utils.c",
+            "cl_utils.c",
+            "kernel.cl"
+        ],
+        "support_files": [
+            "Makefile",
+            "rsbench.h",
+            "cl_utils.h"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "kernel.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C",
+        "language_standard": "C11"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl-headers",
+                    "opencl-icd-loader",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl",
+        "commands": {
+            "configure": null,
+            "build": "make CFLAGS='-std=gnu99 -Wall -O3 -I/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include' LDFLAGS='-lm -lOpenCL -L/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64'",
+            "clean": "make clean"
+        },
+        "variables": null,
+        "outputs": {
+            "executable": "./rsbench"
+        }
+    },
+    "run": {
+        "executable": "./rsbench",
+        "default_arguments": [
+            "-m",
+            "event",
+            "-s",
+            "small"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-m",
+                    "event",
+                    "-s",
+                    "small"
+                ],
+                "description": "Small event-based input for correctness verification of rsbench (OpenCL)",
+                "input_files": [],
+                "expected_results": {
+                    "stdout_pattern": "Verification checksum: \\d+ \\(Valid\\)"
+                }
+            },
+            "performance": {
+                "arguments": [
+                    "-m",
+                    "event",
+                    "-s",
+                    "large"
+                ],
+                "description": "Large event-based input for performance measurement of rsbench (OpenCL)",
+                "input_files": [],
+                "expected_results": {
+                    "stdout_pattern": "Verification checksum: \\d+ \\(Valid\\)"
+                }
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Verification checksum: \\d+ \\(Valid\\)",
+                "description": "RSBench self-verification reports valid checksum"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits with code 0 on valid checksum, 1 on invalid"
+            }
+        ],
+        "floating_point": null
+    },
+    "performance": {
+        "metrics": [
+            {
+                "name": "runtime",
+                "extraction": {
+                    "type": "regex",
+                    "pattern": "Runtime:\\s+([\\d.]+)\\s+seconds",
+                    "capture_group": 1
+                },
+                "unit": "seconds"
+            },
+            {
+                "name": "lookups_per_second",
+                "extraction": {
+                    "type": "regex",
+                    "pattern": "Lookups/s:\\s+([\\d,]+)",
+                    "capture_group": 1
+                },
+                "unit": "lookups/s"
+            }
+        ],
+        "warmup_runs": 0,
+        "measurement_runs": 1
+    },
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "vendor": "NVIDIA",
+                "min_compute_capability": "sm_60",
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-linux-x86_64",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-28T20:00:00+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "Programming Model:           OpenCL\nSimulation Method:           Event Based\nH-M Benchmark Size:          Small\nTotal XS Lookups:            10,200,000\nRuntime:     2.648 seconds\nLookups:     10,200,000\nLookups/s:   3,851,963\nVerification checksum: 880018 (Valid)\n",
+                "wall_time_seconds": 2.7,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Monte Carlo multipole resolved resonance cross-section lookup (RSBench)",
+        "domain": "nuclear physics",
+        "complexity": "Monte Carlo cross-section lookup with multipole resonance method",
+        "tags": [
+            "opencl",
+            "monte-carlo",
+            "nuclear",
+            "physics",
+            "rsbench"
+        ],
+        "multi_file": true,
+        "translation_complexity": null
+    }
+}

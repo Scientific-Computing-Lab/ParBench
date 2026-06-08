@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lavamd-cuda",
+  "target_spec": "rodinia-lavamd-opencl",
+  "kernel": "lavamd",
+  "model": "azure-gpt-5.4",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1011959531,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-boxes1d",
+    "10"
+  ],
+  "timestamp": "2026-04-26T02:50:08Z",
+  "prompt_tokens": 9985,
+  "completion_tokens": 3167,
+  "llm_response_time_seconds": 59.028,
+  "build_status": "pass",
+  "build_time_seconds": 0.22,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.165,
+  "run_exit_code": 245,
+  "run_stderr_snippet": "3 errors generated.\n",
+  "run_stdout_snippet": "      ^\n<kernel>:89:23: error: variables in the local address space can only be declared in the outermost scope of a kernel function\n                __local FOUR_VECTOR rB_shared[NUMBER_PAR_PER_BOX];\n                                    ^\n<kernel>:90:14: error: variables in the local address space can only be declared in the outermost scope of a kernel function\n                __local fp qB_shared[NUMBER_PAR_PER_BOX];\n                           ^\n\n>>>>\nError at line 238: CL_BUILD_PROGRAM_FAILURE\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 245)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#define fp float\n\n#define NUMBER_PAR_PER_BOX 100\n\n#ifdef RD_WG_SIZE_0_0\n    #define NUMBER_THREADS RD_WG_SIZE_0_0\n#elif defined(RD_WG_SIZE_0)\n    #define NUMBER_THREADS RD_WG_SIZE_0\n#elif defined(RD_WG_SIZE)\n    #define NUMBER_THREADS RD_WG_SIZE\n#else\n    #define NUMBER_THREADS 128\n#endif\n\n#define DOT(A,B) ((A.x)*(B.x)+(A.y)*(B.y)+(A.z)*(B.z))\n\ntypedef struct\n{\n\tfp x, y, z;\n} THREE_VECTOR;\n\ntypedef struct\n{\n\tfp v, x, y, z;\n} FOUR_VECTOR;\n\ntypedef struct nei_str\n{\n\tint x, y, z;\n\tint number;\n\tlong offset;\n} nei_str;\n\ntypedef struct box_str\n{\n\tint x, y, z;\n\tint number;\n\tlong offset;\n\n\tint nn;\n\tnei_str nei[26];\n} box_str;\n\ntypedef struct par_str\n{\n\tfp alpha;\n} par_str;\n\ntypedef struct dim_str\n{\n\tint cur_arg;\n\tint arch_arg;\n\tint cores_arg;\n\tint boxes1d_arg;\n\n\tlong number_boxes;\n\tlong box_mem;\n\tlong space_elem;\n\tlong space_mem;\n\tlong space_mem2;\n} dim_str;\n\n__kernel void kernel_gpu_opencl(par_str d_par_gpu,\n                                dim_str d_dim_gpu,\n                                __global box_str* d_box_gpu,\n                                __global FOUR_VECTOR* d_rv_gpu,\n                                __global fp* d_qv_gpu,\n                                __global FOUR_VECTOR* d_fv_gpu)\n{\n\tint bx = get_group_id(0);\n\tint tx = get_local_id(0);\n\tint wtx = tx;\n\n\tif (bx < d_dim_gpu.number_boxes) {\n\n\t\tfp a2 = (fp)2.0f * d_par_gpu.alpha * d_par_gpu.alpha;\n\n\t\tint first_i;\n\t\t__global FOUR_VECTOR* rA;\n\t\t__global FOUR_VECTOR* fA;\n\t\t__local FOUR_VECTOR rA_shared[NUMBER_PAR_PER_BOX];\n\n\t\tint pointer;\n\t\tint k = 0;\n\t\tint first_j;\n\t\t__global FOUR_VECTOR* rB;\n\t\t__global fp* qB;\n\t\tint j = 0;\n\t\t__local FOUR_VECTOR rB_shared[NUMBER_PAR_PER_BOX];\n\t\t__local fp qB_shared[NUMBER_PAR_PER_BOX];\n\n\t\tfp r2;\n\t\tfp u2;\n\t\tfp vij;\n\t\tfp fs;\n\t\tfp fxij;\n\t\tfp fyij;\n\t\tfp fzij;\n\t\tTHREE_VECTOR d;\n\n\t\tfirst_i = (int)d_box_gpu[bx].offset;\n\n\t\trA = &d_rv_gpu[first_i];\n\t\tfA = &d_fv_gpu[first_i];\n\n\t\twhile (wtx < NUMBER_PAR_PER_BOX) {\n\t\t\trA_shared[wtx] = rA[wtx];\n\t\t\twtx = wtx + NUMBER_THREADS;\n\t\t}\n\t\twtx = tx;\n\n\t\tbarrier(CLK_LOCAL_MEM_FENCE);\n\n\t\tfor (k = 0; k < (1 + d_box_gpu[bx].nn); k++) {\n\n\t\t\tif (k == 0) {\n\t\t\t\tpointer = bx;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tpointer = d_box_gpu[bx].nei[k-1].number;\n\t\t\t}\n\n\t\t\tfirst_j = (int)d_box_gpu[pointer].offset;\n\n\t\t\trB = &d_rv_gpu[first_j];\n\t\t\tqB = &d_qv_gpu[first_j];\n\n\t\t\twhile (wtx < NUMBER_PAR_PER_BOX) {\n\t\t\t\trB_shared[wtx] = rB[wtx];\n\t\t\t\tqB_shared[wtx] = qB[wtx];\n\t\t\t\twtx = wtx + NUMBER_THREADS;\n\t\t\t}\n\t\t\twtx = tx;\n\n\t\t\tbarrier(CLK_LOCAL_MEM_FENCE);\n\n\t\t\twhile (wtx < NUMBER_PAR_PER_BOX) {\n\n\t\t\t\tfor (j = 0; j < NUMBER_PAR_PER_BOX; j++) {\n\n\t\t\t\t\tr2 = (fp)rA_shared[wtx].v + (fp)rB_shared[j].v -\n\t\t\t\t\t     DOT(((FOUR_VECTOR)(rA_shared[wtx].v, rA_shared[wtx].x, rA_shared[wtx].y, rA_shared[wtx].z)),\n\t\t\t\t\t         ((FOUR_VECTOR)(rB_shared[j].v, rB_shared[j].x, rB_shared[j].y, rB_shared[j].z)));\n\t\t\t\t\tu2 = a2 * r2;\n\t\t\t\t\tvij = exp(-u2);\n\t\t\t\t\tfs = (fp)2.0f * vij;\n\n\t\t\t\t\td.x = (fp)rA_shared[wtx].x - (fp)rB_shared[j].x;\n\t\t\t\t\tfxij = fs * d.x;\n\t\t\t\t\td.y = (fp)rA_shared[wtx].y - (fp)rB_shared[j].y;\n\t\t\t\t\tfyij = fs * d.y;\n\t\t\t\t\td.z = (fp)rA_shared[wtx].z - (fp)rB_shared[j].z;\n\t\t\t\t\tfzij = fs * d.z;\n\n\t\t\t\t\tfA[wtx].v += (fp)(qB_shared[j] * vij);\n\t\t\t\t\tfA[wtx].x += (fp)(qB_shared[j] * fxij);\n\t\t\t\t\tfA[wtx].y += (fp)(qB_shared[j] * fyij);\n\t\t\t\t\tfA[wtx].z += (fp)(qB_shared[j] * fzij);\n\t\t\t\t}\n\n\t\t\t\twtx = wtx + NUMBER_THREADS;\n\t\t\t}\n\n\t\t\twtx = tx;\n\n\t\t\tbarrier(CLK_LOCAL_MEM_FENCE);\n\t\t}\n\t}\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 59.028,
+      "prompt_tokens": 9985,
+      "completion_tokens": 3167,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "3 errors generated.\n",
+      "run_stdout_snippet": "      ^\n<kernel>:89:23: error: variables in the local address space can only be declared in the outermost scope of a kernel function\n                __local FOUR_VECTOR rB_shared[NUMBER_PAR_PER_BOX];\n                                    ^\n<kernel>:90:14: error: variables in the local address space can only be declared in the outermost scope of a kernel function\n                __local fp qB_shared[NUMBER_PAR_PER_BOX];\n                           ^\n\n>>>>\nError at line 238: CL_BUILD_PROGRAM_FAILURE\n",
+      "extraction_fail": null
+    }
+  ]
+}

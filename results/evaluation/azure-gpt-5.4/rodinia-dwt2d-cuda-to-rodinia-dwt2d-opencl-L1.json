@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-dwt2d-cuda",
+  "target_spec": "rodinia-dwt2d-opencl",
+  "kernel": "dwt2d",
+  "model": "azure-gpt-5.4",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 59059947,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "rgb.bmp",
+    "-i",
+    "../../data/dwt2d",
+    "-D",
+    "1024x1024",
+    "-f",
+    "-5",
+    "-l",
+    "3"
+  ],
+  "timestamp": "2026-04-27T01:12:45Z",
+  "prompt_tokens": 30828,
+  "completion_tokens": 9304,
+  "llm_response_time_seconds": 169.801,
+  "build_status": "pass",
+  "build_time_seconds": 0.311,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.336,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "sliding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 3 , gx = 4 , gy = 11 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\n\nWriting to rgb.bmp.dwt.r (1024 x 1024)\n\nWriting to rgb.bmp.dwt.g (1024 x 1024)\n\nWriting to rgb.bmp.dwt.b (1024 x 1024)\nInit: 258.764008\nMemAlloc: 10.450000\nHtoD: 0.000000\nExec: 0.021504\nDtoH: 0.890000\nClose: 0.642000\nTotal: 281.126007\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.1,
+  "translated_wall_time_seconds": 0.336,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.2976,
+  "translated_files": {
+    "com_dwt.cl": "#define THREADS 256\n\ninline int mirror_index_1d(int d, int size)\n{\n    if (size <= 1) return 0;\n    if (d >= size) {\n        d = 2 * size - 2 - d;\n    } else if (d < 0) {\n        d = -d;\n    }\n    if (d < 0) d = 0;\n    if (d >= size) d = size - 1;\n    return d;\n}\n\ninline int src_at(__global const int *in, int sx, int sy, int x, int y)\n{\n    const int mx = mirror_index_1d(x, sx);\n    const int my = mirror_index_1d(y, sy);\n    return in[my * sx + mx];\n}\n\ninline int h53_high_from_odd(__global const int *in, int sx, int sy, int row, int oddx)\n{\n    row = mirror_index_1d(row, sy);\n    oddx = mirror_index_1d(oddx, sx);\n\n    const int l = mirror_index_1d(oddx - 1, sx);\n    const int r = mirror_index_1d(oddx + 1, sx);\n\n    const int c = src_at(in, sx, sy, oddx, row);\n    const int p = src_at(in, sx, sy, l, row);\n    const int n = src_at(in, sx, sy, r, row);\n\n    return c - ((p + n) / 2);\n}\n\ninline int h53_low_from_even(__global const int *in, int sx, int sy, int row, int evenx)\n{\n    row = mirror_index_1d(row, sy);\n    evenx = mirror_index_1d(evenx, sx);\n\n    const int lo = mirror_index_1d(evenx - 1, sx);\n    const int ro = mirror_index_1d(evenx + 1, sx);\n\n    const int hleft  = h53_high_from_odd(in, sx, sy, row, lo);\n    const int hright = h53_high_from_odd(in, sx, sy, row, ro);\n    const int c      = src_at(in, sx, sy, evenx, row);\n\n    return c + ((hleft + hright + 2) / 4);\n}\n\ninline int band_low_row(__global const int *in, int sx, int sy, int row, int lx)\n{\n    return h53_low_from_even(in, sx, sy, row, 2 * lx);\n}\n\ninline int band_high_row(__global const int *in, int sx, int sy, int row, int hx)\n{\n    return h53_high_from_odd(in, sx, sy, row, 2 * hx + 1);\n}\n\ninline int v53_high_from_lowband(__global const int *in, int sx, int sy, int oddy, int lx)\n{\n    oddy = mirror_index_1d(oddy, sy);\n\n    const int pRow = mirror_index_1d(oddy - 1, sy);\n    const int nRow = mirror_index_1d(oddy + 1, sy);\n\n    const int c = band_low_row(in, sx, sy, oddy, lx);\n    const int p = band_low_row(in, sx, sy, pRow, lx);\n    const int n = band_low_row(in, sx, sy, nRow, lx);\n\n    return c - ((p + n) / 2);\n}\n\ninline int v53_low_from_lowband(__global const int *in, int sx, int sy, int eveny, int lx)\n{\n    eveny = mirror_index_1d(eveny, sy);\n\n    const int pOdd = mirror_index_1d(eveny - 1, sy);\n    const int nOdd = mirror_index_1d(eveny + 1, sy);\n\n    const int c = band_low_row(in, sx, sy, eveny, lx);\n    const int p = v53_high_from_lowband(in, sx, sy, pOdd, lx);\n    const int n = v53_high_from_lowband(in, sx, sy, nOdd, lx);\n\n    return c + ((p + n + 2) / 4);\n}\n\ninline int v53_high_from_highband(__global const int *in, int sx, int sy, int oddy, int hx)\n{\n    oddy = mirror_index_1d(oddy, sy);\n\n    const int pRow = mirror_index_1d(oddy - 1, sy);\n    const int nRow = mirror_index_1d(oddy + 1, sy);\n\n    const int c = band_high_row(in, sx, sy, oddy, hx);\n    const int p = band_high_row(in, sx, sy, pRow, hx);\n    const int n = band_high_row(in, sx, sy, nRow, hx);\n\n    return c - ((p + n) / 2);\n}\n\ninline int v53_low_from_highband(__global const int *in, int sx, int sy, int eveny, int hx)\n{\n    eveny = mirror_index_1d(eveny, sy);\n\n    const int pOdd = mirror_index_1d(eveny - 1, sy);\n    const int nOdd = mirror_index_1d(eveny + 1, sy);\n\n    const int c = band_high_row(in, sx, sy, eveny, hx);\n    const int p = v53_high_from_highband(in, sx, sy, pOdd, hx);\n    const int n = v53_high_from_highband(in, sx, sy, nOdd, hx);\n\n    return c + ((p + n + 2) / 4);\n}\n\n__kernel void c_CopySrcToComponents(__global int *d_r,\n                                    __global int *d_g,\n                                    __global int *d_b,\n                                    __global const uchar *d_src,\n                                    const int pixels)\n{\n    const int gid = (int)get_global_id(0);\n\n    if (gid < pixels) {\n        const int base = gid * 3;\n        d_r[gid] = (int)d_src[base + 0] - 128;\n        d_g[gid] = (int)d_src[base + 1] - 128;\n        d_b[gid] = (int)d_src[base + 2] - 128;\n    }\n}\n\n__kernel void c_CopySrcToComponent(__global int *d_c,\n                                   __global const uchar *d_src,\n                                   const int pixels)\n{\n    const int gid = (int)get_global_id(0);\n\n    if (gid < pixels) {\n        d_c[gid] = (int)d_src[gid] - 128;\n    }\n}\n\n__kernel void cl_fdwt53Kernel(__global const int *input,\n                              __global int *output,\n                              const int sizeX,\n                              const int sizeY,\n                              const int winSteps,\n                              const int WIN_SX,\n                              const int WIN_SY)\n{\n    (void)winSteps;\n    (void)WIN_SX;\n    (void)WIN_SY;\n\n    const int llSizeX = (sizeX + 1) / 2;\n    const int llSizeY = (sizeY + 1) / 2;\n    const int hlSizeX = sizeX - llSizeX;\n    const int lhSizeY = sizeY - llSizeY;\n\n    const int sizeLL = llSizeX * llSizeY;\n    const int sizeHL = hlSizeX * llSizeY;\n    const int sizeLH = llSizeX * lhSizeY;\n    const int total  = sizeX * sizeY;\n\n    const int gid0 = (int)get_global_id(0);\n    const int gid1 = (int)get_global_id(1);\n    const int gsz0 = (int)get_global_size(0);\n    const int gsz1 = (int)get_global_size(1);\n    const int tid  = gid1 * gsz0 + gid0;\n    const int tnum = gsz0 * gsz1;\n\n    for (int idx = tid; idx < total; idx += tnum) {\n        if (idx < sizeLL) {\n            const int x = idx % llSizeX;\n            const int y = idx / llSizeX;\n            output[idx] = v53_low_from_lowband(input, sizeX, sizeY, 2 * y, x);\n        } else if (idx < sizeLL + sizeHL) {\n            const int off = idx - sizeLL;\n            const int x = off % hlSizeX;\n            const int y = off / hlSizeX;\n            output[idx] = v53_low_from_highband(input, sizeX, sizeY, 2 * y, x);\n        } else if (idx < sizeLL + sizeHL + sizeLH) {\n            const int off = idx - sizeLL - sizeHL;\n            const int x = off % llSizeX;\n            const int y = off / llSizeX;\n            output[idx] = v53_high_from_lowband(input, sizeX, sizeY, 2 * y + 1, x);\n        } else {\n            const int off = idx - sizeLL - sizeHL - sizeLH;\n            const int x = off % hlSizeX;\n            const int y = off / hlSizeX;\n            output[idx] = v53_high_from_highband(input, sizeX, sizeY, 2 * y + 1, x);\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "com_dwt.cl"
+  ],
+  "target_files_extracted": [
+    "com_dwt.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 169.801,
+      "prompt_tokens": 30828,
+      "completion_tokens": 9304,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

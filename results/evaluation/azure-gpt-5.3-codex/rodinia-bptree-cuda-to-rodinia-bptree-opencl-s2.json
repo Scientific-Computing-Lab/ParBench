@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-bptree-cuda",
+  "target_spec": "rodinia-bptree-opencl",
+  "kernel": "bptree",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 119674744,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-04-30T03:11:46Z",
+  "prompt_tokens": 11656,
+  "completion_tokens": 1687,
+  "llm_response_time_seconds": 26.439,
+  "build_status": "pass",
+  "build_time_seconds": 0.55,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.656,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "_mem=4000000\nknodes_elem=7874, knodes_unit_mem=2068, knodes_mem=16283432\nPlatform: NVIDIA Corporation\nDevice num: 1\nCreating GPU Context\nDevice: NVIDIA GeForce RTX 4070\n-----OpenCL Compiler Output-----\n--------------------------------\n# of blocks = 10000, # of threads/block = 256 (ensure that device can handle)\nTime spent in different stages of GPU_CUDA KERNEL:\nInit: 96.152000\nMemAlloc: 0.003000\nHtoD: 1.185952\nExec: 0.058368\nDtoH: 0.002400\nClose: 47.382000\nTotal: 145.199005\n> > > > > > > > > > \n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.453,
+  "translated_wall_time_seconds": 0.656,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.6905,
+  "translated_files": {
+    "kernel/kernel_gpu_opencl.cl": "#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 256\n#endif\n\ntypedef struct record {\n\tint value;\n} record;\n\ntypedef struct knode {\n\tint location;\n\tint indices[DEFAULT_ORDER + 1];\n\tint keys[DEFAULT_ORDER + 1];\n\tbool is_leaf;\n\tint num_keys;\n} knode;\n\n__kernel void findK(long height,\n                    __global knode *knodesD,\n                    long knodes_elem,\n                    __global record *recordsD,\n                    __global long *currKnodeD,\n                    __global long *offsetD,\n                    __global int *keysD,\n                    __global record *ansD)\n{\n\tint thid = (int)get_local_id(0);\n\tint bid = (int)get_group_id(0);\n\n\tint i;\n\tfor (i = 0; i < height; i++) {\n\t\tif ((knodesD[currKnodeD[bid]].keys[thid] <= keysD[bid]) &&\n\t\t    (knodesD[currKnodeD[bid]].keys[thid + 1] > keysD[bid])) {\n\t\t\tif (knodesD[offsetD[bid]].indices[thid] < knodes_elem) {\n\t\t\t\toffsetD[bid] = knodesD[offsetD[bid]].indices[thid];\n\t\t\t}\n\t\t}\n\t\tbarrier(CLK_GLOBAL_MEM_FENCE);\n\n\t\tif (thid == 0) {\n\t\t\tcurrKnodeD[bid] = offsetD[bid];\n\t\t}\n\t\tbarrier(CLK_GLOBAL_MEM_FENCE);\n\t}\n\n\tif (knodesD[currKnodeD[bid]].keys[thid] == keysD[bid]) {\n\t\tansD[bid].value = recordsD[knodesD[currKnodeD[bid]].indices[thid]].value;\n\t}\n}\n",
+    "kernel/kernel_gpu_opencl_2.cl": "#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 256\n#endif\n\ntypedef struct knode {\n\tint location;\n\tint indices[DEFAULT_ORDER + 1];\n\tint keys[DEFAULT_ORDER + 1];\n\tbool is_leaf;\n\tint num_keys;\n} knode;\n\n__kernel void findRangeK(long height,\n                         __global knode *knodesD,\n                         long knodes_elem,\n                         __global long *currKnodeD,\n                         __global long *offsetD,\n                         __global long *lastKnodeD,\n                         __global long *offset_2D,\n                         __global int *startD,\n                         __global int *endD,\n                         __global int *RecstartD,\n                         __global int *ReclenD)\n{\n\tint thid = (int)get_local_id(0);\n\tint bid = (int)get_group_id(0);\n\n\tint i;\n\tfor (i = 0; i < height; i++) {\n\t\tif ((knodesD[currKnodeD[bid]].keys[thid] <= startD[bid]) &&\n\t\t    (knodesD[currKnodeD[bid]].keys[thid + 1] > startD[bid])) {\n\t\t\tif (knodesD[currKnodeD[bid]].indices[thid] < knodes_elem) {\n\t\t\t\toffsetD[bid] = knodesD[currKnodeD[bid]].indices[thid];\n\t\t\t}\n\t\t}\n\t\tif ((knodesD[lastKnodeD[bid]].keys[thid] <= endD[bid]) &&\n\t\t    (knodesD[lastKnodeD[bid]].keys[thid + 1] > endD[bid])) {\n\t\t\tif (knodesD[lastKnodeD[bid]].indices[thid] < knodes_elem) {\n\t\t\t\toffset_2D[bid] = knodesD[lastKnodeD[bid]].indices[thid];\n\t\t\t}\n\t\t}\n\t\tbarrier(CLK_GLOBAL_MEM_FENCE);\n\n\t\tif (thid == 0) {\n\t\t\tcurrKnodeD[bid] = offsetD[bid];\n\t\t\tlastKnodeD[bid] = offset_2D[bid];\n\t\t}\n\t\tbarrier(CLK_GLOBAL_MEM_FENCE);\n\t}\n\n\tif (knodesD[currKnodeD[bid]].keys[thid] == startD[bid]) {\n\t\tRecstartD[bid] = knodesD[currKnodeD[bid]].indices[thid];\n\t}\n\tbarrier(CLK_GLOBAL_MEM_FENCE);\n\n\tif (knodesD[lastKnodeD[bid]].keys[thid] == endD[bid]) {\n\t\tReclenD[bid] = knodesD[lastKnodeD[bid]].indices[thid] - RecstartD[bid] + 1;\n\t}\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_gpu_opencl.cl",
+    "kernel/kernel_gpu_opencl_2.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 26.439,
+      "prompt_tokens": 11656,
+      "completion_tokens": 1687,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "source_spec": "rodinia-bfs-opencl",
+  "target_spec": "rodinia-bfs-omp",
+  "kernel": "bfs",
+  "model": "azure-gpt-5.4",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 604832351,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "../../data/bfs/graph1MW_6.txt"
+  ],
+  "timestamp": "2026-04-27T05:10:31Z",
+  "prompt_tokens": 11322,
+  "completion_tokens": 5983,
+  "llm_response_time_seconds": 96.187,
+  "build_status": "pass",
+  "build_time_seconds": 0.336,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.48,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Reading File\n--cambine:passed:-)\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": 0.48,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0021,
+  "translated_files": {
+    "bfs.cpp": "#include <cstdio>\n#include <cstdlib>\n#include <cstring>\n#include <cmath>\n#include <iostream>\n#include <string>\n#include <omp.h>\n\n#ifdef TIMING\n#include <sys/time.h>\n#endif\n\n#define MAX_THREADS_PER_BLOCK 256\n\nstruct Node {\n    int starting;\n    int no_of_edges;\n};\n\nint work_group_size = 512;\nint platform_id_inuse = 0;\nint device_id_inuse = 0;\n\n#ifdef TIMING\nstruct timeval tv;\nstruct timeval tv_total_start, tv_total_end;\nstruct timeval tv_h2d_start, tv_h2d_end;\nstruct timeval tv_d2h_start, tv_d2h_end;\nstruct timeval tv_kernel_start, tv_kernel_end;\nstruct timeval tv_mem_alloc_start, tv_mem_alloc_end;\nstruct timeval tv_close_start, tv_close_end;\nfloat init_time = 0, mem_alloc_time = 0, h2d_time = 0, kernel_time = 0,\n      d2h_time = 0, close_time = 0, total_time = 0;\n\nstatic void tvsub(const struct timeval *t1, const struct timeval *t0, struct timeval *td)\n{\n    td->tv_sec = t1->tv_sec - t0->tv_sec;\n    td->tv_usec = t1->tv_usec - t0->tv_usec;\n    if (td->tv_usec < 0) {\n        td->tv_sec--;\n        td->tv_usec += 1000000;\n    }\n}\n#endif\n\n#ifdef PROFILING\nclass timer {\npublic:\n    timer(const char * = 0) : start_time(0.0), elapsed(0.0) {}\n    timer(const char *, std::ostream &) : start_time(0.0), elapsed(0.0) {}\n    ~timer() {}\n    void start() { start_time = omp_get_wtime(); }\n    void stop() { elapsed += omp_get_wtime() - start_time; }\n    void reset() { start_time = 0.0; elapsed = 0.0; }\n    double getTimeInSeconds() { return elapsed; }\nprivate:\n    double start_time;\n    double elapsed;\n};\n#endif\n\ntemplate<typename datatype>\nvoid compare_results(const datatype *cpu_results, const datatype *gpu_results, const int size)\n{\n    char passed = true;\n    for (int i = 0; i < size; i++) {\n        if (cpu_results[i] != gpu_results[i]) {\n            passed = false;\n        }\n    }\n    if (passed) {\n        std::cout << \"--cambine:passed:-)\" << std::endl;\n    } else {\n        std::cout << \"--cambine: failed:-(\" << std::endl;\n    }\n}\n\nvoid _clCmdParams(int argc, char* argv[])\n{\n    for (int i = 1; i < argc; ++i) {\n        if (argv[i][0] != '-' || argv[i][1] == '\\0') continue;\n        switch (argv[i][1]) {\n        case 'g':\n            if (++i < argc) {\n                sscanf(argv[i], \"%u\", &work_group_size);\n            } else {\n                std::cerr << \"Could not read argument after option \" << argv[i - 1] << std::endl;\n                throw std::string(\"invalid command line\");\n            }\n            break;\n        case 'd':\n            if (++i < argc) {\n                sscanf(argv[i], \"%u\", &device_id_inuse);\n            } else {\n                std::cerr << \"Could not read argument after option \" << argv[i - 1] << std::endl;\n                throw std::string(\"invalid command line\");\n            }\n            break;\n        case 'p':\n            if (++i < argc) {\n                sscanf(argv[i], \"%u\", &platform_id_inuse);\n            } else {\n                std::cerr << \"Could not read argument after option \" << argv[i - 1] << std::endl;\n                throw std::string(\"invalid command line\");\n            }\n            break;\n        case 't':\n            if (i + 1 < argc) ++i;\n            break;\n        default:\n            break;\n        }\n    }\n}\n\nvoid run_bfs_cpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size,\n                 int *h_graph_edges, char *h_graph_mask, char *h_updating_graph_mask,\n                 char *h_graph_visited, int *h_cost_ref)\n{\n    (void)edge_list_size;\n    char stop;\n    int k = 0;\n    do {\n        stop = false;\n        for (int tid = 0; tid < no_of_nodes; tid++) {\n            if (h_graph_mask[tid] == true) {\n                h_graph_mask[tid] = false;\n                for (int i = h_graph_nodes[tid].starting;\n                     i < (h_graph_nodes[tid].no_of_edges + h_graph_nodes[tid].starting); i++) {\n                    int id = h_graph_edges[i];\n                    if (!h_graph_visited[id]) {\n                        h_cost_ref[id] = h_cost_ref[tid] + 1;\n                        h_updating_graph_mask[id] = true;\n                    }\n                }\n            }\n        }\n\n        for (int tid = 0; tid < no_of_nodes; tid++) {\n            if (h_updating_graph_mask[tid] == true) {\n                h_graph_mask[tid] = true;\n                h_graph_visited[tid] = true;\n                stop = true;\n                h_updating_graph_mask[tid] = false;\n            }\n        }\n        k++;\n    } while (stop);\n}\n\nvoid run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size,\n                 int *h_graph_edges, char *h_graph_mask, char *h_updating_graph_mask,\n                 char *h_graph_visited, int *h_cost)\n{\n    (void)edge_list_size;\n\n#ifdef TIMING\n    gettimeofday(&tv_total_start, NULL);\n    gettimeofday(&tv_mem_alloc_start, NULL);\n    tvsub(&tv_mem_alloc_start, &tv_total_start, &tv);\n    init_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n    gettimeofday(&tv_mem_alloc_end, NULL);\n    tvsub(&tv_mem_alloc_end, &tv_mem_alloc_start, &tv);\n    mem_alloc_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n#endif\n\n#ifdef PROFILING\n    timer kernel_timer;\n    double kernel_time_profile = 0.0;\n    kernel_timer.reset();\n    kernel_timer.start();\n#endif\n\n#ifdef TIMING\n    gettimeofday(&tv_kernel_start, NULL);\n#endif\n\n    char h_over;\n    do {\n        h_over = false;\n\n        #pragma omp parallel for schedule(static)\n        for (int tid = 0; tid < no_of_nodes; tid++) {\n            if (h_graph_mask[tid]) {\n                h_graph_mask[tid] = false;\n                for (int i = h_graph_nodes[tid].starting;\n                     i < (h_graph_nodes[tid].no_of_edges + h_graph_nodes[tid].starting); i++) {\n                    int id = h_graph_edges[i];\n                    if (!h_graph_visited[id]) {\n                        #pragma omp atomic write\n                        h_cost[id] = h_cost[tid] + 1;\n                        #pragma omp atomic write\n                        h_updating_graph_mask[id] = true;\n                    }\n                }\n            }\n        }\n\n        int over_int = 0;\n        #pragma omp parallel for reduction(|:over_int) schedule(static)\n        for (int tid = 0; tid < no_of_nodes; tid++) {\n            if (h_updating_graph_mask[tid]) {\n                h_graph_mask[tid] = true;\n                h_graph_visited[tid] = true;\n                over_int = 1;\n                h_updating_graph_mask[tid] = false;\n            }\n        }\n        h_over = over_int ? true : false;\n    } while (h_over);\n\n#ifdef TIMING\n    gettimeofday(&tv_kernel_end, NULL);\n    tvsub(&tv_kernel_end, &tv_kernel_start, &tv);\n    kernel_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n#endif\n\n#ifdef PROFILING\n    kernel_timer.stop();\n    kernel_time_profile = kernel_timer.getTimeInSeconds();\n    std::cout << \"kernel time(s):\" << kernel_time_profile << std::endl;\n#endif\n\n#ifdef TIMING\n    gettimeofday(&tv_close_start, NULL);\n    gettimeofday(&tv_close_end, NULL);\n    tvsub(&tv_close_end, &tv_close_start, &tv);\n    close_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n    tvsub(&tv_close_end, &tv_total_start, &tv);\n    total_time = tv.tv_sec * 1000.0f + (float)tv.tv_usec / 1000.0f;\n\n    printf(\"Init: %f\\n\", init_time);\n    printf(\"MemAlloc: %f\\n\", mem_alloc_time);\n    printf(\"HtoD: %f\\n\", h2d_time);\n    printf(\"Exec: %f\\n\", kernel_time);\n    printf(\"DtoH: %f\\n\", d2h_time);\n    printf(\"Close: %f\\n\", close_time);\n    printf(\"Total: %f\\n\", total_time);\n#endif\n}\n\nvoid Usage(int argc, char **argv)\n{\n    (void)argc;\n    fprintf(stderr, \"Usage: %s <input_file> [-p platform] [-d device] [-t gpu(0)/cpu(1)]\\n\", argv[0]);\n}\n\nint main(int argc, char *argv[])\n{\n    int no_of_nodes = 0;\n    int edge_list_size = 0;\n    FILE *fp = NULL;\n    Node *h_graph_nodes = NULL;\n    char *h_graph_mask = NULL, *h_updating_graph_mask = NULL, *h_graph_visited = NULL;\n    int *h_graph_edges = NULL;\n    int *h_cost = NULL;\n    int *h_cost_ref = NULL;\n\n    try {\n        char *input_f;\n        if (argc < 2) {\n            Usage(argc, argv);\n            exit(0);\n        }\n\n        _clCmdParams(argc, argv);\n        input_f = argv[1];\n        printf(\"Reading File\\n\");\n\n        fp = fopen(input_f, \"r\");\n        if (!fp) {\n            printf(\"Error Reading graph file\\n\");\n            return 0;\n        }\n\n        int source = 0;\n\n        fscanf(fp, \"%d\", &no_of_nodes);\n\n        int num_of_blocks = 1;\n        int num_of_threads_per_block = no_of_nodes;\n\n        if (no_of_nodes > MAX_THREADS_PER_BLOCK) {\n            num_of_blocks = (int)ceil(no_of_nodes / (double)MAX_THREADS_PER_BLOCK);\n            num_of_threads_per_block = MAX_THREADS_PER_BLOCK;\n        }\n        (void)num_of_blocks;\n        work_group_size = num_of_threads_per_block;\n\n        h_graph_nodes = (Node *)malloc(sizeof(Node) * no_of_nodes);\n        h_graph_mask = (char *)malloc(sizeof(char) * no_of_nodes);\n        h_updating_graph_mask = (char *)malloc(sizeof(char) * no_of_nodes);\n        h_graph_visited = (char *)malloc(sizeof(char) * no_of_nodes);\n\n        int start, edgeno;\n\n        for (int i = 0; i < no_of_nodes; i++) {\n            fscanf(fp, \"%d %d\", &start, &edgeno);\n            h_graph_nodes[i].starting = start;\n            h_graph_nodes[i].no_of_edges = edgeno;\n            h_graph_mask[i] = false;\n            h_updating_graph_mask[i] = false;\n            h_graph_visited[i] = false;\n        }\n\n        fscanf(fp, \"%d\", &source);\n        source = 0;\n\n        h_graph_mask[source] = true;\n        h_graph_visited[source] = true;\n        fscanf(fp, \"%d\", &edge_list_size);\n        int id, cost;\n        h_graph_edges = (int *)malloc(sizeof(int) * edge_list_size);\n        for (int i = 0; i < edge_list_size; i++) {\n            fscanf(fp, \"%d\", &id);\n            fscanf(fp, \"%d\", &cost);\n            h_graph_edges[i] = id;\n        }\n\n        if (fp)\n            fclose(fp);\n        fp = NULL;\n\n        h_cost = (int *)malloc(sizeof(int) * no_of_nodes);\n        h_cost_ref = (int *)malloc(sizeof(int) * no_of_nodes);\n        for (int i = 0; i < no_of_nodes; i++) {\n            h_cost[i] = -1;\n            h_cost_ref[i] = -1;\n        }\n        h_cost[source] = 0;\n        h_cost_ref[source] = 0;\n\n        run_bfs_gpu(no_of_nodes, h_graph_nodes, edge_list_size, h_graph_edges,\n                    h_graph_mask, h_updating_graph_mask, h_graph_visited, h_cost);\n\n        for (int i = 0; i < no_of_nodes; i++) {\n            h_graph_mask[i] = false;\n            h_updating_graph_mask[i] = false;\n            h_graph_visited[i] = false;\n        }\n\n        source = 0;\n        h_graph_mask[source] = true;\n        h_graph_visited[source] = true;\n        run_bfs_cpu(no_of_nodes, h_graph_nodes, edge_list_size, h_graph_edges,\n                    h_graph_mask, h_updating_graph_mask, h_graph_visited, h_cost_ref);\n\n        compare_results<int>(h_cost_ref, h_cost, no_of_nodes);\n\n        free(h_graph_nodes);\n        free(h_graph_mask);\n        free(h_updating_graph_mask);\n        free(h_graph_visited);\n        free(h_graph_edges);\n        free(h_cost);\n        free(h_cost_ref);\n    } catch (std::string msg) {\n        std::cout << \"--cambine: exception in main ->\" << msg << std::endl;\n        if (fp) fclose(fp);\n        free(h_graph_nodes);\n        free(h_graph_mask);\n        free(h_updating_graph_mask);\n        free(h_graph_visited);\n        free(h_graph_edges);\n        free(h_cost);\n        free(h_cost_ref);\n    }\n\n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "bfs.cpp"
+  ],
+  "target_files_extracted": [
+    "bfs.cpp"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 96.187,
+      "prompt_tokens": 11322,
+      "completion_tokens": 5983,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

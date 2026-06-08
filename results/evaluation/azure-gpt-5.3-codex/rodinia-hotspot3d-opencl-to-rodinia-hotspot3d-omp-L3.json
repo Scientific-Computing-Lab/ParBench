@@ -1,0 +1,82 @@
+{
+  "source_spec": "rodinia-hotspot3d-opencl",
+  "target_spec": "rodinia-hotspot3d-omp",
+  "kernel": "hotspot3d",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 3,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 715880191,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "-n",
+    "512",
+    "-l",
+    "8",
+    "-i",
+    "100",
+    "-f",
+    "../../data/hotspot3D/power_512x8",
+    "../../data/hotspot3D/temp_512x8",
+    "output.out",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-05-01T01:27:11Z",
+  "prompt_tokens": 7449,
+  "completion_tokens": 4148,
+  "llm_response_time_seconds": 35.276,
+  "build_status": "pass",
+  "build_time_seconds": 0.139,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.187,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Accuracy: 4.110550e-05\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+numeric_comparison+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 1.215,
+  "translated_wall_time_seconds": 1.187,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 1.0236,
+  "translated_files": {
+    "3D.c": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <math.h>\n#include <omp.h>\n\n#define TOL      (0.001)\n#define STR_SIZE (256)\n#define MAX_PD   (3.0e6)\n\n#define PRECISION    0.001\n#define SPEC_HEAT_SI 1.75e6\n#define K_SI         100\n\n#define FACTOR_CHIP  0.5\n\n#define WG_SIZE_X (64)\n#define WG_SIZE_Y (4)\n\nfloat t_chip      = 0.0005f;\nfloat chip_height = 0.016f;\nfloat chip_width  = 0.016f;\nfloat amb_temp    = 80.0f;\n\nvoid fatal(char *s)\n{\n    fprintf(stderr, \"Error: %s\\n\", s);\n}\n\nvoid usage(int argc, char **argv)\n{\n    (void)argc;\n    fprintf(stderr, \"Usage: %s <-n rows/cols> <-l layers> <-i iterations> <-f powerFile tempFile outputFile> [-p platform] [-d device]\\n\", argv[0]);\n    fprintf(stderr, \"\\t<rows/cols>  - number of rows/cols in the grid (positive integer)\\n\");\n    fprintf(stderr, \"\\t<layers>  - number of layers in the grid (positive integer)\\n\");\n    fprintf(stderr, \"\\t<iteration> - number of iterations\\n\");\n    fprintf(stderr, \"\\t<powerFile>  - name of the file containing the initial power values of each cell\\n\");\n    fprintf(stderr, \"\\t<tempFile>  - name of the file containing the initial temperature values of each cell\\n\");\n    fprintf(stderr, \"\\t<outputFile - output file\\n\");\n    exit(1);\n}\n\nvoid readinput(float *vect, int grid_rows, int grid_cols, int layers, char *file)\n{\n    int i, j, k;\n    FILE *fp;\n    char str[STR_SIZE];\n    float val;\n\n    if ((fp = fopen(file, \"r\")) == 0)\n        fatal(\"The file was not opened\");\n\n    for (i = 0; i <= grid_rows - 1; i++)\n        for (j = 0; j <= grid_cols - 1; j++)\n            for (k = 0; k <= layers - 1; k++)\n            {\n                if (fgets(str, STR_SIZE, fp) == NULL) fatal(\"Error reading file\\n\");\n                if (feof(fp)) fatal(\"not enough lines in file\");\n                if ((sscanf(str, \"%f\", &val) != 1)) fatal(\"invalid file format\");\n                vect[i * grid_cols + j + k * grid_rows * grid_cols] = val;\n            }\n\n    fclose(fp);\n}\n\nvoid writeoutput(float *vect, int grid_rows, int grid_cols, int layers, char *file)\n{\n    int i, j, k, index = 0;\n    FILE *fp;\n    char str[STR_SIZE];\n\n    if ((fp = fopen(file, \"w\")) == 0)\n        printf(\"The file was not opened\\n\");\n\n    for (i = 0; i < grid_rows; i++)\n        for (j = 0; j < grid_cols; j++)\n            for (k = 0; k < layers; k++)\n            {\n                sprintf(str, \"%d\\t%g\\n\", index, vect[i * grid_cols + j + k * grid_rows * grid_cols]);\n                fputs(str, fp);\n                index++;\n            }\n\n    fclose(fp);\n}\n\nvoid computeTempCPU(float *pIn, float *tIn, float *tOut,\n                    int nx, int ny, int nz, float Cap,\n                    float Rx, float Ry, float Rz,\n                    float dt, float amb_temp_in, int numiter)\n{\n    float ce, cw, cn, cs, ct, cb, cc;\n    float stepDivCap = dt / Cap;\n    ce = cw = stepDivCap / Rx;\n    cn = cs = stepDivCap / Ry;\n    ct = cb = stepDivCap / Rz;\n\n    cc = 1.0f - (2.0f * ce + 2.0f * cn + 3.0f * ct);\n\n    int c, w, e, n, s, b, t;\n    int x, y, z;\n    int i = 0;\n    do {\n        for (z = 0; z < nz; z++)\n            for (y = 0; y < ny; y++)\n                for (x = 0; x < nx; x++)\n                {\n                    c = x + y * nx + z * nx * ny;\n\n                    w = (x == 0) ? c : c - 1;\n                    e = (x == nx - 1) ? c : c + 1;\n                    n = (y == 0) ? c : c - nx;\n                    s = (y == ny - 1) ? c : c + nx;\n                    b = (z == 0) ? c : c - nx * ny;\n                    t = (z == nz - 1) ? c : c + nx * ny;\n\n                    tOut[c] = tIn[c] * cc + tIn[n] * cn + tIn[s] * cs + tIn[e] * ce + tIn[w] * cw +\n                              tIn[t] * ct + tIn[b] * cb + (dt / Cap) * pIn[c] + ct * amb_temp_in;\n                }\n        {\n            float *temp = tIn;\n            tIn = tOut;\n            tOut = temp;\n        }\n        i++;\n    } while (i < numiter);\n}\n\nfloat accuracy(float *arr1, float *arr2, int len)\n{\n    float err = 0.0f;\n    int i;\n    for (i = 0; i < len; i++)\n        err += (arr1[i] - arr2[i]) * (arr1[i] - arr2[i]);\n    return (float)sqrt(err / len);\n}\n\nvoid hotspotOpt1_omp(const float *p, const float *tIn, float *tOut, float sdc,\n                     int nx, int ny, int nz,\n                     float ce, float cw,\n                     float cn, float cs,\n                     float ct, float cb,\n                     float cc)\n{\n    float amb_temp_local = 80.0f;\n    int xy = nx * ny;\n\n    #pragma omp parallel for collapse(2)\n    for (int j = 0; j < ny; j++) {\n        for (int i = 0; i < nx; i++) {\n            int c = i + j * nx;\n\n            int W = (i == 0) ? c : c - 1;\n            int E = (nx - 1 == i) ? c : c + 1;\n            int N = (j == 0) ? c : c - nx;\n            int S = (ny - 1 == j) ? c : c + nx;\n\n            float temp1, temp2, temp3;\n            temp1 = temp2 = tIn[c];\n            temp3 = tIn[c + xy];\n            tOut[c] = cc * temp2 + cw * tIn[W] + ce * tIn[E] + cs * tIn[S]\n                    + cn * tIn[N] + cb * temp1 + ct * temp3 + sdc * p[c] + ct * amb_temp_local;\n\n            c += xy;\n            W += xy;\n            E += xy;\n            N += xy;\n            S += xy;\n\n            for (int k = 1; nz - 1 > k; ++k) {\n                temp1 = temp2;\n                temp2 = temp3;\n                temp3 = tIn[c + xy];\n                tOut[c] = cc * temp2 + cw * tIn[W] + ce * tIn[E] + cs * tIn[S]\n                        + cn * tIn[N] + cb * temp1 + ct * temp3 + sdc * p[c] + ct * amb_temp_local;\n                c += xy;\n                W += xy;\n                E += xy;\n                N += xy;\n                S += xy;\n            }\n\n            temp1 = temp2;\n            temp2 = temp3;\n            tOut[c] = cc * temp2 + cw * tIn[W] + ce * tIn[E] + cs * tIn[S]\n                    + cn * tIn[N] + cb * temp1 + ct * temp3 + sdc * p[c] + ct * amb_temp_local;\n        }\n    }\n}\n\nint main(int argc, char **argv)\n{\n    char *pfile = NULL, *tfile = NULL, *ofile = NULL;\n    int iterations = 0;\n    int numCols = 0;\n    int numRows = 0;\n    int layers = 0;\n\n    int platform_id_inuse = 0;\n    int device_id_inuse = 0;\n\n    int cur_arg;\n    for (cur_arg = 1; cur_arg < argc; cur_arg++) {\n        if (strcmp(argv[cur_arg], \"-h\") == 0) {\n            usage(argc, argv);\n        } else if (strcmp(argv[cur_arg], \"-n\") == 0) {\n            if (argc >= cur_arg + 1) {\n                numCols = numRows = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        } else if (strcmp(argv[cur_arg], \"-l\") == 0) {\n            if (argc >= cur_arg + 1) {\n                layers = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        } else if (strcmp(argv[cur_arg], \"-i\") == 0) {\n            if (argc >= cur_arg + 1) {\n                iterations = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        } else if (strcmp(argv[cur_arg], \"-f\") == 0) {\n            if (argc >= cur_arg + 3) {\n                pfile = argv[cur_arg + 1];\n                tfile = argv[cur_arg + 2];\n                ofile = argv[cur_arg + 3];\n                cur_arg += 3;\n            }\n        } else if (strcmp(argv[cur_arg], \"-p\") == 0) {\n            if (argc >= cur_arg + 1) {\n                platform_id_inuse = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        } else if (strcmp(argv[cur_arg], \"-d\") == 0) {\n            if (argc >= cur_arg + 1) {\n                device_id_inuse = atoi(argv[cur_arg + 1]);\n                cur_arg++;\n            }\n        }\n    }\n\n    (void)platform_id_inuse;\n    (void)device_id_inuse;\n\n    if (numCols == 0 || layers == 0 || iterations == 0 || pfile == NULL) {\n        usage(argc, argv);\n    }\n\n    float dx = chip_height / numRows;\n    float dy = chip_width / numCols;\n    float dz = t_chip / layers;\n\n    float Cap = FACTOR_CHIP * SPEC_HEAT_SI * t_chip * dx * dy;\n    float Rx = dy / (2.0f * K_SI * t_chip * dx);\n    float Ry = dx / (2.0f * K_SI * t_chip * dy);\n    float Rz = dz / (K_SI * dx * dy);\n\n    float max_slope = MAX_PD / (FACTOR_CHIP * t_chip * SPEC_HEAT_SI);\n    float dt = PRECISION / max_slope;\n\n    float ce, cw, cn, cs, ct, cb, cc;\n    float stepDivCap = dt / Cap;\n    ce = cw = stepDivCap / Rx;\n    cn = cs = stepDivCap / Ry;\n    ct = cb = stepDivCap / Rz;\n    cc = 1.0f - (2.0f * ce + 2.0f * cn + 3.0f * ct);\n\n    int size = numCols * numRows * layers;\n    int count = size;\n\n    float *tIn = (float *)calloc(size, sizeof(float));\n    float *pIn = (float *)calloc(size, sizeof(float));\n    float *tempCopy = (float *)malloc(size * sizeof(float));\n    float *tempOut = (float *)calloc(size, sizeof(float));\n\n    readinput(tIn, numRows, numCols, layers, tfile);\n    readinput(pIn, numRows, numCols, layers, pfile);\n    memcpy(tempCopy, tIn, size * sizeof(float));\n\n    float *d_a = tIn;\n    float *d_b = pIn;\n    float *d_c = tempOut;\n\n    for (int j = 0; j < iterations; j++) {\n        hotspotOpt1_omp(d_b, d_a, d_c, stepDivCap, numCols, numRows, layers,\n                        ce, cw, cn, cs, ct, cb, cc);\n        float *temp = d_a;\n        d_a = d_c;\n        d_c = temp;\n    }\n\n    memcpy(tempOut, d_c, sizeof(float) * count);\n\n    float *answer = (float *)calloc(size, sizeof(float));\n    computeTempCPU(pIn, tempCopy, answer, numCols, numRows, layers, Cap, Rx, Ry, Rz, dt, amb_temp, iterations);\n    float acc = accuracy(tempOut, answer, numRows * numCols * layers);\n    printf(\"Accuracy: %e\\n\", acc);\n\n    writeoutput(tempOut, numRows, numCols, layers, ofile);\n\n    free(answer);\n    free(tempOut);\n    free(tempCopy);\n    free(pIn);\n    free(tIn);\n\n    return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "3D.c"
+  ],
+  "target_files_extracted": [
+    "3D.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 35.276,
+      "prompt_tokens": 7449,
+      "completion_tokens": 4148,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

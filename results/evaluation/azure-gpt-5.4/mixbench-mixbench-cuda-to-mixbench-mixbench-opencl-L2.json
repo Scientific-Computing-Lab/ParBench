@@ -1,0 +1,74 @@
+{
+  "source_spec": "mixbench-mixbench-cuda",
+  "target_spec": "mixbench-mixbench-opencl",
+  "kernel": "mixbench",
+  "model": "azure-gpt-5.4",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 729461310,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-27T01:03:51Z",
+  "prompt_tokens": 11054,
+  "completion_tokens": 4822,
+  "llm_response_time_seconds": 93.794,
+  "build_status": "pass",
+  "build_time_seconds": 0.471,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 4.526,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "5.45\n          192,     96.250,    0.42,30695.09, 318.91,     48.125,   30.26,  426.85,   8.87,    192.500,    0.00,     inf,    inf,    96.250,    0.81,15908.80, 165.29\n          256,    128.250,    0.55,31129.60, 242.73,     64.125,   40.33,  426.85,   6.66,    256.500,    0.00,     inf,    inf,   128.250,    1.08,15979.07, 124.59\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "single_precision_gflops": {
+      "value": 118.74,
+      "unit": "GFLOPS"
+    }
+  },
+  "baseline_wall_time_seconds": 30.0,
+  "translated_wall_time_seconds": 4.526,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 6.6284,
+  "translated_files": {
+    "mix_kernels.cl": "#ifdef ENABLE_DP\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#endif\n\n#ifdef ENABLE_HP\n#pragma OPENCL EXTENSION cl_khr_fp16 : enable\n#endif\n\n#define CAT2(a, b) a##b\n#define CAT(a, b) CAT2(a, b)\n\ninline short conv_int_short(const int i) { return (short)i; }\ninline int conv_int_int(const int i) { return i; }\ninline float conv_int_float(const int i) { return (float)i; }\n\n#ifdef ENABLE_DP\ninline double conv_int_double(const int i) { return (double)i; }\n#endif\n\n#ifdef ENABLE_HP\ninline half2 conv_int_half2(const int i) { return (half2)((half)i); }\n#endif\n\ninline short mad_short(const short a, const short b, const short c) {\n  return (short)((uint)(ushort)a * (uint)(ushort)b + (uint)(ushort)c);\n}\n\ninline int mad_int(const int a, const int b, const int c) {\n  return as_int((uint)a * (uint)b + (uint)c);\n}\n\ninline float mad_float(const float a, const float b, const float c) {\n  return a * b + c;\n}\n\n#ifdef ENABLE_DP\ninline double mad_double(const double a, const double b, const double c) {\n  return a * b + c;\n}\n#endif\n\n#ifdef ENABLE_HP\ninline half2 mad_half2(const half2 a, const half2 b, const half2 c) {\n  return a * b + c;\n}\n#endif\n\ninline int equal_short(const short a, const short b) { return a == b; }\ninline int equal_int(const int a, const int b) { return a == b; }\ninline int equal_float(const float a, const float b) { return a == b; }\n\n#ifdef ENABLE_DP\ninline int equal_double(const double a, const double b) { return a == b; }\n#endif\n\n#ifdef ENABLE_HP\ninline int equal_half2(const half2 a, const half2 b) { return all(a == b); }\n#endif\n\n#define CONV_INT(i) CAT(conv_int_, class_T)(i)\n#define MAD(a, b, c) CAT(mad_, class_T)((a), (b), (c))\n#define EQUAL(a, b) CAT(equal_, class_T)((a), (b))\n\n__kernel void benchmark_func(class_T seed, __global class_T* g_data) {\n  const size_t local_id = get_local_id(0);\n  const size_t group_id = get_group_id(0);\n  const size_t global_id = get_global_id(0);\n  const size_t local_size = get_local_size(0);\n\n#ifdef BLOCK_STRIDED\n  const size_t stride = local_size;\n  const size_t idx = group_id * local_size * (size_t)ELEMENTS_PER_THREAD + local_id;\n  const size_t big_stride =\n      get_num_groups(0) * local_size * (size_t)ELEMENTS_PER_THREAD;\n#else\n  const size_t stride = get_global_size(0);\n  const size_t idx = global_id;\n  const size_t big_stride = get_global_size(0) * (size_t)ELEMENTS_PER_THREAD;\n#endif\n\n  class_T tmps[ELEMENTS_PER_THREAD];\n\n  for (int k = 0; k < FUSION_DEGREE; k++) {\n    for (int j = 0; j < ELEMENTS_PER_THREAD; j++) {\n      tmps[j] = g_data[idx + (size_t)j * stride + (size_t)k * big_stride];\n\n      for (int i = 0; i < COMPUTE_ITERATIONS; i++) {\n        tmps[j] = MAD(tmps[j], tmps[j], seed);\n      }\n    }\n\n    class_T sum = CONV_INT(0);\n    for (int j = 0; j + 1 < ELEMENTS_PER_THREAD; j += 2) {\n      sum = MAD(tmps[j], tmps[j + 1], sum);\n    }\n\n    if (EQUAL(sum, CONV_INT(-1))) {\n      g_data[idx + (size_t)k * big_stride] = sum;\n    }\n  }\n}\n"
+  },
+  "target_files_expected": [
+    "mix_kernels.cl"
+  ],
+  "target_files_extracted": [
+    "mix_kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 93.794,
+      "prompt_tokens": 11054,
+      "completion_tokens": 4822,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

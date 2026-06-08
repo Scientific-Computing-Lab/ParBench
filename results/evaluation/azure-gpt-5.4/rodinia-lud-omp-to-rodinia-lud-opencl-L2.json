@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-lud-omp",
+  "target_spec": "rodinia-lud-opencl",
+  "kernel": "lud",
+  "model": "azure-gpt-5.4",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 55408477,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-s",
+    "256"
+  ],
+  "timestamp": "2026-04-27T04:00:08Z",
+  "prompt_tokens": 11428,
+  "completion_tokens": 3380,
+  "llm_response_time_seconds": 87.633,
+  "build_status": "pass",
+  "build_time_seconds": 0.469,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.434,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "WG size of kernel = 16 X 16\nGenerate input matrix internally, size =256\nCreating matrix internally size=256\nnum_devices = 1\nCreate GPU context\nInit: 375.648010\nMemAlloc: 0.003000\nHtoD: 0.011520\nExec: 5.628289\nDtoH: 0.010816\nClose: 0.058000\nTotal: 381.916992\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.07,
+  "translated_wall_time_seconds": 0.434,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.1613,
+  "translated_files": {
+    "lud_kernel.cl": "#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\ninline int mat_idx(int row, int col, int size) {\n    return row * size + col;\n}\n\n__kernel void lud_diagonal(__global float *a,\n                           __local float *shadow,\n                           int size,\n                           int offset)\n{\n    (void)shadow;\n\n    if (get_global_id(0) != 0 || get_global_id(1) != 0)\n        return;\n\n    for (int i = 0; i < BLOCK_SIZE; i++) {\n        for (int j = i; j < BLOCK_SIZE; j++) {\n            float sum = a[mat_idx(offset + i, offset + j, size)];\n            for (int k = 0; k < i; k++) {\n                sum -= a[mat_idx(offset + i, offset + k, size)] *\n                       a[mat_idx(offset + k, offset + j, size)];\n            }\n            a[mat_idx(offset + i, offset + j, size)] = sum;\n        }\n\n        float temp = 1.0f / a[mat_idx(offset + i, offset + i, size)];\n        for (int j = i + 1; j < BLOCK_SIZE; j++) {\n            float sum = a[mat_idx(offset + j, offset + i, size)];\n            for (int k = 0; k < i; k++) {\n                sum -= a[mat_idx(offset + j, offset + k, size)] *\n                       a[mat_idx(offset + k, offset + i, size)];\n            }\n            a[mat_idx(offset + j, offset + i, size)] = sum * temp;\n        }\n    }\n}\n\n__kernel void lud_perimeter(__global float *a,\n                            __local float *diag_block,\n                            __local float *peri_row,\n                            __local float *peri_col,\n                            int size,\n                            int offset)\n{\n    (void)diag_block;\n    (void)peri_row;\n    (void)peri_col;\n\n    if (get_local_id(0) != 0 || get_local_id(1) != 0)\n        return;\n\n    int chunk_idx = (int)get_group_id(0);\n\n    float temp[BLOCK_SIZE * BLOCK_SIZE];\n\n    for (int i = 0; i < BLOCK_SIZE; i++) {\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            temp[i * BLOCK_SIZE + j] = a[mat_idx(offset + i, offset + j, size)];\n        }\n    }\n\n    int i_global = offset;\n    int j_global = offset + BLOCK_SIZE * (chunk_idx + 1);\n\n    for (int j = 0; j < BLOCK_SIZE; j++) {\n        for (int i = 0; i < BLOCK_SIZE; i++) {\n            float sum = 0.0f;\n            for (int k = 0; k < i; k++) {\n                sum += temp[i * BLOCK_SIZE + k] *\n                       a[mat_idx(i_global + k, j_global + j, size)];\n            }\n            a[mat_idx(i_global + i, j_global + j, size)] -= sum;\n        }\n    }\n\n    j_global = offset;\n    i_global = offset + BLOCK_SIZE * (chunk_idx + 1);\n\n    for (int i = 0; i < BLOCK_SIZE; i++) {\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            float sum = 0.0f;\n            for (int k = 0; k < j; k++) {\n                sum += a[mat_idx(i_global + i, j_global + k, size)] *\n                       temp[k * BLOCK_SIZE + j];\n            }\n            a[mat_idx(i_global + i, j_global + j, size)] =\n                (a[mat_idx(i_global + i, j_global + j, size)] - sum) /\n                a[mat_idx(offset + j, offset + j, size)];\n        }\n    }\n}\n\n__kernel void lud_internal(__global float *a,\n                           __local float *temp_top_local,\n                           __local float *temp_left_local,\n                           int size,\n                           int offset)\n{\n    (void)temp_top_local;\n    (void)temp_left_local;\n\n    if (get_local_id(0) != 0 || get_local_id(1) != 0)\n        return;\n\n    int block_col = (int)get_group_id(0);\n    int block_row = (int)get_group_id(1);\n\n    int i_global = offset + BLOCK_SIZE * (1 + block_row);\n    int j_global = offset + BLOCK_SIZE * (1 + block_col);\n\n    float temp_top[BLOCK_SIZE * BLOCK_SIZE];\n    float temp_left[BLOCK_SIZE * BLOCK_SIZE];\n\n    for (int i = 0; i < BLOCK_SIZE; i++) {\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            temp_top[i * BLOCK_SIZE + j] =\n                a[mat_idx(offset + i, j_global + j, size)];\n            temp_left[i * BLOCK_SIZE + j] =\n                a[mat_idx(i_global + i, offset + j, size)];\n        }\n    }\n\n    for (int i = 0; i < BLOCK_SIZE; i++) {\n        float sum[BLOCK_SIZE];\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            sum[j] = 0.0f;\n        }\n\n        for (int k = 0; k < BLOCK_SIZE; k++) {\n            float left_val = temp_left[i * BLOCK_SIZE + k];\n            for (int j = 0; j < BLOCK_SIZE; j++) {\n                sum[j] += left_val * temp_top[k * BLOCK_SIZE + j];\n            }\n        }\n\n        for (int j = 0; j < BLOCK_SIZE; j++) {\n            a[mat_idx(i_global + i, j_global + j, size)] -= sum[j];\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "lud_kernel.cl"
+  ],
+  "target_files_extracted": [
+    "lud_kernel.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 87.633,
+      "prompt_tokens": 11428,
+      "completion_tokens": 3380,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

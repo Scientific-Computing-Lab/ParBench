@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-hybridsort-cuda",
+  "target_spec": "rodinia-hybridsort-opencl",
+  "kernel": "hybridsort",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 686809391,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "r",
+    "-p",
+    "0"
+  ],
+  "timestamp": "2026-04-21T23:10:41Z",
+  "prompt_tokens": 30579,
+  "completion_tokens": 3962,
+  "llm_response_time_seconds": 24.55,
+  "build_status": "pass",
+  "build_time_seconds": 0.145,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.263,
+  "run_exit_code": 1,
+  "run_stderr_snippet": "1 error generated.\nCould not open file: /tmp/dep-9884ce.d\n1 error generated.\n",
+  "run_stdout_snippet": "Sorting list of 1000000 floats.\nError: Failed to build bucket program executable!\nIn file included from <kernel>:4:\n/usr/include/stdio.h:34:10: fatal error: 'stddef.h' file not found\n#include <stddef.h>\n         ^~~~~~~~~~\n\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.272,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "bucketsort_kernels.cl": "#ifndef _BUCKETSORT_KERNEL_H_\n#define _BUCKETSORT_KERNEL_H_\n\n#include <stdio.h>\n\n#define BUCKET_WARP_LOG_SIZE\t5\n#define BUCKET_WARP_N\t\t\t1\n#ifdef BUCKET_WG_SIZE_1\n#define BUCKET_THREAD_N BUCKET_WG_SIZE_1\n#else\n#define BUCKET_THREAD_N\t\t\t(BUCKET_WARP_N << BUCKET_WARP_LOG_SIZE)\n#endif\n#define BUCKET_BLOCK_MEMORY\t\t(DIVISIONS * BUCKET_WARP_N)\n#define BUCKET_BAND\t\t\t\t128\n#define LOG_DIVISIONS 10\n#define DIVISIONS (1 << LOG_DIVISIONS)\n\n__attribute__((always_inline))\nint addOffset(local volatile unsigned int *s_offset, unsigned int data, unsigned int threadTag){\n    unsigned int count;\n\n    do{\n        count = s_offset[data] & 0x07FFFFFFU;\n        count = threadTag | (count + 1);\n        s_offset[data] = count;\n    }while(s_offset[data] != count);\n\n\treturn (count & 0x07FFFFFFU) - 1;\n}\n\nkernel void\nbucketcount( const global float *input, global int *indice, global unsigned int *d_prefixoffsets, int size, const global float *pivotPoints)\n{\n\tlocal volatile unsigned int s_offset[BUCKET_BLOCK_MEMORY]; \n\n    const unsigned int threadTag = get_local_id(0) << (32 - BUCKET_WARP_LOG_SIZE);\n    const int warpBase = (get_local_id(0) >> BUCKET_WARP_LOG_SIZE) * DIVISIONS; \n    const int numThreads = get_global_size(0);\n\tfor (int i = get_local_id(0); i < BUCKET_BLOCK_MEMORY; i += get_local_size(0))\n\t\ts_offset[i] = 0; \n\n\tbarrier(CLK_LOCAL_MEM_FENCE); \n\n\tfor (int tid = get_group_id(0) * get_local_size(0) + get_local_id(0); tid < size; tid += numThreads) {\n\t\tfloat elem = input[tid]; \n\n\t\tint idx  = DIVISIONS/2 - 1; \n\t\tint jump = DIVISIONS/4; \n\t\tfloat piv = pivotPoints[idx]; \n\n\t\twhile(jump >= 1){\n\t\t\tidx = (elem < piv) ? (idx - jump) : (idx + jump);\n\t\t\tpiv = pivotPoints[idx]; \n\t\t\tjump /= 2; \n\t\t}\n\t\tidx = (elem < piv) ? idx : (idx + 1); \n\n\t\tindice[tid] = (addOffset(s_offset + warpBase, idx, threadTag) << LOG_DIVISIONS) + idx;  \n\t}\n\n\tbarrier(CLK_LOCAL_MEM_FENCE); \n\n\tint prefixBase = get_group_id(0) * BUCKET_BLOCK_MEMORY; \n\n\tfor (int i = get_local_id(0); i < BUCKET_BLOCK_MEMORY; i += get_local_size(0))\n\t\td_prefixoffsets[prefixBase + i] = s_offset[i] & 0x07FFFFFFU; \n}\n\nkernel void bucketprefixoffset(global unsigned int *d_prefixoffsets, global unsigned int *d_offsets, int blocks) {\n\tint tid = get_group_id(0) * get_local_size(0) + get_local_id(0); \n\tint size = blocks * BUCKET_BLOCK_MEMORY; \n\tint sum = 0; \n\n\tfor (int i = tid; i < size; i += DIVISIONS) {\n\t\tint x = d_prefixoffsets[i]; \n\t\td_prefixoffsets[i] = sum; \n\t\tsum += x; \n\t}\n\n\td_offsets[tid] = sum; \n}\n\nkernel void\nbucketsort(const global float *input, const global int *indice, global float *output, int size, const global unsigned int *d_prefixoffsets, \n\t\t   const global unsigned int *l_offsets)\n{\n\tlocal volatile unsigned int s_offset[BUCKET_BLOCK_MEMORY]; \n\n\tint prefixBase = get_group_id(0) * BUCKET_BLOCK_MEMORY; \n    const int warpBase = (get_local_id(0) >> BUCKET_WARP_LOG_SIZE) * DIVISIONS; \n    const int numThreads = get_global_size(0);\n\tfor (int i = get_local_id(0); i < BUCKET_BLOCK_MEMORY; i += get_local_size(0))\n\t\ts_offset[i] = l_offsets[i & (DIVISIONS - 1)] + d_prefixoffsets[prefixBase + i]; \n\n\tbarrier(CLK_LOCAL_MEM_FENCE); \n\n\tfor (int tid = get_group_id(0) * get_local_size(0) + get_local_id(0); tid < size; tid += numThreads) {\n\n\t\tfloat elem = input[tid]; \n\t\tint id = indice[tid]; \n\n\t\toutput[s_offset[warpBase + (id & (DIVISIONS - 1))] + (id >> LOG_DIVISIONS)] = elem;\n\t}\n}\n\n#endif\n",
+    "histogram1024.cl": "#define BIN_COUNT 1024 \n#define HISTOGRAM_SIZE (BIN_COUNT * sizeof(unsigned int))\n\n#define WARP_LOG_SIZE 5\n#define WARP_N 3\n\n#ifdef HISTO_WG_SIZE_0\n#define THREAD_N HISTO_WG_SIZE_0\n#else\n#define THREAD_N (WARP_N << WARP_LOG_SIZE)\n#endif\n\n#define BLOCK_MEMORY (WARP_N * BIN_COUNT)\n\n__attribute__((always_inline))\nvoid addData1024(local volatile unsigned int *s_WarpHist, unsigned int data, unsigned int threadTag){\n    unsigned int count;\n    do{\n        count = s_WarpHist[data] & 0x07FFFFFFU;\n        count = threadTag | (count + 1);\n        s_WarpHist[data] = count;\n    }while(s_WarpHist[data] != count);\n}\n\nkernel void histogram1024Kernel(global unsigned int *d_Result, const global float *d_Data, float minimum, float maximum, int dataN){\n\n    const int globalTid = get_group_id(0) * get_local_size(0) + get_local_id(0);\n    \n    const int numThreads = get_global_size(0);\n    \n    const unsigned int threadTag = get_local_id(0) << (32 - WARP_LOG_SIZE);\n    \n    local volatile unsigned int s_Hist[BLOCK_MEMORY];\n    \n    const int warpBase = (get_local_id(0) >> WARP_LOG_SIZE) * BIN_COUNT;\n    \n    for(int pos = get_local_id(0); pos < BLOCK_MEMORY; pos += get_local_size(0))\n       s_Hist[pos] = 0;\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n    \n    for(int pos = globalTid; pos < dataN; pos += numThreads){\n        unsigned int data4 = ((d_Data[pos] - minimum)/(maximum - minimum)) * BIN_COUNT;\n        addData1024(s_Hist + warpBase, data4 & 0x3FFU, threadTag);\n    }\n\n    barrier(CLK_LOCAL_MEM_FENCE);\n    \n    for(int pos = get_local_id(0); pos < BIN_COUNT; pos += get_local_size(0)){\n        unsigned int sum = 0;\n\n        for(int base = 0; base < BLOCK_MEMORY; base += BIN_COUNT)\n            sum += s_Hist[base + pos] & 0x07FFFFFFU;\n        atomic_add(d_result + pos, sum);\n    }\n}\n",
+    "mergesort.cl": "#ifndef _MATRIXMUL_KERNEL_H_\n#define _MATRIXMUL_KERNEL_H_\n\n#include <stdio.h>\n\n#define LOG_DIVISIONS 10\n#define DIVISIONS (1 << LOG_DIVISIONS)\n\n__attribute__((always_inline))\nfloat4 sortElem(float4 r) {\n\tfloat4 nr;\n\n\tnr.x = (r.x > r.y) ? r.y : r.x; \n\tnr.y = (r.y > r.x) ? r.y : r.x; \n\tnr.z = (r.z > r.w) ? r.w : r.z; \n\tnr.w = (r.w > r.z) ? r.w : r.z; \n\n\tr.x = (nr.x > nr.z) ? nr.z : nr.x; \n\tr.y = (nr.y > nr.w) ? nr.w : nr.y; \n\tr.z = (nr.z > nr.x) ? nr.z : nr.x; \n\tr.w = (nr.w > nr.y) ? nr.w : nr.y; \n\n\tnr.x = r.x; \n\tnr.y = (r.y > r.z) ? r.z : r.y; \n\tnr.z = (r.z > r.y) ? r.z : r.y; \n\tnr.w = r.w; \n\treturn nr; \n}\n\n__attribute__((always_inline))\nfloat4 getLowest(float4 a, float4 b)\n{\n\t\n\ta.x = (a.x < b.w) ? a.x : b.w; \n\ta.y = (a.y < b.z) ? a.y : b.z; \n\ta.z = (a.z < b.y) ? a.z : b.y; \n\ta.w = (a.w < b.x) ? a.w : b.x; \n\treturn a; \n}\n\n__attribute__((always_inline))\nfloat4 getHighest(float4 a, float4 b)\n{\n\tb.x = (a.w >= b.x) ? a.w : b.x; \n\tb.y = (a.z >= b.y) ? a.z : b.y; \n\tb.z = (a.y >= b.z) ? a.y : b.z; \n\tb.w = (a.x >= b.w) ? a.x : b.w; \n\treturn b; \n}\n\nkernel void\nmergeSortFirst(global float4 *result, int listsize, const global float *texData) \n{\n    int bx = get_group_id(0);\n    \n\tif(bx * get_local_size(0) + get_local_id(0) < listsize/4){\n\t\tfloat4 r;\n\t\tint idx = bx * get_local_size(0) + get_local_id(0);\n\t\tr.x = texData[idx * 4];\n\t\tr.y = texData[idx * 4 + 1];\n\t\tr.z = texData[idx * 4 + 2];\n\t\tr.w = texData[idx * 4 + 3];\n\t\tresult[bx * get_local_size(0) + get_local_id(0)] = sortElem(r); \n\t}\n}\n\nkernel void\nmergeSortPass(global float4 *result, int nrElems, int threadsPerDiv, const global int *constStartAddr, const global float *texData) \n{\n\tint tid = (get_group_id(0) * get_local_size(0)) + get_local_id(0); \n\t\n\tint division = tid / threadsPerDiv; \n\tif(division >= DIVISIONS) return; \n\t\n\tint int_tid = tid - division * threadsPerDiv; \n\tint Astart = constStartAddr[division] + int_tid * nrElems; \n\n\tint Bstart = Astart + nrElems/2;\n\tfloat4 *resStart = &(result[Astart]); \n\n\tif(Astart >= constStartAddr[division + 1]) \n\t\treturn; \n\tif(Bstart >= constStartAddr[division + 1]){\n\t\tfor(int i=0; i<(constStartAddr[division + 1] - Astart); i++)\n\t\t{\n\t\t\tint idx = Astart + i;\n\t\t\tfloat4 elem;\n\t\t\telem.x = texData[idx * 4];\n\t\t\telem.y = texData[idx * 4 + 1];\n\t\t\telem.z = texData[idx * 4 + 2];\n\t\t\telem.w = texData[idx * 4 + 3];\n\t\t\tresStart[i] = elem;\n\t\t}\n\t\treturn; \n\t}\n\n\tint aidx = 0; \n\tint bidx = 0; \n\tint outidx = 0; \n\tfloat4 a, b;\n\t\n\tint idx_a = Astart + aidx;\n\ta.x = texData[idx_a * 4];\n\ta.y = texData[idx_a * 4 + 1];\n\ta.z = texData[idx_a * 4 + 2];\n\ta.w = texData[idx_a * 4 + 3];\n\t\n\tint idx_b = Bstart + bidx;\n\tb.x = texData[idx_b * 4];\n\tb.y = texData[idx_b * 4 + 1];\n\tb.z = texData[idx_b * 4 + 2];\n\tb.w = texData[idx_b * 4 + 3];\n\t\n\twhile(true)\n\t{\n\t\tfloat4 nextA, nextB;\n\t\t\n\t\tint idx_next_a = Astart + aidx + 1;\n\t\tnextA.x = texData[idx_next_a * 4];\n\t\tnextA.y = texData[idx_next_a * 4 + 1];\n\t\tnextA.z = texData[idx_next_a * 4 + 2];\n\t\tnextA.w = texData[idx_next_a * 4 + 3];\n\t\t\n\t\tint idx_next_b = Bstart + bidx + 1;\n\t\tnextB.x = texData[idx_next_b * 4];\n\t\tnextB.y = texData[idx_next_b * 4 + 1];\n\t\tnextB.z = texData[idx_next_b * 4 + 2];\n\t\tnextB.w = texData[idx_next_b * 4 + 3];\n\n\t\tfloat4 na = getLowest(a,b); \n\t\tfloat4 nb = getHighest(a,b); \n\t\ta = sortElem(na); \n\t\tb = sortElem(nb); \n\t\t\n\t\tresStart[outidx++] = a; \n\n\t\tbool elemsLeftInA; \n\t\tbool elemsLeftInB;\n\n\t\telemsLeftInA = (aidx + 1 < nrElems/2); \n\t\telemsLeftInB = (bidx + 1 < nrElems/2) && (Bstart + bidx + 1 < constStartAddr[division + 1]); \n\n\t\tif(elemsLeftInA){\n\t\t\tif(elemsLeftInB){\n\t\t\t\tif(nextA.x < nextB.x) { aidx += 1; a = nextA; }  \n\t\t\t\telse { bidx += 1;  a = nextB; }\n\t\t\t}\n\t\t\telse {\n\t\t\t\taidx += 1; a = nextA;\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\tif(elemsLeftInB){\n\t\t\t\tbidx += 1;  a = nextB;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tbreak; \n\t\t\t}\n\t\t}\n\n\t}\n\tresStart[outidx++] = b;\n}\n\nkernel void\nmergepack(global float *orig, global float *result, const global int *finalStartAddr, const global int *constStartAddr, const global int *nullElems) \n{\n\tint idx = (get_group_id(0) * get_local_size(0)) + get_local_id(0); \n\tint division = get_group_id(1); \n\n\tif((finalStartAddr[division] + idx) >= finalStartAddr[division + 1]) return; \n\tresult[finalStartAddr[division] + idx] = orig[constStartAddr[division]*4 + nullElems[division] + idx]; \n}\n\n#endif\n"
+  },
+  "target_files_expected": [
+    "bucketsort_kernels.cl",
+    "histogram1024.cl",
+    "mergesort.cl"
+  ],
+  "target_files_extracted": [
+    "bucketsort_kernels.cl",
+    "histogram1024.cl",
+    "mergesort.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 24.55,
+      "prompt_tokens": 30579,
+      "completion_tokens": 3962,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "1 error generated.\nCould not open file: /tmp/dep-9884ce.d\n1 error generated.\n",
+      "run_stdout_snippet": "Sorting list of 1000000 floats.\nError: Failed to build bucket program executable!\nIn file included from <kernel>:4:\n/usr/include/stdio.h:34:10: fatal error: 'stddef.h' file not found\n#include <stddef.h>\n         ^~~~~~~~~~\n\n",
+      "extraction_fail": null
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "source_spec": "rodinia-lavamd-opencl",
+  "target_spec": "rodinia-lavamd-omp",
+  "kernel": "lavamd",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1042390638,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-30T04:47:09Z",
+  "prompt_tokens": 10318,
+  "completion_tokens": 1350,
+  "llm_response_time_seconds": 18.832,
+  "build_status": "fail",
+  "build_time_seconds": 0.083,
+  "build_error_snippet": "rm: cannot remove './kernel/*.o': No such file or directory\nrm: cannot remove './util/num/*.o': No such file or directory\nrm: cannot remove './util/timer/*.o': No such file or directory\nrm: cannot remove './util/device/*.o': No such file or directory\nrm: cannot remove 'lavaMD': No such file or directory\nmake: *** [makefile:67: clean] Error 1\n\nmain.c: In function \u2018main\u2019:\nmain.c:95:20: warning: implicit declaration of function \u2018strcmp\u2019 [-Wimplicit-function-declaration]\n   95 |                 if(strcmp(argv[dim_cpu.cur_arg], \"-cores\")==0){\n      |                    ^~~~~~\nmain.c:42:1: note: include \u2018<string.h>\u2019 or provide a declaration of \u2018strcmp\u2019\n   41 | #include \"./kernel/kernel_cpu.h\"                                // (in library path specified here)\n  +++ |+#include <string.h>\n   42 | \nmain.c:253:15: warning: implicit declaration of function \u2018time\u2019 [-Wimplicit-function-declaration]\n  253 |         srand(time(NULL));\n      |               ^~~~\nmain.c:42:1: note: \u2018time\u2019 is defined in header \u2018<time.h>\u2019; did you forget to \u2018#include <time.h>\u2019?\n   41 | #include \"./kernel/kernel_cpu.h\"                                // (in library path specified here)\n  +++ |+#include <time.h>\n   42 | \n./kernel/kernel_cpu.c:4:10: fatal error: ./main.h: No such file or directory\n    4 | #include \"./main.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\nmake: *** [makefile:45: kernel/kernel_cpu.o] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: ernel_cpu.c:4:10: fatal error: ./main.h: No such file or directory\n    4 | #include \"./main.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\nmake: *** [makefile:45: kernel/kernel_cpu.o] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.001,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_cpu.c": "#include <math.h>\n#include <omp.h>\n\n#include \"./main.h\"\n#include \"./kernel/kernel_cpu.h\"\n\nvoid kernel_cpu(par_str par,\n                dim_str dim,\n                box_str* box,\n                FOUR_VECTOR* rv,\n                fp* qv,\n                FOUR_VECTOR* fv) {\n    long bx;\n\n    #pragma omp parallel for num_threads(dim.cores_arg) schedule(static)\n    for (bx = 0; bx < dim.number_boxes; bx++) {\n        FOUR_VECTOR rA_shared[NUMBER_PAR_PER_BOX];\n        FOUR_VECTOR rB_shared[NUMBER_PAR_PER_BOX];\n        fp qB_shared[NUMBER_PAR_PER_BOX];\n\n        fp a2 = (fp)2.0 * par.alpha * par.alpha;\n        int first_i = (int)box[bx].offset;\n\n        for (int i = 0; i < NUMBER_PAR_PER_BOX; i++) {\n            rA_shared[i] = rv[first_i + i];\n        }\n\n        for (int k = 0; k < (1 + box[bx].nn); k++) {\n            int pointer = (k == 0) ? (int)bx : box[bx].nei[k - 1].number;\n            int first_j = (int)box[pointer].offset;\n\n            for (int j = 0; j < NUMBER_PAR_PER_BOX; j++) {\n                rB_shared[j] = rv[first_j + j];\n                qB_shared[j] = qv[first_j + j];\n            }\n\n            for (int i = 0; i < NUMBER_PAR_PER_BOX; i++) {\n                fp sum_v = 0;\n                fp sum_x = 0;\n                fp sum_y = 0;\n                fp sum_z = 0;\n\n                FOUR_VECTOR rAi = rA_shared[i];\n\n                for (int j = 0; j < NUMBER_PAR_PER_BOX; j++) {\n                    fp r2 = rAi.v + rB_shared[j].v - DOT(rAi, rB_shared[j]);\n                    fp u2 = a2 * r2;\n                    fp vij = exp(-u2);\n                    fp fs = (fp)2.0 * vij;\n\n                    fp dx = rAi.x - rB_shared[j].x;\n                    fp dy = rAi.y - rB_shared[j].y;\n                    fp dz = rAi.z - rB_shared[j].z;\n\n                    fp q = qB_shared[j];\n                    sum_v += q * vij;\n                    sum_x += q * (fs * dx);\n                    sum_y += q * (fs * dy);\n                    sum_z += q * (fs * dz);\n                }\n\n                fv[first_i + i].v += sum_v;\n                fv[first_i + i].x += sum_x;\n                fv[first_i + i].y += sum_y;\n                fv[first_i + i].z += sum_z;\n            }\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_cpu.c"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_cpu.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 18.832,
+      "prompt_tokens": 10318,
+      "completion_tokens": 1350,
+      "finish_reason": "completed",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "rm: cannot remove './kernel/*.o': No such file or directory\nrm: cannot remove './util/num/*.o': No such file or directory\nrm: cannot remove './util/timer/*.o': No such file or directory\nrm: cannot remove './util/device/*.o': No such file or directory\nrm: cannot remove 'lavaMD': No such file or directory\nmake: *** [makefile:67: clean] Error 1\n\nmain.c: In function \u2018main\u2019:\nmain.c:95:20: warning: implicit declaration of function \u2018strcmp\u2019 [-Wimplicit-function-declaration]\n   95 |                 if(strcmp(argv[dim_cpu.cur_arg], \"-cores\")==0){\n      |                    ^~~~~~\nmain.c:42:1: note: include \u2018<string.h>\u2019 or provide a declaration of \u2018strcmp\u2019\n   41 | #include \"./kernel/kernel_cpu.h\"                                // (in library path specified here)\n  +++ |+#include <string.h>\n   42 | \nmain.c:253:15: warning: implicit declaration of function \u2018time\u2019 [-Wimplicit-function-declaration]\n  253 |         srand(time(NULL));\n      |               ^~~~\nmain.c:42:1: note: \u2018time\u2019 is defined in header \u2018<time.h>\u2019; did you forget to \u2018#include <time.h>\u2019?\n   41 | #include \"./kernel/kernel_cpu.h\"                                // (in library path specified here)\n  +++ |+#include <time.h>\n   42 | \n./kernel/kernel_cpu.c:4:10: fatal error: ./main.h: No such file or directory\n    4 | #include \"./main.h\"\n      |          ^~~~~~~~~~\ncompilation terminated.\nmake: *** [makefile:45: kernel/kernel_cpu.o] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

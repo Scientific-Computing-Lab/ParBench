@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-bptree-cuda",
+  "target_spec": "rodinia-bptree-omp",
+  "kernel": "bptree",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 456771004,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-21T20:27:21Z",
+  "prompt_tokens": 8731,
+  "completion_tokens": 4281,
+  "llm_response_time_seconds": 57.447,
+  "build_status": "fail",
+  "build_time_seconds": 0.443,
+  "build_error_snippet": "rm: cannot remove '*.out': No such file or directory\nrm: cannot remove './kernel/*.o': No such file or directory\nrm: cannot remove './util/timer/*.o': No such file or directory\nrm: cannot remove './util/num/*.o': No such file or directory\nrm: cannot remove 'output.txt': No such file or directory\nmake: *** [Makefile:89: clean] Error 1\n\n./main.c: In function \u2018transform_to_cuda\u2019:\n./main.c:652:9: warning: implicit declaration of function \u2018gettimeofday\u2019 [-Wimplicit-function-declaration]\n  652 |         gettimeofday (&one, NULL);\n      |         ^~~~~~~~~~~~\n./main.c:737:48: warning: format \u2018%d\u2019 expects argument of type \u2018int\u2019, but argument 2 has type \u2018long int\u2019 [-Wformat=]\n  737 |                 printf(\"\\nNumber of records = %d, sizeof(record)=%\n...[truncated]...\n\n  132 |         printf(\"%15.12f s, %15.12f % : GPU MEM: FRE\\n\",                                         (float) (time6-time5) / 1000000, (float) (time6-time5) / (float) (time6-time0) * 100);\n      |                                      ^\n./util/timer/timer.c: In function \u2018get_time\u2019:\n./util/timer/timer.c:26:9: warning: implicit declaration of function \u2018gettimeofday\u2019 [-Wimplicit-function-declaration]\n   26 |         gettimeofday(&tv, NULL);\n      |         ^~~~~~~~~~~~\n/usr/bin/ld: ./main.o: in function `main':\nmain.c:(.text.startup+0x89d): undefined reference to `kernel_cpu_2'\n/usr/bin/ld: main.c:(.text.startup+0xbcb): undefined reference to `kernel_cpu'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:14: b+tree.out] Error 1\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: fined reference to `kernel_cpu_2'\n/usr/bin/ld: main.c:(.text.startup+0xbcb): undefined reference to `kernel_cpu'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:14: b+tree.out] Error 1",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.489,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_cpu.c": "#ifdef __cplusplus\nextern \"C\" {\n#endif\n\n#include \"../common.h\"\n#include \"../util/timer/timer.h\"\n#include <stdio.h>\n#include <stdlib.h>\n#include <omp.h>\n\nvoid \nfindK_openmp(\tlong height,\n\t\t\t\tknode *knodes,\n\t\t\t\tlong knodes_elem,\n\t\t\t\trecord *records,\n\t\t\t\tlong *currKnode,\n\t\t\t\tlong *offset,\n\t\t\t\tint *keys, \n\t\t\t\trecord *ans,\n\t\t\t\tint count,\n\t\t\t\tint order)\n{\n\t#pragma omp parallel for\n\tfor(int bid = 0; bid < count; bid++) {\n\t\tint thid;\n\t\tfor(thid = 0; thid < order; thid++) {\n\t\t\tint i;\n\t\t\tlong currKnode_bid = currKnode[bid];\n\t\t\tlong offset_bid = offset[bid];\n\t\t\t\n\t\t\tfor(i = 0; i < height; i++) {\n\t\t\t\tif((knodes[currKnode_bid].keys[thid] <= keys[bid]) && \n\t\t\t\t   (knodes[currKnode_bid].keys[thid+1] > keys[bid])) {\n\t\t\t\t\tif(knodes[offset_bid].indices[thid] < knodes_elem) {\n\t\t\t\t\t\toffset_bid = knodes[offset_bid].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tcurrKnode_bid = offset_bid;\n\t\t\t}\n\t\t\t\n\t\t\tif(knodes[currKnode_bid].keys[thid] == keys[bid]) {\n\t\t\t\tans[bid].value = records[knodes[currKnode_bid].indices[thid]].value;\n\t\t\t}\n\t\t}\n\t}\n}\n\nvoid \nkernel_gpu_cuda_wrapper(record *records,\n\t\t\t\t\t\tlong records_mem,\n\t\t\t\t\t\tknode *knodes,\n\t\t\t\t\t\tlong knodes_elem,\n\t\t\t\t\t\tlong knodes_mem,\n\t\t\t\t\t\tint order,\n\t\t\t\t\t\tlong maxheight,\n\t\t\t\t\t\tint count,\n\t\t\t\t\t\tlong *currKnode,\n\t\t\t\t\t\tlong *offset,\n\t\t\t\t\t\tint *keys,\n\t\t\t\t\t\trecord *ans)\n{\n\tlong long time0;\n\tlong long time1;\n\tlong long time2;\n\tlong long time3;\n\tlong long time4;\n\tlong long time5;\n\tlong long time6;\n\n\ttime0 = get_time();\n\n\ttime1 = get_time();\n\n\tint numThreads;\n\tnumThreads = count;\n\tint threadsPerBlock;\n\tthreadsPerBlock = order < 1024 ? order : 1024;\n\n\tprintf(\"# of blocks = %d, # of threads/block = %d (ensure that device can handle)\\n\", numThreads, threadsPerBlock);\n\n\ttime2 = get_time();\n\n\ttime3 = get_time();\n\n\tfindK_openmp(maxheight,\n\t\t\t\tknodes,\n\t\t\t\tknodes_elem,\n\t\t\t\trecords,\n\t\t\t\tcurrKnode,\n\t\t\t\toffset,\n\t\t\t\tkeys,\n\t\t\t\tans,\n\t\t\t\tcount,\n\t\t\t\tthreadsPerBlock);\n\n\ttime4 = get_time();\n\n\ttime5 = get_time();\n\n\ttime6 = get_time();\n\n\tprintf(\"Time spent in different stages of GPU_CUDA KERNEL:\\n\");\n\n\tprintf(\"%15.12f s, %15.12f % : GPU: SET DEVICE / DRIVER INIT\\n\",\t(float) (time1-time0) / 1000000, (float) (time1-time0) / (float) (time6-time0) * 100);\n\tprintf(\"%15.12f s, %15.12f % : GPU MEM: ALO\\n\", \t\t\t\t\t(float) (time2-time1) / 1000000, (float) (time2-time1) / (float) (time6-time0) * 100);\n\tprintf(\"%15.12f s, %15.12f % : GPU MEM: COPY IN\\n\",\t\t\t\t\t(float) (time3-time2) / 1000000, (float) (time3-time2) / (float) (time6-time0) * 100);\n\n\tprintf(\"%15.12f s, %15.12f % : GPU: KERNEL\\n\",\t\t\t\t\t\t(float) (time4-time3) / 1000000, (float) (time4-time3) / (float) (time6-time0) * 100);\n\n\tprintf(\"%15.12f s, %15.12f % : GPU MEM: COPY OUT\\n\",\t\t\t\t(float) (time5-time4) / 1000000, (float) (time5-time4) / (float) (time6-time0) * 100);\n\tprintf(\"%15.12f s, %15.12f % : GPU MEM: FRE\\n\", \t\t\t\t\t(float) (time6-time5) / 1000000, (float) (time6-time5) / (float) (time6-time0) * 100);\n\n\tprintf(\"Total time:\\n\");\n\tprintf(\"%.12f s\\n\", \t\t\t\t\t\t\t\t\t\t\t\t(float) (time6-time0) / 1000000);\n}\n\n#ifdef __cplusplus\n}\n#endif\n",
+    "kernel/kernel_cpu_2.c": "#ifdef __cplusplus\nextern \"C\" {\n#endif\n\n#include \"../common.h\"\n#include \"../util/timer/timer.h\"\n#include <stdio.h>\n#include <stdlib.h>\n#include <omp.h>\n\nvoid \nfindRangeK_openmp(\tlong height,\n\t\t\t\t\tknode *knodes,\n\t\t\t\t\tlong knodes_elem,\n\t\t\t\t\tlong *currKnode,\n\t\t\t\t\tlong *offset,\n\t\t\t\t\tlong *lastKnode,\n\t\t\t\t\tlong *offset_2,\n\t\t\t\t\tint *start,\n\t\t\t\t\tint *end,\n\t\t\t\t\tint *Recstart, \n\t\t\t\t\tint *Reclen,\n\t\t\t\t\tint count,\n\t\t\t\t\tint order)\n{\n\t#pragma omp parallel for\n\tfor(int bid = 0; bid < count; bid++) {\n\t\tint thid;\n\t\tfor(thid = 0; thid < order; thid++) {\n\t\t\tint i;\n\t\t\tlong currKnode_bid = currKnode[bid];\n\t\t\tlong offset_bid = offset[bid];\n\t\t\tlong lastKnode_bid = lastKnode[bid];\n\t\t\tlong offset_2_bid = offset_2[bid];\n\t\t\t\n\t\t\tfor(i = 0; i < height; i++) {\n\t\t\t\tif((knodes[currKnode_bid].keys[thid] <= start[bid]) && \n\t\t\t\t   (knodes[currKnode_bid].keys[thid+1] > start[bid])) {\n\t\t\t\t\tif(knodes[currKnode_bid].indices[thid] < knodes_elem) {\n\t\t\t\t\t\toffset_bid = knodes[currKnode_bid].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif((knodes[lastKnode_bid].keys[thid] <= end[bid]) && \n\t\t\t\t   (knodes[lastKnode_bid].keys[thid+1] > end[bid])) {\n\t\t\t\t\tif(knodes[lastKnode_bid].indices[thid] < knodes_elem) {\n\t\t\t\t\t\toffset_2_bid = knodes[lastKnode_bid].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tcurrKnode_bid = offset_bid;\n\t\t\t\tlastKnode_bid = offset_2_bid;\n\t\t\t}\n\t\t\t\n\t\t\tif(knodes[currKnode_bid].keys[thid] == start[bid]) {\n\t\t\t\tRecstart[bid] = knodes[currKnode_bid].indices[thid];\n\t\t\t}\n\t\t\t\n\t\t\tif(knodes[lastKnode_bid].keys[thid] == end[bid]) {\n\t\t\t\tReclen[bid] = knodes[lastKnode_bid].indices[thid] - Recstart[bid] + 1;\n\t\t\t}\n\t\t}\n\t}\n}\n\nvoid \nkernel_gpu_cuda_wrapper_2(\tknode *knodes,\n\t\t\t\t\t\t\tlong knodes_elem,\n\t\t\t\t\t\t\tlong knodes_mem,\n\t\t\t\t\t\t\tint order,\n\t\t\t\t\t\t\tlong maxheight,\n\t\t\t\t\t\t\tint count,\n\t\t\t\t\t\t\tlong *currKnode,\n\t\t\t\t\t\t\tlong *offset,\n\t\t\t\t\t\t\tlong *lastKnode,\n\t\t\t\t\t\t\tlong *offset_2,\n\t\t\t\t\t\t\tint *start,\n\t\t\t\t\t\t\tint *end,\n\t\t\t\t\t\t\tint *recstart,\n\t\t\t\t\t\t\tint *reclength)\n{\n\tlong long time0;\n\tlong long time1;\n\tlong long time2;\n\tlong long time3;\n\tlong long time4;\n\tlong long time5;\n\tlong long time6;\n\n\ttime0 = get_time();\n\n\ttime1 = get_time();\n\n\tint numThreads;\n\tnumThreads = count;\n\tint threadsPerBlock;\n\tthreadsPerBlock = order < 1024 ? order : 1024;\n\n\tprintf(\"# of blocks = %d, # of threads/block = %d (ensure that device can handle)\\n\", numThreads, threadsPerBlock);\n\n\ttime2 = get_time();\n\n\ttime3 = get_time();\n\n\tfindRangeK_openmp(maxheight,\n\t\t\t\t\tknodes,\n\t\t\t\t\tknodes_elem,\n\t\t\t\t\tcurrKnode,\n\t\t\t\t\toffset,\n\t\t\t\t\tlastKnode,\n\t\t\t\t\toffset_2,\n\t\t\t\t\tstart,\n\t\t\t\t\tend,\n\t\t\t\t\trecstart,\n\t\t\t\t\treclength,\n\t\t\t\t\tcount,\n\t\t\t\t\tthreadsPerBlock);\n\n\ttime4 = get_time();\n\n\ttime5 = get_time();\n\n\ttime6 = get_time();\n\n\tprintf(\"Time spent in different stages of GPU_CUDA KERNEL:\\n\");\n\n\tprintf(\"%15.12f s, %15.12f % : GPU: SET DEVICE / DRIVER INIT\\n\",\t(float) (time1-time0) / 1000000, (float) (time1-time0) / (float) (time6-time0) * 100);\n\tprintf(\"%15.12f s, %15.12f % : GPU MEM: ALO\\n\", \t\t\t\t\t(float) (time2-time1) / 1000000, (float) (time2-time1) / (float) (time6-time0) * 100);\n\tprintf(\"%15.12f s, %15.12f % : GPU MEM: COPY IN\\n\",\t\t\t\t\t(float) (time3-time2) / 1000000, (float) (time3-time2) / (float) (time6-time0) * 100);\n\n\tprintf(\"%15.12f s, %15.12f % : GPU: KERNEL\\n\",\t\t\t\t\t\t(float) (time4-time3) / 1000000, (float) (time4-time3) / (float) (time6-time0) * 100);\n\n\tprintf(\"%15.12f s, %15.12f % : GPU MEM: COPY OUT\\n\",\t\t\t\t(float) (time5-time4) / 1000000, (float) (time5-time4) / (float) (time6-time0) * 100);\n\tprintf(\"%15.12f s, %15.12f % : GPU MEM: FRE\\n\", \t\t\t\t\t(float) (time6-time5) / 1000000, (float) (time6-time5) / (float) (time6-time0) * 100);\n\n\tprintf(\"Total time:\\n\");\n\tprintf(\"%.12f s\\n\", \t\t\t\t\t\t\t\t\t\t\t\t(float) (time6-time0) / 1000000);\n}\n\n#ifdef __cplusplus\n}\n#endif\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_cpu.c",
+    "kernel/kernel_cpu_2.c"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_cpu.c",
+    "kernel/kernel_cpu_2.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 57.447,
+      "prompt_tokens": 8731,
+      "completion_tokens": 4281,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "rm: cannot remove '*.out': No such file or directory\nrm: cannot remove './kernel/*.o': No such file or directory\nrm: cannot remove './util/timer/*.o': No such file or directory\nrm: cannot remove './util/num/*.o': No such file or directory\nrm: cannot remove 'output.txt': No such file or directory\nmake: *** [Makefile:89: clean] Error 1\n\n./main.c: In function \u2018transform_to_cuda\u2019:\n./main.c:652:9: warning: implicit declaration of function \u2018gettimeofday\u2019 [-Wimplicit-function-declaration]\n  652 |         gettimeofday (&one, NULL);\n      |         ^~~~~~~~~~~~\n./main.c:737:48: warning: format \u2018%d\u2019 expects argument of type \u2018int\u2019, but argument 2 has type \u2018long int\u2019 [-Wformat=]\n  737 |                 printf(\"\\nNumber of records = %d, sizeof(record)=%\n...[truncated]...\n\n  132 |         printf(\"%15.12f s, %15.12f % : GPU MEM: FRE\\n\",                                         (float) (time6-time5) / 1000000, (float) (time6-time5) / (float) (time6-time0) * 100);\n      |                                      ^\n./util/timer/timer.c: In function \u2018get_time\u2019:\n./util/timer/timer.c:26:9: warning: implicit declaration of function \u2018gettimeofday\u2019 [-Wimplicit-function-declaration]\n   26 |         gettimeofday(&tv, NULL);\n      |         ^~~~~~~~~~~~\n/usr/bin/ld: ./main.o: in function `main':\nmain.c:(.text.startup+0x89d): undefined reference to `kernel_cpu_2'\n/usr/bin/ld: main.c:(.text.startup+0xbcb): undefined reference to `kernel_cpu'\ncollect2: error: ld returned 1 exit status\nmake: *** [Makefile:14: b+tree.out] Error 1\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

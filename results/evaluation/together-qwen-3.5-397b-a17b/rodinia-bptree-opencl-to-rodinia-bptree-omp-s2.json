@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-bptree-opencl",
+  "target_spec": "rodinia-bptree-omp",
+  "kernel": "bptree",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1750387040,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-04-22T02:19:12Z",
+  "prompt_tokens": 28420,
+  "completion_tokens": 10133,
+  "llm_response_time_seconds": 75.334,
+  "build_status": "pass",
+  "build_time_seconds": 0.429,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 1.555,
+  "run_exit_code": -11,
+  "run_stderr_snippet": "",
+  "run_stdout_snippet": "",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code -11)",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.489,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernel/kernel_cpu.c": "#include <omp.h>\n#include <stdlib.h>\n#include <stdio.h>\n#include \"../common.h\"\n\nvoid kernel_cpu(int cores_arg,\n                record *records,\n                knode *knodes,\n                long knodes_elem,\n                int order,\n                long maxheight,\n                int count,\n                long *currKnode,\n                long *offset,\n                int *keys,\n                record *ans)\n{\n    int total_threads = count * order;\n    \n    #pragma omp parallel num_threads(total_threads)\n    {\n        int global_id = omp_get_thread_num();\n        int bid = global_id / order;\n        int thid = global_id % order;\n        \n        if(bid < count) {\n            for(int i = 0; i < maxheight; i++) {\n                if(thid < knodes[currKnode[bid]].num_keys - 1) {\n                    if(knodes[currKnode[bid]].keys[thid] <= keys[bid] && \n                       knodes[currKnode[bid]].keys[thid+1] > keys[bid]) {\n                        if(knodes[offset[bid]].indices[thid] < knodes_elem) {\n                            offset[bid] = knodes[offset[bid]].indices[thid];\n                        }\n                    }\n                }\n                \n                #pragma omp barrier\n                \n                if(thid == 0) {\n                    currKnode[bid] = offset[bid];\n                }\n                \n                #pragma omp barrier\n            }\n            \n            if(thid < knodes[currKnode[bid]].num_keys) {\n                if(knodes[currKnode[bid]].keys[thid] == keys[bid]) {\n                    ans[bid].value = records[knodes[currKnode[bid]].indices[thid]].value;\n                }\n            }\n        }\n    }\n}\n",
+    "kernel/kernel_cpu_2.c": "#include <omp.h>\n#include <stdlib.h>\n#include <stdio.h>\n#include \"../common.h\"\n\nvoid kernel_cpu_2(int cores_arg,\n                  knode *knodes,\n                  long knodes_elem,\n                  int order,\n                  long maxheight,\n                  int count,\n                  long *currKnode,\n                  long *offset,\n                  long *lastKnode,\n                  long *offset_2,\n                  int *start,\n                  int *end,\n                  int *recstart,\n                  int *reclength)\n{\n    int total_threads = count * order;\n    \n    #pragma omp parallel num_threads(total_threads)\n    {\n        int global_id = omp_get_thread_num();\n        int bid = global_id / order;\n        int thid = global_id % order;\n        \n        if(bid < count) {\n            for(int i = 0; i < maxheight; i++) {\n                if(thid < knodes[currKnode[bid]].num_keys - 1) {\n                    if(knodes[currKnode[bid]].keys[thid] <= start[bid] && \n                       knodes[currKnode[bid]].keys[thid+1] > start[bid]) {\n                        if(knodes[currKnode[bid]].indices[thid] < knodes_elem) {\n                            offset[bid] = knodes[currKnode[bid]].indices[thid];\n                        }\n                    }\n                }\n                \n                if(thid < knodes[lastKnode[bid]].num_keys - 1) {\n                    if(knodes[lastKnode[bid]].keys[thid] <= end[bid] && \n                       knodes[lastKnode[bid]].keys[thid+1] > end[bid]) {\n                        if(knodes[lastKnode[bid]].indices[thid] < knodes_elem) {\n                            offset_2[bid] = knodes[lastKnode[bid]].indices[thid];\n                        }\n                    }\n                }\n                \n                #pragma omp barrier\n                \n                if(thid == 0) {\n                    currKnode[bid] = offset[bid];\n                    lastKnode[bid] = offset_2[bid];\n                }\n                \n                #pragma omp barrier\n            }\n            \n            if(thid < knodes[currKnode[bid]].num_keys) {\n                if(knodes[currKnode[bid]].keys[thid] == start[bid]) {\n                    recstart[bid] = knodes[currKnode[bid]].indices[thid];\n                }\n            }\n            \n            #pragma omp barrier\n            \n            if(thid < knodes[lastKnode[bid]].num_keys) {\n                if(knodes[lastKnode[bid]].keys[thid] == end[bid]) {\n                    reclength[bid] = knodes[lastKnode[bid]].indices[thid] - recstart[bid] + 1;\n                }\n            }\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_cpu.c",
+    "kernel/kernel_cpu_2.c"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_cpu.c",
+    "kernel/kernel_cpu_2.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 75.334,
+      "prompt_tokens": 28420,
+      "completion_tokens": 10133,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "",
+      "run_stdout_snippet": "",
+      "extraction_fail": null
+    }
+  ]
+}

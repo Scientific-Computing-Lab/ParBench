@@ -1,0 +1,76 @@
+{
+  "source_spec": "rodinia-pathfinder-omp",
+  "target_spec": "rodinia-pathfinder-opencl",
+  "kernel": "pathfinder",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 1,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 326867091,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "-c",
+    "100000",
+    "-r",
+    "100",
+    "-h",
+    "20"
+  ],
+  "timestamp": "2026-04-22T02:13:11Z",
+  "prompt_tokens": 4330,
+  "completion_tokens": 14396,
+  "llm_response_time_seconds": 127.736,
+  "build_status": "pass",
+  "build_time_seconds": 0.482,
+  "build_error_snippet": null,
+  "run_status": "fail",
+  "run_time_seconds": 0.219,
+  "run_exit_code": 1,
+  "run_stderr_snippet": "4 errors generated.\n",
+  "run_stdout_snippet": "* src_buf,\n               ^\n<kernel>:7:10: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    int* dst_buf,\n         ^\n<kernel>:15:10: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    int* output_buffer\n         ^\n\n\n*************************************************\n*** END OUTPUT FROM COMPILING THE KERNEL FILE ***\n*************************************************\n\n\n",
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "RUN_FAIL",
+  "error_message": "Run failed (exit code 1)",
+  "metrics": {},
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "kernels.cl": "#define MIN(a, b) ((a)<=(b) ? (a) : (b))\n\nkernel void dynproc_kernel(\n    int num_steps,\n    const int* wall_data,\n    const int* src_buf,\n    int* dst_buf,\n    int cols,\n    int rows,\n    int row_offset,\n    int borderCols,\n    int halo,\n    local int* local_src1,\n    local int* local_src2,\n    int* output_buffer\n) {\n    int n = (int)get_global_id(0);\n    if (n >= cols) return;\n\n    for (int s = 0; s < num_steps; s++) {\n        int src_val;\n        int left_val;\n        int right_val;\n\n        if (s == 0) {\n            src_val = src_buf[n];\n            if (n > 0) left_val = src_buf[n-1];\n            if (n < cols - 1) right_val = src_buf[n+1];\n        } else {\n            src_val = dst_buf[n];\n            if (n > 0) left_val = dst_buf[n-1];\n            if (n < cols - 1) right_val = dst_buf[n+1];\n        }\n\n        int min_val = src_val;\n        if (n > 0) {\n            min_val = MIN(min_val, left_val);\n        }\n        if (n < cols - 1) {\n            min_val = MIN(min_val, right_val);\n        }\n\n        int r = row_offset + s;\n        int wall_val = wall_data[r * cols + n];\n\n        dst_buf[n] = wall_val + min_val;\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "kernels.cl"
+  ],
+  "target_files_extracted": [
+    "kernels.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 127.736,
+      "prompt_tokens": 4330,
+      "completion_tokens": 14396,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "fail",
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": "4 errors generated.\n",
+      "run_stdout_snippet": "* src_buf,\n               ^\n<kernel>:7:10: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    int* dst_buf,\n         ^\n<kernel>:15:10: error: pointer arguments to kernel functions must reside in '__global', '__constant' or '__local' address space\n    int* output_buffer\n         ^\n\n\n*************************************************\n*** END OUTPUT FROM COMPILING THE KERNEL FILE ***\n*************************************************\n\n\n",
+      "extraction_fail": null
+    }
+  ]
+}

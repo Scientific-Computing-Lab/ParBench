@@ -1,0 +1,73 @@
+{
+  "source_spec": "rodinia-nw-omp",
+  "target_spec": "rodinia-nw-opencl",
+  "kernel": "nw",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 2,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 716361242,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "2048",
+    "10",
+    "./nw.cl"
+  ],
+  "timestamp": "2026-04-24T05:47:32Z",
+  "prompt_tokens": 11990,
+  "completion_tokens": 5841,
+  "llm_response_time_seconds": 103.893,
+  "build_status": "pass",
+  "build_time_seconds": 0.353,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.273,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "rofiling.\nERROR (-9999) in event start profiling.\nERROR (-9999) in event start profiling.\nERROR (-9999) in event start profiling.\nERROR (-9999) in event start profiling.\nERROR (-9999) in event start profiling.\nERROR (-9999) in event start profiling.\nERROR (-9999) in event start profiling.\nERROR (-9999) in event start profiling.\nERROR (-58) in event start profiling.\nComputation Done\nInit: 195.028000\nMemAlloc: 0.003000\nHtoD: 1.958144\nExec: 1.867519\nDtoH: 0.000000\nClose: 0.839000\nTotal: 208.091995\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.09,
+  "translated_wall_time_seconds": 0.273,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.3297,
+  "translated_files": {
+    "nw.cl": "#define LIMIT -999\n\n#ifndef BLOCK_SIZE\n#define BLOCK_SIZE 16\n#endif\n\nint maximum(int a, int b, int c) {\n    int k;\n    if (a <= b)\n        k = b;\n    else\n        k = a;\n    \n    if (k <= c)\n        return c;\n    else\n        return k;\n}\n\nkernel void nw_kernel1(\n    global int* reference,\n    global int* input_itemsets,\n    global int* output_itemsets,\n    local int* input_itemsets_l,\n    local int* reference_l,\n    int max_cols,\n    int penalty,\n    int blk,\n    int block_width,\n    int worksize,\n    int offset_r,\n    int offset_c\n) {\n    int b_index_x = get_global_id(0) / BLOCK_SIZE;\n    \n    if (b_index_x >= blk) return;\n    \n    int b_index_y = blk - 1 - b_index_x;\n    \n    // Load reference data into local memory\n    for (int i = 0; i < BLOCK_SIZE; ++i) {\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            reference_l[i * BLOCK_SIZE + j] = reference[max_cols * (b_index_y * BLOCK_SIZE + i + 1) + b_index_x * BLOCK_SIZE + j + 1];\n        }\n    }\n    \n    // Load input data into local memory\n    for (int i = 0; i < BLOCK_SIZE + 1; ++i) {\n        for (int j = 0; j < BLOCK_SIZE + 1; ++j) {\n            input_itemsets_l[i * (BLOCK_SIZE + 1) + j] = input_itemsets[max_cols * (b_index_y * BLOCK_SIZE + i) + b_index_x * BLOCK_SIZE + j];\n        }\n    }\n    \n    // Compute NW scores\n    for (int i = 1; i < BLOCK_SIZE + 1; ++i) {\n        for (int j = 1; j < BLOCK_SIZE + 1; ++j) {\n            input_itemsets_l[i * (BLOCK_SIZE + 1) + j] = maximum(\n                input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + j - 1] + reference_l[(i - 1) * BLOCK_SIZE + j - 1],\n                input_itemsets_l[i * (BLOCK_SIZE + 1) + j - 1] - penalty,\n                input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + j] - penalty\n            );\n        }\n    }\n    \n    // Write results back to global memory\n    for (int i = 0; i < BLOCK_SIZE; ++i) {\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            input_itemsets[max_cols * (b_index_y * BLOCK_SIZE + i + 1) + b_index_x * BLOCK_SIZE + j + 1] = input_itemsets_l[(i + 1) * (BLOCK_SIZE + 1) + j + 1];\n        }\n    }\n}\n\nkernel void nw_kernel2(\n    global int* reference,\n    global int* input_itemsets,\n    global int* output_itemsets,\n    local int* input_itemsets_l,\n    local int* reference_l,\n    int max_cols,\n    int penalty,\n    int blk,\n    int block_width,\n    int worksize,\n    int offset_r,\n    int offset_c\n) {\n    int b_index_x = get_global_id(0) / BLOCK_SIZE;\n    \n    int max_b_index_x = worksize / BLOCK_SIZE;\n    if (b_index_x >= max_b_index_x - blk + 1) return;\n    \n    int b_index_y = worksize / BLOCK_SIZE + blk - 2 - b_index_x;\n    \n    // Load reference data into local memory\n    for (int i = 0; i < BLOCK_SIZE; ++i) {\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            reference_l[i * BLOCK_SIZE + j] = reference[max_cols * (b_index_y * BLOCK_SIZE + i + 1) + b_index_x * BLOCK_SIZE + j + 1];\n        }\n    }\n    \n    // Load input data into local memory\n    for (int i = 0; i < BLOCK_SIZE + 1; ++i) {\n        for (int j = 0; j < BLOCK_SIZE + 1; ++j) {\n            input_itemsets_l[i * (BLOCK_SIZE + 1) + j] = input_itemsets[max_cols * (b_index_y * BLOCK_SIZE + i) + b_index_x * BLOCK_SIZE + j];\n        }\n    }\n    \n    // Compute NW scores\n    for (int i = 1; i < BLOCK_SIZE + 1; ++i) {\n        for (int j = 1; j < BLOCK_SIZE + 1; ++j) {\n            input_itemsets_l[i * (BLOCK_SIZE + 1) + j] = maximum(\n                input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + j - 1] + reference_l[(i - 1) * BLOCK_SIZE + j - 1],\n                input_itemsets_l[i * (BLOCK_SIZE + 1) + j - 1] - penalty,\n                input_itemsets_l[(i - 1) * (BLOCK_SIZE + 1) + j] - penalty\n            );\n        }\n    }\n    \n    // Write results back to global memory\n    for (int i = 0; i < BLOCK_SIZE; ++i) {\n        for (int j = 0; j < BLOCK_SIZE; ++j) {\n            input_itemsets[max_cols * (b_index_y * BLOCK_SIZE + i + 1) + b_index_x * BLOCK_SIZE + j + 1] = input_itemsets_l[(i + 1) * (BLOCK_SIZE + 1) + j + 1];\n        }\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "nw.cl"
+  ],
+  "target_files_extracted": [
+    "nw.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 103.893,
+      "prompt_tokens": 11990,
+      "completion_tokens": 5841,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

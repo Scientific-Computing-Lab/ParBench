@@ -1,0 +1,82 @@
+{
+  "source_spec": "hecbench-iso2dfd-omp",
+  "target_spec": "hecbench-iso2dfd-cuda",
+  "kernel": "iso2dfd",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 1,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1537310028,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "2048",
+    "2048",
+    "10"
+  ],
+  "timestamp": "2026-04-24T03:59:16Z",
+  "prompt_tokens": 2825,
+  "completion_tokens": 6075,
+  "llm_response_time_seconds": 128.562,
+  "build_status": "pass",
+  "build_time_seconds": 1.093,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.207,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Initializing ... \nGrid Sizes: 2048 2048\nIterations: 10\n\nComputing wavefield in device ..\nTotal kernel execution time 1.51682 (ms)\nAverage kernel execution time 151.682 (us)\nComputing wavefield in CPU ..\nInitializing ... \nCPU time: 18 ms\n\nCheck difference between final wavefields computed in device and host\nPASS\nFinal wavefields (from device and CPU) written to disk\nFinished.  \n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {
+    "total_kernel_time": {
+      "value": 1.51682,
+      "unit": "ms"
+    },
+    "avg_kernel_time": {
+      "value": 151.682,
+      "unit": "us"
+    }
+  },
+  "baseline_wall_time_seconds": null,
+  "translated_wall_time_seconds": 0.207,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": null,
+  "translated_files": {
+    "iso2dfd.cu": "#include <fstream>\n#include <iostream>\n#include <cuda_runtime.h>\n#include <chrono>\n#include <cmath>\n#include <cstring>\n\n#define DT 0.002f\n#define DXY 20.0f\n#define HALF_LENGTH 1\n#define MIN(a, b) (a) < (b) ? (a) : (b)\n\nvoid usage(std::string programName) {\n  std::cout << \" Incorrect parameters \" << std::endl;\n  std::cout << \" Usage: \";\n  std::cout << programName << \" n1 n2 Iterations \" << std::endl\n            << std::endl;\n  std::cout << \" n1 n2      : Grid sizes for the stencil \" << std::endl;\n  std::cout << \" Iterations : No. of timesteps. \" << std::endl;\n}\n\nvoid initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, size_t nRows,\n                size_t nCols) {\n  std::cout << \"Initializing ... \" << std::endl;\n\n  float wavelet[12] = {0.016387336, -0.041464937, -0.067372555, 0.386110067,\n                       0.812723635, 0.416998396,  0.076488599,  -0.059434419,\n                       0.023680172, 0.005611435,  0.001823209,  -0.000720549};\n\n  for (size_t i = 0; i < nRows; i++) {\n    size_t offset = i * nCols;\n    for (int k = 0; k < nCols; k++) {\n      ptr_prev[offset + k] = 0.0f;\n      ptr_next[offset + k] = 0.0f;\n      ptr_vel[offset + k] = 2250000.0f;\n    }\n  }\n  \n  for (int s = 11; s >= 0; s--) {\n    for (size_t i = nRows / 2 - s; i < nRows / 2 + s; i++) {\n      size_t offset = i * nCols;\n      for (size_t k = nCols / 2 - s; k < nCols / 2 + s; k++) {\n        ptr_prev[offset + k] = wavelet[s];\n      }\n    }\n  }\n}\n\nbool within_epsilon(float* output, float* reference, const size_t dimx,\n                    const size_t dimy, const unsigned int radius,\n                    const float delta = 0.01f) {\n  FILE* fp = fopen(\"./error_diff.txt\", \"w\");\n  if (!fp) fp = stderr;\n\n  bool error = false;\n  double norm2 = 0;\n\n  for (size_t iy = 0; iy < dimy; iy++) {\n    for (size_t ix = 0; ix < dimx; ix++) {\n      if (ix >= radius && ix < (dimx - radius) && iy >= radius &&\n          iy < (dimy - radius)) {\n        float difference = fabsf(*reference - *output);\n        norm2 += difference * difference;\n        if (difference > delta) {\n          error = true;\n          fprintf(fp, \" ERROR: (%zu,%zu)\\t%e instead of %e (|e|=%e)\\n\", ix, iy,\n                  *output, *reference, difference);\n        }\n      }\n\n      ++output;\n      ++reference;\n    }\n  }\n\n  if (fp != stderr) fclose(fp);\n  norm2 = sqrt(norm2);\n  if (error) printf(\"error (Euclidean norm): %.9e\\n\", norm2);\n  return error;\n}\n\nvoid iso_2dfd_iteration_cpu(float* next, float* prev, float* vel,\n                            const float dtDIVdxy, int nRows, int nCols,\n                            int nIterations) {\n  for (unsigned int k = 0; k < nIterations; k += 1) {\n    for (size_t i = 1; i < nRows - HALF_LENGTH; i += 1) {\n      for (size_t j = 1; j < nCols - HALF_LENGTH; j += 1) {\n        size_t gid = j + (i * nCols);\n        float value = 0.f;\n        value += prev[gid + 1] - 2.f * prev[gid] + prev[gid - 1];\n        value += prev[gid + nCols] - 2.f * prev[gid] + prev[gid - nCols];\n        value *= dtDIVdxy * vel[gid];\n        next[gid] = 2.f * prev[gid] - next[gid] + value;\n      }\n    }\n\n    float* swap = next;\n    next = prev;\n    prev = swap;\n  }\n}\n\n__global__ void iso_2dfd_kernel(float* next, const float* prev, const float* vel, \n                                const float dtDIVdxy, const size_t nRows, const size_t nCols) {\n  size_t gidRow = blockIdx.y * blockDim.y + threadIdx.y;\n  size_t gidCol = blockIdx.x * blockDim.x + threadIdx.x;\n  \n  if (gidRow < nRows && gidCol < nCols) {\n    size_t gid = gidRow * nCols + gidCol;\n    \n    if ((gidCol >= HALF_LENGTH && gidCol < nCols - HALF_LENGTH) &&\n        (gidRow >= HALF_LENGTH && gidRow < nRows - HALF_LENGTH)) {\n      float value = 0.f;\n      value += prev[gid + 1] - 2.f * prev[gid] + prev[gid - 1];\n      value += prev[gid + nCols] - 2.f * prev[gid] + prev[gid - nCols];\n      value *= dtDIVdxy * vel[gid];\n      next[gid] = 2.f * prev[gid] - next[gid] + value;\n    }\n  }\n}\n\nint main(int argc, char* argv[]) {\n  float* prev_base;\n  float* next_base;\n  float* next_cpu;\n  float* vel_base;\n  \n  float* dev_prev;\n  float* dev_next;\n  float* dev_vel;\n\n  bool error = false;\n\n  size_t nRows, nCols;\n  unsigned int nIterations;\n\n  try {\n    nRows = std::stoi(argv[1]);\n    nCols = std::stoi(argv[2]);\n    nIterations = std::stoi(argv[3]);\n  }\n\n  catch (...) {\n    usage(argv[0]);\n    return 1;\n  }\n\n  size_t nsize = nRows * nCols;\n\n  prev_base = new float[nsize];\n  next_base = new float[nsize];\n  next_cpu = new float[nsize];\n  vel_base = new float[nsize];\n\n  float dtDIVdxy = (DT * DT) / (DXY * DXY);\n\n  initialize(prev_base, next_base, vel_base, nRows, nCols);\n\n  std::cout << \"Grid Sizes: \" << nRows << \" \" << nCols << std::endl;\n  std::cout << \"Iterations: \" << nIterations << std::endl;\n  std::cout << std::endl;\n\n  cudaMalloc(&dev_prev, nsize * sizeof(float));\n  cudaMalloc(&dev_next, nsize * sizeof(float));\n  cudaMalloc(&dev_vel, nsize * sizeof(float));\n\n  cudaMemcpy(dev_prev, prev_base, nsize * sizeof(float), cudaMemcpyHostToDevice);\n  cudaMemcpy(dev_next, next_base, nsize * sizeof(float), cudaMemcpyHostToDevice);\n  cudaMemcpy(dev_vel, vel_base, nsize * sizeof(float), cudaMemcpyHostToDevice);\n\n  std::cout << \"Computing wavefield in device ..\" << std::endl;\n\n  dim3 blockDim(16, 16);\n  dim3 gridDim((nCols + blockDim.x - 1) / blockDim.x, (nRows + blockDim.y - 1) / blockDim.y);\n\n  auto kstart = std::chrono::steady_clock::now();\n  \n  for (unsigned int k = 0; k < nIterations; k += 1) {\n    if (k % 2) {\n      iso_2dfd_kernel<<<gridDim, blockDim>>>(dev_prev, dev_next, dev_vel, dtDIVdxy, nRows, nCols);\n    } else {\n      iso_2dfd_kernel<<<gridDim, blockDim>>>(dev_next, dev_prev, dev_vel, dtDIVdxy, nRows, nCols);\n    }\n    cudaDeviceSynchronize();\n  }  \n  \n  auto kend = std::chrono::steady_clock::now();\n  auto ktime = std::chrono::duration_cast<std::chrono::nanoseconds>(kend - kstart).count();\n  std::cout << \"Total kernel execution time \" << ktime * 1e-6f << \" (ms)\\n\";\n  std::cout << \"Average kernel execution time \" << (ktime * 1e-3f) / nIterations << \" (us)\\n\";\n\n  cudaMemcpy(next_base, dev_next, nsize * sizeof(float), cudaMemcpyDeviceToHost);\n\n  std::ofstream outFile;\n  outFile.open(\"wavefield_snapshot.bin\", std::ios::out | std::ios::binary);\n  outFile.write(reinterpret_cast<char*>(next_base), nsize * sizeof(float));\n  outFile.close();\n\n  std::cout << \"Computing wavefield in CPU ..\" << std::endl;\n  \n  initialize(prev_base, next_cpu, vel_base, nRows, nCols);\n\n  auto start = std::chrono::steady_clock::now();\n  iso_2dfd_iteration_cpu(next_cpu, prev_base, vel_base, dtDIVdxy, nRows, nCols,\n                         nIterations);\n\n  auto end = std::chrono::steady_clock::now();\n  auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start)\n                  .count();\n  std::cout << \"CPU time: \" << time << \" ms\" << std::endl;\n  std::cout << std::endl;\n\n  std::cout << \"Check difference between final wavefields computed in device and host\"\n            << std::endl;\n  error = within_epsilon(next_base, next_cpu, nRows, nCols, HALF_LENGTH, 0.1f);\n  std::cout << (error ? \"FAIL\" : \"PASS\") << std::endl;\n\n  outFile.open(\"wavefield_snapshot_cpu.bin\", std::ios::out | std::ios::binary);\n  outFile.write(reinterpret_cast<char*>(next_cpu), nsize * sizeof(float));\n  outFile.close();\n\n  std::cout << \"Final wavefields (from device and CPU) written to disk\"\n            << std::endl;\n  std::cout << \"Finished.  \" << std::endl;\n\n  cudaFree(dev_prev);\n  cudaFree(dev_next);\n  cudaFree(dev_vel);\n  \n  delete[] prev_base;\n  delete[] next_base;\n  delete[] vel_base;\n\n  return error ? 1 : 0;\n}\n"
+  },
+  "target_files_expected": [
+    "iso2dfd.cu"
+  ],
+  "target_files_extracted": [
+    "iso2dfd.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 128.562,
+      "prompt_tokens": 2825,
+      "completion_tokens": 6075,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

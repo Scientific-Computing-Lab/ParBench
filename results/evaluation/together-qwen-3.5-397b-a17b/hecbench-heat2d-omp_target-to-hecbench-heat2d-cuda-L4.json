@@ -1,0 +1,69 @@
+{
+  "source_spec": "hecbench-heat2d-omp_target",
+  "target_spec": "hecbench-heat2d-cuda",
+  "kernel": "heat2d",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 4,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 1,
+  "seed": 1467773133,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-24T06:53:08Z",
+  "prompt_tokens": 1957,
+  "completion_tokens": 4386,
+  "llm_response_time_seconds": 108.764,
+  "build_status": "fail",
+  "build_time_seconds": 0.225,
+  "build_error_snippet": "main.cu(60): error: \"blockDim\" has already been declared in the current scope\n    dim3 blockDim(elem_15/16, var_21/16);\n         ^\n\n1 error detected in the compilation of \"main.cu\".\nmake: *** [Makefile:51: main.o] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: lockDim\" has already been declared in the current scope\n    dim3 blockDim(elem_15/16, var_21/16);\n         ^\n\n1 error detected in the compilation of \"main.cu\".\nmake: *** [Makefile:51: main.o] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.231,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "main.cu": "#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <assert.h>\n#include <sys/time.h>\n#include <math.h>\n#include <utility>\n#include <cuda.h>\n#include <cuda_runtime.h>\n\n#define NTX 16\n#define NTY 16\n\ndouble stop_watch(double val_2)\n{\n  double data_9;\n  struct timeval t;\n  gettimeofday(&t, NULL);\n  data_9 = t.tv_sec * 1e6 + t.tv_usec;\n  return data_9-val_2;\n}\n\nvoid usage(char *argv[]) {\n  fprintf(stderr, \" Usage: %s LX LY NITER\\n\", argv[0]);\n  return;\n}\n\nvoid reference(float *out, const float *in, const float tmp_20, const float x_16, const int v_23, const int x_28)\n{\n  for (int y = 0; x_28 > y; y++) {\n    for (int x = 0; v_23 > x; x++) {\n      int x_3 = y*v_23 + x;\n      int x_14 = y*v_23 + (x + 1)%v_23;\n      int var_0 = y*v_23 + (v_23 + x - 1)%v_23;\n      int x_8 = ((y+1)%x_28)*v_23 + x;\n      int val_13 = ((x_28+y-1)%x_28)*v_23 + x;\n      out[x_3] = x_16*in[x_3] + tmp_20*(in[x_14] + in[var_0] + in[x_8] + in[val_13]);\n    }\n  }\n}\n\n__global__ void dev_lapl_iter_kernel(float *out, const float *in, const float v_24, const float data_27, const int elem_15, const int var_21)\n{\n  int x = blockIdx.x * blockDim.x + threadIdx.x;\n  int y = blockIdx.y * blockDim.y + threadIdx.y;\n  \n  if (y < var_21 && x < elem_15) {\n    int val_25 = y*elem_15 + x;\n    int x_6 = y*elem_15 + (x + 1)%elem_15;\n    int tmp_18 = y*elem_15 + (elem_15 + x - 1)%elem_15;\n    int val_4 = ((y+1)%var_21)*elem_15 + x;\n    int data_17 = ((var_21+y-1)%var_21)*elem_15 + x;\n    out[val_25] = data_27*in[val_25] + v_24*(in[x_6] + in[tmp_18] + in[val_4] + in[data_17]);\n  }\n}\n\nvoid dev_lapl_iter(float *out, const float *in, const float v_24, const float data_27, const int elem_15, const int var_21)\n{\n  dim3 blockDim(NTX, NTY);\n  dim3 blockDim(elem_15/NTX, var_21/NTY);\n  \n  dev_lapl_iter_kernel<<<blockDim, blockDim>>>(out, in, v_24, data_27, elem_15, var_21);\n  cudaDeviceSynchronize();\n}\n\nint main(int argc, char *argv[]) {\n  \n  if(4 != argc) {\n    usage(argv);\n    exit(1);\n  }\n  \n  int Lx = atoi(argv[1]);\n  int Ly = atoi(argv[2]);\n  if (0 != Lx % NTX ||  0 != Ly % NTY) {\n    printf(\"Array length LX and LY must be a multiple of block size %d and %d, respectively\\n\",\n          NTX, NTY);\n    exit(1);\n  }\n  \n  int val_26 = atoi(argv[3]);\n  assert(val_26 >= 1);\n\n  const float tmp_10 = 0.01;\n  const float v_19 = tmp_10 / (1.0+4.0*tmp_10);\n  const float data_5 = 1.0/(1.0+4.0*tmp_10);\n\n  printf(\" Ly,Lx = %d,%d\\n\", Ly, Lx);\n  printf(\" niter = %d\\n\", val_26);\n\n  srand(123);\n  float *data_11 = (float*) malloc(sizeof(float)*Lx*Ly);\n  float *tmp_12 = (float*) malloc(sizeof(float)*Lx*Ly);\n  float *elem_22  = (float*) malloc(sizeof(float)*Lx*Ly);\n\n  int i, j, x, y;\n  for (i = 0; Lx > i; i += 16) {\n    x = rand() % Lx;\n    for (j = 0; Ly > j; j++)\n       data_11[x + j*Lx] = 1.f;\n  }\n  for (i = 0; Ly > i; i += 16) {\n    y = rand() % Ly;\n    for (j = 0; Lx > j; j++)\n       data_11[j + y*Lx] = 1.f;\n  }\n  memcpy(elem_22, data_11, sizeof(float)*Lx*Ly);\n\n  for(i=0; val_26 > i; i++) {\n    reference (tmp_12, elem_22, v_19, data_5, Lx, Ly);\n    std::swap(tmp_12, elem_22);\n  }\n\n  float *d_out = NULL;\n  float *d_in  = NULL;\n  cudaMalloc(&d_in, sizeof(float)*Lx*Ly);\n  cudaMalloc(&d_out, sizeof(float)*Lx*Ly);\n  cudaMemcpy(d_in, data_11, sizeof(float)*Lx*Ly, cudaMemcpyHostToDevice);\n\n  double var_7;\n  \n  var_7 = stop_watch(0);\n  for(i=0; val_26 > i; i++) {\n    dev_lapl_iter(d_out, d_in, v_19, data_5, Lx, Ly);\n    std::swap(d_out, d_in);\n  }\n  var_7 = stop_watch(var_7)/(double)val_26;\n\n  float *d_in_host = (float*) malloc(sizeof(float)*Lx*Ly);\n  cudaMemcpy(d_in_host, d_in, sizeof(float)*Lx*Ly, cudaMemcpyDeviceToHost);\n\n  printf(\"Device: iters = %8d, (Lx,Ly) = %6d, %6d, t = %8.1f usec/iter, BW = %6.3f GB/s, P = %6.3f Gflop/s\\n\",\n  \t val_26, Lx, Ly, var_7,\n  \t Lx*Ly*sizeof(float)*2.0/(var_7*1.0e3),\n  \t (Lx*Ly*6.0)/(var_7*1.0e3));\n\n  bool data_1 = true;\n  for (i = 0; Lx*Ly > i; i++) {\n    if ( fabs(elem_22[i] - d_in_host[i]) > 1e-2 ) {\n      printf(\"Mismatch at %d cpu=%f gpu=%f\\n\", i, elem_22[i], d_in_host[i]);\n      data_1 = false;\n      break;\n    }\n  }\n  printf(\"%s\\n\", data_1 ? \"PASS\" : \"FAIL\");\n\n  free(data_11);\n  free(tmp_12);\n  free(elem_22);\n  free(d_in_host);\n  cudaFree(d_in);\n  cudaFree(d_out);\n  return 0;\n}\n"
+  },
+  "target_files_expected": [
+    "main.cu"
+  ],
+  "target_files_extracted": [
+    "main.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 108.764,
+      "prompt_tokens": 1957,
+      "completion_tokens": 4386,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "main.cu(60): error: \"blockDim\" has already been declared in the current scope\n    dim3 blockDim(elem_15/16, var_21/16);\n         ^\n\n1 error detected in the compilation of \"main.cu\".\nmake: *** [Makefile:51: main.o] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

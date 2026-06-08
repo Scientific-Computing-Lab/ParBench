@@ -1,0 +1,72 @@
+{
+  "source_spec": "rodinia-srad-omp",
+  "target_spec": "rodinia-srad-cuda",
+  "kernel": "srad",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 2,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 1837835909,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": null,
+  "timestamp": "2026-04-21T22:36:27Z",
+  "prompt_tokens": 2453,
+  "completion_tokens": 3904,
+  "llm_response_time_seconds": 25.183,
+  "build_status": "fail",
+  "build_time_seconds": 0.188,
+  "build_error_snippet": "srad.cu(226): error: this declaration has no storage class or type specifier\n      update_J_kernel<<<gridDim, blockDim>>>(d_J, d_c, d_dN, d_dS, d_dW, d_dE,\n      ^\n\nsrad.cu(226): error: declaration is incompatible with \"void update_J_kernel(float *, float *, float *, float *, float *, float *, int *, int *, int, int, float)\" (declared at line 57)\n      update_J_kernel<<<gridDim, blockDim>>>(d_J, d_c, d_dN, d_dS, d_dW, d_dE,\n      ^\n\nsrad.cu(226): error: expected a \";\"\n      update_J_kernel<<<gridDim, blockDim>>>(d_J, d_c, d_dN, d_dS, d_dW, d_dE,\n                     ^\n\nsrad.cu(228): error: explicit type is missing (\"int\" assumed)\n      cudaDeviceSynchronize();\n      ^\n\nsrad.cu(228): error: cannot overload functions distinguished by return t\n...[truncated]...\ne specifier\n      cudaFree(d_sum);\n      ^\n\nsrad.cu(264): error: variable \"cudaFree\" has already been defined\n      cudaFree(d_sum);\n      ^\n\nsrad.cu(264): error: identifier \"d_sum\" is undefined\n      cudaFree(d_sum);\n               ^\n\nsrad.cu(265): error: this declaration has no storage class or type specifier\n      cudaFree(d_sum2);\n      ^\n\nsrad.cu(265): error: variable \"cudaFree\" has already been defined\n      cudaFree(d_sum2);\n      ^\n\nsrad.cu(265): error: identifier \"d_sum2\" is undefined\n      cudaFree(d_sum2);\n               ^\n\nsrad.cu(267): error: expected a declaration\n   return 0;\n   ^\n\nsrad.cu(268): error: expected a declaration\n  }\n  ^\n\n83 errors detected in the compilation of \"srad.cu\".\nmake: *** [Makefile:12: release] Error 2\n",
+  "run_status": null,
+  "run_time_seconds": null,
+  "run_exit_code": null,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": null,
+  "verify_status": null,
+  "verify_strategy": null,
+  "overall_status": "BUILD_FAIL",
+  "error_message": "Build failed: 67): error: expected a declaration\n   return 0;\n   ^\n\nsrad.cu(268): error: expected a declaration\n  }\n  ^\n\n83 errors detected in the compilation of \"srad.cu\".\nmake: *** [Makefile:12: release] Error 2",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.068,
+  "translated_wall_time_seconds": null,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": null,
+  "speedup_ratio": null,
+  "translated_files": {
+    "srad.cu": "#define GPU\n#define\tITERATION\n#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <math.h>\n#include <cuda_runtime.h>\n\nvoid random_matrix(float *I, int rows, int cols);\n\nvoid usage(int argc, char **argv)\n{\n\tfprintf(stderr, \"Usage: %s <rows> <cols> <y1> <y2> <x1> <x2> <no. of threads><lamda> <no. of iter>\\n\", argv[0]);\n\tfprintf(stderr, \"\\t<rows>   - number of rows\\n\");\n\tfprintf(stderr, \"\\t<cols>    - number of cols\\n\");\n\tfprintf(stderr, \"\\t<y1> \t - y1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<y2>      - y2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x1>       - x1 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<x2>       - x2 value of the speckle\\n\");\n\tfprintf(stderr, \"\\t<no. of threads>  - no. of threads\\n\");\n\tfprintf(stderr, \"\\t<lamda>   - lambda (0,1)\\n\");\n\tfprintf(stderr, \"\\t<no. of iter>   - number of iterations\\n\");\n\t\n\texit(1);\n}\n\n__global__ void compute_coefficients_kernel(float *J, float *dN, float *dS, float *dW, float *dE, float *c, \n                                            int *iN, int *iS, int *jW, int *jE, int rows, int cols, float q0sqr)\n{\n    int i = blockIdx.y * blockDim.y + threadIdx.y;\n    int j = blockIdx.x * blockDim.x + threadIdx.x;\n    \n    if (i < rows && j < cols) {\n        int k = i * cols + j;\n        float Jc = J[k];\n        \n        dN[k] = J[iN[i] * cols + j] - Jc;\n        dS[k] = J[iS[i] * cols + j] - Jc;\n        dW[k] = J[i * cols + jW[j]] - Jc;\n        dE[k] = J[i * cols + jE[j]] - Jc;\n        \n        float G2 = (dN[k]*dN[k] + dS[k]*dS[k] + dW[k]*dW[k] + dE[k]*dE[k]) / (Jc*Jc);\n        float L = (dN[k] + dS[k] + dW[k] + dE[k]) / Jc;\n        \n        float num = (0.5*G2) - ((1.0/16.0)*(L*L));\n        float den = 1 + (.25*L);\n        float qsqr = num/(den*den);\n        \n        den = (qsqr-q0sqr) / (q0sqr * (1+q0sqr));\n        c[k] = 1.0 / (1.0+den);\n        \n        if (c[k] < 0) {c[k] = 0;}\n        else if (c[k] > 1) {c[k] = 1;}\n    }\n}\n\n__global__ void update_J_kernel(float *J, float *c, float *dN, float *dS, float *dW, float *dE,\n                                int *iS, int *jE, int rows, int cols, float lambda)\n{\n    int i = blockIdx.y * blockDim.y + threadIdx.y;\n    int j = blockIdx.x * blockDim.x + threadIdx.x;\n    \n    if (i < rows && j < cols) {\n        int k = i * cols + j;\n        \n        float cN = c[k];\n        float cS = c[iS[i] * cols + j];\n        float cW = c[k];\n        float cE = c[i * cols + jE[j]];\n        \n        float D = cN * dN[k] + cS * dS[k] + cW * dW[k] + cE * dE[k];\n        \n        J[k] = J[k] + 0.25*lambda*D;\n    }\n}\n\n__global__ void compute_roi_stats_kernel(float *J, float *sum, float *sum2, int r1, int r2, int c1, int c2, int cols)\n{\n    int i = blockIdx.y * blockDim.y + threadIdx.y;\n    int j = blockIdx.x * blockDim.x + threadIdx.x;\n    \n    if (i >= r1 && i <= r2 && j >= c1 && j <= c2) {\n        float tmp = J[i * cols + j];\n        sum[0] += tmp;\n        sum2[0] += tmp*tmp;\n    }\n}\n\nint main(int argc, char* argv[])\n{   \n\tint rows, cols, size_I, size_R, niter = 10, iter, k;\n    float *I, *J, q0sqr, sum, sum2, tmp, meanROI, varROI;\n\tfloat Jc, G2, L, num, den, qsqr;\n\tint *iN,*iS,*jE,*jW;\n\tfloat *dN,*dS,*dW,*dE;\n\tint r1, r2, c1, c2;\n\tfloat cN,cS,cW,cE;\n\tfloat *c, D;\n\tfloat lambda;\n\tint i, j;\n    int nthreads;\n\n\tif (argc == 10)\n\t{\n\t\trows = atoi(argv[1]); \n\t\tcols = atoi(argv[2]); \n\t\tif ((rows%16!=0) || (cols%16!=0)){\n\t\t\tfprintf(stderr, \"rows and cols must be multiples of 16\\n\");\n\t\t\texit(1);\n\t\t}\n\t\tr1   = atoi(argv[3]); \n\t\tr2   = atoi(argv[4]); \n\t\tc1   = atoi(argv[5]); \n\t\tc2   = atoi(argv[6]); \n\t\tnthreads = atoi(argv[7]); \n\t\tlambda = atof(argv[8]); \n\t\tniter = atoi(argv[9]); \n\t}\n    else{\n\t\tusage(argc, argv);\n    }\n\n\n\tsize_I = cols * rows;\n    size_R = (r2-r1+1)*(c2-c1+1);   \n\n\tI = (float *)malloc( size_I * sizeof(float) );\n    J = (float *)malloc( size_I * sizeof(float) );\n\tc  = (float *)malloc(sizeof(float)* size_I) ;\n\n    iN = (int *)malloc(sizeof(int) * rows) ;\n    iS = (int *)malloc(sizeof(int) * rows) ;\n    jW = (int *)malloc(sizeof(int) * cols) ;\n    jE = (int *)malloc(sizeof(int) * cols) ;    \n\n\n\tdN = (float *)malloc(sizeof(float)* size_I) ;\n    dS = (float *)malloc(sizeof(float)* size_I) ;\n    dW = (float *)malloc(sizeof(float)* size_I) ;\n    dE = (float *)malloc(sizeof(float)* size_I) ;    \n    \n\n    for (int i=0; i< rows; i++) {\n        iN[i] = i-1;\n        iS[i] = i+1;\n    }    \n    for (int j=0; j< cols; j++) {\n        jW[j] = j-1;\n        jE[j] = j+1;\n    }\n    iN[0]    = 0;\n    iS[rows-1] = rows-1;\n    jW[0]    = 0;\n    jE[cols-1] = cols-1;\n\t\n\tprintf(\"Randomizing the input matrix\\n\");\n\n    random_matrix(I, rows, cols);\n\n    for (k = 0;  k < size_I; k++ ) {\n     \tJ[k] = (float)exp(I[k]) ;\n    }\n   \n\tprintf(\"Start the SRAD main loop\\n\");\n\n    // CUDA device memory allocation\n    float *d_J, *d_dN, *d_dS, *d_dW, *d_dE, *d_c;\n    int *d_iN, *d_iS, *d_jW, *d_jE;\n    float *d_sum, *d_sum2;\n    \n    cudaMalloc(&d_J, size_I * sizeof(float));\n    cudaMalloc(&d_dN, size_I * sizeof(float));\n    cudaMalloc(&d_dS, size_I * sizeof(float));\n    cudaMalloc(&d_dW, size_I * sizeof(float));\n    cudaMalloc(&d_dE, size_I * sizeof(float));\n    cudaMalloc(&d_c, size_I * sizeof(float));\n    cudaMalloc(&d_iN, rows * sizeof(int));\n    cudaMalloc(&d_iS, rows * sizeof(int));\n    cudaMalloc(&d_jW, cols * sizeof(int));\n    cudaMalloc(&d_jE, cols * sizeof(int));\n    cudaMalloc(&d_sum, sizeof(float));\n    cudaMalloc(&d_sum2, sizeof(float));\n    \n    // Copy data to device\n    cudaMemcpy(d_J, J, size_I * sizeof(float), cudaMemcpyHostToDevice);\n    cudaMemcpy(d_iN, iN, rows * sizeof(int), cudaMemcpyHostToDevice);\n    cudaMemcpy(d_iS, iS, rows * sizeof(int), cudaMemcpyHostToDevice);\n    cudaMemcpy(d_jW, jW, cols * sizeof(int), cudaMemcpyHostToDevice);\n    cudaMemcpy(d_jE, jE, cols * sizeof(int), cudaMemcpyHostToDevice);\n    \n    // Set up CUDA block and grid dimensions\n    dim3 blockDim(16, 16);\n    dim3 gridDim((cols + 15) / 16, (rows + 15) / 16);\n\n#ifdef ITERATION\n\tfor (iter=0; iter< niter; iter++){\n#endif        \n\t\tsum=0; sum2=0;\n        cudaMemcpy(d_sum, &sum, sizeof(float), cudaMemcpyHostToDevice);\n        cudaMemcpy(d_sum2, &sum2, sizeof(float), cudaMemcpyHostToDevice);\n        \n        // Compute ROI statistics on GPU\n        dim3 roiBlockDim(16, 16);\n        dim3 roiGridDim((c2-c1+1 + 15) / 16, (r2-r1+1 + 15) / 16);\n        compute_roi_stats_kernel<<<roiGridDim, roiBlockDim>>>(d_J, d_sum, d_sum2, r1, r2, c1, c2, cols);\n        cudaDeviceSynchronize();\n        \n        cudaMemcpy(&sum, d_sum, sizeof(float), cudaMemcpyDeviceToHost);\n        cudaMemcpy(&sum2, d_sum2, sizeof(float), cudaMemcpyDeviceToHost);\n        \n        meanROI = sum / size_R;\n        varROI  = (sum2 / size_R) - meanROI*meanROI;\n        q0sqr   = varROI / (meanROI*meanROI);\n\t\t\n\t\t// Compute coefficients kernel\n        compute_coefficients_kernel<<<gridDim, blockDim>>>(d_J, d_dN, d_dS, d_dW, d_dE, d_c, \n                                                           d_iN, d_iS, d_jW, d_jE, rows, cols, q0sqr);\n        cudaDeviceSynchronize();\n  \n    }\n#ifdef ITERATION\n\t}\n#endif\n\n\t// Update J kernel\n    update_J_kernel<<<gridDim, blockDim>>>(d_J, d_c, d_dN, d_dS, d_dW, d_dE,\n                                           d_iS, d_jE, rows, cols, lambda);\n    cudaDeviceSynchronize();\n    \n    // Copy result back to host\n    cudaMemcpy(J, d_J, size_I * sizeof(float), cudaMemcpyDeviceToHost);\n\n#ifdef OUTPUT\n\t  for( int i = 0 ; i < rows ; i++){\n\t\tfor ( int j = 0 ; j < cols ; j++){\n\n         printf(\"%.5f \", J[i * cols + j]); \n    \n\t\t}\n         printf(\"\\n\"); \n   }\n#endif \n\n\tprintf(\"Computation Done\\n\");\n\n\tfree(I);\n\tfree(J);\n\tfree(iN); free(iS); free(jW); free(jE);\n    free(dN); free(dS); free(dW); free(dE);\n\n\tfree(c);\n    \n    // Free CUDA memory\n    cudaFree(d_J);\n    cudaFree(d_dN);\n    cudaFree(d_dS);\n    cudaFree(d_dW);\n    cudaFree(d_dE);\n    cudaFree(d_c);\n    cudaFree(d_iN);\n    cudaFree(d_iS);\n    cudaFree(d_jW);\n    cudaFree(d_jE);\n    cudaFree(d_sum);\n    cudaFree(d_sum2);\n    \n\treturn 0;\n}\n\n\n\n\nvoid random_matrix(float *I, int rows, int cols){\n\n\tsrand(7);\n\t\n\tfor( int i = 0 ; i < rows ; i++){\n\t\tfor ( int j = 0 ; j < cols ; j++){\n\t\t I[i * cols + j] = rand()/(float)RAND_MAX ;\n\t\t #ifdef OUTPUT\n         \n         #endif \n\t\t}\n\t\t #ifdef OUTPUT\n         \n         #endif \n\t}\n\n}\n\n",
+    "srad_kernel.cu": "// Helper functions and utilities for CUDA SRAD implementation\n// This file contains additional CUDA helper functions if needed\n\n#include <cuda_runtime.h>\n#include <stdio.h>\n\n// Empty placeholder for additional helper functions\n// Main implementation is in translated_0.cu\n\n"
+  },
+  "target_files_expected": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "target_files_extracted": [
+    "srad.cu",
+    "srad_kernel.cu"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 25.183,
+      "prompt_tokens": 2453,
+      "completion_tokens": 3904,
+      "finish_reason": "stop",
+      "build_status": "fail",
+      "run_status": null,
+      "verify_status": null,
+      "error_feedback_sent": null,
+      "build_error_snippet": "srad.cu(226): error: this declaration has no storage class or type specifier\n      update_J_kernel<<<gridDim, blockDim>>>(d_J, d_c, d_dN, d_dS, d_dW, d_dE,\n      ^\n\nsrad.cu(226): error: declaration is incompatible with \"void update_J_kernel(float *, float *, float *, float *, float *, float *, int *, int *, int, int, float)\" (declared at line 57)\n      update_J_kernel<<<gridDim, blockDim>>>(d_J, d_c, d_dN, d_dS, d_dW, d_dE,\n      ^\n\nsrad.cu(226): error: expected a \";\"\n      update_J_kernel<<<gridDim, blockDim>>>(d_J, d_c, d_dN, d_dS, d_dW, d_dE,\n                     ^\n\nsrad.cu(228): error: explicit type is missing (\"int\" assumed)\n      cudaDeviceSynchronize();\n      ^\n\nsrad.cu(228): error: cannot overload functions distinguished by return t\n...[truncated]...\ne specifier\n      cudaFree(d_sum);\n      ^\n\nsrad.cu(264): error: variable \"cudaFree\" has already been defined\n      cudaFree(d_sum);\n      ^\n\nsrad.cu(264): error: identifier \"d_sum\" is undefined\n      cudaFree(d_sum);\n               ^\n\nsrad.cu(265): error: this declaration has no storage class or type specifier\n      cudaFree(d_sum2);\n      ^\n\nsrad.cu(265): error: variable \"cudaFree\" has already been defined\n      cudaFree(d_sum2);\n      ^\n\nsrad.cu(265): error: identifier \"d_sum2\" is undefined\n      cudaFree(d_sum2);\n               ^\n\nsrad.cu(267): error: expected a declaration\n   return 0;\n   ^\n\nsrad.cu(268): error: expected a declaration\n  }\n  ^\n\n83 errors detected in the compilation of \"srad.cu\".\nmake: *** [Makefile:12: release] Error 2\n",
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

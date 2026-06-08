@@ -1,0 +1,79 @@
+{
+  "source_spec": "rodinia-dwt2d-cuda",
+  "target_spec": "rodinia-dwt2d-opencl",
+  "kernel": "dwt2d",
+  "model": "azure-gpt-5.3-codex",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 59059947,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "kernel_only",
+  "verification_mode": "kernel_only_target_pattern",
+  "run_args_mode": "kernel_only_target_args",
+  "run_arguments_used": [
+    "rgb.bmp",
+    "-i",
+    "../../data/dwt2d",
+    "-D",
+    "1024x1024",
+    "-f",
+    "-5",
+    "-l",
+    "3"
+  ],
+  "timestamp": "2026-04-30T03:15:03Z",
+  "prompt_tokens": 30828,
+  "completion_tokens": 7827,
+  "llm_response_time_seconds": 114.117,
+  "build_status": "pass",
+  "build_time_seconds": 0.31,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 1.693,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "iding steps = 9 , gx = 6 , gy = 15 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 5 , gx = 4 , gy = 13 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\nsliding steps = 3 , gx = 4 , gy = 11 \nkl_fdwt53Kernel in launchFDW53Kernel has finished\n\nWriting to rgb.bmp.dwt.r (1024 x 1024)\n\nWriting to rgb.bmp.dwt.g (1024 x 1024)\n\nWriting to rgb.bmp.dwt.b (1024 x 1024)\nInit: 196.421005\nMemAlloc: 8.664000\nHtoD: 0.000000\nExec: 0.021504\nDtoH: 467.246002\nClose: 0.606000\nTotal: 1640.406982\n",
+  "verify_status": "pass",
+  "verify_strategy": "stdout_pattern+exit_code",
+  "overall_status": "PASS",
+  "error_message": null,
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.1,
+  "translated_wall_time_seconds": 1.693,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.0591,
+  "translated_files": {
+    "com_dwt.cl": "#define THREADS 256\n\ninline int mirror_idx(int d, int size)\n{\n    if (size <= 1) return 0;\n    while (d >= size || d < 0) {\n        if (d >= size) d = 2 * size - 2 - d;\n        else d = -d;\n    }\n    return d;\n}\n\ninline int read_input_pixel(__global const int *in, int sx, int sy, int x, int y)\n{\n    x = mirror_idx(x, sx);\n    y = mirror_idx(y, sy);\n    return in[y * sx + x];\n}\n\ninline int horiz_high_from_input(__global const int *in, int sx, int sy, int row, int oddX)\n{\n    int c = read_input_pixel(in, sx, sy, oddX, row);\n    int p = read_input_pixel(in, sx, sy, oddX - 1, row);\n    int n = read_input_pixel(in, sx, sy, oddX + 1, row);\n    return c - (p + n) / 2;\n}\n\ninline int horiz_low_from_input(__global const int *in, int sx, int sy, int row, int evenX)\n{\n    int c = read_input_pixel(in, sx, sy, evenX, row);\n    int o1 = mirror_idx(evenX - 1, sx);\n    int o2 = mirror_idx(evenX + 1, sx);\n    int d1 = horiz_high_from_input(in, sx, sy, row, o1);\n    int d2 = horiz_high_from_input(in, sx, sy, row, o2);\n    return c + (d1 + d2 + 2) / 4;\n}\n\ninline int read_rowpacked(__global const int *tmp, int sx, int sy, int lowW, int band, int x, int row)\n{\n    row = mirror_idx(row, sy);\n    return (band == 0) ? tmp[row * sx + x] : tmp[row * sx + lowW + x];\n}\n\ninline int vert_high_from_rowpacked(__global const int *tmp, int sx, int sy, int lowW, int band, int x, int oddY)\n{\n    int c = read_rowpacked(tmp, sx, sy, lowW, band, x, oddY);\n    int p = read_rowpacked(tmp, sx, sy, lowW, band, x, oddY - 1);\n    int n = read_rowpacked(tmp, sx, sy, lowW, band, x, oddY + 1);\n    return c - (p + n) / 2;\n}\n\ninline int vert_low_from_rowpacked(__global const int *tmp, int sx, int sy, int lowW, int band, int x, int evenY)\n{\n    int c = read_rowpacked(tmp, sx, sy, lowW, band, x, evenY);\n    int o1 = mirror_idx(evenY - 1, sy);\n    int o2 = mirror_idx(evenY + 1, sy);\n    int d1 = vert_high_from_rowpacked(tmp, sx, sy, lowW, band, x, o1);\n    int d2 = vert_high_from_rowpacked(tmp, sx, sy, lowW, band, x, o2);\n    return c + (d1 + d2 + 2) / 4;\n}\n\n__kernel void c_CopySrcToComponents(__global int *d_r,\n                                    __global int *d_g,\n                                    __global int *d_b,\n                                    __global const uchar *d_src,\n                                    int pixels)\n{\n    int gid = (int)get_global_id(0);\n    if (gid >= pixels) return;\n\n    int off = gid * 3;\n    int r = (int)d_src[off + 0];\n    int g = (int)d_src[off + 1];\n    int b = (int)d_src[off + 2];\n\n    d_r[gid] = r - 128;\n    d_g[gid] = g - 128;\n    d_b[gid] = b - 128;\n}\n\n__kernel void c_CopySrcToComponent(__global int *d_c,\n                                   __global const uchar *d_src,\n                                   int pixels)\n{\n    int gid = (int)get_global_id(0);\n\n    /* host launches alignedSize/9 threads; process 9 items per work-item */\n    int base = gid * 9;\n    for (int k = 0; k < 9; k++) {\n        int idx = base + k;\n        if (idx < pixels) {\n            d_c[idx] = ((int)d_src[idx]) - 128;\n        }\n    }\n}\n\n__kernel void cl_fdwt53Kernel(__global int *input,\n                              __global int *output,\n                              int sizeX,\n                              int sizeY,\n                              int steps,\n                              int WIN_SX,\n                              int WIN_SY)\n{\n    (void)steps;\n    (void)WIN_SX;\n    (void)WIN_SY;\n\n    /* serialized implementation to preserve output format */\n    if (get_global_id(0) != 0 || get_global_id(1) != 0) return;\n\n    int sx = sizeX;\n    int sy = sizeY;\n    int lowW = (sx + 1) >> 1;\n    int highW = sx >> 1;\n    int lowH = (sy + 1) >> 1;\n    int highH = sy >> 1;\n\n    int total = sx * sy;\n\n    /* Horizontal transform: input -> output (row-packed temp: low | high per row) */\n    for (int y = 0; y < sy; y++) {\n        for (int lx = 0; lx < lowW; lx++) {\n            int evenX = lx << 1;\n            output[y * sx + lx] = horiz_low_from_input(input, sx, sy, y, evenX);\n        }\n        for (int hx = 0; hx < highW; hx++) {\n            int oddX = (hx << 1) + 1;\n            output[y * sx + lowW + hx] = horiz_high_from_input(input, sx, sy, y, oddX);\n        }\n    }\n\n    /* Vertical transform + band packing: output(temp) -> input(final packed) */\n    int offsetLL = 0;\n    int offsetHL = lowW * lowH;\n    int offsetLH = offsetHL + highW * lowH;\n    int offsetHH = offsetLH + lowW * highH;\n\n    /* horizontal-low columns -> LL / LH */\n    for (int x = 0; x < lowW; x++) {\n        for (int ly = 0; ly < lowH; ly++) {\n            int evenY = ly << 1;\n            int v = vert_low_from_rowpacked(output, sx, sy, lowW, 0, x, evenY);\n            input[offsetLL + ly * lowW + x] = v;\n        }\n        for (int hy = 0; hy < highH; hy++) {\n            int oddY = (hy << 1) + 1;\n            int v = vert_high_from_rowpacked(output, sx, sy, lowW, 0, x, oddY);\n            input[offsetLH + hy * lowW + x] = v;\n        }\n    }\n\n    /* horizontal-high columns -> HL / HH */\n    for (int x = 0; x < highW; x++) {\n        for (int ly = 0; ly < lowH; ly++) {\n            int evenY = ly << 1;\n            int v = vert_low_from_rowpacked(output, sx, sy, lowW, 1, x, evenY);\n            input[offsetHL + ly * highW + x] = v;\n        }\n        for (int hy = 0; hy < highH; hy++) {\n            int oddY = (hy << 1) + 1;\n            int v = vert_high_from_rowpacked(output, sx, sy, lowW, 1, x, oddY);\n            input[offsetHH + hy * highW + x] = v;\n        }\n    }\n\n    /* final: copy packed result to output buffer */\n    for (int i = 0; i < total; i++) {\n        output[i] = input[i];\n    }\n}\n"
+  },
+  "target_files_expected": [
+    "com_dwt.cl"
+  ],
+  "target_files_extracted": [
+    "com_dwt.cl"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 114.117,
+      "prompt_tokens": 30828,
+      "completion_tokens": 7827,
+      "finish_reason": "completed",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "pass",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

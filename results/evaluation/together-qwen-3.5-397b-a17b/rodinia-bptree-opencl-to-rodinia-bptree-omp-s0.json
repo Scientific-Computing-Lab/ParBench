@@ -1,0 +1,77 @@
+{
+  "source_spec": "rodinia-bptree-opencl",
+  "target_spec": "rodinia-bptree-omp",
+  "kernel": "bptree",
+  "model": "together-qwen-3.5-397b-a17b",
+  "augment_level": 0,
+  "temperature": 0.7,
+  "sample_id": 0,
+  "thinking_enabled": true,
+  "num_samples": 3,
+  "seed": 870920417,
+  "top_p": 1.0,
+  "translation_mode": "kernel_centric",
+  "translation_type": "full_program",
+  "verification_mode": "cross_api_combined_pattern",
+  "run_args_mode": "cross_api_source_args",
+  "run_arguments_used": [
+    "file",
+    "../../data/b+tree/mil.txt",
+    "command",
+    "../../data/b+tree/command.txt"
+  ],
+  "timestamp": "2026-04-22T02:17:49Z",
+  "prompt_tokens": 28420,
+  "completion_tokens": 2647,
+  "llm_response_time_seconds": 22.092,
+  "build_status": "pass",
+  "build_time_seconds": 0.439,
+  "build_error_snippet": null,
+  "run_status": "pass",
+  "run_time_seconds": 0.491,
+  "run_exit_code": 0,
+  "run_stderr_snippet": null,
+  "run_stdout_snippet": "Input File: ../../data/b+tree/mil.txt \nCommand File: ../../data/b+tree/command.txt \nCommand Buffer: \nj 6000 3000\nk 10000\n\n\nGetting input from file file...\nTransforming data to a GPU suitable structure...\nTree transformation took 0.021856\nWaiting for command\n> \n******command: j count=6000, rSize=6000 \n> > > > > > > > > > > > \n ******command: k count=10000 \n> > > > > > > > > > \n",
+  "verify_status": "fail",
+  "verify_strategy": "stdout_pattern",
+  "overall_status": "VERIFY_FAIL",
+  "error_message": "Verify failed: Pattern '(?:Total:)' NOT found in stdout. ",
+  "metrics": {},
+  "baseline_wall_time_seconds": 0.489,
+  "translated_wall_time_seconds": 0.491,
+  "translated_cpu_time_seconds": null,
+  "translated_kernel_time_seconds": null,
+  "timing_method": "wall_time",
+  "speedup_ratio": 0.9959,
+  "translated_files": {
+    "kernel/kernel_cpu.c": "#include <omp.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <stdint.h>\n#include <stdbool.h>\n#include <limits.h>\n\n#ifndef DEFAULT_ORDER\n#define DEFAULT_ORDER 256\n#endif\n\ntypedef struct record {\n\tint value;\n} record;\n\ntypedef struct knode {\n\tint location;\n\tint indices [DEFAULT_ORDER + 1];\n\tint  keys [DEFAULT_ORDER + 1];\n\tbool is_leaf;\n\tint num_keys;\n} knode;\n\nvoid \nkernel_cpu(\tint cores_arg,\n\n\t\t\trecord *records,\n\t\t\tknode *knodes,\n\t\t\tlong knodes_elem,\n\n\t\t\tint order,\n\t\t\tlong maxheight,\n\t\t\tint count,\n\n\t\t\tlong *currKnode,\n\t\t\tlong *offset,\n\t\t\tint *keys,\n\t\t\trecord *ans)\n{\n\tint bid;\n\tint thid;\n\tint i;\n\t\n\t#pragma omp parallel for num_threads(cores_arg)\n\tfor(bid = 0; bid < count; bid++){\n\t\t\n\t\toffset[bid] = currKnode[bid];\n\t\t\n\t\tfor(i = 0; i < maxheight; i++){\n\t\t\t\n\t\t\tfor(thid = 0; thid < order; thid++){\n\t\t\t\t\n\t\t\t\tif((knodes[currKnode[bid]].keys[thid]) <= keys[bid] && \n\t\t\t\t   (knodes[currKnode[bid]].keys[thid+1] > keys[bid])){\n\t\t\t\t\t\n\t\t\t\t\tif(knodes[offset[bid]].indices[thid] < knodes_elem){\n\t\t\t\t\t\toffset[bid] = knodes[offset[bid]].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\t\n\t\t\tcurrKnode[bid] = offset[bid];\n\t\t}\n\n\t\t\n\t\tfor(thid = 0; thid < order; thid++){\n\t\t\tif(knodes[currKnode[bid]].keys[thid] == keys[bid]){\n\t\t\t\tans[bid].value = records[knodes[currKnode[bid]].indices[thid]].value;\n\t\t\t\tbreak;\n\t\t\t}\n\t\t}\n\t}\n}\n",
+    "kernel/kernel_cpu_2.c": "#include <omp.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <stdint.h>\n#include <stdbool.h>\n#include <limits.h>\n\n#ifndef DEFAULT_ORDER_2\n#define DEFAULT_ORDER_2 256\n#endif\n\ntypedef struct knode {\n\tint location;\n\tint indices [DEFAULT_ORDER_2 + 1];\n\tint  keys [DEFAULT_ORDER_2 + 1];\n\tbool is_leaf;\n\tint num_keys;\n} knode;\n\nvoid \nkernel_cpu_2(\tint cores_arg,\n\n\t\t\t\tknode *knodes,\n\t\t\t\tlong knodes_elem,\n\n\t\t\t\tint order,\n\t\t\t\tlong maxheight,\n\t\t\t\tint count,\n\n\t\t\t\tlong *currKnode,\n\t\t\t\tlong *offset,\n\t\t\t\tlong *lastKnode,\n\t\t\t\tlong *offset_2,\n\t\t\t\tint *start,\n\t\t\t\tint *end,\n\t\t\t\tint *recstart,\n\t\t\t\tint *reclength)\n{\n\tint bid;\n\tint thid;\n\tint i;\n\t\n\t#pragma omp parallel for num_threads(cores_arg)\n\tfor(bid = 0; bid < count; bid++){\n\t\t\n\t\toffset[bid] = currKnode[bid];\n\t\toffset_2[bid] = lastKnode[bid];\n\t\t\n\t\tfor(i = 0; i < maxheight; i++){\n\t\t\t\n\t\t\tfor(thid = 0; thid < order; thid++){\n\t\t\t\t\n\t\t\t\tif((knodes[currKnode[bid]].keys[thid] <= start[bid]) && \n\t\t\t\t   (knodes[currKnode[bid]].keys[thid+1] > start[bid])){\n\t\t\t\t\t\n\t\t\t\t\tif(knodes[currKnode[bid]].indices[thid] < knodes_elem){\n\t\t\t\t\t\toffset[bid] = knodes[currKnode[bid]].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tif((knodes[lastKnode[bid]].keys[thid] <= end[bid]) && \n\t\t\t\t   (knodes[lastKnode[bid]].keys[thid+1] > end[bid])){\n\t\t\t\t\t\n\t\t\t\t\tif(knodes[lastKnode[bid]].indices[thid] < knodes_elem){\n\t\t\t\t\t\toffset_2[bid] = knodes[lastKnode[bid]].indices[thid];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\t\n\t\t\tcurrKnode[bid] = offset[bid];\n\t\t\tlastKnode[bid] = offset_2[bid];\n\t\t}\n\n\t\t\n\t\tfor(thid = 0; thid < order; thid++){\n\t\t\tif(knodes[currKnode[bid]].keys[thid] == start[bid]){\n\t\t\t\trecstart[bid] = knodes[currKnode[bid]].indices[thid];\n\t\t\t\tbreak;\n\t\t\t}\n\t\t}\n\n\t\t\n\t\tfor(thid = 0; thid < order; thid++){\n\t\t\tif(knodes[lastKnode[bid]].keys[thid] == end[bid]){\n\t\t\t\treclength[bid] = knodes[lastKnode[bid]].indices[thid] - recstart[bid] + 1;\n\t\t\t\tbreak;\n\t\t\t}\n\t\t}\n\t}\n}\n"
+  },
+  "target_files_expected": [
+    "kernel/kernel_cpu.c",
+    "kernel/kernel_cpu_2.c"
+  ],
+  "target_files_extracted": [
+    "kernel/kernel_cpu.c",
+    "kernel/kernel_cpu_2.c"
+  ],
+  "max_retries": 1,
+  "total_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "llm_response_time_seconds": 22.092,
+      "prompt_tokens": 28420,
+      "completion_tokens": 2647,
+      "finish_reason": "stop",
+      "build_status": "pass",
+      "run_status": "pass",
+      "verify_status": "fail",
+      "error_feedback_sent": null,
+      "build_error_snippet": null,
+      "run_stderr_snippet": null,
+      "run_stdout_snippet": null,
+      "extraction_fail": null
+    }
+  ]
+}

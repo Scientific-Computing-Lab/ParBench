@@ -1,0 +1,231 @@
+{
+  "spec_version": "1.0.0",
+  "identity": {
+    "kernel_name": "convolution3d",
+    "parallel_api": "cuda",
+    "unique_id": "hecbench-convolution3d-cuda",
+    "source_suite": "hecbench"
+  },
+  "provenance": {
+    "repository": {
+      "url": "https://github.com/zjin-lcf/HeCBench",
+      "commit": "archive-download",
+      "branch": "master"
+    },
+    "repo_root": "HeCBench-master/",
+    "source_path": "src/convolution3D-cuda",
+    "license": "MIT"
+  },
+  "files": {
+    "prompt_payload": [
+      "main.cu"
+    ],
+    "support_files": [
+      "Makefile",
+      "CMakeLists.txt",
+      "conv3d_s4.cu"
+    ],
+    "verification_only": [],
+    "translation_targets": [
+      "main.cu"
+    ]
+  },
+  "implementation": {
+    "api": "cuda",
+    "api_version": null,
+    "language": "C++",
+    "language_standard": "C++17"
+  },
+  "build": {
+    "environment": {
+      "preferred": "system",
+      "conda": null,
+      "system": {
+        "dependencies": [
+          "CUDA Toolkit >= 11.0",
+          "GCC >= 9.0"
+        ]
+      }
+    },
+    "build_system": "make",
+    "working_directory": "src/convolution3D-cuda",
+    "commands": {
+      "configure": null,
+      "build": "make ARCH=sm_89",
+      "clean": "make clean"
+    },
+    "variables": null,
+    "outputs": {
+      "executable": "main"
+    }
+  },
+  "run": {
+    "executable": "./main",
+    "default_arguments": [
+      "32",
+      "1",
+      "6",
+      "32",
+      "32",
+      "5",
+      "100"
+    ],
+    "timeout_seconds": 300,
+    "environment_variables": null,
+    "input_configurations": {
+      "correctness": {
+        "arguments": [
+          "32",
+          "1",
+          "6",
+          "32",
+          "32",
+          "5",
+          "1"
+        ],
+        "description": "Single iteration for correctness; element-wise comparison of GPU vs CPU 3D convolution",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      },
+      "performance": {
+        "arguments": [
+          "32",
+          "1",
+          "6",
+          "32",
+          "32",
+          "5",
+          "100"
+        ],
+        "description": "100 iterations for performance measurement",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      }
+    }
+  },
+  "verification": {
+    "method": "self_checking",
+    "strategies": [
+      {
+        "type": "stdout_pattern",
+        "pattern": "PASS",
+        "description": "Element-wise comparison of GPU vs CPU 3D convolution results"
+      },
+      {
+        "type": "exit_code",
+        "expected": 0,
+        "description": "Process exits cleanly"
+      }
+    ],
+    "floating_point": {
+      "tolerance": 0.001,
+      "tolerance_type": "absolute",
+      "note": "Element-wise absolute difference comparison between GPU and CPU convolution output"
+    }
+  },
+  "performance": {
+    "metrics": [
+      {
+        "name": "kernel_time_s1",
+        "extraction": {
+          "type": "regex",
+          "pattern": "Average kernel execution time of conv3d_s1 kernel:\\s+([\\d.eE+-]+)\\s+\\(us\\)",
+          "capture_group": 1
+        },
+        "unit": "us"
+      },
+      {
+        "name": "kernel_time_s2",
+        "extraction": {
+          "type": "regex",
+          "pattern": "Average kernel execution time of conv3d_s2 kernel:\\s+([\\d.eE+-]+)\\s+\\(us\\)",
+          "capture_group": 1
+        },
+        "unit": "us"
+      },
+      {
+        "name": "kernel_time_s3",
+        "extraction": {
+          "type": "regex",
+          "pattern": "Average kernel execution time of conv3d_s3 kernel:\\s+([\\d.eE+-]+)\\s+\\(us\\)",
+          "capture_group": 1
+        },
+        "unit": "us"
+      }
+    ],
+    "warmup_runs": 1,
+    "measurement_runs": 5
+  },
+  "hardware": {
+    "target": "gpu",
+    "requirements": {
+      "gpu": {
+        "vendor": "NVIDIA",
+        "min_compute_capability": "sm_60",
+        "min_memory_gb": 2
+      }
+    },
+    "reference_platform": {
+      "platform_id": "rtx4070-r9-7900x",
+      "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+      },
+      "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+      },
+      "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+      }
+    }
+  },
+  "baseline_results": {
+    "reference_platform": "rtx4070-r9-7900x",
+    "timestamp": "2026-03-03T18:52:35Z",
+    "configurations": {
+      "correctness": {
+        "status": "pass",
+        "exit_code": 0,
+        "stdout_snippet": "3D convolution (FP32)\n\n========== Warmup start ==========\ninput dimensions: C=1 Win=32 Hin=32\noutput dimensions: M=6 Wout=28 Hout=28\n3D grid dimensions: N=32 M=6 Z=4\nAverage kernel execution time of conv3d_s1 kernel: 7.454094 (us)\nPASS\nAverage kernel execution time of conv3d_s2 kernel: 7.514458 (us)\nPASS\nAverage kernel execution time of conv3d_s3 kernel: 7.536409 (us)\nPASS\n\n========== Warmup done ==========\ninput dimensions: C=1 Win=32 Hin=32\noutput dimensions: M=6 Wout=28 Hout=28\n3D grid dimens",
+        "wall_time_seconds": 0.09
+      },
+      "performance": {
+        "status": "pass",
+        "wall_time_seconds": 0.09,
+        "metrics": {
+          "kernel_time_s1_us": 7.454094,
+          "kernel_time_s2_us": 7.514458,
+          "kernel_time_s3_us": 7.536409
+        }
+      }
+    }
+  },
+  "metadata": {
+    "description": "3D convolution using multiple algorithmic strategies (direct, shared memory, register tiling) on GPU. Processes 3D feature maps with learned filters, verified against CPU reference.",
+    "domain": "3D signal processing / deep learning",
+    "complexity": "O(N \u00d7 C \u00d7 H \u00d7 W \u00d7 K^3)",
+    "tags": [
+      "convolution3d",
+      "3d-convolution",
+      "deep-learning",
+      "feature-map",
+      "tiling"
+    ],
+    "multi_file": true,
+    "translation_complexity": null
+  }
+}
