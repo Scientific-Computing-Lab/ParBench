@@ -1,0 +1,198 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "nn",
+        "parallel_api": "opencl",
+        "unique_id": "rodinia-nn-opencl",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "opencl/nn",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "nearestNeighbor_kernel.cl",
+            "clutils.cpp",
+            "gettimeofday.cpp",
+            "nearestNeighbor.cpp",
+            "utils.cpp"
+        ],
+        "support_files": [
+            "clutils.h",
+            "gettimeofday.h",
+            "ipoint.h",
+            "nearestNeighbor.h",
+            "utils.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "nearestNeighbor_kernel.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl>=2.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl/nn",
+        "commands": {
+            "configure": null,
+            "build": "make OPENCL_INC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include OPENCL_LIB=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+            "clean": "make clean"
+        },
+        "variables": {
+            "OPENCL_INC": {
+                "description": "Path to OpenCL headers",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include",
+                "detection": "find /usr -name 'cl.h' -path '*/CL/cl.h' | head -1 | xargs dirname | xargs dirname"
+            },
+            "OPENCL_LIB": {
+                "description": "Path to OpenCL libraries",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+                "detection": "find /usr -name 'libOpenCL.so' | head -1 | xargs dirname"
+            }
+        },
+        "outputs": {
+            "executable": "./nn.out"
+        }
+    },
+    "run": {
+        "executable": "./nn.out",
+        "default_arguments": [
+            "../../data/nn/filelist.txt",
+            "-r",
+            "5",
+            "-lat",
+            "30",
+            "-lng",
+            "90",
+            "-f",
+            "../../data/nn"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "../../data/nn/filelist.txt",
+                    "-r",
+                    "5",
+                    "-lat",
+                    "30",
+                    "-lng",
+                    "90",
+                    "-f",
+                    "../../data/nn"
+                ],
+                "description": "Small input for correctness verification of nn (OPENCL)",
+                "input_files": [
+                    "../../data/nn/filelist.txt",
+                    "../../data/nn/cane4_0.db",
+                    "../../data/nn/cane4_1.db",
+                    "../../data/nn/cane4_2.db",
+                    "../../data/nn/cane4_3.db"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "(?i)(pass|correct|match|verified)",
+                "description": "Results match reference"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.279853+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "fail",
+                "exit_code": -1,
+                "stdout_snippet": "",
+                "wall_time_seconds": 300.039,
+                "metrics": {},
+                "fail_reason": "Execution timed out after 300s"
+            }
+        }
+    },
+    "metadata": {
+        "description": "Nearest neighbor search on GPU",
+        "domain": "data mining",
+        "complexity": "nearest neighbor search",
+        "tags": [
+            "data-mining",
+            "knn",
+            "nearest-neighbor",
+            "nn",
+            "opencl",
+            "rodinia",
+            "search"
+        ],
+        "multi_file": true,
+        "translation_complexity": "single_file"
+    }
+}

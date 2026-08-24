@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ParBench bounded agentic-repair protocol",
+  "description": "Schema for config/agentic_repair_protocol.json (plan Task 10, gate E-08). Enforced by load_agentic_protocol() in scripts/evaluation/llm_evaluate.py.",
+  "type": "object",
+  "required": [
+    "protocol_name",
+    "protocol_version",
+    "attempts",
+    "token_budget",
+    "accounting",
+    "diagnostics_exposed_to_model",
+    "visibility",
+    "stop_reasons"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "protocol_name": {"type": "string", "minLength": 1},
+    "protocol_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "description": {"type": "string"},
+    "attempts": {
+      "type": "object",
+      "required": ["original_attempts", "max_repair_attempts", "max_total_attempts"],
+      "additionalProperties": false,
+      "properties": {
+        "original_attempts": {"type": "integer", "const": 1},
+        "max_repair_attempts": {"type": "integer", "minimum": 0, "maximum": 2},
+        "max_total_attempts": {"type": "integer", "minimum": 1, "maximum": 3}
+      }
+    },
+    "token_budget": {
+      "type": "object",
+      "required": [
+        "trajectory_total_tokens",
+        "per_call_response_limit_tokens",
+        "protocol_minimum_completion_tokens",
+        "prompt_estimator"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "trajectory_total_tokens": {"type": "integer", "minimum": 1},
+        "per_call_response_limit_tokens": {"type": "integer", "minimum": 1},
+        "protocol_minimum_completion_tokens": {"type": "integer", "minimum": 1},
+        "prompt_estimator": {
+          "type": "object",
+          "required": ["method", "bytes_per_token", "per_message_overhead_tokens"],
+          "additionalProperties": false,
+          "properties": {
+            "method": {"type": "string", "const": "conservative_byte_upper_bound"},
+            "bytes_per_token": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "description": "Byte-level BPE tokens cover >= 1 byte each, so tokens <= UTF-8 bytes; the bound is only provable at 1.0 or below."
+            },
+            "per_message_overhead_tokens": {
+              "type": "integer",
+              "minimum": 8,
+              "description": "Covers the provider envelope per message (role encoding, chat-template wrappers, request framing). Zero would reduce the estimate to bare content bytes and break the complete-wire-prompt bound (gate 4 finding 2, 2026-08-12); 8 covers every normalized provider family's template, and the budget class additionally fails closed at settlement if a provider ever reports prompt usage above the estimate."
+            }
+          }
+        }
+      }
+    },
+    "accounting": {
+      "type": "object",
+      "required": ["normalized_fields", "provider_field_maps"],
+      "additionalProperties": false,
+      "properties": {
+        "normalized_fields": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 3
+        },
+        "provider_field_maps": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["prompt_tokens", "completion_tokens"],
+            "properties": {
+              "prompt_tokens": {"type": "string"},
+              "completion_tokens": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "diagnostics_exposed_to_model": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "visibility": {
+      "type": "object",
+      "required": ["forbidden_to_agent"],
+      "additionalProperties": false,
+      "properties": {
+        "forbidden_to_agent": {
+          "type": "array",
+          "items": {"type": "string"},
+          "allOf": [
+            {"contains": {"const": "reference_implementations"}},
+            {"contains": {"const": "target_implementations"}},
+            {"contains": {"const": "verification_only_files"}},
+            {"contains": {"const": "hidden_expected_outputs"}},
+            {"contains": {"const": "oracle_contents"}}
+          ]
+        }
+      }
+    },
+    "stop_reasons": {
+      "type": "array",
+      "items": {"type": "string"},
+      "allOf": [
+        {"contains": {"const": "TOKEN_BUDGET_EXHAUSTED"}},
+        {"contains": {"const": "ATTEMPT_LIMIT_REACHED"}},
+        {"contains": {"const": "PROTOCOL_VIOLATION"}}
+      ]
+    }
+  }
+}

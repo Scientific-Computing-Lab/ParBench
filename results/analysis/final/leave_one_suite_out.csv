@@ -1,0 +1,6 @@
+variant,n_records,dominant_failure_stage,dominant_stage_share_of_failures,easiest_direction,easiest_direction_rate,hardest_direction,hardest_direction_rate,largest_asymmetry_pair,largest_asymmetry_delta,largest_asymmetry_p,gpt54_minus_codex,single_minus_multi_file_gap
+FULL,1224,BUILD_FAIL,0.5195,cuda-to-omp,0.5749,opencl-to-cuda,0.1049,cuda-to-omp_target vs omp_target-to-cuda,-0.2916,0.015625,0.0122,0.2434
+minus_hecbench,936,BUILD_FAIL,0.5021,cuda-to-omp,0.4877,opencl-to-cuda,0.1049,cuda-to-omp vs omp-to-cuda,0.2963,0.000402,0.0224,-0.0152
+minus_rodinia,396,BUILD_FAIL,0.6538,cuda-to-omp,0.6984,omp-to-opencl,0.0,omp-to-opencl vs opencl-to-omp,-0.5,0.25,0.0076,0.4954
+minus_rsbench,1170,BUILD_FAIL,0.5171,cuda-to-omp,0.5909,opencl-to-cuda,0.085,cuda-to-omp_target vs omp_target-to-cuda,-0.2916,0.015625,0.0103,0.2586
+minus_xsbench,1170,BUILD_FAIL,0.5151,cuda-to-omp,0.5909,opencl-to-cuda,0.085,cuda-to-omp_target vs omp_target-to-cuda,-0.2916,0.015625,0.0077,0.2454

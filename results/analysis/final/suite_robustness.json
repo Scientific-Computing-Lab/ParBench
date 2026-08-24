@@ -1,0 +1,1429 @@
+{
+  "scope": {
+    "level": "L0 only (primary task set)",
+    "records": 1224,
+    "suites": [
+      "hecbench",
+      "rodinia",
+      "rsbench",
+      "xsbench"
+    ],
+    "models": [
+      "azure-gpt-5.3-codex",
+      "azure-gpt-5.4",
+      "together-qwen-3.5-397b-a17b"
+    ],
+    "known_fail_excluded": [
+      "hecbench-lud-omp",
+      "hecbench-scan-omp_target",
+      "hecbench-stencil1d-omp_target",
+      "rodinia-backprop-opencl",
+      "rodinia-hybridsort-cuda",
+      "rodinia-kmeans-cuda",
+      "rodinia-kmeans-opencl",
+      "rodinia-mummergpu-cuda",
+      "rodinia-mummergpu-omp",
+      "rodinia-nn-opencl"
+    ]
+  },
+  "per_suite_by_model": [
+    {
+      "suite": "hecbench",
+      "model": "ALL",
+      "n": 288,
+      "passes": 237,
+      "rate": 0.8229,
+      "ci_lower": 0.7747,
+      "ci_upper": 0.8627,
+      "PASS": 237,
+      "BUILD_FAIL": 39,
+      "RUN_FAIL": 4,
+      "VERIFY_FAIL": 8,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "hecbench",
+      "model": "azure-gpt-5.3-codex",
+      "n": 96,
+      "passes": 95,
+      "rate": 0.9896,
+      "ci_lower": 0.9433,
+      "ci_upper": 0.9982,
+      "PASS": 95,
+      "BUILD_FAIL": 0,
+      "RUN_FAIL": 0,
+      "VERIFY_FAIL": 1,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "hecbench",
+      "model": "azure-gpt-5.4",
+      "n": 96,
+      "passes": 93,
+      "rate": 0.9688,
+      "ci_lower": 0.9121,
+      "ci_upper": 0.9893,
+      "PASS": 93,
+      "BUILD_FAIL": 2,
+      "RUN_FAIL": 0,
+      "VERIFY_FAIL": 1,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "hecbench",
+      "model": "together-qwen-3.5-397b-a17b",
+      "n": 96,
+      "passes": 49,
+      "rate": 0.5104,
+      "ci_lower": 0.412,
+      "ci_upper": 0.6081,
+      "PASS": 49,
+      "BUILD_FAIL": 37,
+      "RUN_FAIL": 4,
+      "VERIFY_FAIL": 6,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "rodinia",
+      "model": "ALL",
+      "n": 828,
+      "passes": 190,
+      "rate": 0.2295,
+      "ci_lower": 0.2021,
+      "ci_upper": 0.2593,
+      "PASS": 190,
+      "BUILD_FAIL": 314,
+      "RUN_FAIL": 135,
+      "VERIFY_FAIL": 186,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "rodinia",
+      "model": "azure-gpt-5.3-codex",
+      "n": 276,
+      "passes": 76,
+      "rate": 0.2754,
+      "ci_lower": 0.226,
+      "ci_upper": 0.3309,
+      "PASS": 76,
+      "BUILD_FAIL": 89,
+      "RUN_FAIL": 39,
+      "VERIFY_FAIL": 72,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "rodinia",
+      "model": "azure-gpt-5.4",
+      "n": 276,
+      "passes": 80,
+      "rate": 0.2899,
+      "ci_lower": 0.2395,
+      "ci_upper": 0.346,
+      "PASS": 80,
+      "BUILD_FAIL": 83,
+      "RUN_FAIL": 40,
+      "VERIFY_FAIL": 70,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "rodinia",
+      "model": "together-qwen-3.5-397b-a17b",
+      "n": 276,
+      "passes": 34,
+      "rate": 0.1232,
+      "ci_lower": 0.0895,
+      "ci_upper": 0.1672,
+      "PASS": 34,
+      "BUILD_FAIL": 142,
+      "RUN_FAIL": 56,
+      "VERIFY_FAIL": 44,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "rsbench",
+      "model": "ALL",
+      "n": 54,
+      "passes": 15,
+      "rate": 0.2778,
+      "ci_lower": 0.1762,
+      "ci_upper": 0.4089,
+      "PASS": 15,
+      "BUILD_FAIL": 22,
+      "RUN_FAIL": 17,
+      "VERIFY_FAIL": 0,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "rsbench",
+      "model": "azure-gpt-5.3-codex",
+      "n": 18,
+      "passes": 7,
+      "rate": 0.3889,
+      "ci_lower": 0.2031,
+      "ci_upper": 0.6138,
+      "PASS": 7,
+      "BUILD_FAIL": 6,
+      "RUN_FAIL": 5,
+      "VERIFY_FAIL": 0,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "rsbench",
+      "model": "azure-gpt-5.4",
+      "n": 18,
+      "passes": 8,
+      "rate": 0.4444,
+      "ci_lower": 0.2456,
+      "ci_upper": 0.6628,
+      "PASS": 8,
+      "BUILD_FAIL": 4,
+      "RUN_FAIL": 6,
+      "VERIFY_FAIL": 0,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "rsbench",
+      "model": "together-qwen-3.5-397b-a17b",
+      "n": 18,
+      "passes": 0,
+      "rate": 0.0,
+      "ci_lower": 0.0,
+      "ci_upper": 0.1759,
+      "PASS": 0,
+      "BUILD_FAIL": 12,
+      "RUN_FAIL": 6,
+      "VERIFY_FAIL": 0,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "xsbench",
+      "model": "ALL",
+      "n": 54,
+      "passes": 14,
+      "rate": 0.2593,
+      "ci_lower": 0.1612,
+      "ci_upper": 0.3893,
+      "PASS": 14,
+      "BUILD_FAIL": 24,
+      "RUN_FAIL": 16,
+      "VERIFY_FAIL": 0,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "xsbench",
+      "model": "azure-gpt-5.3-codex",
+      "n": 18,
+      "passes": 6,
+      "rate": 0.3333,
+      "ci_lower": 0.1628,
+      "ci_upper": 0.5625,
+      "PASS": 6,
+      "BUILD_FAIL": 8,
+      "RUN_FAIL": 4,
+      "VERIFY_FAIL": 0,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "xsbench",
+      "model": "azure-gpt-5.4",
+      "n": 18,
+      "passes": 8,
+      "rate": 0.4444,
+      "ci_lower": 0.2456,
+      "ci_upper": 0.6628,
+      "PASS": 8,
+      "BUILD_FAIL": 4,
+      "RUN_FAIL": 6,
+      "VERIFY_FAIL": 0,
+      "EXTRACTION_FAIL": 0
+    },
+    {
+      "suite": "xsbench",
+      "model": "together-qwen-3.5-397b-a17b",
+      "n": 18,
+      "passes": 0,
+      "rate": 0.0,
+      "ci_lower": 0.0,
+      "ci_upper": 0.1759,
+      "PASS": 0,
+      "BUILD_FAIL": 12,
+      "RUN_FAIL": 6,
+      "VERIFY_FAIL": 0,
+      "EXTRACTION_FAIL": 0
+    }
+  ],
+  "rodinia_vs_non_rodinia": {
+    "rodinia": {
+      "n": 828,
+      "passes": 190,
+      "rate": 0.2295,
+      "ci_lower": 0.2021,
+      "ci_upper": 0.2593,
+      "PASS": 190,
+      "BUILD_FAIL": 314,
+      "RUN_FAIL": 135,
+      "VERIFY_FAIL": 186,
+      "EXTRACTION_FAIL": 0,
+      "headline": {
+        "n_records": 828,
+        "dominant_failure_stage": {
+          "stage": "BUILD_FAIL",
+          "count": 314,
+          "share_of_failures": 0.4922,
+          "all_stages": {
+            "BUILD_FAIL": 314,
+            "VERIFY_FAIL": 186,
+            "RUN_FAIL": 135,
+            "NOT_REPLAYABLE": 3
+          }
+        },
+        "easiest_direction": {
+          "direction": "cuda-to-omp",
+          "n": 144,
+          "passes": 75,
+          "rate": 0.5208,
+          "ci_lower": 0.4398,
+          "ci_upper": 0.6008
+        },
+        "hardest_direction": {
+          "direction": "opencl-to-cuda",
+          "n": 144,
+          "passes": 9,
+          "rate": 0.0625,
+          "ci_lower": 0.0332,
+          "ci_upper": 0.1145
+        },
+        "largest_asymmetry": {
+          "pair": "cuda-to-omp vs omp-to-cuda",
+          "forward": "cuda-to-omp",
+          "reverse": "omp-to-cuda",
+          "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+          "samples_per_cell": [
+            3
+          ],
+          "n_tests_corrected_for": 3,
+          "delta": 0.25,
+          "mcnemar": {
+            "n_paired": 48,
+            "forward_pass_rate": 0.5625,
+            "reverse_pass_rate": 0.3125,
+            "table": {
+              "both_pass": 13,
+              "reverse_only": 2,
+              "forward_only": 14,
+              "both_fail": 19
+            },
+            "discordant": 16,
+            "method": "exact",
+            "p_value": 0.004181,
+            "cohens_h": 0.5097,
+            "effect_size": "medium",
+            "alpha_corrected": 0.016667,
+            "significant": true
+          }
+        },
+        "model_gap_gpt54_minus_codex": 0.0145,
+        "model_rates": {
+          "azure-gpt-5.3-codex": {
+            "n": 276,
+            "passes": 76,
+            "rate": 0.2754,
+            "ci_lower": 0.226,
+            "ci_upper": 0.3309
+          },
+          "azure-gpt-5.4": {
+            "n": 276,
+            "passes": 80,
+            "rate": 0.2899,
+            "ci_lower": 0.2395,
+            "ci_upper": 0.346
+          },
+          "together-qwen-3.5-397b-a17b": {
+            "n": 276,
+            "passes": 34,
+            "rate": 0.1232,
+            "ci_lower": 0.0895,
+            "ci_upper": 0.1672
+          }
+        },
+        "multi_vs_single_file_gap": {
+          "single_file": {
+            "n": 360,
+            "passes": 82,
+            "rate": 0.2278,
+            "ci_lower": 0.1875,
+            "ci_upper": 0.2738
+          },
+          "multi_file": {
+            "n": 468,
+            "passes": 108,
+            "rate": 0.2308,
+            "ci_lower": 0.1949,
+            "ci_upper": 0.271
+          },
+          "gap": -0.003,
+          "unclassified_records": 0
+        }
+      }
+    },
+    "non_rodinia": {
+      "n": 396,
+      "passes": 266,
+      "rate": 0.6717,
+      "ci_lower": 0.624,
+      "ci_upper": 0.7161,
+      "PASS": 266,
+      "BUILD_FAIL": 85,
+      "RUN_FAIL": 37,
+      "VERIFY_FAIL": 8,
+      "EXTRACTION_FAIL": 0,
+      "headline": {
+        "n_records": 396,
+        "dominant_failure_stage": {
+          "stage": "BUILD_FAIL",
+          "count": 85,
+          "share_of_failures": 0.6538,
+          "all_stages": {
+            "VERIFY_FAIL": 8,
+            "BUILD_FAIL": 85,
+            "RUN_FAIL": 37
+          }
+        },
+        "easiest_direction": {
+          "direction": "cuda-to-omp",
+          "n": 63,
+          "passes": 44,
+          "rate": 0.6984,
+          "ci_lower": 0.5764,
+          "ci_upper": 0.7976
+        },
+        "hardest_direction": {
+          "direction": "omp-to-opencl",
+          "n": 18,
+          "passes": 0,
+          "rate": 0.0,
+          "ci_lower": 0.0,
+          "ci_upper": 0.1759
+        },
+        "largest_asymmetry": {
+          "pair": "omp-to-opencl vs opencl-to-omp",
+          "forward": "omp-to-opencl",
+          "reverse": "opencl-to-omp",
+          "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+          "samples_per_cell": [
+            3
+          ],
+          "n_tests_corrected_for": 5,
+          "delta": -0.5,
+          "mcnemar": {
+            "n_paired": 6,
+            "forward_pass_rate": 0.0,
+            "reverse_pass_rate": 0.5,
+            "table": {
+              "both_pass": 0,
+              "reverse_only": 3,
+              "forward_only": 0,
+              "both_fail": 3
+            },
+            "discordant": 3,
+            "method": "exact",
+            "p_value": 0.25,
+            "cohens_h": -1.5708,
+            "effect_size": "large",
+            "alpha_corrected": 0.01,
+            "significant": false
+          }
+        },
+        "model_gap_gpt54_minus_codex": 0.0076,
+        "model_rates": {
+          "azure-gpt-5.3-codex": {
+            "n": 132,
+            "passes": 108,
+            "rate": 0.8182,
+            "ci_lower": 0.7437,
+            "ci_upper": 0.8747
+          },
+          "azure-gpt-5.4": {
+            "n": 132,
+            "passes": 109,
+            "rate": 0.8258,
+            "ci_lower": 0.7521,
+            "ci_upper": 0.881
+          },
+          "together-qwen-3.5-397b-a17b": {
+            "n": 132,
+            "passes": 49,
+            "rate": 0.3712,
+            "ci_lower": 0.2935,
+            "ci_upper": 0.4562
+          }
+        },
+        "multi_vs_single_file_gap": {
+          "single_file": {
+            "n": 306,
+            "passes": 240,
+            "rate": 0.7843,
+            "ci_lower": 0.7349,
+            "ci_upper": 0.8267
+          },
+          "multi_file": {
+            "n": 90,
+            "passes": 26,
+            "rate": 0.2889,
+            "ci_lower": 0.2054,
+            "ci_upper": 0.3896
+          },
+          "gap": 0.4954,
+          "unclassified_records": 0
+        }
+      }
+    }
+  },
+  "micro_vs_macro": {
+    "ALL": {
+      "micro": 0.372549,
+      "macro": 0.397356,
+      "delta_macro_minus_micro_pp": 2.4807,
+      "n": 1224,
+      "n_suites": 4
+    },
+    "azure-gpt-5.3-codex": {
+      "micro": 0.45098,
+      "macro": 0.496792,
+      "delta_macro_minus_micro_pp": 4.5812,
+      "n": 408,
+      "n_suites": 4
+    },
+    "azure-gpt-5.4": {
+      "micro": 0.463235,
+      "macro": 0.536873,
+      "delta_macro_minus_micro_pp": 7.3638,
+      "n": 408,
+      "n_suites": 4
+    },
+    "together-qwen-3.5-397b-a17b": {
+      "micro": 0.203431,
+      "macro": 0.158401,
+      "delta_macro_minus_micro_pp": -4.503,
+      "n": 408,
+      "n_suites": 4
+    }
+  },
+  "leave_one_suite_out": {
+    "FULL": {
+      "n_records": 1224,
+      "dominant_failure_stage": {
+        "stage": "BUILD_FAIL",
+        "count": 399,
+        "share_of_failures": 0.5195,
+        "all_stages": {
+          "VERIFY_FAIL": 194,
+          "BUILD_FAIL": 399,
+          "RUN_FAIL": 172,
+          "NOT_REPLAYABLE": 3
+        }
+      },
+      "easiest_direction": {
+        "direction": "cuda-to-omp",
+        "n": 207,
+        "passes": 119,
+        "rate": 0.5749,
+        "ci_lower": 0.5068,
+        "ci_upper": 0.6403
+      },
+      "hardest_direction": {
+        "direction": "opencl-to-cuda",
+        "n": 162,
+        "passes": 17,
+        "rate": 0.1049,
+        "ci_lower": 0.0666,
+        "ci_upper": 0.1616
+      },
+      "largest_asymmetry": {
+        "pair": "cuda-to-omp_target vs omp_target-to-cuda",
+        "forward": "cuda-to-omp_target",
+        "reverse": "omp_target-to-cuda",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 5,
+        "delta": -0.2916,
+        "mcnemar": {
+          "n_paired": 24,
+          "forward_pass_rate": 0.6667,
+          "reverse_pass_rate": 0.9583,
+          "table": {
+            "both_pass": 16,
+            "reverse_only": 7,
+            "forward_only": 0,
+            "both_fail": 1
+          },
+          "discordant": 7,
+          "method": "exact",
+          "p_value": 0.015625,
+          "cohens_h": -0.8198,
+          "effect_size": "large",
+          "alpha_corrected": 0.01,
+          "significant": false
+        }
+      },
+      "model_gap_gpt54_minus_codex": 0.0122,
+      "model_rates": {
+        "azure-gpt-5.3-codex": {
+          "n": 408,
+          "passes": 184,
+          "rate": 0.451,
+          "ci_lower": 0.4034,
+          "ci_upper": 0.4995
+        },
+        "azure-gpt-5.4": {
+          "n": 408,
+          "passes": 189,
+          "rate": 0.4632,
+          "ci_lower": 0.4154,
+          "ci_upper": 0.5117
+        },
+        "together-qwen-3.5-397b-a17b": {
+          "n": 408,
+          "passes": 83,
+          "rate": 0.2034,
+          "ci_lower": 0.1672,
+          "ci_upper": 0.2452
+        }
+      },
+      "multi_vs_single_file_gap": {
+        "single_file": {
+          "n": 666,
+          "passes": 322,
+          "rate": 0.4835,
+          "ci_lower": 0.4457,
+          "ci_upper": 0.5214
+        },
+        "multi_file": {
+          "n": 558,
+          "passes": 134,
+          "rate": 0.2401,
+          "ci_lower": 0.2066,
+          "ci_upper": 0.2773
+        },
+        "gap": 0.2434,
+        "unclassified_records": 0
+      }
+    },
+    "minus_hecbench": {
+      "n_records": 936,
+      "dominant_failure_stage": {
+        "stage": "BUILD_FAIL",
+        "count": 360,
+        "share_of_failures": 0.5021,
+        "all_stages": {
+          "BUILD_FAIL": 360,
+          "VERIFY_FAIL": 186,
+          "RUN_FAIL": 168,
+          "NOT_REPLAYABLE": 3
+        }
+      },
+      "easiest_direction": {
+        "direction": "cuda-to-omp",
+        "n": 162,
+        "passes": 79,
+        "rate": 0.4877,
+        "ci_lower": 0.4119,
+        "ci_upper": 0.564
+      },
+      "hardest_direction": {
+        "direction": "opencl-to-cuda",
+        "n": 162,
+        "passes": 17,
+        "rate": 0.1049,
+        "ci_lower": 0.0666,
+        "ci_upper": 0.1616
+      },
+      "largest_asymmetry": {
+        "pair": "cuda-to-omp vs omp-to-cuda",
+        "forward": "cuda-to-omp",
+        "reverse": "omp-to-cuda",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 3,
+        "delta": 0.2963,
+        "mcnemar": {
+          "n_paired": 54,
+          "forward_pass_rate": 0.5741,
+          "reverse_pass_rate": 0.2778,
+          "table": {
+            "both_pass": 13,
+            "reverse_only": 2,
+            "forward_only": 18,
+            "both_fail": 21
+          },
+          "discordant": 20,
+          "method": "exact",
+          "p_value": 0.000402,
+          "cohens_h": 0.6092,
+          "effect_size": "medium",
+          "alpha_corrected": 0.016667,
+          "significant": true
+        }
+      },
+      "model_gap_gpt54_minus_codex": 0.0224,
+      "model_rates": {
+        "azure-gpt-5.3-codex": {
+          "n": 312,
+          "passes": 89,
+          "rate": 0.2853,
+          "ci_lower": 0.238,
+          "ci_upper": 0.3377
+        },
+        "azure-gpt-5.4": {
+          "n": 312,
+          "passes": 96,
+          "rate": 0.3077,
+          "ci_lower": 0.2591,
+          "ci_upper": 0.361
+        },
+        "together-qwen-3.5-397b-a17b": {
+          "n": 312,
+          "passes": 34,
+          "rate": 0.109,
+          "ci_lower": 0.079,
+          "ci_upper": 0.1484
+        }
+      },
+      "multi_vs_single_file_gap": {
+        "single_file": {
+          "n": 378,
+          "passes": 85,
+          "rate": 0.2249,
+          "ci_lower": 0.1857,
+          "ci_upper": 0.2696
+        },
+        "multi_file": {
+          "n": 558,
+          "passes": 134,
+          "rate": 0.2401,
+          "ci_lower": 0.2066,
+          "ci_upper": 0.2773
+        },
+        "gap": -0.0152,
+        "unclassified_records": 0
+      }
+    },
+    "minus_rodinia": {
+      "n_records": 396,
+      "dominant_failure_stage": {
+        "stage": "BUILD_FAIL",
+        "count": 85,
+        "share_of_failures": 0.6538,
+        "all_stages": {
+          "VERIFY_FAIL": 8,
+          "BUILD_FAIL": 85,
+          "RUN_FAIL": 37
+        }
+      },
+      "easiest_direction": {
+        "direction": "cuda-to-omp",
+        "n": 63,
+        "passes": 44,
+        "rate": 0.6984,
+        "ci_lower": 0.5764,
+        "ci_upper": 0.7976
+      },
+      "hardest_direction": {
+        "direction": "omp-to-opencl",
+        "n": 18,
+        "passes": 0,
+        "rate": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.1759
+      },
+      "largest_asymmetry": {
+        "pair": "omp-to-opencl vs opencl-to-omp",
+        "forward": "omp-to-opencl",
+        "reverse": "opencl-to-omp",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 5,
+        "delta": -0.5,
+        "mcnemar": {
+          "n_paired": 6,
+          "forward_pass_rate": 0.0,
+          "reverse_pass_rate": 0.5,
+          "table": {
+            "both_pass": 0,
+            "reverse_only": 3,
+            "forward_only": 0,
+            "both_fail": 3
+          },
+          "discordant": 3,
+          "method": "exact",
+          "p_value": 0.25,
+          "cohens_h": -1.5708,
+          "effect_size": "large",
+          "alpha_corrected": 0.01,
+          "significant": false
+        }
+      },
+      "model_gap_gpt54_minus_codex": 0.0076,
+      "model_rates": {
+        "azure-gpt-5.3-codex": {
+          "n": 132,
+          "passes": 108,
+          "rate": 0.8182,
+          "ci_lower": 0.7437,
+          "ci_upper": 0.8747
+        },
+        "azure-gpt-5.4": {
+          "n": 132,
+          "passes": 109,
+          "rate": 0.8258,
+          "ci_lower": 0.7521,
+          "ci_upper": 0.881
+        },
+        "together-qwen-3.5-397b-a17b": {
+          "n": 132,
+          "passes": 49,
+          "rate": 0.3712,
+          "ci_lower": 0.2935,
+          "ci_upper": 0.4562
+        }
+      },
+      "multi_vs_single_file_gap": {
+        "single_file": {
+          "n": 306,
+          "passes": 240,
+          "rate": 0.7843,
+          "ci_lower": 0.7349,
+          "ci_upper": 0.8267
+        },
+        "multi_file": {
+          "n": 90,
+          "passes": 26,
+          "rate": 0.2889,
+          "ci_lower": 0.2054,
+          "ci_upper": 0.3896
+        },
+        "gap": 0.4954,
+        "unclassified_records": 0
+      }
+    },
+    "minus_rsbench": {
+      "n_records": 1170,
+      "dominant_failure_stage": {
+        "stage": "BUILD_FAIL",
+        "count": 377,
+        "share_of_failures": 0.5171,
+        "all_stages": {
+          "VERIFY_FAIL": 194,
+          "BUILD_FAIL": 377,
+          "RUN_FAIL": 155,
+          "NOT_REPLAYABLE": 3
+        }
+      },
+      "easiest_direction": {
+        "direction": "cuda-to-omp",
+        "n": 198,
+        "passes": 117,
+        "rate": 0.5909,
+        "ci_lower": 0.5213,
+        "ci_upper": 0.657
+      },
+      "hardest_direction": {
+        "direction": "opencl-to-cuda",
+        "n": 153,
+        "passes": 13,
+        "rate": 0.085,
+        "ci_lower": 0.0503,
+        "ci_upper": 0.1399
+      },
+      "largest_asymmetry": {
+        "pair": "cuda-to-omp_target vs omp_target-to-cuda",
+        "forward": "cuda-to-omp_target",
+        "reverse": "omp_target-to-cuda",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 5,
+        "delta": -0.2916,
+        "mcnemar": {
+          "n_paired": 24,
+          "forward_pass_rate": 0.6667,
+          "reverse_pass_rate": 0.9583,
+          "table": {
+            "both_pass": 16,
+            "reverse_only": 7,
+            "forward_only": 0,
+            "both_fail": 1
+          },
+          "discordant": 7,
+          "method": "exact",
+          "p_value": 0.015625,
+          "cohens_h": -0.8198,
+          "effect_size": "large",
+          "alpha_corrected": 0.01,
+          "significant": false
+        }
+      },
+      "model_gap_gpt54_minus_codex": 0.0103,
+      "model_rates": {
+        "azure-gpt-5.3-codex": {
+          "n": 390,
+          "passes": 177,
+          "rate": 0.4538,
+          "ci_lower": 0.4051,
+          "ci_upper": 0.5035
+        },
+        "azure-gpt-5.4": {
+          "n": 390,
+          "passes": 181,
+          "rate": 0.4641,
+          "ci_lower": 0.4152,
+          "ci_upper": 0.5137
+        },
+        "together-qwen-3.5-397b-a17b": {
+          "n": 390,
+          "passes": 83,
+          "rate": 0.2128,
+          "ci_lower": 0.1751,
+          "ci_upper": 0.2561
+        }
+      },
+      "multi_vs_single_file_gap": {
+        "single_file": {
+          "n": 648,
+          "passes": 319,
+          "rate": 0.4923,
+          "ci_lower": 0.454,
+          "ci_upper": 0.5307
+        },
+        "multi_file": {
+          "n": 522,
+          "passes": 122,
+          "rate": 0.2337,
+          "ci_lower": 0.1994,
+          "ci_upper": 0.2719
+        },
+        "gap": 0.2586,
+        "unclassified_records": 0
+      }
+    },
+    "minus_xsbench": {
+      "n_records": 1170,
+      "dominant_failure_stage": {
+        "stage": "BUILD_FAIL",
+        "count": 375,
+        "share_of_failures": 0.5151,
+        "all_stages": {
+          "VERIFY_FAIL": 194,
+          "BUILD_FAIL": 375,
+          "RUN_FAIL": 156,
+          "NOT_REPLAYABLE": 3
+        }
+      },
+      "easiest_direction": {
+        "direction": "cuda-to-omp",
+        "n": 198,
+        "passes": 117,
+        "rate": 0.5909,
+        "ci_lower": 0.5213,
+        "ci_upper": 0.657
+      },
+      "hardest_direction": {
+        "direction": "opencl-to-cuda",
+        "n": 153,
+        "passes": 13,
+        "rate": 0.085,
+        "ci_lower": 0.0503,
+        "ci_upper": 0.1399
+      },
+      "largest_asymmetry": {
+        "pair": "cuda-to-omp_target vs omp_target-to-cuda",
+        "forward": "cuda-to-omp_target",
+        "reverse": "omp_target-to-cuda",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 5,
+        "delta": -0.2916,
+        "mcnemar": {
+          "n_paired": 24,
+          "forward_pass_rate": 0.6667,
+          "reverse_pass_rate": 0.9583,
+          "table": {
+            "both_pass": 16,
+            "reverse_only": 7,
+            "forward_only": 0,
+            "both_fail": 1
+          },
+          "discordant": 7,
+          "method": "exact",
+          "p_value": 0.015625,
+          "cohens_h": -0.8198,
+          "effect_size": "large",
+          "alpha_corrected": 0.01,
+          "significant": false
+        }
+      },
+      "model_gap_gpt54_minus_codex": 0.0077,
+      "model_rates": {
+        "azure-gpt-5.3-codex": {
+          "n": 390,
+          "passes": 178,
+          "rate": 0.4564,
+          "ci_lower": 0.4076,
+          "ci_upper": 0.506
+        },
+        "azure-gpt-5.4": {
+          "n": 390,
+          "passes": 181,
+          "rate": 0.4641,
+          "ci_lower": 0.4152,
+          "ci_upper": 0.5137
+        },
+        "together-qwen-3.5-397b-a17b": {
+          "n": 390,
+          "passes": 83,
+          "rate": 0.2128,
+          "ci_lower": 0.1751,
+          "ci_upper": 0.2561
+        }
+      },
+      "multi_vs_single_file_gap": {
+        "single_file": {
+          "n": 666,
+          "passes": 322,
+          "rate": 0.4835,
+          "ci_lower": 0.4457,
+          "ci_upper": 0.5214
+        },
+        "multi_file": {
+          "n": 504,
+          "passes": 120,
+          "rate": 0.2381,
+          "ci_lower": 0.203,
+          "ci_upper": 0.2772
+        },
+        "gap": 0.2454,
+        "unclassified_records": 0
+      }
+    }
+  },
+  "per_suite_asymmetry": {
+    "hecbench": {
+      "cuda-to-omp vs omp-to-cuda": {
+        "forward": "cuda-to-omp",
+        "reverse": "omp-to-cuda",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 3,
+        "delta": 0.0,
+        "mcnemar": {
+          "n_paired": 15,
+          "forward_pass_rate": 0.9333,
+          "reverse_pass_rate": 0.9333,
+          "table": {
+            "both_pass": 14,
+            "reverse_only": 0,
+            "forward_only": 0,
+            "both_fail": 1
+          },
+          "discordant": 0,
+          "method": "exact",
+          "p_value": 1.0,
+          "cohens_h": 0.0,
+          "effect_size": "negligible",
+          "alpha_corrected": 0.016667,
+          "significant": false
+        }
+      },
+      "cuda-to-omp_target vs omp_target-to-cuda": {
+        "forward": "cuda-to-omp_target",
+        "reverse": "omp_target-to-cuda",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 3,
+        "delta": -0.2916,
+        "mcnemar": {
+          "n_paired": 24,
+          "forward_pass_rate": 0.6667,
+          "reverse_pass_rate": 0.9583,
+          "table": {
+            "both_pass": 16,
+            "reverse_only": 7,
+            "forward_only": 0,
+            "both_fail": 1
+          },
+          "discordant": 7,
+          "method": "exact",
+          "p_value": 0.015625,
+          "cohens_h": -0.8198,
+          "effect_size": "large",
+          "alpha_corrected": 0.016667,
+          "significant": true
+        }
+      },
+      "omp-to-omp_target vs omp_target-to-omp": {
+        "forward": "omp-to-omp_target",
+        "reverse": "omp_target-to-omp",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 3,
+        "delta": 0.0,
+        "mcnemar": {
+          "n_paired": 9,
+          "forward_pass_rate": 1.0,
+          "reverse_pass_rate": 1.0,
+          "table": {
+            "both_pass": 9,
+            "reverse_only": 0,
+            "forward_only": 0,
+            "both_fail": 0
+          },
+          "discordant": 0,
+          "method": "exact",
+          "p_value": 1.0,
+          "cohens_h": 0.0,
+          "effect_size": "negligible",
+          "alpha_corrected": 0.016667,
+          "significant": false
+        }
+      }
+    },
+    "rodinia": {
+      "cuda-to-omp vs omp-to-cuda": {
+        "forward": "cuda-to-omp",
+        "reverse": "omp-to-cuda",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 3,
+        "delta": 0.25,
+        "mcnemar": {
+          "n_paired": 48,
+          "forward_pass_rate": 0.5625,
+          "reverse_pass_rate": 0.3125,
+          "table": {
+            "both_pass": 13,
+            "reverse_only": 2,
+            "forward_only": 14,
+            "both_fail": 19
+          },
+          "discordant": 16,
+          "method": "exact",
+          "p_value": 0.004181,
+          "cohens_h": 0.5097,
+          "effect_size": "medium",
+          "alpha_corrected": 0.016667,
+          "significant": true
+        }
+      },
+      "cuda-to-opencl vs opencl-to-cuda": {
+        "forward": "cuda-to-opencl",
+        "reverse": "opencl-to-cuda",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 3,
+        "delta": 0.1667,
+        "mcnemar": {
+          "n_paired": 48,
+          "forward_pass_rate": 0.2292,
+          "reverse_pass_rate": 0.0625,
+          "table": {
+            "both_pass": 0,
+            "reverse_only": 3,
+            "forward_only": 11,
+            "both_fail": 34
+          },
+          "discordant": 14,
+          "method": "exact",
+          "p_value": 0.057373,
+          "cohens_h": 0.493,
+          "effect_size": "small",
+          "alpha_corrected": 0.016667,
+          "significant": false
+        }
+      },
+      "omp-to-opencl vs opencl-to-omp": {
+        "forward": "omp-to-opencl",
+        "reverse": "opencl-to-omp",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 3,
+        "delta": -0.1428,
+        "mcnemar": {
+          "n_paired": 42,
+          "forward_pass_rate": 0.1667,
+          "reverse_pass_rate": 0.3095,
+          "table": {
+            "both_pass": 6,
+            "reverse_only": 7,
+            "forward_only": 1,
+            "both_fail": 28
+          },
+          "discordant": 8,
+          "method": "exact",
+          "p_value": 0.070312,
+          "cohens_h": -0.3389,
+          "effect_size": "small",
+          "alpha_corrected": 0.016667,
+          "significant": false
+        }
+      }
+    },
+    "rsbench": {
+      "cuda-to-omp vs omp-to-cuda": {
+        "forward": "cuda-to-omp",
+        "reverse": "omp-to-cuda",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 3,
+        "delta": 0.6667,
+        "mcnemar": {
+          "n_paired": 3,
+          "forward_pass_rate": 0.6667,
+          "reverse_pass_rate": 0.0,
+          "table": {
+            "both_pass": 0,
+            "reverse_only": 0,
+            "forward_only": 2,
+            "both_fail": 1
+          },
+          "discordant": 2,
+          "method": "exact",
+          "p_value": 0.5,
+          "cohens_h": 1.9106,
+          "effect_size": "large",
+          "alpha_corrected": 0.016667,
+          "significant": false
+        }
+      },
+      "cuda-to-opencl vs opencl-to-cuda": {
+        "forward": "cuda-to-opencl",
+        "reverse": "opencl-to-cuda",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 3,
+        "delta": 0.0,
+        "mcnemar": {
+          "n_paired": 3,
+          "forward_pass_rate": 0.6667,
+          "reverse_pass_rate": 0.6667,
+          "table": {
+            "both_pass": 2,
+            "reverse_only": 0,
+            "forward_only": 0,
+            "both_fail": 1
+          },
+          "discordant": 0,
+          "method": "exact",
+          "p_value": 1.0,
+          "cohens_h": 0.0,
+          "effect_size": "negligible",
+          "alpha_corrected": 0.016667,
+          "significant": false
+        }
+      },
+      "omp-to-opencl vs opencl-to-omp": {
+        "forward": "omp-to-opencl",
+        "reverse": "opencl-to-omp",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 3,
+        "delta": -0.6667,
+        "mcnemar": {
+          "n_paired": 3,
+          "forward_pass_rate": 0.0,
+          "reverse_pass_rate": 0.6667,
+          "table": {
+            "both_pass": 0,
+            "reverse_only": 2,
+            "forward_only": 0,
+            "both_fail": 1
+          },
+          "discordant": 2,
+          "method": "exact",
+          "p_value": 0.5,
+          "cohens_h": -1.9106,
+          "effect_size": "large",
+          "alpha_corrected": 0.016667,
+          "significant": false
+        }
+      }
+    },
+    "xsbench": {
+      "cuda-to-omp vs omp-to-cuda": {
+        "forward": "cuda-to-omp",
+        "reverse": "omp-to-cuda",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 3,
+        "delta": 0.6667,
+        "mcnemar": {
+          "n_paired": 3,
+          "forward_pass_rate": 0.6667,
+          "reverse_pass_rate": 0.0,
+          "table": {
+            "both_pass": 0,
+            "reverse_only": 0,
+            "forward_only": 2,
+            "both_fail": 1
+          },
+          "discordant": 2,
+          "method": "exact",
+          "p_value": 0.5,
+          "cohens_h": 1.9106,
+          "effect_size": "large",
+          "alpha_corrected": 0.016667,
+          "significant": false
+        }
+      },
+      "cuda-to-opencl vs opencl-to-cuda": {
+        "forward": "cuda-to-opencl",
+        "reverse": "opencl-to-cuda",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 3,
+        "delta": 0.0,
+        "mcnemar": {
+          "n_paired": 3,
+          "forward_pass_rate": 0.6667,
+          "reverse_pass_rate": 0.6667,
+          "table": {
+            "both_pass": 2,
+            "reverse_only": 0,
+            "forward_only": 0,
+            "both_fail": 1
+          },
+          "discordant": 0,
+          "method": "exact",
+          "p_value": 1.0,
+          "cohens_h": 0.0,
+          "effect_size": "negligible",
+          "alpha_corrected": 0.016667,
+          "significant": false
+        }
+      },
+      "omp-to-opencl vs opencl-to-omp": {
+        "forward": "omp-to-opencl",
+        "reverse": "opencl-to-omp",
+        "unit": "cell (model, suite, kernel, direction), samples collapsed by pass@1-of-any",
+        "samples_per_cell": [
+          3
+        ],
+        "n_tests_corrected_for": 3,
+        "delta": -0.3333,
+        "mcnemar": {
+          "n_paired": 3,
+          "forward_pass_rate": 0.0,
+          "reverse_pass_rate": 0.3333,
+          "table": {
+            "both_pass": 0,
+            "reverse_only": 1,
+            "forward_only": 0,
+            "both_fail": 2
+          },
+          "discordant": 1,
+          "method": "exact",
+          "p_value": 1.0,
+          "cohens_h": -1.231,
+          "effect_size": "large",
+          "alpha_corrected": 0.016667,
+          "significant": false
+        }
+      }
+    }
+  },
+  "per_suite_taxonomy": {
+    "hecbench": {
+      "n_records": 288,
+      "n_failures": 51,
+      "failure_counts": {
+        "VERIFY_FAIL": 8,
+        "BUILD_FAIL": 39,
+        "RUN_FAIL": 4
+      },
+      "failure_shares": {
+        "VERIFY_FAIL": 0.1569,
+        "BUILD_FAIL": 0.7647,
+        "RUN_FAIL": 0.0784
+      },
+      "dominant_stage": "BUILD_FAIL"
+    },
+    "rodinia": {
+      "n_records": 828,
+      "n_failures": 638,
+      "failure_counts": {
+        "BUILD_FAIL": 314,
+        "VERIFY_FAIL": 186,
+        "RUN_FAIL": 135,
+        "NOT_REPLAYABLE": 3
+      },
+      "failure_shares": {
+        "BUILD_FAIL": 0.4922,
+        "VERIFY_FAIL": 0.2915,
+        "RUN_FAIL": 0.2116,
+        "NOT_REPLAYABLE": 0.0047
+      },
+      "dominant_stage": "BUILD_FAIL"
+    },
+    "rsbench": {
+      "n_records": 54,
+      "n_failures": 39,
+      "failure_counts": {
+        "BUILD_FAIL": 22,
+        "RUN_FAIL": 17
+      },
+      "failure_shares": {
+        "BUILD_FAIL": 0.5641,
+        "RUN_FAIL": 0.4359
+      },
+      "dominant_stage": "BUILD_FAIL"
+    },
+    "xsbench": {
+      "n_records": 54,
+      "n_failures": 40,
+      "failure_counts": {
+        "BUILD_FAIL": 24,
+        "RUN_FAIL": 16
+      },
+      "failure_shares": {
+        "BUILD_FAIL": 0.6,
+        "RUN_FAIL": 0.4
+      },
+      "dominant_stage": "BUILD_FAIL"
+    }
+  },
+  "provenance": {
+    "generated_at": "2026-08-17T18:37:15.012428+00:00",
+    "generator": "scripts/analysis/quantitative_findings.py --suite-robustness",
+    "source_namespace": "results/evaluation_final/parbench-final-v1"
+  }
+}

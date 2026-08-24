@@ -1,0 +1,178 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "kmeans",
+        "parallel_api": "cuda",
+        "unique_id": "rodinia-kmeans-cuda",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "cuda/kmeans",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "kmeans_cuda.cu",
+            "kmeans_cuda_kernel.cu"
+        ],
+        "support_files": [
+            "cluster.c",
+            "getopt.c",
+            "kmeans.c",
+            "kmeans_clustering.c",
+            "rmse.c",
+            "getopt.h",
+            "kmeans.h",
+            "unistd.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "kmeans_cuda.cu",
+            "kmeans_cuda_kernel.cu"
+        ]
+    },
+    "implementation": {
+        "api": "cuda",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "cuda-toolkit>=11.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "cuda/kmeans",
+        "commands": {
+            "configure": null,
+            "build": "make CUDA_DIR=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda",
+            "clean": "make clean"
+        },
+        "variables": {
+            "CUDA_DIR": {
+                "description": "Path to CUDA toolkit installation",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda",
+                "detection": "dirname $(dirname $(which nvcc))"
+            }
+        },
+        "outputs": {
+            "executable": "./kmeans"
+        }
+    },
+    "run": {
+        "executable": "./kmeans",
+        "default_arguments": [
+            "-i",
+            "../../data/kmeans/kdd_cup"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-i",
+                    "../../data/kmeans/kdd_cup"
+                ],
+                "description": "Small input for correctness verification of kmeans (CUDA)",
+                "input_files": [
+                    "../../data/kmeans/kdd_cup"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "(?i)(pass|correct|match|verified)",
+                "description": "Results match reference"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "vendor": "NVIDIA",
+                "min_compute_capability": "sm_60",
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.276757+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "fail",
+                "exit_code": null,
+                "stdout_snippet": null,
+                "wall_time_seconds": null,
+                "metrics": {},
+                "fail_reason": "build failed: ernel.cu(15): error: texture is not a template\n  texture<float, 1, cudaReadModeElementType> t_features;\n  ^\n\nkmeans_cuda_kernel.cu(17): error: texture is not a template\n  texture<float, 1, cudaReadModeElementType> t_features_flipped;\n  ^\n\nkmeans_cuda_kernel.cu(18): error: texture is not a template\n  texture<float, 1, cudaReadModeElementType> t_clusters;\n  ^\n\nkmeans_cuda_kernel.cu(89): error: no instance of overloaded function \"tex1Dfetch\" matches the argument list\n            argument types are: (<error-type>, int)\n      float diff = (tex1Dfetch(t_features,addr) -\n                    ^\n\nkmeans_cuda.cu(169): error: identifier \"cudaBindTexture\" is undefined\n   if(cudaBindTexture(\n      ^\n\n5 errors detected in the compilation of \"kmeans_cuda.cu\".\nmake: *** [Makefile:31: kmeans_cuda.o] Error 2\nharness.builder WARNING: Command exited 2: make CUDA_DIR=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda\nBuilding rodinia-kmeans-cuda ...\n[rodinia-kmeans-cuda] | BUILD: FAIL (0.295s) | RUN: \u2014 | VERIFY: \u2014\n",
+                "fail_category": "build_failure"
+            }
+        }
+    },
+    "metadata": {
+        "description": "K-means clustering on GPU",
+        "domain": "machine learning",
+        "complexity": "k-means clustering",
+        "tags": [
+            "clustering",
+            "cuda",
+            "k-means",
+            "kmeans",
+            "machine-learning",
+            "rodinia"
+        ],
+        "multi_file": true,
+        "translation_complexity": null
+    }
+}

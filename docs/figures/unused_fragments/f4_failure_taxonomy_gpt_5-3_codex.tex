@@ -1,0 +1,60 @@
+% Failure taxonomy stacked bar (GPT-5.3-Codex).
+% Styled to match f4_failure_taxonomy_qwen / Figure 2.
+\begin{tikzpicture}
+\begin{axis}[
+  parbench compact,
+  ybar stacked,
+  bar width=0.56cm,
+  xtick={0,...,7},
+  xticklabels={{\ensuremath{\mathrm{CUDA}{\to}\mathrm{OMP}}},{\ensuremath{\mathrm{OMP}{\to}\mathrm{CUDA}}},{\ensuremath{\mathrm{CUDA}{\to}\mathrm{OCL}}},{\ensuremath{\mathrm{OCL}{\to}\mathrm{CUDA}}},{\ensuremath{\mathrm{OMP}{\to}\mathrm{OCL}}},{\ensuremath{\mathrm{OCL}{\to}\mathrm{OMP}}},{\ensuremath{\mathrm{CUDA}{\to}\mathrm{OMP\text{-}T}}},{\ensuremath{\mathrm{OMP\text{-}T}{\to}\mathrm{CUDA}}}},
+  xticklabel style={font=\scriptsize, rotate=45, anchor=north east},
+  ylabel={Number of Tasks},
+  xmin=-0.6, xmax=7.6,
+  ymin=0, ymax=26,
+  ytick={0,5,10,15,20,25},
+  legend style={
+  at={(0.5,0.93)},
+  anchor=south,
+  legend columns=5, cells={anchor=west}},
+  legend cell align={left},
+  title={Failure Taxonomy by Direction (GPT-5.3-Codex)},
+  ymajorgrids=true, xmajorgrids=false,
+  major grid style={dashed, draw=gray!40},
+]
+  \addplot[ybar stacked, fill=pbPass, draw=black, line width=0.3pt,
+           fill opacity=0.9,
+           nodes near coords={\pgfmathfloattoint{\pgfplotspointmeta}\ifnum\pgfmathresult>1\relax\pgfmathresult\fi},
+           nodes near coords align={center},
+           every node near coord/.style={font=\small\bfseries, text=white, inner sep=2pt}]
+    coordinates {(0,18) (1,14) (2,11) (3,3) (4,14) (5,7) (6,8) (7,8)};
+  \addlegendentry{Pass}
+  \addplot[ybar stacked, fill=pbBuildFail, draw=black, line width=0.3pt,
+           fill opacity=0.9,
+           nodes near coords={\pgfmathfloattoint{\pgfplotspointmeta}\ifnum\pgfmathresult>1\relax\pgfmathresult\fi},
+           nodes near coords align={center},
+           every node near coord/.style={font=\small\bfseries, text=white, inner sep=2pt}]
+    coordinates {(0,6) (1,10) (2,0) (3,14) (4,0) (5,7) (6,0) (7,0)};
+  \addlegendentry{Build Fail}
+  \addplot[ybar stacked, fill=pbRunFail, draw=black, line width=0.3pt,
+           fill opacity=0.9,
+           nodes near coords={\pgfmathfloattoint{\pgfplotspointmeta}\ifnum\pgfmathresult>1\relax\pgfmathresult\fi},
+           nodes near coords align={center},
+           every node near coord/.style={font=\small\bfseries, text=white, inner sep=2pt}]
+    coordinates {(0,0) (1,0) (2,6) (3,0) (4,2) (5,1) (6,0) (7,0)};
+  \addlegendentry{Run Fail}
+  \addplot[ybar stacked, fill=pbExtractionFail, draw=black, line width=0.3pt,
+           fill opacity=0.9,
+           nodes near coords={\pgfmathfloattoint{\pgfplotspointmeta}\ifnum\pgfmathresult>1\relax\pgfmathresult\fi},
+           nodes near coords align={center},
+           every node near coord/.style={font=\small\bfseries, text=white, inner sep=2pt}]
+    coordinates {(0,0) (1,0) (2,0) (3,0) (4,0) (5,0) (6,0) (7,0)};
+  \addlegendentry{Extract Fail}
+  \addplot[ybar stacked, fill=pbVerifyFail, draw=black, line width=0.3pt,
+           fill opacity=0.9,
+           nodes near coords={\pgfmathfloattoint{\pgfplotspointmeta}\ifnum\pgfmathresult>1\relax\pgfmathresult\fi},
+           nodes near coords align={center},
+           every node near coord/.style={font=\small\bfseries, text=white, inner sep=2pt}]
+    coordinates {(0,0) (1,0) (2,2) (3,2) (4,1) (5,2) (6,0) (7,0)};
+  \addlegendentry{Verify Fail}
+\end{axis}
+\end{tikzpicture}

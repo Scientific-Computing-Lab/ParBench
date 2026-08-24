@@ -1,0 +1,182 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "myocyte",
+        "parallel_api": "omp",
+        "unique_id": "rodinia-myocyte-omp",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "openmp/myocyte",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "cam.c",
+            "define.c",
+            "ecc.c",
+            "embedded_fehlberg_7_8.c",
+            "file.c",
+            "fin.c",
+            "main.c",
+            "master.c",
+            "solver.c",
+            "timer.c"
+        ],
+        "support_files": [
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "main.c",
+            "master.c"
+        ]
+    },
+    "implementation": {
+        "api": "omp",
+        "api_version": null,
+        "language": "C",
+        "language_standard": null
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "gcc>=9.0 (with OpenMP support)"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "openmp/myocyte",
+        "commands": {
+            "configure": null,
+            "build": "make",
+            "clean": "make clean"
+        },
+        "variables": null,
+        "outputs": {
+            "executable": "./myocyte.out"
+        }
+    },
+    "run": {
+        "executable": "./myocyte.out",
+        "default_arguments": [
+            "100",
+            "1",
+            "1",
+            "4"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "100",
+                    "1",
+                    "1",
+                    "4"
+                ],
+                "description": "Small input for correctness verification of myocyte (OMP)",
+                "input_files": [],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "1000",
+                    "100",
+                    "1",
+                    "4"
+                ],
+                "description": "Large input for performance measurement of myocyte (OMP)",
+                "input_files": [],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Time spent in different stages",
+                "description": "Myocyte simulation timing reported"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "cpu",
+        "requirements": {
+            "cpu": {
+                "min_cores": 4,
+                "min_memory_gb": 8
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.279085+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "ERROR: 3 is the incorrect number of arguments, the number of arguments must be 4\n",
+                "wall_time_seconds": 0.001,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Cardiac myocyte electrophysiology simulation (ODE solver) on GPU",
+        "domain": "scientific simulation",
+        "complexity": "cardiac myocyte simulation (ODE solver)",
+        "tags": [
+            "cardiac",
+            "myocyte",
+            "ode",
+            "omp",
+            "rodinia",
+            "simulation"
+        ],
+        "multi_file": true,
+        "translation_complexity": "multi_to_multi"
+    }
+}

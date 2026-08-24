@@ -1,0 +1,202 @@
+{
+  "spec_version": "1.0.0",
+  "identity": {
+    "kernel_name": "particle-diffusion",
+    "parallel_api": "omp",
+    "unique_id": "hecbench-particle-diffusion-omp",
+    "source_suite": "hecbench"
+  },
+  "provenance": {
+    "repository": {
+      "url": "https://github.com/zjin-lcf/HeCBench",
+      "commit": "archive-download",
+      "branch": "master"
+    },
+    "repo_root": "HeCBench-master/",
+    "source_path": "src/particle-diffusion-omp",
+    "license": "MIT"
+  },
+  "files": {
+    "prompt_payload": [
+      "motionsim.cpp"
+    ],
+    "support_files": [
+      "Makefile",
+      "Makefile.aomp",
+      "Makefile.nvc",
+      "CMakeLists.txt"
+    ],
+    "verification_only": [
+      "../particle-diffusion-cuda/reference.h"
+    ],
+    "translation_targets": [
+      "motionsim.cpp"
+    ]
+  },
+  "implementation": {
+    "api": "omp",
+    "api_version": null,
+    "language": "C++",
+    "language_standard": "C++17"
+  },
+  "build": {
+    "environment": {
+      "preferred": "system",
+      "conda": null,
+      "system": {
+        "dependencies": [
+          "GCC >= 9.0"
+        ]
+      }
+    },
+    "build_system": "make",
+    "working_directory": "src/particle-diffusion-omp",
+    "commands": {
+      "configure": null,
+      "build": "make -f Makefile.aomp CC=g++ DEVICE=cpu",
+      "clean": "make -f Makefile.aomp clean"
+    },
+    "variables": null,
+    "outputs": {
+      "executable": "main"
+    }
+  },
+  "run": {
+    "executable": "./main",
+    "default_arguments": [
+      "2000",
+      "100"
+    ],
+    "timeout_seconds": 300,
+    "environment_variables": null,
+    "input_configurations": {
+      "correctness": {
+        "arguments": [
+          "100",
+          "1"
+        ],
+        "description": "Short simulation (100 iterations, 1 repeat) for correctness validation",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      },
+      "performance": {
+        "arguments": [
+          "2000",
+          "100"
+        ],
+        "description": "Full simulation (2000 iterations, 100 repeats) for performance",
+        "input_files": [],
+        "expected_results": {
+          "stdout_pattern": "PASS"
+        }
+      }
+    }
+  },
+  "verification": {
+    "method": "reference_comparison",
+    "strategies": [
+      {
+        "type": "stdout_pattern",
+        "pattern": "PASS",
+        "description": "GPU map compared element-wise to CPU reference (<=2 mismatches tolerated). Checked first because exit_code=0 even on verification failure."
+      },
+      {
+        "type": "exit_code",
+        "expected": 0,
+        "description": "Process exits cleanly"
+      }
+    ],
+    "floating_point": {
+      "tolerance": 2,
+      "tolerance_type": "absolute",
+      "note": "Integer map comparison allows up to 2 element-level mismatches due to floating-point non-determinism in random walk"
+    }
+  },
+  "performance": {
+    "metrics": [
+      {
+        "name": "kernel_time",
+        "extraction": {
+          "type": "regex",
+          "pattern": "Average kernel execution time:\\s+([\\d.eE+-]+)\\s+\\(s\\)",
+          "capture_group": 1
+        },
+        "unit": "s"
+      },
+      {
+        "name": "simulation_time",
+        "extraction": {
+          "type": "regex",
+          "pattern": "Simulation time:\\s+([\\d.eE+-]+)\\s+\\(s\\)",
+          "capture_group": 1
+        },
+        "unit": "s"
+      }
+    ],
+    "warmup_runs": 1,
+    "measurement_runs": 5
+  },
+  "hardware": {
+    "target": "cpu",
+    "requirements": {
+      "cpu": {
+        "min_cores": 4,
+        "min_memory_gb": 4
+      }
+    },
+    "reference_platform": {
+      "platform_id": "rtx4070-r9-7900x",
+      "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+      },
+      "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+      },
+      "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+      }
+    }
+  },
+  "baseline_results": {
+    "reference_platform": "rtx4070-r9-7900x",
+    "timestamp": "2026-02-11T12:00:00Z",
+    "configurations": {
+      "correctness": {
+        "status": "fail",
+        "exit_code": 0,
+        "stdout_snippet": "FAIL",
+        "wall_time_seconds": null,
+        "fail_reason": "Verification FAIL (exit 0). Root cause: code relies on GPU device/host memory separation that does not exist on CPU fallback. Buffers particleX/Y are declared map(alloc:) which on GPU creates separate device copies; on CPU (GCC host fallback) they alias the same host memory. The kernel modifies particleX/Y in-place, so when motion_host() reference runs afterward it starts from already-modified particle positions instead of the original (10.0,10.0). Even with nRepeat=1 the verification fails because the sequential reference computes from corrupted initial state. The kernel computation itself is correct (uses distribute parallel for simd, thread-count-independent).",
+        "fail_category": "benchmark_source_gpu_memory_model",
+        "reproducibility": "deterministic"
+      }
+    }
+  },
+  "metadata": {
+    "description": "Monte Carlo simulation of water molecule diffusion in tissue. Particles undergo random walks on a 2D grid; a per-particle map accumulates cell-hit counts, then reduces to a global grid.",
+    "domain": "Monte Carlo simulation",
+    "complexity": "O(particles \u00d7 iterations)",
+    "tags": [
+      "monte-carlo",
+      "diffusion",
+      "random-walk",
+      "simulation",
+      "particle"
+    ],
+    "multi_file": false,
+    "translation_complexity": "single_file"
+  }
+}

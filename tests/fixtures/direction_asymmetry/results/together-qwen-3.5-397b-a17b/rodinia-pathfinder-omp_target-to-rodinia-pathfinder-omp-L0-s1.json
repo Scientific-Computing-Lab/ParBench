@@ -1,0 +1,10 @@
+{
+  "source_spec": "rodinia-pathfinder-omp_target",
+  "target_spec": "rodinia-pathfinder-omp",
+  "model": "together-qwen-3.5-397b-a17b",
+  "direction": "omp_target-to-omp",
+  "overall_status": "PASS",
+  "augment_level": 0,
+  "sample_id": 1,
+  "temperature": 0.7
+}

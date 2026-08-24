@@ -1,0 +1,184 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "particlefilter",
+        "parallel_api": "omp",
+        "unique_id": "rodinia-particlefilter-omp",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "openmp/particlefilter",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "ex_particle_OPENMP_seq.c"
+        ],
+        "support_files": [
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "ex_particle_OPENMP_seq.c"
+        ]
+    },
+    "implementation": {
+        "api": "omp",
+        "api_version": null,
+        "language": "C",
+        "language_standard": null
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "gcc>=9.0 (with OpenMP support)"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "openmp/particlefilter",
+        "commands": {
+            "configure": null,
+            "build": "make",
+            "clean": "make clean"
+        },
+        "variables": null,
+        "outputs": {
+            "executable": "./particle_filter"
+        }
+    },
+    "run": {
+        "executable": "./particle_filter",
+        "default_arguments": [
+            "-x",
+            "128",
+            "-y",
+            "128",
+            "-z",
+            "10",
+            "-np",
+            "1000"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-x",
+                    "128",
+                    "-y",
+                    "128",
+                    "-z",
+                    "10",
+                    "-np",
+                    "1000"
+                ],
+                "description": "Small input for correctness verification of particlefilter (OMP)",
+                "input_files": [],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "-x",
+                    "128",
+                    "-y",
+                    "128",
+                    "-z",
+                    "10",
+                    "-np",
+                    "10000"
+                ],
+                "description": "Large input for performance measurement of particlefilter (OMP)",
+                "input_files": [],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "ENTIRE PROGRAM TOOK",
+                "description": "Particle filter computation completed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "cpu",
+        "requirements": {
+            "cpu": {
+                "min_cores": 4,
+                "min_memory_gb": 8
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.280792+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "VIDEO SEQUENCE TOOK 0.004266\nTIME TO GET NEIGHBORS TOOK: 0.000000\nTIME TO GET WEIGHTSTOOK: 0.000608\nTIME TO SET ARRAYS TOOK: 0.000031\nTIME TO SET ERROR TOOK: 0.000043\nTIME TO GET LIKELIHOODS TOOK: 0.000038\nTIME TO GET EXP TOOK: 0.000066\nTIME TO SUM WEIGHTS TOOK: 0.000005\nTIME TO NORMALIZE WEIGHTS TOOK: 0.000004\nTIME TO MOVE OBJECT TOOK: 0.000015\nXE: 64.454557\nYE: 64.371944\n0.587336\nTIME TO CALC CUM SUM TOOK: 0.000004\nTIME TO CALC U TOOK: 0.000012\nTIME TO CALC NEW ARRAY X AND Y TOOK: 0.000028\nTIME TO RESET WEIGHTS TOOK: 0.000003\nTIME TO SET ERROR TOOK: 0.000009\nTIME TO GET LIKELIHOODS TOOK: 0.000016\nTIME TO GET EXP TOOK: 0.000004\nTIME TO SUM WEIGHTS TOOK: 0.000006\nTIME TO NORMALIZE WEIGHTS TOOK: 0.000004\nTIME TO MOVE OBJECT TOOK: 0.000011\nXE: 62.138333\nYE: 65.448213\n2.358628\nTIME TO CALC CUM SUM TOOK: 0.000002\nTIME TO CALC U TOOK: 0.000004\nTIME TO CALC NEW ARRAY X AND Y TOOK: 0.000024\nTIME TO RESET WEIGHTS TOOK: 0.000004\nTIME TO SET ERROR TOOK: 0.000009\nTIME TO GET LIKELIHOODS TOOK: 0.0",
+                "wall_time_seconds": 0.007,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Particle filter for Bayesian state estimation on GPU",
+        "domain": "signal processing",
+        "complexity": "particle filter (Bayesian estimation)",
+        "tags": [
+            "bayesian",
+            "omp",
+            "particle-filter",
+            "particlefilter",
+            "rodinia",
+            "state-estimation"
+        ],
+        "multi_file": false,
+        "translation_complexity": "multi_to_single"
+    }
+}

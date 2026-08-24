@@ -1,0 +1,2325 @@
+{
+  "contract_version": "parbench-final-v1",
+  "pairs": [
+    {
+      "source_spec": "hecbench-aes-cuda",
+      "target_spec": "hecbench-aes-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-aes-omp",
+      "target_spec": "hecbench-aes-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-babelstream-cuda",
+      "target_spec": "hecbench-babelstream-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-babelstream-omp",
+      "target_spec": "hecbench-babelstream-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-backprop-cuda",
+      "target_spec": "hecbench-backprop-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-backprop-omp",
+      "target_spec": "hecbench-backprop-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-bezier-surface-cuda",
+      "target_spec": "hecbench-bezier-surface-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-bezier-surface-omp",
+      "target_spec": "hecbench-bezier-surface-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-bilateral-cuda",
+      "target_spec": "hecbench-bilateral-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-bilateral-omp",
+      "target_spec": "hecbench-bilateral-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-binomial-cuda",
+      "target_spec": "hecbench-binomial-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-binomial-omp",
+      "target_spec": "hecbench-binomial-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-ccsd-trpdrv-cuda",
+      "target_spec": "hecbench-ccsd-trpdrv-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-ccsd-trpdrv-omp",
+      "target_spec": "hecbench-ccsd-trpdrv-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-chacha20-cuda",
+      "target_spec": "hecbench-chacha20-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-chacha20-omp",
+      "target_spec": "hecbench-chacha20-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-chi2-cuda",
+      "target_spec": "hecbench-chi2-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-chi2-omp",
+      "target_spec": "hecbench-chi2-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-convolution1d-cuda",
+      "target_spec": "hecbench-convolution1d-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-convolution1d-omp_target",
+      "target_spec": "hecbench-convolution1d-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-convolution3d-cuda",
+      "target_spec": "hecbench-convolution3d-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-convolution3d-omp",
+      "target_spec": "hecbench-convolution3d-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-convolutionseparable-cuda",
+      "target_spec": "hecbench-convolutionseparable-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-convolutionseparable-omp",
+      "target_spec": "hecbench-convolutionseparable-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-crc64-cuda",
+      "target_spec": "hecbench-crc64-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-crc64-omp",
+      "target_spec": "hecbench-crc64-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-dct8x8-cuda",
+      "target_spec": "hecbench-dct8x8-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-dct8x8-omp",
+      "target_spec": "hecbench-dct8x8-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-deredundancy-cuda",
+      "target_spec": "hecbench-deredundancy-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-deredundancy-omp",
+      "target_spec": "hecbench-deredundancy-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-eigenvalue-cuda",
+      "target_spec": "hecbench-eigenvalue-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-eigenvalue-omp",
+      "target_spec": "hecbench-eigenvalue-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-feynman-kac-cuda",
+      "target_spec": "hecbench-feynman-kac-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-feynman-kac-omp",
+      "target_spec": "hecbench-feynman-kac-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-fft-cuda",
+      "target_spec": "hecbench-fft-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-fft-omp",
+      "target_spec": "hecbench-fft-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-floydwarshall-cuda",
+      "target_spec": "hecbench-floydwarshall-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-floydwarshall-cuda",
+      "target_spec": "hecbench-floydwarshall-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-floydwarshall-omp",
+      "target_spec": "hecbench-floydwarshall-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-floydwarshall-omp",
+      "target_spec": "hecbench-floydwarshall-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-floydwarshall-omp_target",
+      "target_spec": "hecbench-floydwarshall-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-floydwarshall-omp_target",
+      "target_spec": "hecbench-floydwarshall-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-fpc-cuda",
+      "target_spec": "hecbench-fpc-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-fpc-omp",
+      "target_spec": "hecbench-fpc-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-fwt-cuda",
+      "target_spec": "hecbench-fwt-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-fwt-omp",
+      "target_spec": "hecbench-fwt-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-ga-cuda",
+      "target_spec": "hecbench-ga-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-ga-omp",
+      "target_spec": "hecbench-ga-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-gaussian-cuda",
+      "target_spec": "hecbench-gaussian-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-gaussian-omp",
+      "target_spec": "hecbench-gaussian-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-geglu-cuda",
+      "target_spec": "hecbench-geglu-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-geglu-omp",
+      "target_spec": "hecbench-geglu-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-heat2d-cuda",
+      "target_spec": "hecbench-heat2d-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-heat2d-cuda",
+      "target_spec": "hecbench-heat2d-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-heat2d-omp",
+      "target_spec": "hecbench-heat2d-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-heat2d-omp",
+      "target_spec": "hecbench-heat2d-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-heat2d-omp_target",
+      "target_spec": "hecbench-heat2d-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-heat2d-omp_target",
+      "target_spec": "hecbench-heat2d-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-ising-cuda",
+      "target_spec": "hecbench-ising-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-ising-omp",
+      "target_spec": "hecbench-ising-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-iso2dfd-cuda",
+      "target_spec": "hecbench-iso2dfd-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-iso2dfd-cuda",
+      "target_spec": "hecbench-iso2dfd-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-iso2dfd-omp",
+      "target_spec": "hecbench-iso2dfd-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-iso2dfd-omp",
+      "target_spec": "hecbench-iso2dfd-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-iso2dfd-omp_target",
+      "target_spec": "hecbench-iso2dfd-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-iso2dfd-omp_target",
+      "target_spec": "hecbench-iso2dfd-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-jacobi-cuda",
+      "target_spec": "hecbench-jacobi-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-jacobi-omp_target",
+      "target_spec": "hecbench-jacobi-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-jenkins-hash-cuda",
+      "target_spec": "hecbench-jenkins-hash-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-jenkins-hash-omp",
+      "target_spec": "hecbench-jenkins-hash-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-keccaktreehash-cuda",
+      "target_spec": "hecbench-keccaktreehash-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-keccaktreehash-omp",
+      "target_spec": "hecbench-keccaktreehash-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-knn-cuda",
+      "target_spec": "hecbench-knn-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-knn-omp",
+      "target_spec": "hecbench-knn-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-laplace3d-cuda",
+      "target_spec": "hecbench-laplace3d-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-laplace3d-omp",
+      "target_spec": "hecbench-laplace3d-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-lud-cuda",
+      "target_spec": "hecbench-lud-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-lud-omp",
+      "target_spec": "hecbench-lud-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-lulesh-cuda",
+      "target_spec": "hecbench-lulesh-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-lulesh-omp",
+      "target_spec": "hecbench-lulesh-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-mandelbrot-cuda",
+      "target_spec": "hecbench-mandelbrot-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-mandelbrot-omp",
+      "target_spec": "hecbench-mandelbrot-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-maxpool3d-cuda",
+      "target_spec": "hecbench-maxpool3d-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-maxpool3d-omp",
+      "target_spec": "hecbench-maxpool3d-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-md-cuda",
+      "target_spec": "hecbench-md-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-md-omp_target",
+      "target_spec": "hecbench-md-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-md5hash-cuda",
+      "target_spec": "hecbench-md5hash-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-md5hash-omp",
+      "target_spec": "hecbench-md5hash-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-merge-cuda",
+      "target_spec": "hecbench-merge-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-merge-omp",
+      "target_spec": "hecbench-merge-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-mis-cuda",
+      "target_spec": "hecbench-mis-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-mis-omp",
+      "target_spec": "hecbench-mis-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-murmurhash3-cuda",
+      "target_spec": "hecbench-murmurhash3-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-murmurhash3-omp",
+      "target_spec": "hecbench-murmurhash3-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-myocyte-cuda",
+      "target_spec": "hecbench-myocyte-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-myocyte-omp",
+      "target_spec": "hecbench-myocyte-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-nbody-cuda",
+      "target_spec": "hecbench-nbody-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-nbody-omp",
+      "target_spec": "hecbench-nbody-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-nn-cuda",
+      "target_spec": "hecbench-nn-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-nn-omp",
+      "target_spec": "hecbench-nn-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-nqueen-cuda",
+      "target_spec": "hecbench-nqueen-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-nqueen-omp_target",
+      "target_spec": "hecbench-nqueen-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-nw-cuda",
+      "target_spec": "hecbench-nw-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-nw-omp",
+      "target_spec": "hecbench-nw-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-page-rank-cuda",
+      "target_spec": "hecbench-page-rank-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-page-rank-omp_target",
+      "target_spec": "hecbench-page-rank-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-particle-diffusion-cuda",
+      "target_spec": "hecbench-particle-diffusion-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-particle-diffusion-omp",
+      "target_spec": "hecbench-particle-diffusion-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-pathfinder-cuda",
+      "target_spec": "hecbench-pathfinder-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-pathfinder-omp",
+      "target_spec": "hecbench-pathfinder-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-perplexity-cuda",
+      "target_spec": "hecbench-perplexity-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-perplexity-omp",
+      "target_spec": "hecbench-perplexity-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-popcount-cuda",
+      "target_spec": "hecbench-popcount-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-popcount-omp",
+      "target_spec": "hecbench-popcount-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-pso-cuda",
+      "target_spec": "hecbench-pso-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-pso-omp",
+      "target_spec": "hecbench-pso-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-radixsort-cuda",
+      "target_spec": "hecbench-radixsort-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-radixsort-omp",
+      "target_spec": "hecbench-radixsort-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-rmsnorm-cuda",
+      "target_spec": "hecbench-rmsnorm-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-rmsnorm-omp",
+      "target_spec": "hecbench-rmsnorm-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-scan-cuda",
+      "target_spec": "hecbench-scan-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-scan-cuda",
+      "target_spec": "hecbench-scan-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-scan-omp",
+      "target_spec": "hecbench-scan-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-scan-omp",
+      "target_spec": "hecbench-scan-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-scan-omp_target",
+      "target_spec": "hecbench-scan-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-scan-omp_target",
+      "target_spec": "hecbench-scan-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-secp256k1-cuda",
+      "target_spec": "hecbench-secp256k1-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-secp256k1-omp",
+      "target_spec": "hecbench-secp256k1-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-simplespmv-cuda",
+      "target_spec": "hecbench-simplespmv-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-simplespmv-omp",
+      "target_spec": "hecbench-simplespmv-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-sobel-cuda",
+      "target_spec": "hecbench-sobel-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-sobel-omp",
+      "target_spec": "hecbench-sobel-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-sobol-cuda",
+      "target_spec": "hecbench-sobol-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-sobol-omp",
+      "target_spec": "hecbench-sobol-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-softmax-online-cuda",
+      "target_spec": "hecbench-softmax-online-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-softmax-online-omp",
+      "target_spec": "hecbench-softmax-online-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-stencil1d-cuda",
+      "target_spec": "hecbench-stencil1d-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-stencil1d-cuda",
+      "target_spec": "hecbench-stencil1d-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-stencil1d-omp",
+      "target_spec": "hecbench-stencil1d-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-stencil1d-omp",
+      "target_spec": "hecbench-stencil1d-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-stencil1d-omp_target",
+      "target_spec": "hecbench-stencil1d-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-stencil1d-omp_target",
+      "target_spec": "hecbench-stencil1d-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-thomas-cuda",
+      "target_spec": "hecbench-thomas-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-thomas-omp",
+      "target_spec": "hecbench-thomas-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-tissue-cuda",
+      "target_spec": "hecbench-tissue-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-tissue-omp",
+      "target_spec": "hecbench-tissue-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-triad-cuda",
+      "target_spec": "hecbench-triad-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-triad-omp",
+      "target_spec": "hecbench-triad-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-tsp-cuda",
+      "target_spec": "hecbench-tsp-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "hecbench-tsp-omp",
+      "target_spec": "hecbench-tsp-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "mixbench-mixbench-cuda",
+      "target_spec": "mixbench-mixbench-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "mixbench-mixbench-cuda",
+      "target_spec": "mixbench-mixbench-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "mixbench-mixbench-omp",
+      "target_spec": "mixbench-mixbench-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "mixbench-mixbench-omp",
+      "target_spec": "mixbench-mixbench-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "mixbench-mixbench-opencl",
+      "target_spec": "mixbench-mixbench-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "mixbench-mixbench-opencl",
+      "target_spec": "mixbench-mixbench-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-backprop-cuda",
+      "target_spec": "rodinia-backprop-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-backprop-cuda",
+      "target_spec": "rodinia-backprop-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-backprop-omp",
+      "target_spec": "rodinia-backprop-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-backprop-omp",
+      "target_spec": "rodinia-backprop-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-backprop-opencl",
+      "target_spec": "rodinia-backprop-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-backprop-opencl",
+      "target_spec": "rodinia-backprop-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-bfs-cuda",
+      "target_spec": "rodinia-bfs-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-bfs-cuda",
+      "target_spec": "rodinia-bfs-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-bfs-omp",
+      "target_spec": "rodinia-bfs-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-bfs-omp",
+      "target_spec": "rodinia-bfs-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-bfs-opencl",
+      "target_spec": "rodinia-bfs-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-bfs-opencl",
+      "target_spec": "rodinia-bfs-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-bptree-cuda",
+      "target_spec": "rodinia-bptree-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-bptree-cuda",
+      "target_spec": "rodinia-bptree-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-bptree-omp",
+      "target_spec": "rodinia-bptree-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-bptree-omp",
+      "target_spec": "rodinia-bptree-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-bptree-opencl",
+      "target_spec": "rodinia-bptree-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-bptree-opencl",
+      "target_spec": "rodinia-bptree-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-cfd-cuda",
+      "target_spec": "rodinia-cfd-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-cfd-cuda",
+      "target_spec": "rodinia-cfd-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-cfd-omp",
+      "target_spec": "rodinia-cfd-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-cfd-omp",
+      "target_spec": "rodinia-cfd-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-cfd-opencl",
+      "target_spec": "rodinia-cfd-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-cfd-opencl",
+      "target_spec": "rodinia-cfd-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-dwt2d-cuda",
+      "target_spec": "rodinia-dwt2d-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-dwt2d-opencl",
+      "target_spec": "rodinia-dwt2d-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-gaussian-cuda",
+      "target_spec": "rodinia-gaussian-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-gaussian-opencl",
+      "target_spec": "rodinia-gaussian-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-heartwall-cuda",
+      "target_spec": "rodinia-heartwall-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-heartwall-cuda",
+      "target_spec": "rodinia-heartwall-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-heartwall-omp",
+      "target_spec": "rodinia-heartwall-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-heartwall-omp",
+      "target_spec": "rodinia-heartwall-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-heartwall-opencl",
+      "target_spec": "rodinia-heartwall-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-heartwall-opencl",
+      "target_spec": "rodinia-heartwall-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hotspot-cuda",
+      "target_spec": "rodinia-hotspot-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hotspot-cuda",
+      "target_spec": "rodinia-hotspot-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hotspot-omp",
+      "target_spec": "rodinia-hotspot-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hotspot-omp",
+      "target_spec": "rodinia-hotspot-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hotspot-opencl",
+      "target_spec": "rodinia-hotspot-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hotspot-opencl",
+      "target_spec": "rodinia-hotspot-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hotspot3d-cuda",
+      "target_spec": "rodinia-hotspot3d-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hotspot3d-cuda",
+      "target_spec": "rodinia-hotspot3d-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hotspot3d-omp",
+      "target_spec": "rodinia-hotspot3d-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hotspot3d-omp",
+      "target_spec": "rodinia-hotspot3d-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hotspot3d-opencl",
+      "target_spec": "rodinia-hotspot3d-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hotspot3d-opencl",
+      "target_spec": "rodinia-hotspot3d-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hybridsort-cuda",
+      "target_spec": "rodinia-hybridsort-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-hybridsort-opencl",
+      "target_spec": "rodinia-hybridsort-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-kmeans-cuda",
+      "target_spec": "rodinia-kmeans-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-kmeans-cuda",
+      "target_spec": "rodinia-kmeans-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-kmeans-omp",
+      "target_spec": "rodinia-kmeans-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-kmeans-omp",
+      "target_spec": "rodinia-kmeans-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-kmeans-opencl",
+      "target_spec": "rodinia-kmeans-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-kmeans-opencl",
+      "target_spec": "rodinia-kmeans-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-lavamd-cuda",
+      "target_spec": "rodinia-lavamd-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-lavamd-cuda",
+      "target_spec": "rodinia-lavamd-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-lavamd-omp",
+      "target_spec": "rodinia-lavamd-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-lavamd-omp",
+      "target_spec": "rodinia-lavamd-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-lavamd-opencl",
+      "target_spec": "rodinia-lavamd-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-lavamd-opencl",
+      "target_spec": "rodinia-lavamd-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-lud-cuda",
+      "target_spec": "rodinia-lud-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-lud-cuda",
+      "target_spec": "rodinia-lud-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-lud-omp",
+      "target_spec": "rodinia-lud-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-lud-omp",
+      "target_spec": "rodinia-lud-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-lud-opencl",
+      "target_spec": "rodinia-lud-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-lud-opencl",
+      "target_spec": "rodinia-lud-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-mummergpu-cuda",
+      "target_spec": "rodinia-mummergpu-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-mummergpu-omp",
+      "target_spec": "rodinia-mummergpu-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-myocyte-cuda",
+      "target_spec": "rodinia-myocyte-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-myocyte-cuda",
+      "target_spec": "rodinia-myocyte-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-myocyte-omp",
+      "target_spec": "rodinia-myocyte-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-myocyte-omp",
+      "target_spec": "rodinia-myocyte-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-myocyte-opencl",
+      "target_spec": "rodinia-myocyte-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-myocyte-opencl",
+      "target_spec": "rodinia-myocyte-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-nn-cuda",
+      "target_spec": "rodinia-nn-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-nn-cuda",
+      "target_spec": "rodinia-nn-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-nn-omp",
+      "target_spec": "rodinia-nn-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-nn-omp",
+      "target_spec": "rodinia-nn-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-nn-opencl",
+      "target_spec": "rodinia-nn-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-nn-opencl",
+      "target_spec": "rodinia-nn-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-nw-cuda",
+      "target_spec": "rodinia-nw-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-nw-cuda",
+      "target_spec": "rodinia-nw-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-nw-omp",
+      "target_spec": "rodinia-nw-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-nw-omp",
+      "target_spec": "rodinia-nw-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-nw-opencl",
+      "target_spec": "rodinia-nw-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-nw-opencl",
+      "target_spec": "rodinia-nw-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-particlefilter-cuda",
+      "target_spec": "rodinia-particlefilter-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-particlefilter-cuda",
+      "target_spec": "rodinia-particlefilter-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-particlefilter-omp",
+      "target_spec": "rodinia-particlefilter-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-particlefilter-omp",
+      "target_spec": "rodinia-particlefilter-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-particlefilter-opencl",
+      "target_spec": "rodinia-particlefilter-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-particlefilter-opencl",
+      "target_spec": "rodinia-particlefilter-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-pathfinder-cuda",
+      "target_spec": "rodinia-pathfinder-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-pathfinder-cuda",
+      "target_spec": "rodinia-pathfinder-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-pathfinder-omp",
+      "target_spec": "rodinia-pathfinder-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-pathfinder-omp",
+      "target_spec": "rodinia-pathfinder-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-pathfinder-opencl",
+      "target_spec": "rodinia-pathfinder-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-pathfinder-opencl",
+      "target_spec": "rodinia-pathfinder-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-srad-cuda",
+      "target_spec": "rodinia-srad-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-srad-cuda",
+      "target_spec": "rodinia-srad-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-srad-omp",
+      "target_spec": "rodinia-srad-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-srad-omp",
+      "target_spec": "rodinia-srad-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-srad-opencl",
+      "target_spec": "rodinia-srad-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-srad-opencl",
+      "target_spec": "rodinia-srad-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-streamcluster-cuda",
+      "target_spec": "rodinia-streamcluster-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-streamcluster-cuda",
+      "target_spec": "rodinia-streamcluster-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-streamcluster-omp",
+      "target_spec": "rodinia-streamcluster-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-streamcluster-omp",
+      "target_spec": "rodinia-streamcluster-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-streamcluster-opencl",
+      "target_spec": "rodinia-streamcluster-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rodinia-streamcluster-opencl",
+      "target_spec": "rodinia-streamcluster-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rsbench-rsbench-cuda",
+      "target_spec": "rsbench-rsbench-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rsbench-rsbench-cuda",
+      "target_spec": "rsbench-rsbench-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rsbench-rsbench-cuda",
+      "target_spec": "rsbench-rsbench-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rsbench-rsbench-omp",
+      "target_spec": "rsbench-rsbench-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rsbench-rsbench-omp",
+      "target_spec": "rsbench-rsbench-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rsbench-rsbench-omp",
+      "target_spec": "rsbench-rsbench-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rsbench-rsbench-omp_target",
+      "target_spec": "rsbench-rsbench-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rsbench-rsbench-omp_target",
+      "target_spec": "rsbench-rsbench-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rsbench-rsbench-omp_target",
+      "target_spec": "rsbench-rsbench-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rsbench-rsbench-opencl",
+      "target_spec": "rsbench-rsbench-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rsbench-rsbench-opencl",
+      "target_spec": "rsbench-rsbench-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "rsbench-rsbench-opencl",
+      "target_spec": "rsbench-rsbench-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "xsbench-xsbench-cuda",
+      "target_spec": "xsbench-xsbench-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "xsbench-xsbench-cuda",
+      "target_spec": "xsbench-xsbench-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "xsbench-xsbench-cuda",
+      "target_spec": "xsbench-xsbench-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "xsbench-xsbench-omp",
+      "target_spec": "xsbench-xsbench-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "xsbench-xsbench-omp",
+      "target_spec": "xsbench-xsbench-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "xsbench-xsbench-omp",
+      "target_spec": "xsbench-xsbench-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "xsbench-xsbench-omp_target",
+      "target_spec": "xsbench-xsbench-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "xsbench-xsbench-omp_target",
+      "target_spec": "xsbench-xsbench-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "xsbench-xsbench-omp_target",
+      "target_spec": "xsbench-xsbench-opencl",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "xsbench-xsbench-opencl",
+      "target_spec": "xsbench-xsbench-cuda",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "xsbench-xsbench-opencl",
+      "target_spec": "xsbench-xsbench-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    },
+    {
+      "source_spec": "xsbench-xsbench-opencl",
+      "target_spec": "xsbench-xsbench-omp_target",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    }
+  ]
+}

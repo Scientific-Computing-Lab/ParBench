@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "parbench"
+version = "0.1.0"
+description = "Benchmark suite for evaluating LLM-based parallel code translation"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.0",
+    "jsonschema>=4.20",
+    "libclang>=18.1",
+]
+
+[project.optional-dependencies]
+eval = [
+    "anthropic>=0.40.0",
+    "openai>=1.50.0",
+]
+analysis = [
+    "matplotlib>=3.9",
+    "numpy>=1.26",
+]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6.0",
+]
+all = [
+    "parbench[eval,analysis,dev]",
+]
+
+[tool.ruff]
+# line-length feeds `ruff format` only; E501 is deliberately NOT selected
+# (decision D8, 2026-08-15): most lines sit under 100 and lighting up long
+# lines across untouched files would flood the pre-existing-debt WARN bucket.
+line-length = 100
+target-version = "py312"
+# Benchmark trees are never linted or fixed (CLAUDE.md: never edit benchmark
+# source). HeCBench-master and the three *-src trees are already gitignored;
+# rodinia is a submodule, so it needs an explicit exclusion.
+extend-exclude = [
+    "rodinia",
+    "HeCBench-master",
+    "mixbench",
+    "xsbench",
+    "rsbench",
+]
+
+[tool.ruff.lint]
+# Explicit selection (rule 38 redesign, 2026-08-15): the classic core set plus
+# import order, pyupgrade, and bugbear. Pinned explicitly because ruff's
+# built-in defaults widened around 0.15 and a version bump silently changed
+# which rules health_check's lint gate enforced.
+select = ["E4", "E7", "E9", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: requires real benchmark files on disk (GPU machine only)",
+    "llm: real LLM API calls (gated by PARBENCH_RUN_LLM_TESTS=1; costs ~$5.81 for full smoke set)",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["c_augmentation*", "harness*"]

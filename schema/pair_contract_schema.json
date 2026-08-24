@@ -1,0 +1,177 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ParBench pair-contract registry",
+  "description": "Declared per-directed-pair run and correctness contracts for cross-API translation (Task 2, gate E-02). Candidate registries carry unresolved placeholders; the production registry (Task 7) must resolve every entry. Loaded and enforced by scripts/evaluation/pair_contracts.py.",
+  "definitions": {
+    "oracle_strategy": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": ["exit_code", "stdout_pattern", "numeric_comparison", "file_hash", "file_diff"]
+        },
+        "pattern": {"type": "string", "minLength": 1},
+        "expected": {
+          "type": "number",
+          "minimum": -1.7976931348623157e308,
+          "maximum": 1.7976931348623157e308,
+          "description": "Bounded to the finite binary64 range: an integer token beyond it bypasses the loader's parse_float finiteness check and overflows the verifier's float coercion."
+        },
+        "extract_regex": {"type": "string", "minLength": 1},
+        "tolerance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1.7976931348623157e308
+        },
+        "path": {"type": "string", "minLength": 1},
+        "expected_sha256": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"},
+        "reference_file": {"type": "string", "minLength": 1},
+        "description": {"type": "string"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"type": {"const": "exit_code"}}},
+          "then": {"required": ["expected"], "properties": {"expected": {"type": "integer"}}}
+        },
+        {
+          "if": {"properties": {"type": {"const": "stdout_pattern"}}},
+          "then": {"required": ["pattern"]}
+        },
+        {
+          "if": {"properties": {"type": {"const": "numeric_comparison"}}},
+          "then": {"required": ["extract_regex", "expected"]}
+        },
+        {
+          "if": {"properties": {"type": {"const": "file_hash"}}},
+          "then": {"required": ["path", "expected_sha256"]}
+        },
+        {
+          "if": {"properties": {"type": {"const": "file_diff"}}},
+          "then": {"required": ["path", "reference_file"]}
+        }
+      ]
+    },
+    "negative_strategy": {
+      "type": "object",
+      "required": ["type", "pattern"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {"const": "stdout_exclude_pattern"},
+        "pattern": {"type": "string", "minLength": 1},
+        "description": {"type": "string"}
+      }
+    }
+  },
+  "type": "object",
+  "required": ["contract_version", "pairs"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "enum": ["parbench-final-v1", "parbench-contracts-v2"]
+    },
+    "pairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source_spec", "target_spec", "comparability", "baseline_witness"],
+        "additionalProperties": false,
+        "properties": {
+          "source_spec": {
+            "type": "string",
+            "minLength": 1,
+            "description": "unique_id of the source spec."
+          },
+          "target_spec": {
+            "type": "string",
+            "minLength": 1,
+            "description": "unique_id of the target spec."
+          },
+          "shared_input": {
+            "type": "object",
+            "required": ["source_args", "target_args"],
+            "additionalProperties": false,
+            "properties": {
+              "source_args": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "The source spec's correctness arguments; must match the spec on disk."
+              },
+              "target_args": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "The target spec's correctness arguments; must match the spec on disk."
+              }
+            }
+          },
+          "translated_run": {
+            "type": "object",
+            "required": ["args"],
+            "additionalProperties": false,
+            "properties": {
+              "args": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Arguments the translated binary is run with."
+              },
+              "environment": {
+                "type": "object",
+                "additionalProperties": {"type": "string"},
+                "description": "Environment variables merged into the target run block."
+              }
+            }
+          },
+          "target_oracle": {
+            "type": "object",
+            "required": ["strategies"],
+            "additionalProperties": false,
+            "properties": {
+              "strategies": {
+                "type": "array",
+                "items": {"$ref": "#/definitions/oracle_strategy"},
+                "description": "Positive verifier strategies; per-type required fields mirror schema/spec_schema.json. Negative checks belong in negative_checks, never here."
+              }
+            }
+          },
+          "negative_checks": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/negative_strategy"},
+            "description": "stdout_exclude_pattern strategies only; conjunctive with target_oracle."
+          },
+          "comparator": {
+            "type": "object",
+            "required": ["type", "evidence"],
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "enum": ["declared-strategy"],
+                "description": "Implemented comparator kinds only. Task 7 extends this enum when it implements further independent comparators; an unimplemented type must not validate."
+              },
+              "evidence": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Repo-relative path to the evidence file behind the comparator."
+              }
+            }
+          },
+          "baseline_witness": {
+            "type": "object",
+            "required": ["status"],
+            "additionalProperties": false,
+            "properties": {
+              "status": {"enum": ["pass", "fail", "unresolved"]},
+              "evidence": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Repo-relative path to the shared-input witness evidence."
+              }
+            }
+          },
+          "comparability": {
+            "enum": ["eligible", "incomparable", "unresolved"]
+          }
+        }
+      }
+    }
+  }
+}

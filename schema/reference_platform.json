@@ -1,0 +1,27 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "reference_platform.json",
+    "title": "ParBench Reference Platform",
+    "description": "Shared hardware/software reference platform used for all baseline measurements.",
+    "platform_id": "rtx4070-r9-7900x",
+    "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+    },
+    "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+    },
+    "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+    }
+}

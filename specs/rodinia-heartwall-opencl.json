@@ -1,0 +1,221 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "heartwall",
+        "parallel_api": "opencl",
+        "unique_id": "rodinia-heartwall-opencl",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "opencl/heartwall",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "kernel/kernel_gpu_opencl.cl",
+            "kernel/kernel_gpu_opencl_wrapper.c",
+            "main.c"
+        ],
+        "support_files": [
+            "util/avi/avilib.c",
+            "util/avi/avimod.c",
+            "util/file/file.c",
+            "util/opencl/opencl.c",
+            "util/timer/timer.c",
+            "kernel/kernel_gpu_opencl_wrapper.h",
+            "main.h",
+            "util/avi/avilib.h",
+            "util/avi/avimod.h",
+            "util/file/file.h",
+            "util/opencl/opencl.h",
+            "util/timer/timer.h",
+            "Makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "kernel/kernel_gpu_opencl.cl"
+        ]
+    },
+    "implementation": {
+        "api": "opencl",
+        "api_version": null,
+        "language": "C",
+        "language_standard": null
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "opencl>=2.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "opencl/heartwall",
+        "commands": {
+            "configure": null,
+            "build": "make OPENCL_INC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include OPENCL_LIB=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+            "clean": "make clean"
+        },
+        "variables": {
+            "OPENCL_INC": {
+                "description": "Path to OpenCL headers",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/include",
+                "detection": "find /usr -name 'cl.h' -path '*/CL/cl.h' | head -1 | xargs dirname | xargs dirname"
+            },
+            "OPENCL_LIB": {
+                "description": "Path to OpenCL libraries",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64",
+                "detection": "find /usr -name 'libOpenCL.so' | head -1 | xargs dirname"
+            }
+        },
+        "outputs": {
+            "executable": "./heartwall.out"
+        }
+    },
+    "run": {
+        "executable": "./heartwall.out",
+        "default_arguments": [
+            "-f",
+            "../../data/heartwall/test.avi",
+            "-i",
+            "../../data/heartwall/input.txt",
+            "-n",
+            "20",
+            "-p",
+            "0"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-f",
+                    "../../data/heartwall/test.avi",
+                    "-i",
+                    "../../data/heartwall/input.txt",
+                    "-n",
+                    "20",
+                    "-p",
+                    "0"
+                ],
+                "description": "Small input for correctness verification of heartwall (OPENCL)",
+                "input_files": [
+                    "../../data/heartwall/test.avi",
+                    "../../data/heartwall/input.txt"
+                ],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "-f",
+                    "../../data/heartwall/test.avi",
+                    "-i",
+                    "../../data/heartwall/input.txt",
+                    "-n",
+                    "20",
+                    "-p",
+                    "0"
+                ],
+                "description": "Large input for performance measurement of heartwall (OPENCL)",
+                "input_files": [
+                    "../../data/heartwall/test.avi",
+                    "../../data/heartwall/input.txt"
+                ],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "frame progress:",
+                "description": "Heart wall tracking frames processed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            },
+            {
+                "type": "stdout_exclude_pattern",
+                "pattern": "(?i)\\b(error)\\b",
+                "description": "Task 3 (E-03) generated negative condition: reachable failure token(s) ['error'] printed at rodinia/opencl/heartwall/main.c:151, rodinia/opencl/heartwall/util/avi/avilib.c:305, rodinia/opencl/heartwall/util/avi/avilib.c:1248, rodinia/opencl/heartwall/util/opencl/opencl.c:63, rodinia/opencl/heartwall/util/opencl/opencl.c:74, rodinia/opencl/heartwall/util/opencl/opencl.c:132; pattern matches no recorded passing-baseline stdout snippet. Generated by scripts/spec_tools/audit_oracle_contracts.py --apply-safe-negative-patterns; regenerate, never hand-edit."
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-27T00:00:00+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "WG size of kernel = 256 \n# of platforms 1\n\tPlatform 0: NVIDIA Corporation\nSelecting platform 0\n# of devices 1\n\tDevice 0: NVIDIA GeForce RTX 4070\nSelecting device 0\n-----OpenCL Compiler Output-----\n--------------------------------\ntSize is 25, sSize is 40\n# of workgroups = 51, # of threads/workgroup = 256 (ensure that device can handle)\nframe progress: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 \nTime spent in different stages of the application:\nInit: 426.324005\nMemAlloc: 0.011000\nHtoD: 1.543040\nExec: 55.503292\nDtoH: 0.005632\nClose: 1.176000\nTotal: 496.575989\n",
+                "wall_time_seconds": 0.548,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Heart wall tracking in ultrasound video frames on GPU",
+        "domain": "image processing",
+        "complexity": "heart wall tracking (image processing)",
+        "tags": [
+            "heart-wall",
+            "heartwall",
+            "image-processing",
+            "opencl",
+            "rodinia",
+            "tracking",
+            "ultrasound"
+        ],
+        "multi_file": true,
+        "translation_complexity": "multi_to_single"
+    }
+}

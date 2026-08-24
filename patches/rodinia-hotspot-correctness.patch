@@ -1,0 +1,17 @@
+--- a/openmp/hotspot/hotspot_openmp.cpp
++++ b/openmp/hotspot/hotspot_openmp.cpp
+@@ -127,6 +127,14 @@
+                             (temp[(r+1)*col] + temp[(r-1)*col] - 2.0*temp[r*col]) * Ry_1 + 
+                             (temp[r*col+1] - temp[r*col]) * Rx_1 + 
+                             (amb_temp - temp[r*col]) * Rz_1);
++                    }	/* Interior cell inside an edge-touching block
++                    	   (PARBENCH-HOTSPOT-PATCH: restore the missing
++                    	   final else so delta is never reused stale) */
++                    else {
++                        delta = (Cap_1) * (power[r*col+c] + 
++                            (temp[(r+1)*col+c] + temp[(r-1)*col+c] - 2.f*temp[r*col+c]) * Ry_1 + 
++                            (temp[r*col+c+1] + temp[r*col+c-1] - 2.f*temp[r*col+c]) * Rx_1 + 
++                            (amb_temp - temp[r*col+c]) * Rz_1);
+                     }
+                     result[r*col+c] =temp[r*col+c]+ delta;
+                 }

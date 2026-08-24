@@ -1,0 +1,187 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "lavamd",
+        "parallel_api": "cuda",
+        "unique_id": "rodinia-lavamd-cuda",
+        "source_suite": "rodinia"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/yuhc/gpu-rodinia",
+            "commit": "9c10d3ea16ddba2ba057cc3951a9efc4c2cc18a4",
+            "branch": "master"
+        },
+        "repo_root": "rodinia/rodinia-src",
+        "source_path": "cuda/lavaMD",
+        "license": "NCSA/Illinois Open Source License"
+    },
+    "files": {
+        "prompt_payload": [
+            "kernel/kernel_gpu_cuda.cu",
+            "kernel/kernel_gpu_cuda_wrapper.cu",
+            "util/device/device.cu"
+        ],
+        "support_files": [
+            "main.c",
+            "util/num/num.c",
+            "util/timer/timer.c",
+            "kernel/kernel_gpu_cuda_wrapper.h",
+            "main.h",
+            "util/device/device.h",
+            "util/num/num.h",
+            "util/timer/timer.h",
+            "makefile"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "kernel/kernel_gpu_cuda.cu",
+            "kernel/kernel_gpu_cuda_wrapper.cu"
+        ]
+    },
+    "implementation": {
+        "api": "cuda",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++14"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "cuda-toolkit>=11.0",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "make",
+        "working_directory": "cuda/lavaMD",
+        "commands": {
+            "configure": null,
+            "build": "make CUDA_DIR=/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda CUDA_FLAG='-arch sm_89'",
+            "clean": "make clean"
+        },
+        "variables": {
+            "CUDA_DIR": {
+                "description": "Path to CUDA toolkit installation",
+                "default": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda",
+                "detection": "dirname $(dirname $(which nvcc))"
+            }
+        },
+        "outputs": {
+            "executable": "./lavaMD"
+        }
+    },
+    "run": {
+        "executable": "./lavaMD",
+        "default_arguments": [
+            "-boxes1d",
+            "10"
+        ],
+        "timeout_seconds": 300,
+        "environment_variables": {
+            "LD_LIBRARY_PATH": "/opt/nvidia/hpc_sdk/Linux_x86_64/24.3/cuda/lib64:$LD_LIBRARY_PATH"
+        },
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "-boxes1d",
+                    "10"
+                ],
+                "description": "Small input for correctness verification of lavaMD (CUDA)",
+                "input_files": [],
+                "expected_results": null
+            },
+            "performance": {
+                "arguments": [
+                    "-boxes1d",
+                    "30"
+                ],
+                "description": "Large input for performance measurement of lavaMD (CUDA)",
+                "input_files": [],
+                "expected_results": null
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "Total time:",
+                "description": "lavaMD CUDA kernel computation completed"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits cleanly"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak"
+    },
+    "performance": null,
+    "hardware": {
+        "target": "gpu",
+        "requirements": {
+            "gpu": {
+                "vendor": "NVIDIA",
+                "min_compute_capability": "sm_60",
+                "min_memory_gb": 4
+            }
+        },
+        "reference_platform": {
+            "platform_id": "rtx4070-r9-7900x",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-06T22:15:55.277335+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "thread block size of kernel = 128 \nERROR: Unknown parameter\n",
+                "wall_time_seconds": 0.001,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "Molecular dynamics simulation using Lennard-Jones potential on GPU",
+        "domain": "molecular dynamics",
+        "complexity": "molecular dynamics (Lennard-Jones potential)",
+        "tags": [
+            "cuda",
+            "lavaMD",
+            "lennard-jones",
+            "molecular-dynamics",
+            "rodinia",
+            "simulation"
+        ],
+        "multi_file": true,
+        "translation_complexity": null
+    }
+}

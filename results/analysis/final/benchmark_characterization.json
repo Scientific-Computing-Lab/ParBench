@@ -1,0 +1,3333 @@
+{
+  "metadata": {
+    "generated": "2026-08-13T18:11:11.261292+00:00",
+    "project_root": "/parbench",
+    "script": "benchmark_characterization.py",
+    "corpus_size": 35
+  },
+  "sloc": {
+    "per_kernel": {
+      "backprop": {
+        "kernel": "backprop",
+        "suite": "rodinia",
+        "cuda_sloc": 197,
+        "omp_sloc": 449,
+        "omp_cuda_ratio": 2.28,
+        "num_source_files": 2,
+        "num_target_files": 2,
+        "file_details": [
+          {
+            "file": "backprop_cuda.cu",
+            "physical_sloc": 135
+          },
+          {
+            "file": "backprop_cuda_kernel.cu",
+            "physical_sloc": 62
+          }
+        ]
+      },
+      "bfs": {
+        "kernel": "bfs",
+        "suite": "rodinia",
+        "cuda_sloc": 242,
+        "omp_sloc": 144,
+        "omp_cuda_ratio": 0.6,
+        "num_source_files": 3,
+        "num_target_files": 3,
+        "file_details": [
+          {
+            "file": "bfs.cu",
+            "physical_sloc": 206
+          },
+          {
+            "file": "kernel.cu",
+            "physical_sloc": 21
+          },
+          {
+            "file": "kernel2.cu",
+            "physical_sloc": 15
+          }
+        ]
+      },
+      "bptree": {
+        "kernel": "bptree",
+        "suite": "rodinia",
+        "cuda_sloc": 338,
+        "omp_sloc": 1721,
+        "omp_cuda_ratio": 5.09,
+        "num_source_files": 5,
+        "num_target_files": 4,
+        "file_details": [
+          {
+            "file": "kernel/kernel_gpu_cuda.cu",
+            "physical_sloc": 29
+          },
+          {
+            "file": "kernel/kernel_gpu_cuda_2.cu",
+            "physical_sloc": 42
+          },
+          {
+            "file": "kernel/kernel_gpu_cuda_wrapper.cu",
+            "physical_sloc": 103
+          },
+          {
+            "file": "kernel/kernel_gpu_cuda_wrapper_2.cu",
+            "physical_sloc": 128
+          },
+          {
+            "file": "util/cuda/cuda.cu",
+            "physical_sloc": 36
+          }
+        ]
+      },
+      "cfd": {
+        "kernel": "cfd",
+        "suite": "rodinia",
+        "cuda_sloc": 1955,
+        "omp_sloc": 400,
+        "omp_cuda_ratio": 0.2,
+        "num_source_files": 4,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "euler3d.cu",
+            "physical_sloc": 454
+          },
+          {
+            "file": "euler3d_double.cu",
+            "physical_sloc": 456
+          },
+          {
+            "file": "pre_euler3d.cu",
+            "physical_sloc": 532
+          },
+          {
+            "file": "pre_euler3d_double.cu",
+            "physical_sloc": 513
+          }
+        ]
+      },
+      "dwt2d": {
+        "kernel": "dwt2d",
+        "suite": "rodinia",
+        "cuda_sloc": 1238,
+        "omp_sloc": null,
+        "omp_cuda_ratio": null,
+        "num_source_files": 8,
+        "num_target_files": 7,
+        "file_details": [
+          {
+            "file": "components.cu",
+            "physical_sloc": 114
+          },
+          {
+            "file": "dwt.cu",
+            "physical_sloc": 211
+          },
+          {
+            "file": "dwt_cuda/common.cu",
+            "physical_sloc": 4
+          },
+          {
+            "file": "dwt_cuda/fdwt53.cu",
+            "physical_sloc": 154
+          },
+          {
+            "file": "dwt_cuda/fdwt97.cu",
+            "physical_sloc": 152
+          },
+          {
+            "file": "dwt_cuda/rdwt53.cu",
+            "physical_sloc": 149
+          },
+          {
+            "file": "dwt_cuda/rdwt97.cu",
+            "physical_sloc": 158
+          },
+          {
+            "file": "main.cu",
+            "physical_sloc": 296
+          }
+        ]
+      },
+      "gaussian": {
+        "kernel": "gaussian",
+        "suite": "rodinia",
+        "cuda_sloc": 329,
+        "omp_sloc": null,
+        "omp_cuda_ratio": null,
+        "num_source_files": 1,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "gaussian.cu",
+            "physical_sloc": 329
+          }
+        ]
+      },
+      "heartwall": {
+        "kernel": "heartwall",
+        "suite": "rodinia",
+        "cuda_sloc": 1046,
+        "omp_sloc": 837,
+        "omp_cuda_ratio": 0.8,
+        "num_source_files": 3,
+        "num_target_files": 2,
+        "file_details": [
+          {
+            "file": "kernel.cu",
+            "physical_sloc": 595
+          },
+          {
+            "file": "main.cu",
+            "physical_sloc": 431
+          },
+          {
+            "file": "setdevice.cu",
+            "physical_sloc": 20
+          }
+        ]
+      },
+      "hotspot": {
+        "kernel": "hotspot",
+        "suite": "rodinia",
+        "cuda_sloc": 243,
+        "omp_sloc": 262,
+        "omp_cuda_ratio": 1.08,
+        "num_source_files": 1,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "hotspot.cu",
+            "physical_sloc": 243
+          }
+        ]
+      },
+      "hotspot3d": {
+        "kernel": "hotspot3d",
+        "suite": "rodinia",
+        "cuda_sloc": 246,
+        "omp_sloc": 206,
+        "omp_cuda_ratio": 0.84,
+        "num_source_files": 2,
+        "num_target_files": 2,
+        "file_details": [
+          {
+            "file": "3D.cu",
+            "physical_sloc": 157
+          },
+          {
+            "file": "opt1.cu",
+            "physical_sloc": 89
+          }
+        ]
+      },
+      "huffman": {
+        "kernel": "huffman",
+        "suite": "rodinia",
+        "cuda_sloc": 686,
+        "omp_sloc": null,
+        "omp_cuda_ratio": null,
+        "num_source_files": 7,
+        "num_target_files": 6,
+        "file_details": [
+          {
+            "file": "hist.cu",
+            "physical_sloc": 84
+          },
+          {
+            "file": "main_test_cu.cu",
+            "physical_sloc": 132
+          },
+          {
+            "file": "pabio_kernels_v2.cu",
+            "physical_sloc": 34
+          },
+          {
+            "file": "pack_kernels.cu",
+            "physical_sloc": 30
+          },
+          {
+            "file": "scan.cu",
+            "physical_sloc": 155
+          },
+          {
+            "file": "scanLargeArray_kernel.cu",
+            "physical_sloc": 153
+          },
+          {
+            "file": "vlc_kernel_sm64huff.cu",
+            "physical_sloc": 98
+          }
+        ]
+      },
+      "hybridsort": {
+        "kernel": "hybridsort",
+        "suite": "rodinia",
+        "cuda_sloc": 650,
+        "omp_sloc": null,
+        "omp_cuda_ratio": null,
+        "num_source_files": 6,
+        "num_target_files": 6,
+        "file_details": [
+          {
+            "file": "bucketsort.cu",
+            "physical_sloc": 132
+          },
+          {
+            "file": "bucketsort_kernel.cu",
+            "physical_sloc": 80
+          },
+          {
+            "file": "histogram1024_kernel.cu",
+            "physical_sloc": 69
+          },
+          {
+            "file": "main.cu",
+            "physical_sloc": 171
+          },
+          {
+            "file": "mergesort.cu",
+            "physical_sloc": 82
+          },
+          {
+            "file": "mergesort_kernel.cu",
+            "physical_sloc": 116
+          }
+        ]
+      },
+      "kmeans": {
+        "kernel": "kmeans",
+        "suite": "rodinia",
+        "cuda_sloc": 299,
+        "omp_sloc": 1048,
+        "omp_cuda_ratio": 3.51,
+        "num_source_files": 2,
+        "num_target_files": 2,
+        "file_details": [
+          {
+            "file": "kmeans_cuda.cu",
+            "physical_sloc": 191
+          },
+          {
+            "file": "kmeans_cuda_kernel.cu",
+            "physical_sloc": 108
+          }
+        ]
+      },
+      "lavamd": {
+        "kernel": "lavamd",
+        "suite": "rodinia",
+        "cuda_sloc": 200,
+        "omp_sloc": 258,
+        "omp_cuda_ratio": 1.29,
+        "num_source_files": 3,
+        "num_target_files": 2,
+        "file_details": [
+          {
+            "file": "kernel/kernel_gpu_cuda.cu",
+            "physical_sloc": 82
+          },
+          {
+            "file": "kernel/kernel_gpu_cuda_wrapper.cu",
+            "physical_sloc": 88
+          },
+          {
+            "file": "util/device/device.cu",
+            "physical_sloc": 30
+          }
+        ]
+      },
+      "lud": {
+        "kernel": "lud",
+        "suite": "rodinia",
+        "cuda_sloc": 271,
+        "omp_sloc": 400,
+        "omp_cuda_ratio": 1.48,
+        "num_source_files": 2,
+        "num_target_files": 2,
+        "file_details": [
+          {
+            "file": "cuda/lud.cu",
+            "physical_sloc": 135
+          },
+          {
+            "file": "cuda/lud_kernel.cu",
+            "physical_sloc": 136
+          }
+        ]
+      },
+      "mummergpu": {
+        "kernel": "mummergpu",
+        "suite": "rodinia",
+        "cuda_sloc": 2773,
+        "omp_sloc": 5325,
+        "omp_cuda_ratio": 1.92,
+        "num_source_files": 3,
+        "num_target_files": 2,
+        "file_details": [
+          {
+            "file": "src/common.cu",
+            "physical_sloc": 124
+          },
+          {
+            "file": "src/mummergpu.cu",
+            "physical_sloc": 1767
+          },
+          {
+            "file": "src/mummergpu_kernel.cu",
+            "physical_sloc": 882
+          }
+        ]
+      },
+      "myocyte": {
+        "kernel": "myocyte",
+        "suite": "rodinia",
+        "cuda_sloc": 3304,
+        "omp_sloc": 1806,
+        "omp_cuda_ratio": 0.55,
+        "num_source_files": 16,
+        "num_target_files": 2,
+        "file_details": [
+          {
+            "file": "embedded_fehlberg_7_8.cu",
+            "physical_sloc": 266
+          },
+          {
+            "file": "embedded_fehlberg_7_8_2.cu",
+            "physical_sloc": 171
+          },
+          {
+            "file": "kernel.cu",
+            "physical_sloc": 69
+          },
+          {
+            "file": "kernel_2.cu",
+            "physical_sloc": 82
+          },
+          {
+            "file": "kernel_cam.cu",
+            "physical_sloc": 272
+          },
+          {
+            "file": "kernel_cam_2.cu",
+            "physical_sloc": 272
+          },
+          {
+            "file": "kernel_ecc.cu",
+            "physical_sloc": 692
+          },
+          {
+            "file": "kernel_ecc_2.cu",
+            "physical_sloc": 692
+          },
+          {
+            "file": "kernel_fin.cu",
+            "physical_sloc": 73
+          },
+          {
+            "file": "kernel_fin_2.cu",
+            "physical_sloc": 72
+          },
+          {
+            "file": "main.cu",
+            "physical_sloc": 45
+          },
+          {
+            "file": "master.cu",
+            "physical_sloc": 60
+          },
+          {
+            "file": "solver.cu",
+            "physical_sloc": 113
+          },
+          {
+            "file": "solver_2.cu",
+            "physical_sloc": 134
+          },
+          {
+            "file": "work.cu",
+            "physical_sloc": 141
+          },
+          {
+            "file": "work_2.cu",
+            "physical_sloc": 150
+          }
+        ]
+      },
+      "nn": {
+        "kernel": "nn",
+        "suite": "rodinia",
+        "cuda_sloc": 259,
+        "omp_sloc": 111,
+        "omp_cuda_ratio": 0.43,
+        "num_source_files": 1,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "nn_cuda.cu",
+            "physical_sloc": 259
+          }
+        ]
+      },
+      "nw": {
+        "kernel": "nw",
+        "suite": "rodinia",
+        "cuda_sloc": 319,
+        "omp_sloc": 291,
+        "omp_cuda_ratio": 0.91,
+        "num_source_files": 2,
+        "num_target_files": 2,
+        "file_details": [
+          {
+            "file": "needle.cu",
+            "physical_sloc": 202
+          },
+          {
+            "file": "needle_kernel.cu",
+            "physical_sloc": 117
+          }
+        ]
+      },
+      "particlefilter": {
+        "kernel": "particlefilter",
+        "suite": "rodinia",
+        "cuda_sloc": 1023,
+        "omp_sloc": 400,
+        "omp_cuda_ratio": 0.39,
+        "num_source_files": 2,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "ex_particle_CUDA_float_seq.cu",
+            "physical_sloc": 551
+          },
+          {
+            "file": "ex_particle_CUDA_naive_seq.cu",
+            "physical_sloc": 472
+          }
+        ]
+      },
+      "pathfinder": {
+        "kernel": "pathfinder",
+        "suite": "rodinia",
+        "cuda_sloc": 195,
+        "omp_sloc": 103,
+        "omp_cuda_ratio": 0.53,
+        "num_source_files": 1,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "pathfinder.cu",
+            "physical_sloc": 195
+          }
+        ]
+      },
+      "srad": {
+        "kernel": "srad",
+        "suite": "rodinia",
+        "cuda_sloc": 391,
+        "omp_sloc": 173,
+        "omp_cuda_ratio": 0.44,
+        "num_source_files": 2,
+        "num_target_files": 2,
+        "file_details": [
+          {
+            "file": "srad.cu",
+            "physical_sloc": 197
+          },
+          {
+            "file": "srad_kernel.cu",
+            "physical_sloc": 194
+          }
+        ]
+      },
+      "streamcluster": {
+        "kernel": "streamcluster",
+        "suite": "rodinia",
+        "cuda_sloc": 372,
+        "omp_sloc": 981,
+        "omp_cuda_ratio": 2.64,
+        "num_source_files": 2,
+        "num_target_files": 2,
+        "file_details": [
+          {
+            "file": "streamcluster_cuda.cu",
+            "physical_sloc": 252
+          },
+          {
+            "file": "streamcluster_header.cu",
+            "physical_sloc": 120
+          }
+        ]
+      },
+      "convolution1d": {
+        "kernel": "convolution1d",
+        "suite": "hecbench",
+        "cuda_sloc": 200,
+        "omp_sloc": null,
+        "omp_cuda_ratio": null,
+        "num_source_files": 1,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "main.cu",
+            "physical_sloc": 200
+          }
+        ]
+      },
+      "floydwarshall": {
+        "kernel": "floydwarshall",
+        "suite": "hecbench",
+        "cuda_sloc": 164,
+        "omp_sloc": 153,
+        "omp_cuda_ratio": 0.93,
+        "num_source_files": 1,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "main.cu",
+            "physical_sloc": 164
+          }
+        ]
+      },
+      "heat2d": {
+        "kernel": "heat2d",
+        "suite": "hecbench",
+        "cuda_sloc": 125,
+        "omp_sloc": 122,
+        "omp_cuda_ratio": 0.98,
+        "num_source_files": 1,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "main.cu",
+            "physical_sloc": 125
+          }
+        ]
+      },
+      "iso2dfd": {
+        "kernel": "iso2dfd",
+        "suite": "hecbench",
+        "cuda_sloc": 196,
+        "omp_sloc": 170,
+        "omp_cuda_ratio": 0.87,
+        "num_source_files": 1,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "iso2dfd.cu",
+            "physical_sloc": 196
+          }
+        ]
+      },
+      "jacobi": {
+        "kernel": "jacobi",
+        "suite": "hecbench",
+        "cuda_sloc": 129,
+        "omp_sloc": null,
+        "omp_cuda_ratio": null,
+        "num_source_files": 1,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "main.cu",
+            "physical_sloc": 129
+          }
+        ]
+      },
+      "md": {
+        "kernel": "md",
+        "suite": "hecbench",
+        "cuda_sloc": 107,
+        "omp_sloc": null,
+        "omp_cuda_ratio": null,
+        "num_source_files": 1,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "main.cu",
+            "physical_sloc": 107
+          }
+        ]
+      },
+      "nqueen": {
+        "kernel": "nqueen",
+        "suite": "hecbench",
+        "cuda_sloc": 209,
+        "omp_sloc": null,
+        "omp_cuda_ratio": null,
+        "num_source_files": 1,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "main.cu",
+            "physical_sloc": 209
+          }
+        ]
+      },
+      "page-rank": {
+        "kernel": "page-rank",
+        "suite": "hecbench",
+        "cuda_sloc": 235,
+        "omp_sloc": null,
+        "omp_cuda_ratio": null,
+        "num_source_files": 2,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "main.cu",
+            "physical_sloc": 203
+          },
+          {
+            "file": "reference.h",
+            "physical_sloc": 32
+          }
+        ]
+      },
+      "scan": {
+        "kernel": "scan",
+        "suite": "hecbench",
+        "cuda_sloc": 206,
+        "omp_sloc": 189,
+        "omp_cuda_ratio": 0.92,
+        "num_source_files": 1,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "main.cu",
+            "physical_sloc": 206
+          }
+        ]
+      },
+      "stencil1d": {
+        "kernel": "stencil1d",
+        "suite": "hecbench",
+        "cuda_sloc": 80,
+        "omp_sloc": 71,
+        "omp_cuda_ratio": 0.89,
+        "num_source_files": 1,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "stencil_1d.cu",
+            "physical_sloc": 80
+          }
+        ]
+      },
+      "xsbench": {
+        "kernel": "xsbench",
+        "suite": "xsbench",
+        "cuda_sloc": 1390,
+        "omp_sloc": 1238,
+        "omp_cuda_ratio": 0.89,
+        "num_source_files": 6,
+        "num_target_files": 2,
+        "file_details": [
+          {
+            "file": "Main.cu",
+            "physical_sloc": 65
+          },
+          {
+            "file": "io.cu",
+            "physical_sloc": 391
+          },
+          {
+            "file": "Simulation.cu",
+            "physical_sloc": 647
+          },
+          {
+            "file": "GridInit.cu",
+            "physical_sloc": 142
+          },
+          {
+            "file": "XSutils.cu",
+            "physical_sloc": 62
+          },
+          {
+            "file": "Materials.cu",
+            "physical_sloc": 83
+          }
+        ]
+      },
+      "rsbench": {
+        "kernel": "rsbench",
+        "suite": "rsbench",
+        "cuda_sloc": 1016,
+        "omp_sloc": 1092,
+        "omp_cuda_ratio": 1.07,
+        "num_source_files": 6,
+        "num_target_files": 2,
+        "file_details": [
+          {
+            "file": "main.cu",
+            "physical_sloc": 50
+          },
+          {
+            "file": "io.cu",
+            "physical_sloc": 271
+          },
+          {
+            "file": "simulation.cu",
+            "physical_sloc": 422
+          },
+          {
+            "file": "init.cu",
+            "physical_sloc": 165
+          },
+          {
+            "file": "material.cu",
+            "physical_sloc": 93
+          },
+          {
+            "file": "utils.cu",
+            "physical_sloc": 15
+          }
+        ]
+      },
+      "mixbench": {
+        "kernel": "mixbench",
+        "suite": "mixbench",
+        "cuda_sloc": 312,
+        "omp_sloc": 341,
+        "omp_cuda_ratio": 1.09,
+        "num_source_files": 4,
+        "num_target_files": 1,
+        "file_details": [
+          {
+            "file": "main-cuda.cpp",
+            "physical_sloc": 24
+          },
+          {
+            "file": "mix_kernels_cuda.cu",
+            "physical_sloc": 181
+          },
+          {
+            "file": "mix_kernels_cuda.h",
+            "physical_sloc": 2
+          },
+          {
+            "file": "lcutil.h",
+            "physical_sloc": 105
+          }
+        ]
+      }
+    },
+    "summary": {
+      "total_kernels": 35,
+      "min_sloc": 80,
+      "max_sloc": 3304,
+      "mean_sloc": 598.4,
+      "median_sloc": 271,
+      "std_sloc": 736.0,
+      "total_sloc": 20945,
+      "distribution": {
+        "<100": 1,
+        "100-500": 24,
+        "500-1000": 2,
+        ">1000": 8
+      },
+      "omp_cuda_ratio": {
+        "count": 26,
+        "min": 0.2,
+        "max": 5.09,
+        "median": 0.92,
+        "mean": 1.25
+      }
+    }
+  },
+  "categories": {
+    "crypto": {
+      "kernel_count": 5,
+      "kernels": [
+        "aes",
+        "chacha20",
+        "keccaktreehash",
+        "md5hash",
+        "secp256k1"
+      ],
+      "suites": {
+        "hecbench": 5
+      }
+    },
+    "financial": {
+      "kernel_count": 2,
+      "kernels": [
+        "binomial",
+        "sobol"
+      ],
+      "suites": {
+        "hecbench": 2
+      }
+    },
+    "graph": {
+      "kernel_count": 6,
+      "kernels": [
+        "bfs",
+        "floydwarshall",
+        "mis",
+        "nn",
+        "page-rank",
+        "pathfinder"
+      ],
+      "suites": {
+        "hecbench": 5,
+        "rodinia": 1
+      }
+    },
+    "image": {
+      "kernel_count": 4,
+      "kernels": [
+        "bilateral",
+        "heartwall",
+        "sobel",
+        "srad"
+      ],
+      "suites": {
+        "hecbench": 2,
+        "rodinia": 2
+      }
+    },
+    "linear_algebra": {
+      "kernel_count": 5,
+      "kernels": [
+        "eigenvalue",
+        "gaussian",
+        "lud",
+        "simplespmv",
+        "thomas"
+      ],
+      "suites": {
+        "hecbench": 5,
+        "rodinia": 2
+      }
+    },
+    "ml": {
+      "kernel_count": 8,
+      "kernels": [
+        "backprop",
+        "geglu",
+        "kmeans",
+        "knn",
+        "maxpool3d",
+        "perplexity",
+        "rmsnorm",
+        "softmax-online"
+      ],
+      "suites": {
+        "hecbench": 7,
+        "rodinia": 2
+      }
+    },
+    "molecular_dynamics": {
+      "kernel_count": 2,
+      "kernels": [
+        "lavamd",
+        "md"
+      ],
+      "suites": {
+        "hecbench": 1,
+        "rodinia": 1
+      }
+    },
+    "other": {
+      "kernel_count": 30,
+      "kernels": [
+        "babelstream",
+        "bezier-surface",
+        "bptree",
+        "ccsd-trpdrv",
+        "chi2",
+        "convolution3d",
+        "convolutionseparable",
+        "crc64",
+        "dct8x8",
+        "deredundancy",
+        "fft",
+        "fpc",
+        "fwt",
+        "ga",
+        "huffman",
+        "jenkins-hash",
+        "mandelbrot",
+        "mixbench",
+        "mummergpu",
+        "murmurhash3",
+        "myocyte",
+        "nn",
+        "nqueen",
+        "nw",
+        "pathfinder",
+        "popcount",
+        "pso",
+        "streamcluster",
+        "triad",
+        "tsp"
+      ],
+      "suites": {
+        "hecbench": 23,
+        "mixbench": 1,
+        "rodinia": 7
+      }
+    },
+    "physics": {
+      "kernel_count": 15,
+      "kernels": [
+        "cfd",
+        "dwt2d",
+        "feynman-kac",
+        "hotspot",
+        "hotspot3d",
+        "ising",
+        "iso2dfd",
+        "lulesh",
+        "myocyte",
+        "nbody",
+        "particle-diffusion",
+        "particlefilter",
+        "rsbench",
+        "tissue",
+        "xsbench"
+      ],
+      "suites": {
+        "hecbench": 7,
+        "rodinia": 6,
+        "rsbench": 1,
+        "xsbench": 1
+      }
+    },
+    "reduction": {
+      "kernel_count": 1,
+      "kernels": [
+        "scan"
+      ],
+      "suites": {
+        "hecbench": 1
+      }
+    },
+    "sort": {
+      "kernel_count": 3,
+      "kernels": [
+        "hybridsort",
+        "merge",
+        "radixsort"
+      ],
+      "suites": {
+        "hecbench": 2,
+        "rodinia": 1
+      }
+    },
+    "stencil": {
+      "kernel_count": 6,
+      "kernels": [
+        "convolution1d",
+        "heat2d",
+        "iso2dfd",
+        "jacobi",
+        "laplace3d",
+        "stencil1d"
+      ],
+      "suites": {
+        "hecbench": 6
+      }
+    }
+  },
+  "api_coverage": {
+    "suites": {
+      "rodinia": {
+        "cuda": 22,
+        "omp": 18,
+        "opencl": 20,
+        "omp_target": 0,
+        "total": 60
+      },
+      "hecbench": {
+        "cuda": 65,
+        "omp": 60,
+        "opencl": 0,
+        "omp_target": 10,
+        "total": 135
+      },
+      "xsbench": {
+        "cuda": 1,
+        "omp": 1,
+        "opencl": 1,
+        "omp_target": 1,
+        "total": 4
+      },
+      "rsbench": {
+        "cuda": 1,
+        "omp": 1,
+        "opencl": 1,
+        "omp_target": 1,
+        "total": 4
+      },
+      "mixbench": {
+        "cuda": 1,
+        "omp": 1,
+        "opencl": 1,
+        "omp_target": 0,
+        "total": 3
+      }
+    },
+    "totals": {
+      "cuda": 90,
+      "omp": 81,
+      "opencl": 23,
+      "omp_target": 12,
+      "total": 206
+    },
+    "apis": [
+      "cuda",
+      "omp",
+      "opencl",
+      "omp_target"
+    ],
+    "suite_order": [
+      "rodinia",
+      "hecbench",
+      "xsbench",
+      "rsbench",
+      "mixbench"
+    ]
+  },
+  "multi_file": {
+    "by_kernel": {
+      "backprop": {
+        "kernel": "backprop",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 4,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 5,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 2,
+        "headline_payload_count": 2
+      },
+      "bfs": {
+        "kernel": "bfs",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 3,
+            "translation_targets_count": 3,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 3,
+        "headline_payload_count": 3
+      },
+      "bptree": {
+        "kernel": "bptree",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 5,
+            "translation_targets_count": 4,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 3,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "opencl": {
+            "prompt_payload_count": 5,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 4,
+        "headline_payload_count": 5
+      },
+      "cfd": {
+        "kernel": "cfd",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 4,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 4
+      },
+      "dwt2d": {
+        "kernel": "dwt2d",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 8,
+            "translation_targets_count": 7,
+            "is_multi_file": true
+          },
+          "opencl": {
+            "prompt_payload_count": 4,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 7,
+        "headline_payload_count": 8
+      },
+      "gaussian": {
+        "kernel": "gaussian",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 6,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 1
+      },
+      "heartwall": {
+        "kernel": "heartwall",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 3,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 3,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 3,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 2,
+        "headline_payload_count": 3
+      },
+      "hotspot": {
+        "kernel": "hotspot",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 1
+      },
+      "hotspot3d": {
+        "kernel": "hotspot3d",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 2,
+        "headline_payload_count": 2
+      },
+      "huffman": {
+        "kernel": "huffman",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 7,
+            "translation_targets_count": 6,
+            "is_multi_file": true
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 6,
+        "headline_payload_count": 7
+      },
+      "hybridsort": {
+        "kernel": "hybridsort",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 6,
+            "translation_targets_count": 6,
+            "is_multi_file": true
+          },
+          "opencl": {
+            "prompt_payload_count": 6,
+            "translation_targets_count": 3,
+            "is_multi_file": true
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 6,
+        "headline_payload_count": 6
+      },
+      "kmeans": {
+        "kernel": "kmeans",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 4,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 7,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 2,
+        "headline_payload_count": 2
+      },
+      "lavamd": {
+        "kernel": "lavamd",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 3,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 3,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 2,
+        "headline_payload_count": 3
+      },
+      "lud": {
+        "kernel": "lud",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 3,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 3,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 2,
+        "headline_payload_count": 2
+      },
+      "mummergpu": {
+        "kernel": "mummergpu",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 3,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 9,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 2,
+        "headline_payload_count": 3
+      },
+      "myocyte": {
+        "kernel": "myocyte",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 16,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 10,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "opencl": {
+            "prompt_payload_count": 7,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 2,
+        "headline_payload_count": 16
+      },
+      "nn": {
+        "kernel": "nn",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 5,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 1
+      },
+      "nw": {
+        "kernel": "nw",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 2,
+        "headline_payload_count": 2
+      },
+      "particlefilter": {
+        "kernel": "particlefilter",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 6,
+            "translation_targets_count": 3,
+            "is_multi_file": true
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 2
+      },
+      "pathfinder": {
+        "kernel": "pathfinder",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 1
+      },
+      "srad": {
+        "kernel": "srad",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 9,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 2,
+        "headline_payload_count": 2
+      },
+      "streamcluster": {
+        "kernel": "streamcluster",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 2,
+        "headline_payload_count": 2
+      },
+      "convolution1d": {
+        "kernel": "convolution1d",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp_target": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 1
+      },
+      "floydwarshall": {
+        "kernel": "floydwarshall",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp_target": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 1
+      },
+      "heat2d": {
+        "kernel": "heat2d",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp_target": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 1
+      },
+      "iso2dfd": {
+        "kernel": "iso2dfd",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp_target": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 1
+      },
+      "jacobi": {
+        "kernel": "jacobi",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp_target": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 1
+      },
+      "md": {
+        "kernel": "md",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp_target": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 1
+      },
+      "nqueen": {
+        "kernel": "nqueen",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp_target": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 1
+      },
+      "page-rank": {
+        "kernel": "page-rank",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 2,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp_target": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 2
+      },
+      "scan": {
+        "kernel": "scan",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp_target": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 1
+      },
+      "stencil1d": {
+        "kernel": "stencil1d",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp_target": {
+            "prompt_payload_count": 1,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 1
+      },
+      "xsbench": {
+        "kernel": "xsbench",
+        "suite": "xsbench",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 6,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 6,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "opencl": {
+            "prompt_payload_count": 8,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp_target": {
+            "prompt_payload_count": 6,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 2,
+        "headline_payload_count": 6
+      },
+      "rsbench": {
+        "kernel": "rsbench",
+        "suite": "rsbench",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 6,
+            "translation_targets_count": 2,
+            "is_multi_file": true
+          },
+          "omp": {
+            "prompt_payload_count": 6,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 8,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp_target": {
+            "prompt_payload_count": 6,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": true,
+        "headline_target_count": 2,
+        "headline_payload_count": 6
+      },
+      "mixbench": {
+        "kernel": "mixbench",
+        "suite": "mixbench",
+        "apis": {
+          "cuda": {
+            "prompt_payload_count": 4,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "omp": {
+            "prompt_payload_count": 3,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          },
+          "opencl": {
+            "prompt_payload_count": 5,
+            "translation_targets_count": 1,
+            "is_multi_file": false
+          }
+        },
+        "headline_multi_file": false,
+        "headline_target_count": 1,
+        "headline_payload_count": 4
+      }
+    },
+    "aggregate": {
+      "single_file_count": 17,
+      "multi_file_count": 18,
+      "total": 35,
+      "multi_file_pct": 51.4
+    },
+    "by_suite": {
+      "rodinia": {
+        "single": 6,
+        "multi": 16
+      },
+      "hecbench": {
+        "single": 10,
+        "multi": 0
+      },
+      "xsbench": {
+        "single": 0,
+        "multi": 1
+      },
+      "rsbench": {
+        "single": 0,
+        "multi": 1
+      },
+      "mixbench": {
+        "single": 1,
+        "multi": 0
+      }
+    },
+    "by_api": {
+      "cuda": {
+        "single": 44,
+        "multi": 46,
+        "total": 90
+      },
+      "omp": {
+        "single": 54,
+        "multi": 27,
+        "total": 81
+      },
+      "omp_target": {
+        "single": 12,
+        "multi": 0,
+        "total": 12
+      },
+      "opencl": {
+        "single": 20,
+        "multi": 3,
+        "total": 23
+      }
+    }
+  },
+  "language_features": {
+    "per_kernel": {
+      "backprop": {
+        "kernel": "backprop",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "bfs": {
+        "kernel": "bfs",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ],
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_target",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "omp_target"
+      },
+      "bptree": {
+        "kernel": "bptree",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "cfd": {
+        "kernel": "cfd",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__device__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ],
+              "omp_4.5": [
+                "#pragma\\s+omp\\s+simd"
+              ],
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_target",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "omp_target"
+      },
+      "dwt2d": {
+        "kernel": "dwt2d",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__",
+                "__device__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "gaussian": {
+        "kernel": "gaussian",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "heartwall": {
+        "kernel": "heartwall",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "hotspot": {
+        "kernel": "hotspot",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ],
+              "omp_4.5": [
+                "#pragma\\s+omp\\s+simd"
+              ],
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_target",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "omp_target"
+      },
+      "hotspot3d": {
+        "kernel": "hotspot3d",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "huffman": {
+        "kernel": "huffman",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__",
+                "__device__"
+              ]
+            },
+            "tier": "cuda_basic"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "hybridsort": {
+        "kernel": "hybridsort",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__",
+                "__device__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "kmeans": {
+        "kernel": "kmeans",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "lavamd": {
+        "kernel": "lavamd",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "lud": {
+        "kernel": "lud",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ],
+              "omp_4.5": [
+                "#pragma\\s+omp\\s+simd"
+              ],
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_target",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "omp_target"
+      },
+      "mummergpu": {
+        "kernel": "mummergpu",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__device__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "myocyte": {
+        "kernel": "myocyte",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__device__",
+                "__global__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel",
+                "#pragma\\s+omp\\s+parallel\\s+for"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "nn": {
+        "kernel": "nn",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "nw": {
+        "kernel": "nw",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__",
+                "__device__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ],
+              "omp_4.5": [
+                "#pragma\\s+omp\\s+simd"
+              ],
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_target",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "omp_target"
+      },
+      "particlefilter": {
+        "kernel": "particlefilter",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__device__",
+                "__shared__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "pathfinder": {
+        "kernel": "pathfinder",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "srad": {
+        "kernel": "srad",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "streamcluster": {
+        "kernel": "streamcluster",
+        "suite": "rodinia",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__device__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      },
+      "convolution1d": {
+        "kernel": "convolution1d",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp_target": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel"
+              ],
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp_target": "omp_target"
+        },
+        "overall_tier": "omp_target"
+      },
+      "floydwarshall": {
+        "kernel": "floydwarshall",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          },
+          "omp_target": {
+            "features_found": {
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_target",
+          "omp_target": "omp_target"
+        },
+        "overall_tier": "omp_target"
+      },
+      "heat2d": {
+        "kernel": "heat2d",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ],
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          },
+          "omp_target": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ],
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_target",
+          "omp_target": "omp_target"
+        },
+        "overall_tier": "omp_target"
+      },
+      "iso2dfd": {
+        "kernel": "iso2dfd",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          },
+          "omp_target": {
+            "features_found": {
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_target",
+          "omp_target": "omp_target"
+        },
+        "overall_tier": "omp_target"
+      },
+      "jacobi": {
+        "kernel": "jacobi",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp_target": {
+            "features_found": {
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp_target": "omp_target"
+        },
+        "overall_tier": "omp_target"
+      },
+      "md": {
+        "kernel": "md",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp_target": {
+            "features_found": {
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp_target": "omp_target"
+        },
+        "overall_tier": "omp_target"
+      },
+      "nqueen": {
+        "kernel": "nqueen",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__device__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp_target": {
+            "features_found": {
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp_target": "omp_target"
+        },
+        "overall_tier": "omp_target"
+      },
+      "page-rank": {
+        "kernel": "page-rank",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp_target": {
+            "features_found": {
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp_target": "omp_target"
+        },
+        "overall_tier": "omp_target"
+      },
+      "scan": {
+        "kernel": "scan",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel"
+              ],
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          },
+          "omp_target": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel"
+              ],
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_target",
+          "omp_target": "omp_target"
+        },
+        "overall_tier": "omp_target"
+      },
+      "stencil1d": {
+        "kernel": "stencil1d",
+        "suite": "hecbench",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__shared__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ],
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          },
+          "omp_target": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ],
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_target",
+          "omp_target": "omp_target"
+        },
+        "overall_tier": "omp_target"
+      },
+      "xsbench": {
+        "kernel": "xsbench",
+        "suite": "xsbench",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__device__"
+              ],
+              "cuda_library": [
+                "thrust::"
+              ]
+            },
+            "tier": "cuda_library"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "omp_target": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ],
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clCreateBuffer",
+                "clEnqueueNDRangeKernel"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_library",
+          "omp": "omp_basic",
+          "omp_target": "omp_target",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "omp_target"
+      },
+      "rsbench": {
+        "kernel": "rsbench",
+        "suite": "rsbench",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__device__"
+              ],
+              "cuda_library": [
+                "thrust::"
+              ]
+            },
+            "tier": "cuda_library"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "omp_target": {
+            "features_found": {
+              "omp_target": [
+                "#pragma\\s+omp\\s+target"
+              ]
+            },
+            "tier": "omp_target"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clCreateBuffer",
+                "clEnqueueNDRangeKernel"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_library",
+          "omp": "omp_basic",
+          "omp_target": "omp_target",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "omp_target"
+      },
+      "mixbench": {
+        "kernel": "mixbench",
+        "suite": "mixbench",
+        "apis": {
+          "cuda": {
+            "features_found": {
+              "cuda_basic": [
+                "__global__",
+                "__device__"
+              ]
+            },
+            "tier": "cuda_basic"
+          },
+          "omp": {
+            "features_found": {
+              "omp_basic": [
+                "#pragma\\s+omp\\s+parallel\\s+for",
+                "#pragma\\s+omp\\s+parallel"
+              ]
+            },
+            "tier": "omp_basic"
+          },
+          "opencl": {
+            "features_found": {
+              "opencl_1x": [
+                "clEnqueueNDRangeKernel",
+                "clCreateBuffer"
+              ]
+            },
+            "tier": "opencl_1x"
+          }
+        },
+        "per_api_max_tiers": {
+          "cuda": "cuda_basic",
+          "omp": "omp_basic",
+          "opencl": "opencl_1x"
+        },
+        "overall_tier": "cuda_basic"
+      }
+    },
+    "tier_distribution": {
+      "cuda_basic": 33,
+      "omp_basic": 16,
+      "opencl_1x": 23,
+      "omp_target": 22,
+      "cuda_library": 2
+    }
+  },
+  "language_standards": {
+    "distribution": {
+      "C++17": 128,
+      "C++14": 51,
+      "C++11": 2,
+      "unspecified": 19,
+      "C11": 6
+    },
+    "by_api": {
+      "cuda": {
+        "C++17": 65,
+        "C++11": 1,
+        "C++14": 24
+      },
+      "omp": {
+        "C++17": 61,
+        "unspecified": 10,
+        "C++14": 8,
+        "C11": 2
+      },
+      "omp_target": {
+        "C++14": 8,
+        "C++17": 2,
+        "C11": 2
+      },
+      "opencl": {
+        "C++11": 1,
+        "C++14": 11,
+        "unspecified": 9,
+        "C11": 2
+      }
+    },
+    "by_suite": {
+      "hecbench": {
+        "C++17": 127,
+        "C++14": 8
+      },
+      "mixbench": {
+        "C++11": 2,
+        "C++17": 1
+      },
+      "rodinia": {
+        "C++14": 41,
+        "unspecified": 19
+      },
+      "rsbench": {
+        "C++14": 1,
+        "C11": 3
+      },
+      "xsbench": {
+        "C++14": 1,
+        "C11": 3
+      }
+    },
+    "total_specs": 206
+  },
+  "summary": {
+    "total_kernels": 35,
+    "total_specs": 206,
+    "total_categories": 12,
+    "total_suites": 5,
+    "total_apis": 4,
+    "sloc_range": "80-3304",
+    "sloc_median": 271,
+    "multi_file_pct": 51.4
+  }
+}

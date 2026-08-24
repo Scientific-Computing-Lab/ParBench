@@ -1,0 +1,13 @@
+{
+  "contract_version": "parbench-final-v1",
+  "pairs": [
+    {
+      "source_spec": "demo-alpha-cuda",
+      "target_spec": "demo-alpha-omp",
+      "baseline_witness": {
+        "status": "unresolved"
+      },
+      "comparability": "unresolved"
+    }
+  ]
+}

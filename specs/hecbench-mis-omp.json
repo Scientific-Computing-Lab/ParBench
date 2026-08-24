@@ -1,0 +1,177 @@
+{
+  "spec_version": "1.0.0",
+  "identity": {
+    "kernel_name": "mis",
+    "parallel_api": "omp",
+    "unique_id": "hecbench-mis-omp",
+    "source_suite": "hecbench"
+  },
+  "provenance": {
+    "repository": {
+      "url": "https://github.com/zjin-lcf/HeCBench",
+      "commit": "archive-download",
+      "branch": "master"
+    },
+    "repo_root": "HeCBench-master/",
+    "source_path": "src/mis-omp",
+    "license": "MIT"
+  },
+  "files": {
+    "prompt_payload": [
+      "main.cpp"
+    ],
+    "support_files": [
+      "Makefile",
+      "Makefile.aomp",
+      "Makefile.nvc",
+      "CMakeLists.txt"
+    ],
+    "verification_only": [],
+    "translation_targets": [
+      "main.cpp"
+    ]
+  },
+  "implementation": {
+    "api": "omp",
+    "api_version": null,
+    "language": "C++",
+    "language_standard": "C++17"
+  },
+  "build": {
+    "environment": {
+      "preferred": "system",
+      "conda": null,
+      "system": {
+        "dependencies": [
+          "GCC >= 9.0 with OpenMP support"
+        ]
+      }
+    },
+    "build_system": "make",
+    "working_directory": "src/mis-omp",
+    "commands": {
+      "configure": null,
+      "build": "make -f Makefile.aomp CC=g++ DEVICE=cpu",
+      "clean": "make -f Makefile.aomp clean"
+    },
+    "variables": null,
+    "outputs": {
+      "executable": "main"
+    }
+  },
+  "run": {
+    "executable": "./main",
+    "default_arguments": [
+      "internet.egr",
+      "100"
+    ],
+    "timeout_seconds": 300,
+    "environment_variables": null,
+    "input_configurations": {
+      "correctness": {
+        "arguments": [
+          "internet.egr",
+          "1"
+        ],
+        "description": "Single iteration for correctness; validates MIS properties on graph",
+        "input_files": [
+          "internet.egr"
+        ],
+        "expected_results": null
+      },
+      "performance": {
+        "arguments": [
+          "internet.egr",
+          "100"
+        ],
+        "description": "100 iterations for performance measurement",
+        "input_files": [
+          "internet.egr"
+        ],
+        "expected_results": null
+      }
+    }
+  },
+  "verification": {
+    "method": "self_checking",
+    "strategies": [
+      {
+        "type": "exit_code",
+        "expected": 0,
+        "description": "Exit code 0 indicates valid MIS computed without errors"
+      },
+      {
+        "type": "stdout_pattern",
+        "pattern": "compute time",
+        "description": "Presence of timing output indicates successful MIS computation"
+      }
+    ],
+    "floating_point": null
+  },
+  "performance": {
+    "metrics": [
+      {
+        "name": "compute_time",
+        "extraction": {
+          "type": "regex",
+          "pattern": "compute time:\\s+([\\d.eE+-]+)\\s+s",
+          "capture_group": 1
+        },
+        "unit": "s"
+      },
+      {
+        "name": "node_throughput",
+        "extraction": {
+          "type": "regex",
+          "pattern": "throughput:\\s+([\\d.eE+-]+)\\s+Mnodes/s",
+          "capture_group": 1
+        },
+        "unit": "Mnodes/s"
+      }
+    ],
+    "warmup_runs": 1,
+    "measurement_runs": 5
+  },
+  "hardware": {
+    "target": "cpu",
+    "requirements": null,
+    "reference_platform": {
+      "platform_id": "rtx4070-r9-7900x",
+      "gpu": {
+        "model": "NVIDIA GeForce RTX 4070",
+        "architecture": "Ada Lovelace",
+        "compute_capability": "sm_89",
+        "vram_gb": 12,
+        "memory_bandwidth_gbps": 504,
+        "cuda_cores": 5888
+      },
+      "cpu": {
+        "model": "AMD Ryzen 9 7900X",
+        "cores": 12,
+        "threads": 24,
+        "base_clock_ghz": 4.7
+      },
+      "software": {
+        "os": "Ubuntu 22.04 LTS",
+        "cuda_toolkit": "12.x",
+        "gcc": "11+",
+        "driver": "525.x+"
+      }
+    }
+  },
+  "baseline_results": null,
+  "metadata": {
+    "description": "Maximal Independent Set computation on GPU using Luby's parallel algorithm. Iteratively selects vertices into independent set, verified via graph structure validation on stderr.",
+    "domain": "graph algorithms",
+    "complexity": "O(V + E)",
+    "tags": [
+      "mis",
+      "maximal-independent-set",
+      "luby",
+      "graph",
+      "combinatorial"
+    ],
+    "multi_file": true,
+    "translation_complexity": "single_file"
+  }
+}

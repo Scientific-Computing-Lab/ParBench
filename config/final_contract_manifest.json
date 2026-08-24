@@ -1,0 +1,1157 @@
+{
+  "manifest_version": "parbench-final-contract-v1",
+  "generated_by": "scripts/spec_tools/freeze_final_contract.py",
+  "project_root_note": "content-deterministic: no timestamp; rerun over unchanged inputs is byte-identical",
+  "exclusions": {
+    "excluded_specs": [
+      "hecbench-lud-omp",
+      "hecbench-scan-omp_target",
+      "hecbench-stencil1d-omp_target",
+      "rodinia-backprop-opencl",
+      "rodinia-hybridsort-cuda",
+      "rodinia-kmeans-cuda",
+      "rodinia-kmeans-opencl",
+      "rodinia-mummergpu-cuda",
+      "rodinia-mummergpu-omp",
+      "rodinia-nn-opencl"
+    ],
+    "performance_only_specs": [
+      "mixbench-mixbench-cuda",
+      "mixbench-mixbench-omp",
+      "mixbench-mixbench-opencl"
+    ],
+    "correctness_ineligible_specs": [
+      "hecbench-lud-omp",
+      "hecbench-scan-omp_target",
+      "hecbench-stencil1d-omp_target",
+      "mixbench-mixbench-cuda",
+      "mixbench-mixbench-omp",
+      "mixbench-mixbench-opencl",
+      "rodinia-backprop-opencl",
+      "rodinia-hybridsort-cuda",
+      "rodinia-kmeans-cuda",
+      "rodinia-kmeans-opencl",
+      "rodinia-mummergpu-cuda",
+      "rodinia-mummergpu-omp",
+      "rodinia-nn-opencl"
+    ]
+  },
+  "input_artifacts": {
+    "baseline_determinism": {
+      "path": "results/analysis/baseline_determinism.json",
+      "sha256": "be4406722a0b5f0afa0864fb2d5804b7d8b7b20a40e740e6db8630d701d928fa"
+    },
+    "blind_control_labels": {
+      "path": "results/provenance/blind_control_labels.json",
+      "sha256": "ba59fa700e11c580fee3295511526b0da5bfbef4366e2fb050c057ee0a905b37"
+    },
+    "blind_control_preregistration": {
+      "path": "results/provenance/blind_control_prereg_sealed.json",
+      "sha256": "6e488aed5a453ad0dfe6fde03814b774663de9b11e085f9692e4899fc48ac942"
+    },
+    "blind_control_result": {
+      "path": "results/analysis/blind_control_result.json",
+      "sha256": "2e0b28b44dee677694cbf64c11de73aa3cbd6743892d9984fb035db8ec315455"
+    },
+    "blind_control_unblinding": {
+      "path": "results/provenance/blind_control_unblinding.json",
+      "sha256": "42768a3c701620b967c2c929121cd8ada45272971010cf844fe0225c53406dfe"
+    },
+    "candidate_registry": {
+      "path": "config/pair_contract_candidates_populated.json",
+      "sha256": "4e6c17aa2e36c38d2c03dac96e780e7d549d8f3ad5f21ef8bcac734fd72f8a4f"
+    },
+    "host_report": {
+      "path": "results/analysis/source_complete_host.json",
+      "sha256": "938a2f7a78e235e8aed4299fb7274de4e4c8d704b4473160339d656df48c4f79"
+    },
+    "oracle_report": {
+      "path": "results/analysis/oracle_contract_report.json",
+      "sha256": "7a7e90679c06f5d3b98c860636858608d4b31dc66f5a761efc7ccd068ea38e50"
+    },
+    "pair_dispositions": {
+      "path": "results/analysis/pair_contract_dispositions.json",
+      "sha256": "8cfb1ab3a62841eab8bdb0e05bdec77b314b74abe219ff6900db03c3328155f6"
+    },
+    "pair_witnesses": {
+      "path": "results/analysis/pair_witnesses.json",
+      "sha256": "fc72f72c4f355760a6c9d0d830f9cae6d7bee9dffad2996ea78431b96979e18b"
+    },
+    "thread_provisioning": {
+      "path": "results/analysis/thread_provisioning.json",
+      "sha256": "31600ec5041b3ffde3126ba49e60181cb6d190a72b5dbe1df3bfd15d175fe12c"
+    }
+  },
+  "pair_registry": {
+    "path": "config/final_pair_contracts.json",
+    "sha256": "98faf7e642d43e02ef57bfa9e511d7f4f8fa735cd74f33deb0f811d59b619901",
+    "pairs": 204
+  },
+  "blind_controls": {
+    "sealed_sha256": "606dc27dc38cfcd368b6409c5e1623cd5d42373014718332a4c00815c10f3280",
+    "count": 10,
+    "summary": {
+      "seeded": 10,
+      "detected_by_oracle": 5,
+      "detected_at_build": 0,
+      "missed": 5,
+      "other": {},
+      "detected_total": 5
+    }
+  },
+  "specs": {
+    "count": 206,
+    "aggregate_sha256": "e0a57154cb03e2b825a493524ed8469e74aa2303db8ee7a8dfcd91bfbdafde15",
+    "files": {
+      "hecbench-aes-cuda.json": "14830014aeee6a92d03f09f49df9857ed7fedd8dd83e9d02dd71c13a723874a6",
+      "hecbench-aes-omp.json": "9d2f3de307226264bcc7b5673b5a6ab1d34020473caaad503f2713cbfa7607ee",
+      "hecbench-babelstream-cuda.json": "866e0812f70ae5e5ba507c40278156714043035629d581c75744ab2e092e0868",
+      "hecbench-babelstream-omp.json": "7389b7556f59612a46ceba0adb970f1e625a225b7f1aeaf50613f1db5a58cbc7",
+      "hecbench-backprop-cuda.json": "814da67a782d7add6f33c860a1d0b96afabdc6f85a5ca9f7b4fa811f122cc7dc",
+      "hecbench-backprop-omp.json": "50aa127c00f9791503b78052789e72ce6d55175003acd661167c2a98801118c1",
+      "hecbench-bezier-surface-cuda.json": "de818c2cede71793bcbc5a1c792838d4fbab600e2cb1c7ad993878095d512f01",
+      "hecbench-bezier-surface-omp.json": "eb3c484f0b5fb8c52bddbcf0ce678824499846fd2f3479b60f746dba9bc385aa",
+      "hecbench-bilateral-cuda.json": "791a1294397c758c92db247dfb7a41193995f60bfa861b8506c7a43a9d610697",
+      "hecbench-bilateral-omp.json": "cd3c7bc185811c396e0a44212139ddf5e3d5614448f6391ea8f2669afd08c64b",
+      "hecbench-binomial-cuda.json": "2245945818d9876f7759ba14df8d55914da27719f9adf253b40aab15c1af2b34",
+      "hecbench-binomial-omp.json": "f884ed0a57ccb4ad49ac62018c64b57bb06fcaa9f0538e0e1caff5300b9106e2",
+      "hecbench-ccsd-trpdrv-cuda.json": "5375642e44e7dacb2013fdc966a7e809395e65ef1929a14d076538e01c701fd4",
+      "hecbench-ccsd-trpdrv-omp.json": "6db1c9812ceb4170cb5a2b40bfa44c412ccb0fb739d4f761019f88965b355d52",
+      "hecbench-chacha20-cuda.json": "f769753fe805ee33b97c28a18406a851db4130026da8e9faf662a5219f067257",
+      "hecbench-chacha20-omp.json": "339fa994c437c00ec3a004c75c86bc90a9682f52b0e5e745098f3778e3f3cc14",
+      "hecbench-chi2-cuda.json": "270e23a3ef323aaba0393c02cf9e944b4022f75533d8092f12d020e74df840d5",
+      "hecbench-chi2-omp.json": "66e4a388af9a97308524517f2eda6d15223002be44cac03dd59cfd8525ed0f58",
+      "hecbench-convolution1d-cuda.json": "963a13c8a73dc550113a7adabc3b9eca5f86c1fe5f8809439fde0434ea2c0892",
+      "hecbench-convolution1d-omp_target.json": "9603aa16d08dc7775eb550b774a7d9156a24fc16e01a43c1c2aee9e8db9c20a6",
+      "hecbench-convolution3d-cuda.json": "b922d8825520c91e0824815806bd4d1eea4977bcf51ca855446438316528144b",
+      "hecbench-convolution3d-omp.json": "857d64ffa10031e9326aeec0fa4007a2273875298d2cd4fbdc71813158619639",
+      "hecbench-convolutionseparable-cuda.json": "f6d855be94c146c6e212ca803b1bdffd1f994a88ed06f8664f703404f6777c98",
+      "hecbench-convolutionseparable-omp.json": "e51faac3317762bd8e0f6eb201c156916bf9ec2e6d07d94eed377007f1a897ce",
+      "hecbench-crc64-cuda.json": "538e738be5890e2dadec4a6082c2daddd636aeda774fc17be6fbbd61cea7af00",
+      "hecbench-crc64-omp.json": "83d0ac887a253b0cf8641a39dace50788d8173eec131a0b52cf3899ea119dc66",
+      "hecbench-dct8x8-cuda.json": "816c3e6f1366d90116745e51ea14495174a63d2f4e4ce5fdf416874b4bd3413e",
+      "hecbench-dct8x8-omp.json": "e8a3f5b87aef73ff29a9a9cd42d1b7414176b3e3137d6d68b07ce5652541f4a9",
+      "hecbench-deredundancy-cuda.json": "74ea5cabb2b55f724dc2ce043c0f145f9d8acb2b8c972e87bce75d9f54c9bfe7",
+      "hecbench-deredundancy-omp.json": "df707259bb0b4138aa0b9b6f1d8ff54f2434c31a0f441e4bc9ffef7862ca5dbd",
+      "hecbench-eigenvalue-cuda.json": "fb36161f9d00bad4b0b70741cd5cb9d623c7b0aacfa94bedec1ba4a710188804",
+      "hecbench-eigenvalue-omp.json": "3f8e256ce87c786d9684ac551e70470e9e502af1631b7566ebdbd36a496ea0e2",
+      "hecbench-feynman-kac-cuda.json": "e190a5fb7f103acbab358425aa65c927e49f3239f5283acad978f93ff995a5a1",
+      "hecbench-feynman-kac-omp.json": "470e20fc8e8ca2d75030c8dcf4632f441051c442406fc4c248591e859cbb457a",
+      "hecbench-fft-cuda.json": "1ff03cabb0c93960ea2092cc305f5f37bea12c5d6e00626763133912fb8b165e",
+      "hecbench-fft-omp.json": "8626e8d3b83d365e943c97f8ef1ea842046c95b3d877b0a2111c68f2901345be",
+      "hecbench-floydwarshall-cuda.json": "cdf42deef929dd575fcef3924be2e7985c9d89a308c574296c615daf06587f58",
+      "hecbench-floydwarshall-omp.json": "8a8533ab31af6dbbe7eaecfff5c38e044deea697576dd7f35fb5f2cb7dd7a080",
+      "hecbench-floydwarshall-omp_target.json": "e300338876e93cc9aa9c0646a33897e71ad795293f1ae525e2f4ac0c2c974cec",
+      "hecbench-fpc-cuda.json": "30f38eb0e13d2ae043e8143dc62a7b130528b668c77081b88b270adbd0e3d1b5",
+      "hecbench-fpc-omp.json": "68d25c2056dd824d49638e182aa8adbab333a146a8c12fc1ffe1d88bf04c1d8b",
+      "hecbench-fwt-cuda.json": "15828d8482728bc27c33329b31f74511daa9042fafae996043ac934a455ec9b0",
+      "hecbench-fwt-omp.json": "861f7e195e19085a6cbf84675dd02c563335cf97c960da4c05d38758ca21b57b",
+      "hecbench-ga-cuda.json": "234593a50b5145ba8ed6a62937764690c4dfe15f6cb4dccb4492d22bf89275ac",
+      "hecbench-ga-omp.json": "4b2ff8284973b22e1bec53ac70bfde0b2c10e180819c583fa30b9059f72af01d",
+      "hecbench-gaussian-cuda.json": "954f6ae396aa7847bcbfe990be74c2f1f23e0131d795fc3505023bddcc2f6914",
+      "hecbench-gaussian-omp.json": "2c01f849f0334951e083cbb1ae4a9f9faf9ea1535d76869d159a9dffa7477b00",
+      "hecbench-geglu-cuda.json": "42bd02fc9cd701e2573ebd106ea19bf571f67ff5200c57b69b6e47c504f49eae",
+      "hecbench-geglu-omp.json": "5b204722892dc062b987668c65471789d9cae84a6eafddd1266f9480daed71d6",
+      "hecbench-heat2d-cuda.json": "77a22946128b759c7a672bc411cdc8f2c925a0c8a0d4aec0469bc8590f18401b",
+      "hecbench-heat2d-omp.json": "2d24f70bb65a638f8eb6e7e8c45207894281dfa2a05efc5f69647e9114383e5a",
+      "hecbench-heat2d-omp_target.json": "dff3f4a177e80a119af8e7de4c2022dc0119d3b810e8f02f6ac1a27370478044",
+      "hecbench-ising-cuda.json": "03f042ca99df4b59eea7938578209013acbfbdabeca92c9a4193b4d48bea3510",
+      "hecbench-ising-omp.json": "3efabe5e6ea9f9ac737ec5365eff9226fec0a2c01421adfcf68b915f6e7a1ae8",
+      "hecbench-iso2dfd-cuda.json": "c63c25b72822cfdd35340acee9085833fe475682cc6e261661790a053a1a5c48",
+      "hecbench-iso2dfd-omp.json": "ad7bfa17ef38b62a3c2184c7b1db662fd5a29be1175b5ad8f4bb9bcbf1810c19",
+      "hecbench-iso2dfd-omp_target.json": "e4ae8e01e1c904d4bad6515610fb133368212d200cdbd3249d6dce7a6cd61a26",
+      "hecbench-jacobi-cuda.json": "d1a37006f16bd452ebb734cf236dfb725a0b2963b389e645a1fb224911b0b28b",
+      "hecbench-jacobi-omp_target.json": "20519755b7e21544c7aecbd9441ebe5bc0dfa2af6a67aa463e500338ee9b7424",
+      "hecbench-jenkins-hash-cuda.json": "1708a65b6753223dc5cb31e695ccad7704503d111075e6330f35d66b1f461a71",
+      "hecbench-jenkins-hash-omp.json": "942d238772d8ec3c4c03a06fc6acb5313ce2c5e42bfe7e101e96044381a2bd64",
+      "hecbench-keccaktreehash-cuda.json": "801451de8d38a1d819d20be02c13554f4630c9ef9d0616827ab2f89c9669bd7e",
+      "hecbench-keccaktreehash-omp.json": "29b30e349a01cd07cf1549c3a9a4b15f87bb3a1ba4e99adfb690f8c846c2c03e",
+      "hecbench-knn-cuda.json": "4e3e555969b0b2653f29bdc0d759a2134ea22674bf11f0317280e85df6ae6240",
+      "hecbench-knn-omp.json": "67e852f0406e0be82e6b6537ad97adb885b2d95b1f6f1087fc586d7d7542c4ab",
+      "hecbench-laplace3d-cuda.json": "1e07f2c8e92db905312baba896cfa6888506b67a32c46f46fd302e4780df7f85",
+      "hecbench-laplace3d-omp.json": "198cdf7faec8daefee201b8cfc6b0f14ecc9852620ddb39386a39cd5d3025733",
+      "hecbench-lud-cuda.json": "7a0fe68fd7d645680b3c6ca6db30edaa70f414a3cf92dc62898372278e601d36",
+      "hecbench-lud-omp.json": "a3703c630412d78f49db8a19969fd4023558637cfa16762b57a3fdbeb81dc36f",
+      "hecbench-lulesh-cuda.json": "48ed721b4075580f56fb884fb2a468726918db8372ce09bcb4183b1f07e1b034",
+      "hecbench-lulesh-omp.json": "d918786554a02255fcb2599e74911ac03ceb8fe67c24594e94a8bfdcbc098a37",
+      "hecbench-mandelbrot-cuda.json": "1a72591066f50a74fe656a9cce6f02e1f37444a479db05324063b76af30262de",
+      "hecbench-mandelbrot-omp.json": "74b3de7c8b68056d9339f26475a74ae5804e35ef94986e33dcddf847a05ab1dc",
+      "hecbench-maxpool3d-cuda.json": "3c12402df59afa926f9b176b2bf3b11b0f5983e6a872c509ca000d96da1672e3",
+      "hecbench-maxpool3d-omp.json": "7bfa32504fdddc5f3a59edb1741dcc0730abd4a557f6c89ab60daa0e9ef7e70b",
+      "hecbench-md-cuda.json": "d3faaf3008dce0859a4ae79e0877853ed3dfa74871a8d3aea580dd9e8320de39",
+      "hecbench-md-omp_target.json": "1544a370d6f3bfc0d8e0943fd58d69d83bac3bced26332aced7d010f5e112c06",
+      "hecbench-md5hash-cuda.json": "ae6cd220a1786917c3c43eac91dbcfbf944731d874ce30fd0cf6f93872c9c7be",
+      "hecbench-md5hash-omp.json": "2039d0a4ce08887d0878f973c18af68a7d961d7fbbf1fddee6feca42f6db413f",
+      "hecbench-merge-cuda.json": "b3abc1481ee840026f1a15dd140f5c6ef6fbc6a8b61f9f8db44c54fd653fb510",
+      "hecbench-merge-omp.json": "23a4bb8428e9c5491aec278041c5ee967370e9f38990e449c25072da4bcb1bf6",
+      "hecbench-mis-cuda.json": "cbfc1dd80d98126cadf83c20ee09f4b9936abec79c038034b1d4e011594ed626",
+      "hecbench-mis-omp.json": "a7b129330f33e7b27ad3162189f6cb827f8618b5cc36a33014789dcd5a11b5a4",
+      "hecbench-murmurhash3-cuda.json": "80a1c1436c8b0e3412d3a8930a464d5caf08e5a02979afcd86d084065382e9ec",
+      "hecbench-murmurhash3-omp.json": "8ab692b851865518031b38596c32209109c3254a91f1a74043cd921cfd144a8f",
+      "hecbench-myocyte-cuda.json": "3c2dfbdef2cb4e241bd1bc474b307ccd3b41513ce79deb34ba5d4f2602abb5d4",
+      "hecbench-myocyte-omp.json": "509f560b2fec1b8195f7d9479cc3b5e1bea6645b1297c98718c21dfd75705911",
+      "hecbench-nbody-cuda.json": "07d31eaaf9d7f080c5223d2035c3d71dfceaf4cac2d3c42a5236e31f3034c4c9",
+      "hecbench-nbody-omp.json": "d545dd7b4eb1a58f22be5486cf669bd21fa867792a8cb99e15bd4022bf9e45c0",
+      "hecbench-nn-cuda.json": "6db5a5a643ee3f8ecf1a55b55b24bb5054334b4288d7f7ebbda12538998468fc",
+      "hecbench-nn-omp.json": "5088203cc69f007306e3ab0a2aa4d7f2c8214cc74d1671c90b345be24a691929",
+      "hecbench-nqueen-cuda.json": "848036cc2ad9f2420076a3168626409b70735e61a2eecfb41927d43e600e59c6",
+      "hecbench-nqueen-omp_target.json": "12eb67031437ede7942b64d526e602b9b10e7915c0f3ae66a4d65a864008d08f",
+      "hecbench-nw-cuda.json": "11e8e52611d57ba33bf4d0770d336cfd9711ed9d772825e31a71fdf517dd2af0",
+      "hecbench-nw-omp.json": "b80459c54fb3fbb90e1a28aca2f37eeb0394b8f9e6f48760581ec777dc1fd157",
+      "hecbench-page-rank-cuda.json": "89304b83cd2b61bafa09c0efb9643b171a30d732e81851c2fe45bf73695bb268",
+      "hecbench-page-rank-omp_target.json": "bd1468955d8877b55b9437ad9edcb767570749a1c43693cf22dfadd7b9b5a532",
+      "hecbench-particle-diffusion-cuda.json": "7e100528290f3450e521c956f311c3f1702ab74575509dc5eca86f20ee179f9c",
+      "hecbench-particle-diffusion-omp.json": "a6178f250c56c12a557241dc67edd7904171ea3f5ad1d68c0a4dc61c9187dca8",
+      "hecbench-pathfinder-cuda.json": "6e034fbc4909e1b8cb77987eee4327970961797165b1506881144e0aeeb03df3",
+      "hecbench-pathfinder-omp.json": "5edc48a54e145ad0f08c48ed42307241b8857aa20526708ca171b672dcdba6fa",
+      "hecbench-perplexity-cuda.json": "8fd84b5020f8f8aecfbe27159bbe7c178786ab200b0dfbc91553e160dd9075e1",
+      "hecbench-perplexity-omp.json": "f9516e61e14ce02e179c687950167f04457a5ee75c4a351775a3f60312de75b9",
+      "hecbench-popcount-cuda.json": "e053adfc0f0267204ffc123fede6195e0927823b9e5c2d0d10c11cf9f6c942a8",
+      "hecbench-popcount-omp.json": "d8aa6afc2cdf05df1f83088e2e688766f63efad7e04e5ccf244d67ccf2f5c63d",
+      "hecbench-pso-cuda.json": "be21d7b4d75ad11a83cda34d664d1ebf576ce0feb7513c37de566bab25860e0e",
+      "hecbench-pso-omp.json": "186ac19570a507b643d8233bcebedb48fb666b45cf0e2027fb48bfd71d96cb6f",
+      "hecbench-radixsort-cuda.json": "faf76dcb2fadaff2175a433ccc78c6a69a16a457d106d2eeee0042bc7689fc1a",
+      "hecbench-radixsort-omp.json": "1c9096656885f47744fff974c4c13adb4c2fdd93c42d222c9e1fdc1c10f16834",
+      "hecbench-rmsnorm-cuda.json": "a5a13f0615552a82ecc309bb09a14994e91687b86e09523beee9dc696eb3ea11",
+      "hecbench-rmsnorm-omp.json": "14f929d3181132826f4d3407fb540fe06a6ef733ffa235f48ab00a7ea8522df4",
+      "hecbench-scan-cuda.json": "398bd29a1ea07ea8dcc9b1daeb421fe9b3319504c2f38055c735ee7245684bbe",
+      "hecbench-scan-omp.json": "49199d22790354ab2f6b42118810e31ffa86e17017771c32fdfcff6ad89934ef",
+      "hecbench-scan-omp_target.json": "284718d1fe0689ef3dfd1f9785cce9bbb9f33faadf6ea9d208a26c91b2c549ce",
+      "hecbench-secp256k1-cuda.json": "480efb103c98ca0a324a41d78bfdd61692c1bbaacb6b3abecc01970602938aef",
+      "hecbench-secp256k1-omp.json": "e151c43d8560688aa605bb1be74481a646e5dcb93c7afc0fa68c3601e9460dc5",
+      "hecbench-simplespmv-cuda.json": "53fcb36b16bc2dc926193be27a5e7735a9c96318847e801d471f90c50111cc27",
+      "hecbench-simplespmv-omp.json": "1e3ccc748038ab94dd531b95dd9389f434bc55b8a93d63c39e67b1506b824d10",
+      "hecbench-sobel-cuda.json": "735931c6bef19004c7afc1c6024e2a8ab0305a79ff8cf3b6e71d40a9a7dc7da5",
+      "hecbench-sobel-omp.json": "8f7ccc7bddf6f7fc6d813464a16cb0fb2db56802ee081419073d77dcb4dcba81",
+      "hecbench-sobol-cuda.json": "e88d9e11cd9407cf3fd66b0100c514203ce06b549c462c66117f392d75c921bb",
+      "hecbench-sobol-omp.json": "f762542162af435c4bd43f9e409fdf3a0a30f14d2a446e686e9d31ec6da7c96b",
+      "hecbench-softmax-online-cuda.json": "a05b384b373f7b051ce0bdf0f5290c11e7b0b14faead1b65202cd93d87df2795",
+      "hecbench-softmax-online-omp.json": "0425d40f26f4a469245acc785d0669e61d2801896b24a15aa5fb012bb2e4b318",
+      "hecbench-stencil1d-cuda.json": "7d6bcaab8eaf7c4bde6e25f412836447eaf5aa9c20148bd85cc7374a0dfc76ca",
+      "hecbench-stencil1d-omp.json": "31fd63be72dd574728b481271610196066bab07a31dde9ee7ea0808fca2cf9d7",
+      "hecbench-stencil1d-omp_target.json": "85bfd11ef4c9203342491a6301e3866595a6342ae4cd15ef3a6165af97c79506",
+      "hecbench-thomas-cuda.json": "393c78f8f59aacf50d1ce5fd00aa914af140bcfe169561a25bba8501ddb42c16",
+      "hecbench-thomas-omp.json": "2e984a5bb39d781603e783057e4a29065e2894516c84e92f494cb87dfde8dfe7",
+      "hecbench-tissue-cuda.json": "f02a834a802dfdf9f9c05a00df78e69209af1cb0584b119cc701076a79fc008f",
+      "hecbench-tissue-omp.json": "29c952e44410c8f9ec1a260049e9dfd2363fb7b568b312d80a4cdf35f344ac3a",
+      "hecbench-triad-cuda.json": "857991862cb21e4f350045a87f90a1b059d9bf858e6ceca40f2570f956c9829e",
+      "hecbench-triad-omp.json": "df790b872fc28061ba7a346e2c7c87f351add3e582039ba5ff4e093e102b97d0",
+      "hecbench-tsp-cuda.json": "faf89cab3ed0cb56fea228588a09cabe0662ac58973a95b9e9e778b260ee5629",
+      "hecbench-tsp-omp.json": "587c3ed09304f38b4aeb2522210846918117cbb9a907b906047bace2db8ffce5",
+      "mixbench-mixbench-cuda.json": "144abda4b965b5447b44dda5438d8c3f6cef0104185b1d103c60f27625497e55",
+      "mixbench-mixbench-omp.json": "05d18d7d884eeb80e0450e99414e4d0da7bd600945d2cc8f7239eedaaf260880",
+      "mixbench-mixbench-opencl.json": "46777de9bddd0e6fb262907618c2228b491b885c0e0c4ae120a3ec2ce14701c2",
+      "rodinia-backprop-cuda.json": "e97375e47300ddf071c7a1668ac40ae5d9521e8e893f95da70dabcf230429970",
+      "rodinia-backprop-omp.json": "37673fa1c205bfc492488334eebbf7ac51b80af0288a8a00d71da9d2ced4858c",
+      "rodinia-backprop-opencl.json": "8dad53d322eb8aa8d193cbf4fd0af107ddea5f36f0ccd1264657dcc3271e1c67",
+      "rodinia-bfs-cuda.json": "f493422840878d6ab3574530fcb0fba678173183e09ded9b07d6e5a843ed91d9",
+      "rodinia-bfs-omp.json": "6efff560dcc17754f6ca5bbf2b7fee96aee2a2227d7cb19df84644e3e5141d7e",
+      "rodinia-bfs-opencl.json": "13692f985ab8c14165eba576acad1c31687347096d3514c8e9a58a9c480800ee",
+      "rodinia-bptree-cuda.json": "b683033eab4cb7b25e368d412fa9ca72bb5be4b9e2b94bb2f7ae050b9a062c2a",
+      "rodinia-bptree-omp.json": "5bec87203347c89b5fe3c08ca05102a5375dd0a12da39a7c4d594bf9c34f39c1",
+      "rodinia-bptree-opencl.json": "14aa92d9383d847bd398da28d753179fd1cefefd33c0ebf882f169bf1e5dab01",
+      "rodinia-cfd-cuda.json": "0d89c48b07cdc5b9325148336108608199d5a5074ee3501659f6f62a3cfb5815",
+      "rodinia-cfd-omp.json": "b7a7706b6ae34110da5555d5fd502ae94ea577d7d6e93dc6a909937b08619610",
+      "rodinia-cfd-opencl.json": "6f76d9ad6d0925a7e89e4ebdf9eb990fcfd884498b3a94237374a1843d5e5128",
+      "rodinia-dwt2d-cuda.json": "7f5028397af0d0624dc0be0ffd5ba0b637be8023f7f21bb8f78259d94871f16b",
+      "rodinia-dwt2d-opencl.json": "c217727b5d85fdb9f4c7353cdb57b22650af19dd80e4287961c264d4a0f6a17c",
+      "rodinia-gaussian-cuda.json": "da16a4ff834675c8880323b5e9d03dffae528c92018d0ca5a6049143eb269996",
+      "rodinia-gaussian-opencl.json": "c4c8b30d5de06804f732ddce7927bffc7b8b74fe4c8f610e9f41bdbacbbfb6a4",
+      "rodinia-heartwall-cuda.json": "6b9cc4f41ba1c32b1f2c17bf9948ba2b03a030d7e6695ca49a77b54132b74a87",
+      "rodinia-heartwall-omp.json": "b5951cf1f4944dd1e5ef50cd7f3cb7c5d3b97a543e4d140cb2aa1cf6f17a8899",
+      "rodinia-heartwall-opencl.json": "1b1405385e4ceafdad0b042863e8db213f278f0462508bb25175f6b79723a0c8",
+      "rodinia-hotspot-cuda.json": "d67b6605e7e3f61350f4dfeaacf2a300c41a27afeb51684921fe2c5f5710221a",
+      "rodinia-hotspot-omp.json": "8e4824e9510de35e1cfcf59ffda834e153df3ceba5b17831921a3b52aadd4ec6",
+      "rodinia-hotspot-opencl.json": "28015e604981259087dfb674c2bb176227ad4f8c8f0b43eda83b5e95479dd2d5",
+      "rodinia-hotspot3d-cuda.json": "6318171722184843b7888b7a69a9c9b3216e691f8a2b7163f3d687dc25ba517f",
+      "rodinia-hotspot3d-omp.json": "f30d32f89db5c7399fd907b1c81012d91b4c0e7cececf81569f6c31d54b6a001",
+      "rodinia-hotspot3d-opencl.json": "5d5d3952f5ededd78cd4625c955265102bed5462e48b6dd19fff212f93d4e309",
+      "rodinia-huffman-cuda.json": "87890fe1de91d5416d64e6e5e9b044d23ecafed99f18ec145833610a929a66bb",
+      "rodinia-hybridsort-cuda.json": "b18a8d0329f1c81512eac5bac07f4dfe746896f917b8f0d12d6c0ab93c2e6184",
+      "rodinia-hybridsort-opencl.json": "7f46688d4e79084758e412e1425829c0817396d2d5c908f03c3e1bb32502721c",
+      "rodinia-kmeans-cuda.json": "34eabc63321c7ecffe0f0f519db1ed603dfeae349183abcb88d72784e93d458c",
+      "rodinia-kmeans-omp.json": "efb057afc2e18434d227e97e532a5bb3e3741da785aa38846c7f0e3a7710843a",
+      "rodinia-kmeans-opencl.json": "e783a48d3a1727fe55e8cef1374ff8a89794869fd5842d06356ae72706091198",
+      "rodinia-lavamd-cuda.json": "de044e20842006e0f0367024136728182a9a099c3cc9052930086a274a79dd56",
+      "rodinia-lavamd-omp.json": "a9f6b2bf9107e34296b335742adcc7b20fab39ac8cf69a7be161186d475212e5",
+      "rodinia-lavamd-opencl.json": "e588b442b15fc9e166abbb698258997020556985a0529428564d549c6c5c8e20",
+      "rodinia-lud-cuda.json": "7dc17c9cda0342de2d26cc9a6ddca86ed36bdc25b310eb49419689ed24eb0030",
+      "rodinia-lud-omp.json": "b8bf48c44a9a65a6a20bed67a2e7cc172eade6c44f338b9efe213472d10f693b",
+      "rodinia-lud-opencl.json": "0d1beb1e2f4e7a2ed7209b8f64c0d295a4ac3b50c02323caef454c85fdd4b56b",
+      "rodinia-mummergpu-cuda.json": "d66baee0b53805af718539d8e7b2d0a4079a139173c09e1111dbef2d12b35eac",
+      "rodinia-mummergpu-omp.json": "4509d3b34ee75e0f531353b29151d9babcd261173fabed80eedf127c7dad65f5",
+      "rodinia-myocyte-cuda.json": "89e31feb93f324f892ed72961043e905f3e9e8f5ffc33421f12162231ae26d3b",
+      "rodinia-myocyte-omp.json": "b50994b734c7af8be110f26710a91726b93571f9c526781e7719873426195e9b",
+      "rodinia-myocyte-opencl.json": "e4348145843b41df2279069d65cc16fd2d1686345f3d3eccf270e0c281d31bc1",
+      "rodinia-nn-cuda.json": "bba13ef24760fe864417ac176100c56e1136bd8048cedf9c26fd7cd7624ab113",
+      "rodinia-nn-omp.json": "53dfdc0d6d089b2deb476dadd81cd7376f0b245ebcb468f8735707120e1fa309",
+      "rodinia-nn-opencl.json": "3797d63f98a8d2cca1bbb0a5635e96a52d08aef72476f62f64a74c2afcddd062",
+      "rodinia-nw-cuda.json": "f5d05b181879dac98195d9dafbfe5a5b70faf36d3b0cb9bb3e20b6a510749da0",
+      "rodinia-nw-omp.json": "692b9357a28a59e6b5ce46d484df65aa9a18279fbbcab10489102b5f87c3069e",
+      "rodinia-nw-opencl.json": "28f6360316d0ea2c2613243dee730cc4a43d482e5cc1945cfdd2c89f23a34bf2",
+      "rodinia-particlefilter-cuda.json": "40683fd900e67feb0620ecc7494d07e0a27a0050f64fb5ff8b5caacffec40e88",
+      "rodinia-particlefilter-omp.json": "bfa64d2083a8cb7c264adb2480bc97988e92611e91192cec11403ddc393d5d67",
+      "rodinia-particlefilter-opencl.json": "9f798bd344e8edea8f2e2d91866dc10d71da812e148bb77f5b7116f0b22b24db",
+      "rodinia-pathfinder-cuda.json": "2c8ad41c3da05cd4ad71624bf3cffe440b3c147206f2a043670997f84bf8eee0",
+      "rodinia-pathfinder-omp.json": "37f2660a1f29a87b78d758debab6d28796afd8aabd833b31c6bdb9fff7cd280f",
+      "rodinia-pathfinder-opencl.json": "250d8a608d3fcc21666d33b75a76884a7440408a93a1f9e4bf757ac15f07cedf",
+      "rodinia-srad-cuda.json": "9e0c0f77d8d7e082e9cbb6430ecb4a25b81156785c81b80e5331e623a1bed090",
+      "rodinia-srad-omp.json": "8168220e0d75a08c0f8e0709ec3f742dbaa0b86126e875e1f9e6bfcec95fd76f",
+      "rodinia-srad-opencl.json": "a5f934d82c5733a81787f3b0446797d2c052b7f60b64e38da87df93816775fe4",
+      "rodinia-streamcluster-cuda.json": "dd98619c1f933cbe17d857836176a72184bc9e9ac3472d945e1b888adb2deab9",
+      "rodinia-streamcluster-omp.json": "4f4bf71e3d92b21ec7ed71d222d882d8d75b22507ee12fc0e76f1c754dc08ab9",
+      "rodinia-streamcluster-opencl.json": "f139d4d2f3f16669735348e8f22d8c2894ef0bb95c5160b9801945455056af7b",
+      "rsbench-rsbench-cuda.json": "e4229c7d4ec598bd6b1cec9fc26a85af54b188a87fd71a715a1eec133bbc1721",
+      "rsbench-rsbench-omp.json": "3776e5054875e7241a4ec61686964d50378b20c6115e18e2666ad85bbd40aea5",
+      "rsbench-rsbench-omp_target.json": "111f8daeb320888d24c05cd51cc79765c4449c333fa01d3904a1d0fe82694708",
+      "rsbench-rsbench-opencl.json": "539e72d662217ceaa54f37619091bdd077345c4c9709dbf6c2471abd418c7222",
+      "xsbench-xsbench-cuda.json": "ee1aedd9f3d2906a177967e8738ceeec4faf8af734ed4110a5b63857b725dd98",
+      "xsbench-xsbench-omp.json": "0aeeca662b353807af72486d9d4c824f96fcd009a6663d55acc05ab64199cfe2",
+      "xsbench-xsbench-omp_target.json": "8746f62af989130b534d9940eed17e4de52ddf500495c49058cac2b7b081b944",
+      "xsbench-xsbench-opencl.json": "8d4fb6dc3b36d825824927c74fab0dea47ead3e40da8e97547268bd318e70b88"
+    }
+  },
+  "harness": {
+    "count": 10,
+    "aggregate_sha256": "8474299ef0a26ed58d3d2adf58641fd0127223cd53e8c3a3c12718645b309ca4",
+    "files": {
+      "__init__.py": "92f559ef42ca8ed000b817cdef176337449a9e87f60addc5a9a9a99e60876133",
+      "__main__.py": "6e61b4c8a029c8b8ed451325cf744e405d38388e4a3d47893a63b64c2ff59ef0",
+      "builder.py": "aece2a172089447a2946e79283750c603587345a6e647d71eca1218ac5749980",
+      "cli.py": "9347c44399a032ad53cccef50c3bfc7420c71179999e7cc8502c1c596ae3775a",
+      "constants.py": "da578d7b93d447f3b0223d7348c88a3a85784648e4a2f78c4779a5d5caaaef38",
+      "models.py": "217f3ba7568e44b758689460ef3668bf0e1fb6099e3e9d505063fe722154267a",
+      "reporter.py": "22461796228761bbbcd8b06295bb71c0f3f623b6dc519635e6f60f0e997ca13c",
+      "runner.py": "5f1b298509dbb9928c3b3e36ad30cf114cb827b11fa41d987ad013f6640bbcb2",
+      "spec_loader.py": "5bcafdef9f1c1c01218ec037f7c6603841cd17449016d436647089adff9dd5f7",
+      "verifier.py": "5302632460b393e9f715b6db080ccc92197da2fef5046b4c426885ea929c7cbf"
+    }
+  },
+  "toolchains": {
+    "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver",
+    "nvc++": "nvc++ 24.3-0 64-bit target on x86-64 Linux -tp znver4 ",
+    "gcc": "gcc (Ubuntu 12.4.0-2ubuntu1~24.04.1) 12.4.0"
+  },
+  "eligible_task_list": {
+    "count": 204,
+    "sha256": "1936bd45eeb674c52b1763476e4d061dd6d58addccdfa61c880fdecaa3ec332f",
+    "tasks": [
+      {
+        "source_spec": "hecbench-babelstream-cuda",
+        "target_spec": "hecbench-babelstream-omp"
+      },
+      {
+        "source_spec": "hecbench-babelstream-omp",
+        "target_spec": "hecbench-babelstream-cuda"
+      },
+      {
+        "source_spec": "hecbench-bezier-surface-cuda",
+        "target_spec": "hecbench-bezier-surface-omp"
+      },
+      {
+        "source_spec": "hecbench-bezier-surface-omp",
+        "target_spec": "hecbench-bezier-surface-cuda"
+      },
+      {
+        "source_spec": "hecbench-bilateral-cuda",
+        "target_spec": "hecbench-bilateral-omp"
+      },
+      {
+        "source_spec": "hecbench-bilateral-omp",
+        "target_spec": "hecbench-bilateral-cuda"
+      },
+      {
+        "source_spec": "hecbench-ccsd-trpdrv-cuda",
+        "target_spec": "hecbench-ccsd-trpdrv-omp"
+      },
+      {
+        "source_spec": "hecbench-ccsd-trpdrv-omp",
+        "target_spec": "hecbench-ccsd-trpdrv-cuda"
+      },
+      {
+        "source_spec": "hecbench-chacha20-cuda",
+        "target_spec": "hecbench-chacha20-omp"
+      },
+      {
+        "source_spec": "hecbench-chacha20-omp",
+        "target_spec": "hecbench-chacha20-cuda"
+      },
+      {
+        "source_spec": "hecbench-chi2-cuda",
+        "target_spec": "hecbench-chi2-omp"
+      },
+      {
+        "source_spec": "hecbench-chi2-omp",
+        "target_spec": "hecbench-chi2-cuda"
+      },
+      {
+        "source_spec": "hecbench-convolution1d-cuda",
+        "target_spec": "hecbench-convolution1d-omp_target"
+      },
+      {
+        "source_spec": "hecbench-convolution1d-omp_target",
+        "target_spec": "hecbench-convolution1d-cuda"
+      },
+      {
+        "source_spec": "hecbench-crc64-cuda",
+        "target_spec": "hecbench-crc64-omp"
+      },
+      {
+        "source_spec": "hecbench-crc64-omp",
+        "target_spec": "hecbench-crc64-cuda"
+      },
+      {
+        "source_spec": "hecbench-eigenvalue-cuda",
+        "target_spec": "hecbench-eigenvalue-omp"
+      },
+      {
+        "source_spec": "hecbench-eigenvalue-omp",
+        "target_spec": "hecbench-eigenvalue-cuda"
+      },
+      {
+        "source_spec": "hecbench-feynman-kac-cuda",
+        "target_spec": "hecbench-feynman-kac-omp"
+      },
+      {
+        "source_spec": "hecbench-feynman-kac-omp",
+        "target_spec": "hecbench-feynman-kac-cuda"
+      },
+      {
+        "source_spec": "hecbench-floydwarshall-cuda",
+        "target_spec": "hecbench-floydwarshall-omp"
+      },
+      {
+        "source_spec": "hecbench-floydwarshall-cuda",
+        "target_spec": "hecbench-floydwarshall-omp_target"
+      },
+      {
+        "source_spec": "hecbench-floydwarshall-omp",
+        "target_spec": "hecbench-floydwarshall-cuda"
+      },
+      {
+        "source_spec": "hecbench-floydwarshall-omp",
+        "target_spec": "hecbench-floydwarshall-omp_target"
+      },
+      {
+        "source_spec": "hecbench-floydwarshall-omp_target",
+        "target_spec": "hecbench-floydwarshall-cuda"
+      },
+      {
+        "source_spec": "hecbench-floydwarshall-omp_target",
+        "target_spec": "hecbench-floydwarshall-omp"
+      },
+      {
+        "source_spec": "hecbench-ga-cuda",
+        "target_spec": "hecbench-ga-omp"
+      },
+      {
+        "source_spec": "hecbench-ga-omp",
+        "target_spec": "hecbench-ga-cuda"
+      },
+      {
+        "source_spec": "hecbench-gaussian-cuda",
+        "target_spec": "hecbench-gaussian-omp"
+      },
+      {
+        "source_spec": "hecbench-gaussian-omp",
+        "target_spec": "hecbench-gaussian-cuda"
+      },
+      {
+        "source_spec": "hecbench-geglu-cuda",
+        "target_spec": "hecbench-geglu-omp"
+      },
+      {
+        "source_spec": "hecbench-geglu-omp",
+        "target_spec": "hecbench-geglu-cuda"
+      },
+      {
+        "source_spec": "hecbench-heat2d-cuda",
+        "target_spec": "hecbench-heat2d-omp"
+      },
+      {
+        "source_spec": "hecbench-heat2d-cuda",
+        "target_spec": "hecbench-heat2d-omp_target"
+      },
+      {
+        "source_spec": "hecbench-heat2d-omp",
+        "target_spec": "hecbench-heat2d-cuda"
+      },
+      {
+        "source_spec": "hecbench-heat2d-omp",
+        "target_spec": "hecbench-heat2d-omp_target"
+      },
+      {
+        "source_spec": "hecbench-heat2d-omp_target",
+        "target_spec": "hecbench-heat2d-cuda"
+      },
+      {
+        "source_spec": "hecbench-heat2d-omp_target",
+        "target_spec": "hecbench-heat2d-omp"
+      },
+      {
+        "source_spec": "hecbench-ising-cuda",
+        "target_spec": "hecbench-ising-omp"
+      },
+      {
+        "source_spec": "hecbench-ising-omp",
+        "target_spec": "hecbench-ising-cuda"
+      },
+      {
+        "source_spec": "hecbench-iso2dfd-cuda",
+        "target_spec": "hecbench-iso2dfd-omp"
+      },
+      {
+        "source_spec": "hecbench-iso2dfd-cuda",
+        "target_spec": "hecbench-iso2dfd-omp_target"
+      },
+      {
+        "source_spec": "hecbench-iso2dfd-omp",
+        "target_spec": "hecbench-iso2dfd-cuda"
+      },
+      {
+        "source_spec": "hecbench-iso2dfd-omp",
+        "target_spec": "hecbench-iso2dfd-omp_target"
+      },
+      {
+        "source_spec": "hecbench-iso2dfd-omp_target",
+        "target_spec": "hecbench-iso2dfd-cuda"
+      },
+      {
+        "source_spec": "hecbench-iso2dfd-omp_target",
+        "target_spec": "hecbench-iso2dfd-omp"
+      },
+      {
+        "source_spec": "hecbench-jacobi-cuda",
+        "target_spec": "hecbench-jacobi-omp_target"
+      },
+      {
+        "source_spec": "hecbench-jacobi-omp_target",
+        "target_spec": "hecbench-jacobi-cuda"
+      },
+      {
+        "source_spec": "hecbench-jenkins-hash-cuda",
+        "target_spec": "hecbench-jenkins-hash-omp"
+      },
+      {
+        "source_spec": "hecbench-jenkins-hash-omp",
+        "target_spec": "hecbench-jenkins-hash-cuda"
+      },
+      {
+        "source_spec": "hecbench-keccaktreehash-cuda",
+        "target_spec": "hecbench-keccaktreehash-omp"
+      },
+      {
+        "source_spec": "hecbench-keccaktreehash-omp",
+        "target_spec": "hecbench-keccaktreehash-cuda"
+      },
+      {
+        "source_spec": "hecbench-lulesh-cuda",
+        "target_spec": "hecbench-lulesh-omp"
+      },
+      {
+        "source_spec": "hecbench-lulesh-omp",
+        "target_spec": "hecbench-lulesh-cuda"
+      },
+      {
+        "source_spec": "hecbench-mandelbrot-cuda",
+        "target_spec": "hecbench-mandelbrot-omp"
+      },
+      {
+        "source_spec": "hecbench-mandelbrot-omp",
+        "target_spec": "hecbench-mandelbrot-cuda"
+      },
+      {
+        "source_spec": "hecbench-maxpool3d-cuda",
+        "target_spec": "hecbench-maxpool3d-omp"
+      },
+      {
+        "source_spec": "hecbench-maxpool3d-omp",
+        "target_spec": "hecbench-maxpool3d-cuda"
+      },
+      {
+        "source_spec": "hecbench-md-cuda",
+        "target_spec": "hecbench-md-omp_target"
+      },
+      {
+        "source_spec": "hecbench-md-omp_target",
+        "target_spec": "hecbench-md-cuda"
+      },
+      {
+        "source_spec": "hecbench-md5hash-cuda",
+        "target_spec": "hecbench-md5hash-omp"
+      },
+      {
+        "source_spec": "hecbench-md5hash-omp",
+        "target_spec": "hecbench-md5hash-cuda"
+      },
+      {
+        "source_spec": "hecbench-murmurhash3-cuda",
+        "target_spec": "hecbench-murmurhash3-omp"
+      },
+      {
+        "source_spec": "hecbench-murmurhash3-omp",
+        "target_spec": "hecbench-murmurhash3-cuda"
+      },
+      {
+        "source_spec": "hecbench-nbody-cuda",
+        "target_spec": "hecbench-nbody-omp"
+      },
+      {
+        "source_spec": "hecbench-nbody-omp",
+        "target_spec": "hecbench-nbody-cuda"
+      },
+      {
+        "source_spec": "hecbench-nqueen-cuda",
+        "target_spec": "hecbench-nqueen-omp_target"
+      },
+      {
+        "source_spec": "hecbench-nqueen-omp_target",
+        "target_spec": "hecbench-nqueen-cuda"
+      },
+      {
+        "source_spec": "hecbench-page-rank-cuda",
+        "target_spec": "hecbench-page-rank-omp_target"
+      },
+      {
+        "source_spec": "hecbench-page-rank-omp_target",
+        "target_spec": "hecbench-page-rank-cuda"
+      },
+      {
+        "source_spec": "hecbench-pathfinder-cuda",
+        "target_spec": "hecbench-pathfinder-omp"
+      },
+      {
+        "source_spec": "hecbench-pathfinder-omp",
+        "target_spec": "hecbench-pathfinder-cuda"
+      },
+      {
+        "source_spec": "hecbench-perplexity-cuda",
+        "target_spec": "hecbench-perplexity-omp"
+      },
+      {
+        "source_spec": "hecbench-perplexity-omp",
+        "target_spec": "hecbench-perplexity-cuda"
+      },
+      {
+        "source_spec": "hecbench-popcount-cuda",
+        "target_spec": "hecbench-popcount-omp"
+      },
+      {
+        "source_spec": "hecbench-popcount-omp",
+        "target_spec": "hecbench-popcount-cuda"
+      },
+      {
+        "source_spec": "hecbench-rmsnorm-cuda",
+        "target_spec": "hecbench-rmsnorm-omp"
+      },
+      {
+        "source_spec": "hecbench-rmsnorm-omp",
+        "target_spec": "hecbench-rmsnorm-cuda"
+      },
+      {
+        "source_spec": "hecbench-scan-cuda",
+        "target_spec": "hecbench-scan-omp"
+      },
+      {
+        "source_spec": "hecbench-scan-omp",
+        "target_spec": "hecbench-scan-cuda"
+      },
+      {
+        "source_spec": "hecbench-secp256k1-cuda",
+        "target_spec": "hecbench-secp256k1-omp"
+      },
+      {
+        "source_spec": "hecbench-secp256k1-omp",
+        "target_spec": "hecbench-secp256k1-cuda"
+      },
+      {
+        "source_spec": "hecbench-stencil1d-cuda",
+        "target_spec": "hecbench-stencil1d-omp"
+      },
+      {
+        "source_spec": "hecbench-stencil1d-omp",
+        "target_spec": "hecbench-stencil1d-cuda"
+      },
+      {
+        "source_spec": "hecbench-triad-cuda",
+        "target_spec": "hecbench-triad-omp"
+      },
+      {
+        "source_spec": "hecbench-triad-omp",
+        "target_spec": "hecbench-triad-cuda"
+      },
+      {
+        "source_spec": "hecbench-tsp-cuda",
+        "target_spec": "hecbench-tsp-omp"
+      },
+      {
+        "source_spec": "hecbench-tsp-omp",
+        "target_spec": "hecbench-tsp-cuda"
+      },
+      {
+        "source_spec": "rodinia-backprop-cuda",
+        "target_spec": "rodinia-backprop-omp"
+      },
+      {
+        "source_spec": "rodinia-backprop-omp",
+        "target_spec": "rodinia-backprop-cuda"
+      },
+      {
+        "source_spec": "rodinia-bfs-cuda",
+        "target_spec": "rodinia-bfs-omp"
+      },
+      {
+        "source_spec": "rodinia-bfs-cuda",
+        "target_spec": "rodinia-bfs-opencl"
+      },
+      {
+        "source_spec": "rodinia-bfs-omp",
+        "target_spec": "rodinia-bfs-cuda"
+      },
+      {
+        "source_spec": "rodinia-bfs-omp",
+        "target_spec": "rodinia-bfs-opencl"
+      },
+      {
+        "source_spec": "rodinia-bfs-opencl",
+        "target_spec": "rodinia-bfs-cuda"
+      },
+      {
+        "source_spec": "rodinia-bfs-opencl",
+        "target_spec": "rodinia-bfs-omp"
+      },
+      {
+        "source_spec": "rodinia-bptree-cuda",
+        "target_spec": "rodinia-bptree-omp"
+      },
+      {
+        "source_spec": "rodinia-bptree-cuda",
+        "target_spec": "rodinia-bptree-opencl"
+      },
+      {
+        "source_spec": "rodinia-bptree-omp",
+        "target_spec": "rodinia-bptree-cuda"
+      },
+      {
+        "source_spec": "rodinia-bptree-omp",
+        "target_spec": "rodinia-bptree-opencl"
+      },
+      {
+        "source_spec": "rodinia-bptree-opencl",
+        "target_spec": "rodinia-bptree-cuda"
+      },
+      {
+        "source_spec": "rodinia-bptree-opencl",
+        "target_spec": "rodinia-bptree-omp"
+      },
+      {
+        "source_spec": "rodinia-cfd-cuda",
+        "target_spec": "rodinia-cfd-omp"
+      },
+      {
+        "source_spec": "rodinia-cfd-cuda",
+        "target_spec": "rodinia-cfd-opencl"
+      },
+      {
+        "source_spec": "rodinia-cfd-omp",
+        "target_spec": "rodinia-cfd-cuda"
+      },
+      {
+        "source_spec": "rodinia-cfd-omp",
+        "target_spec": "rodinia-cfd-opencl"
+      },
+      {
+        "source_spec": "rodinia-cfd-opencl",
+        "target_spec": "rodinia-cfd-cuda"
+      },
+      {
+        "source_spec": "rodinia-cfd-opencl",
+        "target_spec": "rodinia-cfd-omp"
+      },
+      {
+        "source_spec": "rodinia-dwt2d-cuda",
+        "target_spec": "rodinia-dwt2d-opencl"
+      },
+      {
+        "source_spec": "rodinia-dwt2d-opencl",
+        "target_spec": "rodinia-dwt2d-cuda"
+      },
+      {
+        "source_spec": "rodinia-gaussian-cuda",
+        "target_spec": "rodinia-gaussian-opencl"
+      },
+      {
+        "source_spec": "rodinia-gaussian-opencl",
+        "target_spec": "rodinia-gaussian-cuda"
+      },
+      {
+        "source_spec": "rodinia-heartwall-cuda",
+        "target_spec": "rodinia-heartwall-omp"
+      },
+      {
+        "source_spec": "rodinia-heartwall-cuda",
+        "target_spec": "rodinia-heartwall-opencl"
+      },
+      {
+        "source_spec": "rodinia-heartwall-omp",
+        "target_spec": "rodinia-heartwall-cuda"
+      },
+      {
+        "source_spec": "rodinia-heartwall-omp",
+        "target_spec": "rodinia-heartwall-opencl"
+      },
+      {
+        "source_spec": "rodinia-heartwall-opencl",
+        "target_spec": "rodinia-heartwall-cuda"
+      },
+      {
+        "source_spec": "rodinia-heartwall-opencl",
+        "target_spec": "rodinia-heartwall-omp"
+      },
+      {
+        "source_spec": "rodinia-hotspot-cuda",
+        "target_spec": "rodinia-hotspot-omp"
+      },
+      {
+        "source_spec": "rodinia-hotspot-cuda",
+        "target_spec": "rodinia-hotspot-opencl"
+      },
+      {
+        "source_spec": "rodinia-hotspot-omp",
+        "target_spec": "rodinia-hotspot-cuda"
+      },
+      {
+        "source_spec": "rodinia-hotspot-omp",
+        "target_spec": "rodinia-hotspot-opencl"
+      },
+      {
+        "source_spec": "rodinia-hotspot-opencl",
+        "target_spec": "rodinia-hotspot-cuda"
+      },
+      {
+        "source_spec": "rodinia-hotspot-opencl",
+        "target_spec": "rodinia-hotspot-omp"
+      },
+      {
+        "source_spec": "rodinia-hotspot3d-cuda",
+        "target_spec": "rodinia-hotspot3d-omp"
+      },
+      {
+        "source_spec": "rodinia-hotspot3d-cuda",
+        "target_spec": "rodinia-hotspot3d-opencl"
+      },
+      {
+        "source_spec": "rodinia-hotspot3d-omp",
+        "target_spec": "rodinia-hotspot3d-cuda"
+      },
+      {
+        "source_spec": "rodinia-hotspot3d-omp",
+        "target_spec": "rodinia-hotspot3d-opencl"
+      },
+      {
+        "source_spec": "rodinia-hotspot3d-opencl",
+        "target_spec": "rodinia-hotspot3d-cuda"
+      },
+      {
+        "source_spec": "rodinia-hotspot3d-opencl",
+        "target_spec": "rodinia-hotspot3d-omp"
+      },
+      {
+        "source_spec": "rodinia-lavamd-cuda",
+        "target_spec": "rodinia-lavamd-omp"
+      },
+      {
+        "source_spec": "rodinia-lavamd-cuda",
+        "target_spec": "rodinia-lavamd-opencl"
+      },
+      {
+        "source_spec": "rodinia-lavamd-omp",
+        "target_spec": "rodinia-lavamd-cuda"
+      },
+      {
+        "source_spec": "rodinia-lavamd-omp",
+        "target_spec": "rodinia-lavamd-opencl"
+      },
+      {
+        "source_spec": "rodinia-lavamd-opencl",
+        "target_spec": "rodinia-lavamd-cuda"
+      },
+      {
+        "source_spec": "rodinia-lavamd-opencl",
+        "target_spec": "rodinia-lavamd-omp"
+      },
+      {
+        "source_spec": "rodinia-lud-cuda",
+        "target_spec": "rodinia-lud-omp"
+      },
+      {
+        "source_spec": "rodinia-lud-cuda",
+        "target_spec": "rodinia-lud-opencl"
+      },
+      {
+        "source_spec": "rodinia-lud-omp",
+        "target_spec": "rodinia-lud-cuda"
+      },
+      {
+        "source_spec": "rodinia-lud-omp",
+        "target_spec": "rodinia-lud-opencl"
+      },
+      {
+        "source_spec": "rodinia-lud-opencl",
+        "target_spec": "rodinia-lud-cuda"
+      },
+      {
+        "source_spec": "rodinia-lud-opencl",
+        "target_spec": "rodinia-lud-omp"
+      },
+      {
+        "source_spec": "rodinia-myocyte-cuda",
+        "target_spec": "rodinia-myocyte-omp"
+      },
+      {
+        "source_spec": "rodinia-myocyte-cuda",
+        "target_spec": "rodinia-myocyte-opencl"
+      },
+      {
+        "source_spec": "rodinia-myocyte-omp",
+        "target_spec": "rodinia-myocyte-cuda"
+      },
+      {
+        "source_spec": "rodinia-myocyte-omp",
+        "target_spec": "rodinia-myocyte-opencl"
+      },
+      {
+        "source_spec": "rodinia-myocyte-opencl",
+        "target_spec": "rodinia-myocyte-cuda"
+      },
+      {
+        "source_spec": "rodinia-myocyte-opencl",
+        "target_spec": "rodinia-myocyte-omp"
+      },
+      {
+        "source_spec": "rodinia-nn-cuda",
+        "target_spec": "rodinia-nn-omp"
+      },
+      {
+        "source_spec": "rodinia-nn-omp",
+        "target_spec": "rodinia-nn-cuda"
+      },
+      {
+        "source_spec": "rodinia-nw-cuda",
+        "target_spec": "rodinia-nw-omp"
+      },
+      {
+        "source_spec": "rodinia-nw-cuda",
+        "target_spec": "rodinia-nw-opencl"
+      },
+      {
+        "source_spec": "rodinia-nw-omp",
+        "target_spec": "rodinia-nw-cuda"
+      },
+      {
+        "source_spec": "rodinia-nw-omp",
+        "target_spec": "rodinia-nw-opencl"
+      },
+      {
+        "source_spec": "rodinia-nw-opencl",
+        "target_spec": "rodinia-nw-cuda"
+      },
+      {
+        "source_spec": "rodinia-nw-opencl",
+        "target_spec": "rodinia-nw-omp"
+      },
+      {
+        "source_spec": "rodinia-particlefilter-cuda",
+        "target_spec": "rodinia-particlefilter-omp"
+      },
+      {
+        "source_spec": "rodinia-particlefilter-cuda",
+        "target_spec": "rodinia-particlefilter-opencl"
+      },
+      {
+        "source_spec": "rodinia-particlefilter-omp",
+        "target_spec": "rodinia-particlefilter-cuda"
+      },
+      {
+        "source_spec": "rodinia-particlefilter-omp",
+        "target_spec": "rodinia-particlefilter-opencl"
+      },
+      {
+        "source_spec": "rodinia-particlefilter-opencl",
+        "target_spec": "rodinia-particlefilter-cuda"
+      },
+      {
+        "source_spec": "rodinia-particlefilter-opencl",
+        "target_spec": "rodinia-particlefilter-omp"
+      },
+      {
+        "source_spec": "rodinia-pathfinder-cuda",
+        "target_spec": "rodinia-pathfinder-omp"
+      },
+      {
+        "source_spec": "rodinia-pathfinder-cuda",
+        "target_spec": "rodinia-pathfinder-opencl"
+      },
+      {
+        "source_spec": "rodinia-pathfinder-omp",
+        "target_spec": "rodinia-pathfinder-cuda"
+      },
+      {
+        "source_spec": "rodinia-pathfinder-omp",
+        "target_spec": "rodinia-pathfinder-opencl"
+      },
+      {
+        "source_spec": "rodinia-pathfinder-opencl",
+        "target_spec": "rodinia-pathfinder-cuda"
+      },
+      {
+        "source_spec": "rodinia-pathfinder-opencl",
+        "target_spec": "rodinia-pathfinder-omp"
+      },
+      {
+        "source_spec": "rodinia-srad-cuda",
+        "target_spec": "rodinia-srad-omp"
+      },
+      {
+        "source_spec": "rodinia-srad-cuda",
+        "target_spec": "rodinia-srad-opencl"
+      },
+      {
+        "source_spec": "rodinia-srad-omp",
+        "target_spec": "rodinia-srad-cuda"
+      },
+      {
+        "source_spec": "rodinia-srad-omp",
+        "target_spec": "rodinia-srad-opencl"
+      },
+      {
+        "source_spec": "rodinia-srad-opencl",
+        "target_spec": "rodinia-srad-cuda"
+      },
+      {
+        "source_spec": "rodinia-srad-opencl",
+        "target_spec": "rodinia-srad-omp"
+      },
+      {
+        "source_spec": "rodinia-streamcluster-cuda",
+        "target_spec": "rodinia-streamcluster-omp"
+      },
+      {
+        "source_spec": "rodinia-streamcluster-cuda",
+        "target_spec": "rodinia-streamcluster-opencl"
+      },
+      {
+        "source_spec": "rodinia-streamcluster-omp",
+        "target_spec": "rodinia-streamcluster-cuda"
+      },
+      {
+        "source_spec": "rodinia-streamcluster-omp",
+        "target_spec": "rodinia-streamcluster-opencl"
+      },
+      {
+        "source_spec": "rodinia-streamcluster-opencl",
+        "target_spec": "rodinia-streamcluster-cuda"
+      },
+      {
+        "source_spec": "rodinia-streamcluster-opencl",
+        "target_spec": "rodinia-streamcluster-omp"
+      },
+      {
+        "source_spec": "rsbench-rsbench-cuda",
+        "target_spec": "rsbench-rsbench-omp"
+      },
+      {
+        "source_spec": "rsbench-rsbench-cuda",
+        "target_spec": "rsbench-rsbench-omp_target"
+      },
+      {
+        "source_spec": "rsbench-rsbench-cuda",
+        "target_spec": "rsbench-rsbench-opencl"
+      },
+      {
+        "source_spec": "rsbench-rsbench-omp",
+        "target_spec": "rsbench-rsbench-cuda"
+      },
+      {
+        "source_spec": "rsbench-rsbench-omp",
+        "target_spec": "rsbench-rsbench-omp_target"
+      },
+      {
+        "source_spec": "rsbench-rsbench-omp",
+        "target_spec": "rsbench-rsbench-opencl"
+      },
+      {
+        "source_spec": "rsbench-rsbench-omp_target",
+        "target_spec": "rsbench-rsbench-cuda"
+      },
+      {
+        "source_spec": "rsbench-rsbench-omp_target",
+        "target_spec": "rsbench-rsbench-omp"
+      },
+      {
+        "source_spec": "rsbench-rsbench-omp_target",
+        "target_spec": "rsbench-rsbench-opencl"
+      },
+      {
+        "source_spec": "rsbench-rsbench-opencl",
+        "target_spec": "rsbench-rsbench-cuda"
+      },
+      {
+        "source_spec": "rsbench-rsbench-opencl",
+        "target_spec": "rsbench-rsbench-omp"
+      },
+      {
+        "source_spec": "rsbench-rsbench-opencl",
+        "target_spec": "rsbench-rsbench-omp_target"
+      },
+      {
+        "source_spec": "xsbench-xsbench-cuda",
+        "target_spec": "xsbench-xsbench-omp"
+      },
+      {
+        "source_spec": "xsbench-xsbench-cuda",
+        "target_spec": "xsbench-xsbench-omp_target"
+      },
+      {
+        "source_spec": "xsbench-xsbench-cuda",
+        "target_spec": "xsbench-xsbench-opencl"
+      },
+      {
+        "source_spec": "xsbench-xsbench-omp",
+        "target_spec": "xsbench-xsbench-cuda"
+      },
+      {
+        "source_spec": "xsbench-xsbench-omp",
+        "target_spec": "xsbench-xsbench-omp_target"
+      },
+      {
+        "source_spec": "xsbench-xsbench-omp",
+        "target_spec": "xsbench-xsbench-opencl"
+      },
+      {
+        "source_spec": "xsbench-xsbench-omp_target",
+        "target_spec": "xsbench-xsbench-cuda"
+      },
+      {
+        "source_spec": "xsbench-xsbench-omp_target",
+        "target_spec": "xsbench-xsbench-omp"
+      },
+      {
+        "source_spec": "xsbench-xsbench-omp_target",
+        "target_spec": "xsbench-xsbench-opencl"
+      },
+      {
+        "source_spec": "xsbench-xsbench-opencl",
+        "target_spec": "xsbench-xsbench-cuda"
+      },
+      {
+        "source_spec": "xsbench-xsbench-opencl",
+        "target_spec": "xsbench-xsbench-omp"
+      },
+      {
+        "source_spec": "xsbench-xsbench-opencl",
+        "target_spec": "xsbench-xsbench-omp_target"
+      }
+    ]
+  }
+}

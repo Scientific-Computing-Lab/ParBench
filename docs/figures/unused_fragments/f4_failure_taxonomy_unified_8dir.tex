@@ -1,0 +1,116 @@
+% F4-unified 8-dir: Failure taxonomy across three models (side-by-side)
+% Data: L0, first sample per task, 8 directions (6 standard + 2 OMP-target case studies), KNOWN_FAIL excluded
+% Standard directions: 120 tasks each (24+24+19+19+17+17)
+% OMP-target directions: 8 tasks each (case-study subset)
+%
+% Include inside \begin{figure}[t] ... \end{figure} in the parent file.
+
+\begingroup
+\pgfplotsset{
+  ffour failure axis/.style={
+    width=\linewidth,
+    height=4.9cm,
+    ybar stacked,
+    bar width=0.28cm,
+    enlarge x limits=0.07,
+    xtick={0,...,7},
+    xticklabels={
+        {\ensuremath{\mathrm{CUDA}{\to}\mathrm{OMP}}},
+        {\ensuremath{\mathrm{OMP}{\to}\mathrm{CUDA}}},
+        {\ensuremath{\mathrm{CUDA}{\to}\mathrm{OCL}}},
+        {\ensuremath{\mathrm{OCL}{\to}\mathrm{CUDA}}},
+        {\ensuremath{\mathrm{OMP}{\to}\mathrm{OCL}}},
+        {\ensuremath{\mathrm{OCL}{\to}\mathrm{OMP}}},
+        {\ensuremath{\mathrm{CUDA}{\to}\mathrm{OMP\text{-}T}}},
+        {\ensuremath{\mathrm{OMP\text{-}T}{\to}\mathrm{CUDA}}}},
+    xticklabel style={font=\scriptsize, rotate=45, anchor=north east},
+    yticklabel style={font=\footnotesize},
+    xmin=-0.55,
+    xmax=7.55,
+    ymin=0,
+    ymax=26,
+    ytick={0,5,10,15,20,25},
+    title style={font=\small\bfseries, align=center},
+    ymajorgrids=true,
+    xmajorgrids=false,
+    major grid style={dashed, draw=gray!40},
+    tick pos=left,
+    clip=false,
+  },
+  ffour segment/.style={
+    ybar stacked,
+    draw=black,
+    line width=0.3pt,
+    fill opacity=0.9,
+    nodes near coords={
+      \pgfmathfloattoint{\pgfplotspointmeta}%
+      \ifnum\pgfmathresult>1\relax\pgfmathresult\fi},
+    nodes near coords align={center},
+    every node near coord/.style={
+      font=\tiny\bfseries,
+      text=white,
+      inner sep=1pt,
+    },
+  },
+}
+
+\newcommand{\ffourpanel}[7]{%
+  \begin{minipage}[t]{0.30\textwidth}
+  \centering
+  \begin{tikzpicture}
+  \begin{axis}[
+    ffour failure axis,
+    title={#1},
+    #2
+  ]
+    \addplot[ffour segment, fill=pbPass]
+      coordinates {#3};
+    \addplot[ffour segment, fill=pbBuildFail]
+      coordinates {#4};
+    \addplot[ffour segment, fill=pbRunFail]
+      coordinates {#5};
+    \addplot[ffour segment, fill=pbExtractionFail]
+      coordinates {#6};
+    \addplot[ffour segment, fill=pbVerifyFail]
+      coordinates {#7};
+  \end{axis}
+  \end{tikzpicture}
+  \end{minipage}%
+}
+
+\ffourpanel{\qwenshort{}}%
+  {ylabel={Tasks}, ylabel style={font=\footnotesize}}%
+  {(0,9) (1,5) (2,1) (3,0) (4,4) (5,1) (6,0) (7,5)}%
+  {(0,12) (1,18) (2,0) (3,17) (4,0) (5,12) (6,8) (7,3)}%
+  {(0,1) (1,0) (2,16) (3,2) (4,11) (5,1) (6,0) (7,0)}%
+  {(0,0) (1,0) (2,0) (3,0) (4,0) (5,0) (6,0) (7,0)}%
+  {(0,2) (1,1) (2,2) (3,0) (4,2) (5,3) (6,0) (7,0)}%
+\hfill
+\ffourpanel{\gptnew{}}%
+  {yticklabels={,,,,,,}}%
+  {(0,21) (1,14) (2,11) (3,5) (4,12) (5,6) (6,7) (7,7)}%
+  {(0,3) (1,8) (2,0) (3,12) (4,0) (5,8) (6,1) (7,1)}%
+  {(0,0) (1,2) (2,6) (3,0) (4,3) (5,1) (6,0) (7,0)}%
+  {(0,0) (1,0) (2,0) (3,0) (4,0) (5,0) (6,0) (7,0)}%
+  {(0,0) (1,0) (2,2) (3,2) (4,2) (5,2) (6,0) (7,0)}%
+\hfill
+\ffourpanel{\codex{}}%
+  {yticklabels={,,,,,,}}%
+  {(0,18) (1,14) (2,11) (3,3) (4,14) (5,7) (6,8) (7,8)}%
+  {(0,6) (1,10) (2,0) (3,14) (4,0) (5,7) (6,0) (7,0)}%
+  {(0,0) (1,0) (2,6) (3,0) (4,2) (5,1) (6,0) (7,0)}%
+  {(0,0) (1,0) (2,0) (3,0) (4,0) (5,0) (6,0) (7,0)}%
+  {(0,0) (1,0) (2,2) (3,2) (4,1) (5,2) (6,0) (7,0)}%
+
+\vspace{0.35ex}
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}llllll@{}}
+\fcolorbox{black}{pbPass}{\rule{0pt}{7pt}\rule{10pt}{0pt}} & Pass &
+\fcolorbox{black}{pbBuildFail}{\rule{0pt}{7pt}\rule{10pt}{0pt}} & Build Fail &
+\fcolorbox{black}{pbRunFail}{\rule{0pt}{7pt}\rule{10pt}{0pt}} & Run Fail \\
+\fcolorbox{black}{pbExtractionFail}{\rule{0pt}{7pt}\rule{10pt}{0pt}} & Extract Fail &
+\fcolorbox{black}{pbVerifyFail}{\rule{0pt}{7pt}\rule{10pt}{0pt}} & Verify Fail & & \\
+\end{tabular}
+\end{center}
+\endgroup

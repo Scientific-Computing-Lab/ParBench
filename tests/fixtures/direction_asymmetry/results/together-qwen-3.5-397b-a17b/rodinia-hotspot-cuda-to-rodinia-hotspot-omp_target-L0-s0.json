@@ -1,0 +1,10 @@
+{
+  "source_spec": "rodinia-hotspot-cuda",
+  "target_spec": "rodinia-hotspot-omp_target",
+  "model": "together-qwen-3.5-397b-a17b",
+  "direction": "cuda-to-omp_target",
+  "overall_status": "PASS",
+  "augment_level": 0,
+  "sample_id": 0,
+  "temperature": 0.7
+}

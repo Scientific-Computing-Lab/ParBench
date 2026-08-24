@@ -1,0 +1,10 @@
+{
+  "source_spec": "rodinia-nw-opencl",
+  "target_spec": "rodinia-nw-cuda",
+  "model": "together-qwen-3.5-397b-a17b",
+  "direction": "opencl-to-cuda",
+  "overall_status": "PASS",
+  "augment_level": 0,
+  "sample_id": 1,
+  "temperature": 0.7
+}

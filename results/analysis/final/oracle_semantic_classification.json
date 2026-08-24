@@ -1,0 +1,33 @@
+{
+  "artifact": "oracle_semantic_classification",
+  "generated_by": "scripts/analysis/generate_final_evidence.py",
+  "generated_at": "2026-08-13T18:11:19Z",
+  "results_root": "/parbench/results/evaluation_final/parbench-final-v1",
+  "population": "correctness-eligible L0 replay records (KNOWN_FAIL and performance-only specs both excluded), grouped by the target spec's oracle shape",
+  "by_shape": {
+    "banner-only": {
+      "n": 693,
+      "passes": 161,
+      "pass_rate": 0.2323,
+      "ci_lower": 0.2024,
+      "ci_upper": 0.2652,
+      "ci_level": 0.95
+    },
+    "numeric/hash": {
+      "n": 135,
+      "passes": 34,
+      "pass_rate": 0.2519,
+      "ci_lower": 0.1862,
+      "ci_upper": 0.3312,
+      "ci_level": 0.95
+    },
+    "self-checking": {
+      "n": 396,
+      "passes": 261,
+      "pass_rate": 0.6591,
+      "ci_lower": 0.6111,
+      "ci_upper": 0.704,
+      "ci_level": 0.95
+    }
+  }
+}

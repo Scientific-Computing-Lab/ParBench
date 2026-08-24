@@ -1,0 +1,1020 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "spec_schema.json",
+    "title": "ParBench Level 2 Kernel Spec",
+    "description": "Full specification for a single kernel variant in ParBench. Drives build, run, verification, and LLM evaluation workflows.",
+    "type": "object",
+    "required": [
+        "spec_version",
+        "identity",
+        "provenance",
+        "files",
+        "implementation",
+        "build",
+        "run",
+        "verification",
+        "hardware"
+    ],
+    "additionalProperties": false,
+    "properties": {
+        "spec_version": {
+            "type": "string",
+            "const": "1.0.0",
+            "description": "Schema version for this spec format."
+        },
+        "identity": {
+            "type": "object",
+            "description": "Uniquely identifies this kernel variant.",
+            "required": [
+                "kernel_name",
+                "parallel_api",
+                "unique_id",
+                "source_suite"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "kernel_name": {
+                    "type": "string",
+                    "description": "Logical kernel name, used as pairing key across API variants."
+                },
+                "parallel_api": {
+                    "type": "string",
+                    "description": "Parallel programming API.",
+                    "enum": [
+                        "serial",
+                        "cuda",
+                        "hip",
+                        "sycl",
+                        "opencl",
+                        "omp",
+                        "omp_target",
+                        "openacc",
+                        "kokkos",
+                        "raja",
+                        "mpi",
+                        "omp_mpi",
+                        "tbb",
+                        "stdpar",
+                        "thrust"
+                    ]
+                },
+                "unique_id": {
+                    "type": "string",
+                    "description": "Globally unique identifier. Format: {source_suite}-{kernel_name}-{api}.",
+                    "pattern": "^[a-z0-9_]+-[a-z0-9_][a-z0-9_-]*-[a-z0-9_]+$"
+                },
+                "source_suite": {
+                    "type": "string",
+                    "description": "Origin benchmark suite in lowercase."
+                }
+            }
+        },
+        "provenance": {
+            "type": "object",
+            "description": "Tracks the exact origin of the source code for reproducibility.",
+            "required": [
+                "repository",
+                "repo_root",
+                "source_path"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "repository": {
+                    "type": "object",
+                    "required": [
+                        "url",
+                        "commit"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "Git clone URL."
+                        },
+                        "commit": {
+                            "type": "string",
+                            "description": "Pinned commit hash for reproducibility."
+                        },
+                        "branch": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "description": "Branch name (optional, informational)."
+                        }
+                    }
+                },
+                "repo_root": {
+                    "type": "string",
+                    "description": "Relative path from parbench project root to the cloned repo root."
+                },
+                "source_path": {
+                    "type": "string",
+                    "description": "Path from repo_root to the kernel directory."
+                },
+                "license": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "SPDX license identifier of the source code."
+                }
+            }
+        },
+        "files": {
+            "type": "object",
+            "description": "CRITICAL for LLM evaluation security. Strictly controls which files the LLM sees.",
+            "required": [
+                "prompt_payload"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "prompt_payload": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "description": "Files the LLM receives for translation. ONLY these go in the prompt."
+                },
+                "support_files": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [],
+                    "description": "Build files, shared headers needed for compilation but NOT sent to the LLM."
+                },
+                "verification_only": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [],
+                    "description": "Reference implementations and test harnesses. NEVER shown to the LLM."
+                },
+                "translation_targets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Subset of prompt_payload: kernel files the LLM must produce. If absent, falls back to full prompt_payload."
+                }
+            }
+        },
+        "implementation": {
+            "type": "object",
+            "description": "Programming language and API details.",
+            "required": [
+                "api",
+                "language"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "api": {
+                    "type": "string",
+                    "description": "Parallel API name (matches identity.parallel_api)."
+                },
+                "api_version": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "API version or spec version if applicable (e.g., 'CUDA 12.0', 'OpenMP 5.1')."
+                },
+                "language": {
+                    "type": "string",
+                    "description": "Source language.",
+                    "enum": [
+                        "C++",
+                        "C",
+                        "Fortran"
+                    ]
+                },
+                "language_standard": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "Language standard version (e.g., 'C++17', 'C++14', 'C11')."
+                }
+            }
+        },
+        "build": {
+            "type": "object",
+            "description": "Everything needed to compile the kernel.",
+            "required": [
+                "environment",
+                "build_system",
+                "working_directory",
+                "commands",
+                "outputs"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "environment": {
+                    "type": "object",
+                    "required": [
+                        "preferred",
+                        "system"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "preferred": {
+                            "type": "string",
+                            "enum": [
+                                "conda",
+                                "system"
+                            ],
+                            "description": "Preferred environment type."
+                        },
+                        "conda": {
+                            "type": [
+                                "object",
+                                "null"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "environment_file": {
+                                    "type": "string",
+                                    "description": "Path to conda environment YAML file."
+                                },
+                                "channels": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "Conda channels to use."
+                                },
+                                "packages": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "Conda packages to install."
+                                }
+                            }
+                        },
+                        "system": {
+                            "type": "object",
+                            "required": [
+                                "dependencies"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "dependencies": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "System-level dependencies (e.g., 'cuda-toolkit>=12.0', 'gcc>=11')."
+                                }
+                            }
+                        }
+                    }
+                },
+                "build_system": {
+                    "type": "string",
+                    "enum": [
+                        "make",
+                        "cmake",
+                        "cmake+make",
+                        "autotools"
+                    ],
+                    "description": "Build system used."
+                },
+                "working_directory": {
+                    "type": "string",
+                    "description": "Working directory relative to repo_root for running build commands."
+                },
+                "commands": {
+                    "type": "object",
+                    "required": [
+                        "build"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "configure": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "description": "Configure command (e.g., cmake invocation). Null if not needed."
+                        },
+                        "build": {
+                            "type": "string",
+                            "description": "Build command (e.g., 'make')."
+                        },
+                        "clean": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "description": "Clean command (e.g., 'make clean')."
+                        }
+                    }
+                },
+                "variables": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "description": "Template variables for build commands. Keys are variable names.",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "description": {
+                                "type": "string"
+                            },
+                            "default": {
+                                "type": "string"
+                            },
+                            "detection": {
+                                "type": "string",
+                                "description": "Shell command or method to auto-detect the value."
+                            }
+                        }
+                    }
+                },
+                "outputs": {
+                    "type": "object",
+                    "required": [
+                        "executable"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "executable": {
+                            "type": "string",
+                            "description": "Path to the built executable, relative to working_directory."
+                        }
+                    }
+                }
+            }
+        },
+        "run": {
+            "type": "object",
+            "description": "How to execute the compiled kernel.",
+            "required": [
+                "executable",
+                "default_arguments",
+                "timeout_seconds",
+                "input_configurations"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "executable": {
+                    "type": "string",
+                    "description": "Path to executable, relative to working_directory."
+                },
+                "default_arguments": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Default command-line arguments."
+                },
+                "timeout_seconds": {
+                    "type": "integer",
+                    "default": 300,
+                    "description": "Maximum execution time in seconds before killing the process."
+                },
+                "environment_variables": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "Environment variables to set before execution."
+                },
+                "input_configurations": {
+                    "type": "object",
+                    "description": "Named input configurations (e.g., 'small', 'medium', 'large').",
+                    "minProperties": 1,
+                    "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                            "arguments",
+                            "description"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "arguments": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "Command-line arguments for this configuration."
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Human-readable description of this input configuration."
+                            },
+                            "input_files": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "default": [],
+                                "description": "Input data files required for this configuration."
+                            },
+                            "expected_results": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "stdout_pattern": {
+                                        "type": "string",
+                                        "description": "Regex pattern expected in stdout."
+                                    },
+                                    "reference_output_file": {
+                                        "type": "string",
+                                        "description": "Path to reference output file for comparison."
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "verification": {
+            "type": "object",
+            "description": "How to verify correctness of the kernel output.",
+            "required": [
+                "method",
+                "strategies"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "method": {
+                    "type": "string",
+                    "enum": [
+                        "self_checking",
+                        "reference_comparison"
+                    ],
+                    "description": "Primary verification method. external_script was removed 2026-08-10 (Task 1): no safe, tested implementation exists and no spec used it."
+                },
+                "strategies": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "type"
+                        ],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "exit_code",
+                                    "stdout_pattern",
+                                    "stdout_exclude_pattern",
+                                    "numeric_comparison",
+                                    "file_diff",
+                                    "file_hash"
+                                ],
+                                "description": "Verification strategy type. custom_script was removed 2026-08-10 (Task 1): no safe, tested implementation exists and no spec used it."
+                            },
+                            "expected": {
+                                "description": "Expected value (e.g., expected exit code, or numeric value for numeric_comparison)."
+                            },
+                            "pattern": {
+                                "type": "string",
+                                "description": "Regex pattern for stdout_pattern type."
+                            },
+                            "extract_regex": {
+                                "type": "string",
+                                "description": "Regex with a capture group extracting a numeric value from stdout, for numeric_comparison type."
+                            },
+                            "tolerance": {
+                                "type": "number",
+                                "minimum": 0,
+                                "description": "Numeric tolerance for numeric_comparison type. Must be finite and nonnegative; the runtime fails closed otherwise."
+                            },
+                            "tolerance_type": {
+                                "type": "string",
+                                "enum": [
+                                    "absolute",
+                                    "relative"
+                                ],
+                                "description": "How tolerance is interpreted."
+                            },
+                            "path": {
+                                "type": "string",
+                                "description": "Relative path (under working_directory) to the output file for file_hash / file_diff types."
+                            },
+                            "expected_sha256": {
+                                "type": "string",
+                                "pattern": "^[0-9a-fA-F]{64}$",
+                                "description": "Expected SHA-256 hex digest of the output file, for file_hash type."
+                            },
+                            "reference_file": {
+                                "type": "string",
+                                "description": "Reference file for file_diff type."
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Human-readable description of this strategy."
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": {
+                                        "type": {
+                                            "const": "file_hash"
+                                        }
+                                    },
+                                    "required": [
+                                        "type"
+                                    ]
+                                },
+                                "then": {
+                                    "required": [
+                                        "type",
+                                        "path",
+                                        "expected_sha256"
+                                    ]
+                                }
+                            },
+                            {
+                                "if": {
+                                    "properties": {
+                                        "type": {
+                                            "const": "exit_code"
+                                        }
+                                    },
+                                    "required": [
+                                        "type"
+                                    ]
+                                },
+                                "then": {
+                                    "required": [
+                                        "type",
+                                        "expected"
+                                    ],
+                                    "properties": {
+                                        "expected": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "if": {
+                                    "properties": {
+                                        "type": {
+                                            "const": "file_diff"
+                                        }
+                                    },
+                                    "required": [
+                                        "type"
+                                    ]
+                                },
+                                "then": {
+                                    "required": [
+                                        "type",
+                                        "path",
+                                        "reference_file"
+                                    ]
+                                }
+                            },
+                            {
+                                "if": {
+                                    "properties": {
+                                        "type": {
+                                            "const": "stdout_exclude_pattern"
+                                        }
+                                    },
+                                    "required": [
+                                        "type"
+                                    ]
+                                },
+                                "then": {
+                                    "required": [
+                                        "type",
+                                        "pattern"
+                                    ]
+                                }
+                            },
+                            {
+                                "if": {
+                                    "properties": {
+                                        "type": {
+                                            "const": "numeric_comparison"
+                                        }
+                                    },
+                                    "required": [
+                                        "type"
+                                    ]
+                                },
+                                "then": {
+                                    "required": [
+                                        "type",
+                                        "extract_regex",
+                                        "expected"
+                                    ],
+                                    "properties": {
+                                        "expected": {
+                                            "type": "number",
+                                            "description": "Must be a finite JSON number: booleans and non-numeric values are rejected, and the runtime additionally fails closed on non-finite values (Task A finding 6, 2026-08-12)."
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "if": {
+                                    "properties": {
+                                        "type": {
+                                            "const": "stdout_pattern"
+                                        }
+                                    },
+                                    "required": [
+                                        "type"
+                                    ]
+                                },
+                                "then": {
+                                    "required": [
+                                        "type",
+                                        "pattern"
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "description": "Ordered list of verification strategies."
+                },
+                "floating_point": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "tolerance": {
+                            "type": "number",
+                            "description": "Floating-point comparison tolerance."
+                        },
+                        "tolerance_type": {
+                            "type": "string",
+                            "enum": [
+                                "absolute",
+                                "relative"
+                            ]
+                        },
+                        "note": {
+                            "type": "string",
+                            "description": "Any notes about floating-point behaviour."
+                        }
+                    }
+                },
+                "oracle_strength": {
+                    "type": "string",
+                    "enum": [
+                        "strong",
+                        "medium",
+                        "weak",
+                        "unknown"
+                    ],
+                    "description": "Classification of how strongly this spec's verification oracle gates semantic correctness. See docs/design/spec_oracle_design.md."
+                },
+                "scope": {
+                    "type": "string",
+                    "enum": ["performance_only"],
+                    "description": "Task 4 (E-04): when 'performance_only', the spec stays in the artifact and benchmark inventory but its pairs are removed from correctness denominators (no independent comparator exists for a computed value). Absent means correctness-eligible. Mirrored by harness.constants.PERFORMANCE_ONLY_SPECS; tests/test_mixbench_scope.py pins the two in lockstep."
+                },
+                "scope_reason": {
+                    "type": "string",
+                    "description": "Why the scope restriction holds, with evidence pointers. Required in practice when scope is set (tests enforce)."
+                },
+                "reference_files": {
+                    "type": "array",
+                    "description": "Reference output files committed under specs/references/{kernel}/; each entry records relative path + SHA-256.",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "path",
+                            "sha256"
+                        ],
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "Path relative to the repo root (typically specs/references/{kernel}/...)."
+                            },
+                            "sha256": {
+                                "type": "string",
+                                "pattern": "^[0-9a-fA-F]{64}$",
+                                "description": "SHA-256 hex digest of the reference file contents."
+                            },
+                            "size_bytes": {
+                                "type": "integer",
+                                "description": "File size in bytes; informational."
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Human-readable note about this reference file."
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                }
+            }
+        },
+        "performance": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "description": "Optional performance measurement configuration.",
+            "additionalProperties": false,
+            "properties": {
+                "metrics": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "extraction",
+                            "unit"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "Metric name (e.g., 'kernel_time', 'throughput')."
+                            },
+                            "extraction": {
+                                "type": "object",
+                                "required": [
+                                    "type",
+                                    "pattern"
+                                ],
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "regex",
+                                            "json_field",
+                                            "custom"
+                                        ],
+                                        "description": "How to extract the metric from output."
+                                    },
+                                    "pattern": {
+                                        "type": "string",
+                                        "description": "Regex pattern or JSON path for extraction."
+                                    },
+                                    "capture_group": {
+                                        "type": "integer",
+                                        "description": "Regex capture group index (default 1)."
+                                    }
+                                }
+                            },
+                            "unit": {
+                                "type": "string",
+                                "description": "Unit of the metric (e.g., 'ms', 'GB/s', 'GFLOPS')."
+                            }
+                        }
+                    }
+                },
+                "warmup_runs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Number of warmup runs before measurement."
+                },
+                "measurement_runs": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Number of measured runs for statistics."
+                }
+            }
+        },
+        "hardware": {
+            "type": "object",
+            "description": "Hardware requirements and reference platform.",
+            "required": [
+                "target",
+                "reference_platform"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "target": {
+                    "type": "string",
+                    "enum": [
+                        "gpu",
+                        "cpu",
+                        "both"
+                    ],
+                    "description": "Primary hardware target."
+                },
+                "requirements": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "gpu": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "vendor": {
+                                    "type": "string",
+                                    "description": "GPU vendor (e.g., 'NVIDIA', 'AMD', 'Intel')."
+                                },
+                                "min_compute_capability": {
+                                    "type": "string",
+                                    "description": "Minimum compute capability (e.g., 'sm_70')."
+                                },
+                                "min_memory_gb": {
+                                    "type": "number",
+                                    "description": "Minimum GPU memory in GB."
+                                }
+                            }
+                        },
+                        "cpu": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "min_cores": {
+                                    "type": "integer",
+                                    "description": "Minimum number of CPU cores."
+                                },
+                                "min_memory_gb": {
+                                    "type": "number",
+                                    "description": "Minimum system RAM in GB."
+                                }
+                            }
+                        }
+                    }
+                },
+                "reference_platform": {
+                    "type": "object",
+                    "description": "Reference platform used for baseline results. See schema/reference_platform.json.",
+                    "properties": {
+                        "$ref": {
+                            "type": "string",
+                            "description": "JSON Reference to shared reference_platform.json."
+                        },
+                        "platform_id": {
+                            "type": "string"
+                        },
+                        "gpu": {
+                            "type": "object"
+                        },
+                        "cpu": {
+                            "type": "object"
+                        },
+                        "software": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "baseline_results": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "description": "Starts as null; populated after benchmarking on the reference platform.",
+            "properties": {
+                "reference_platform": {
+                    "type": "string",
+                    "description": "platform_id of the machine used."
+                },
+                "timestamp": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "ISO 8601 timestamp of when results were collected."
+                },
+                "configurations": {
+                    "type": "object",
+                    "description": "Results keyed by input_configuration name.",
+                    "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                            "status"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "status": {
+                                "type": "string",
+                                "enum": [
+                                    "pass",
+                                    "fail",
+                                    "error",
+                                    "timeout",
+                                    "skip"
+                                ],
+                                "description": "Outcome of the run."
+                            },
+                            "exit_code": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ],
+                                "description": "Process exit code."
+                            },
+                            "stdout_snippet": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "description": "First N bytes of stdout for quick inspection."
+                            },
+                            "wall_time_seconds": {
+                                "type": [
+                                    "number",
+                                    "null"
+                                ],
+                                "description": "Wall-clock time in seconds."
+                            },
+                            "metrics": {
+                                "type": "object",
+                                "additionalProperties": true,
+                                "description": "Extracted performance metrics as key-value pairs."
+                            },
+                            "skip_reason": {
+                                "type": "string",
+                                "description": "Reason this configuration was skipped (when status=skip)."
+                            },
+                            "fail_reason": {
+                                "type": "string",
+                                "description": "Reason this configuration failed (when status=fail)."
+                            },
+                            "fail_category": {
+                                "type": "string",
+                                "description": "Category of failure (e.g., benchmark_source_gpu_assumption, benchmark_source_gpu_memory_model)."
+                            },
+                            "reproducibility": {
+                                "type": "string",
+                                "enum": [
+                                    "deterministic",
+                                    "flaky",
+                                    "unknown"
+                                ],
+                                "description": "Whether the failure is deterministic, flaky, or unknown."
+                            },
+                            "note": {
+                                "type": "string",
+                                "description": "Additional notes about this configuration result."
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "metadata": {
+            "type": "object",
+            "description": "Optional descriptive metadata.",
+            "additionalProperties": false,
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "description": "Brief description of what the kernel does."
+                },
+                "domain": {
+                    "type": "string",
+                    "description": "Computational domain (e.g., 'graph traversal', 'dense linear algebra')."
+                },
+                "complexity": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "Algorithmic complexity or difficulty level."
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Free-form tags for search and filtering."
+                },
+                "multi_file": {
+                    "type": "boolean",
+                    "description": "Whether the kernel spans multiple source files."
+                },
+                "translation_complexity": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "enum": [
+                        "single_file",
+                        "multi_to_single",
+                        "single_to_multi",
+                        "multi_to_multi",
+                        null
+                    ],
+                    "description": "Complexity class for stratified reporting of translation pairs (source_files x target_files)."
+                }
+            }
+        }
+    }
+}

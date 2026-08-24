@@ -1,0 +1,51 @@
+{
+  "protocol_name": "parbench-bounded-agentic-repair",
+  "protocol_version": "1.1.0",
+  "description": "Bounded agentic-repair protocol (plan Task 10, gate E-08). One original translation attempt plus at most two repair attempts, all funded from a single declared trajectory token budget. This artifact defines the bounds; no measured agentic comparison runs without a separately approved cost and sampling design.",
+  "attempts": {
+    "original_attempts": 1,
+    "max_repair_attempts": 2,
+    "max_total_attempts": 3
+  },
+  "token_budget": {
+    "trajectory_total_tokens": 180000,
+    "per_call_response_limit_tokens": 32768,
+    "protocol_minimum_completion_tokens": 1024,
+    "prompt_estimator": {
+      "method": "conservative_byte_upper_bound",
+      "bytes_per_token": 1.0,
+      "per_message_overhead_tokens": 8
+    }
+  },
+  "accounting": {
+    "normalized_fields": ["prompt_tokens", "completion_tokens", "total_tokens"],
+    "provider_field_maps": {
+      "anthropic": {"prompt_tokens": "input_tokens", "completion_tokens": "output_tokens"},
+      "openai_compatible": {"prompt_tokens": "prompt_tokens", "completion_tokens": "completion_tokens"},
+      "google_native": {"prompt_tokens": "promptTokenCount", "completion_tokens": "candidatesTokenCount"}
+    }
+  },
+  "diagnostics_exposed_to_model": [
+    "build_stderr_tail",
+    "run_exit_code",
+    "run_stderr_tail",
+    "verify_status_only"
+  ],
+  "visibility": {
+    "forbidden_to_agent": [
+      "reference_implementations",
+      "target_implementations",
+      "verification_only_files",
+      "hidden_expected_outputs",
+      "oracle_contents"
+    ]
+  },
+  "stop_reasons": [
+    "PASS",
+    "ATTEMPT_LIMIT_REACHED",
+    "TOKEN_BUDGET_EXHAUSTED",
+    "PROVIDER_ERROR",
+    "CALLER_ATTEMPT_LIMIT_REACHED",
+    "PROTOCOL_VIOLATION"
+  ]
+}

@@ -1,0 +1,411 @@
+{
+  "scope": {
+    "level": "L0 only (primary task set)",
+    "results_root": "/parbench/results/evaluation_final/parbench-final-v1",
+    "records": 1224,
+    "tasks": 408,
+    "samples_per_task": [
+      3
+    ]
+  },
+  "mix": {
+    "Rodinia": {
+      "n": 828,
+      "opencl": 540,
+      "multi_file": 468
+    },
+    "other four": {
+      "n": 396,
+      "opencl": 72,
+      "multi_file": 90
+    }
+  },
+  "opencl_records": {
+    "rodinia": 540,
+    "corpus": 612
+  },
+  "per_suite_record_unit": {
+    "hecbench": {
+      "n": 288,
+      "passes": 237,
+      "rate": 0.8229,
+      "ci_lower": 0.7747,
+      "ci_upper": 0.8627
+    },
+    "rodinia": {
+      "n": 828,
+      "passes": 190,
+      "rate": 0.2295,
+      "ci_lower": 0.2021,
+      "ci_upper": 0.2593
+    },
+    "rsbench": {
+      "n": 54,
+      "passes": 15,
+      "rate": 0.2778,
+      "ci_lower": 0.1762,
+      "ci_upper": 0.4089
+    },
+    "xsbench": {
+      "n": 54,
+      "passes": 14,
+      "rate": 0.2593,
+      "ci_lower": 0.1612,
+      "ci_upper": 0.3893
+    }
+  },
+  "record_unit": {
+    "unit": "record unit (published; 3 samples per task counted separately)",
+    "rodinia": {
+      "n": 828,
+      "passes": 190,
+      "value": 0.2295,
+      "ci_lower": 0.2021,
+      "ci_upper": 0.2593,
+      "ci_level": 0.95
+    },
+    "others": {
+      "n": 396,
+      "passes": 266,
+      "value": 0.6717,
+      "ci_lower": 0.624,
+      "ci_upper": 0.7161,
+      "ci_level": 0.95
+    },
+    "strata": [
+      {
+        "stratum": "no-OpenCL single-file",
+        "opencl": false,
+        "structure": "single",
+        "rodinia": {
+          "n": 90,
+          "passes": 39,
+          "value": 0.4333,
+          "ci_lower": 0.3358,
+          "ci_upper": 0.5364,
+          "ci_level": 0.95
+        },
+        "others": {
+          "n": 288,
+          "passes": 237,
+          "value": 0.8229,
+          "ci_lower": 0.7747,
+          "ci_upper": 0.8627,
+          "ci_level": 0.95
+        }
+      },
+      {
+        "stratum": "no-OpenCL multi-file",
+        "opencl": false,
+        "structure": "multi",
+        "rodinia": {
+          "n": 198,
+          "passes": 68,
+          "value": 0.3434,
+          "ci_lower": 0.2808,
+          "ci_upper": 0.412,
+          "ci_level": 0.95
+        },
+        "others": {
+          "n": 36,
+          "passes": 4,
+          "value": 0.1111,
+          "ci_lower": 0.0441,
+          "ci_upper": 0.2531,
+          "ci_level": 0.95
+        }
+      },
+      {
+        "stratum": "OpenCL single-file",
+        "opencl": true,
+        "structure": "single",
+        "rodinia": {
+          "n": 270,
+          "passes": 43,
+          "value": 0.1593,
+          "ci_lower": 0.1204,
+          "ci_upper": 0.2076,
+          "ci_level": 0.95
+        },
+        "others": {
+          "n": 18,
+          "passes": 3,
+          "value": 0.1667,
+          "ci_lower": 0.0584,
+          "ci_upper": 0.3922,
+          "ci_level": 0.95
+        }
+      },
+      {
+        "stratum": "OpenCL multi-file",
+        "opencl": true,
+        "structure": "multi",
+        "rodinia": {
+          "n": 270,
+          "passes": 40,
+          "value": 0.1481,
+          "ci_lower": 0.1107,
+          "ci_upper": 0.1954,
+          "ci_level": 0.95
+        },
+        "others": {
+          "n": 54,
+          "passes": 22,
+          "value": 0.4074,
+          "ci_lower": 0.2868,
+          "ci_upper": 0.5403,
+          "ci_level": 0.95
+        }
+      }
+    ],
+    "standardized_rate": 0.3032155797101449,
+    "gap_points": 44.224857268335526,
+    "composition_points": 36.850159200702684,
+    "residual_points": 7.374698067632848,
+    "wilson_bound_restandardization": {
+      "method": "direct standardization of the non-Rodinia pool to Rodinia's direction x structure mix, with every non-Rodinia stratum at its Wilson 95% lower (upper) bound; residual = standardized bound minus Rodinia's observed rate, in percentage points",
+      "descriptive": true,
+      "sparse_threshold_n": 100,
+      "standardized_point": 0.3032155797101449,
+      "standardized_low": 0.20731739130434784,
+      "standardized_high": 0.45837173913043483,
+      "standardized_low_pct": 20.731739130434786,
+      "standardized_high_pct": 45.837173913043486,
+      "residual_low_points": -2.2151207729468574,
+      "residual_high_points": 22.890314009661843,
+      "composition_low_points": 21.334543258673687,
+      "composition_high_points": 46.43997804128239,
+      "per_stratum": [
+        {
+          "stratum": "no-OpenCL single-file",
+          "rodinia_n": 90,
+          "rodinia_passes": 39,
+          "weight": 0.108696,
+          "others_n": 288,
+          "others_passes": 237,
+          "others_ci_lower": 0.7747,
+          "others_ci_upper": 0.8627,
+          "sparse": false,
+          "residual_low_points": 6.850603864734298,
+          "residual_high_points": 7.807125603864732
+        },
+        {
+          "stratum": "no-OpenCL multi-file",
+          "rodinia_n": 198,
+          "rodinia_passes": 68,
+          "weight": 0.23913,
+          "others_n": 36,
+          "others_passes": 4,
+          "others_ci_lower": 0.0441,
+          "others_ci_upper": 0.2531,
+          "sparse": true,
+          "residual_low_points": 5.77225845410628,
+          "residual_high_points": 10.770084541062799
+        },
+        {
+          "stratum": "OpenCL single-file",
+          "rodinia_n": 270,
+          "rodinia_passes": 43,
+          "weight": 0.326087,
+          "others_n": 18,
+          "others_passes": 3,
+          "others_ci_lower": 0.0584,
+          "others_ci_upper": 0.3922,
+          "sparse": true,
+          "residual_low_points": 3.8442632850241547,
+          "residual_high_points": 14.729045893719809
+        },
+        {
+          "stratum": "OpenCL multi-file",
+          "rodinia_n": 270,
+          "rodinia_passes": 40,
+          "weight": 0.326087,
+          "others_n": 54,
+          "others_passes": 22,
+          "others_ci_lower": 0.2868,
+          "others_ci_upper": 0.5403,
+          "sparse": true,
+          "residual_low_points": 3.441847826086955,
+          "residual_high_points": 11.708152173913042
+        }
+      ]
+    }
+  },
+  "task_unit": {
+    "unit": "task unit (any-of-three task success)",
+    "rodinia": {
+      "n": 276,
+      "passes": 76,
+      "value": 0.2754,
+      "ci_lower": 0.226,
+      "ci_upper": 0.3309,
+      "ci_level": 0.95
+    },
+    "others": {
+      "n": 132,
+      "passes": 100,
+      "value": 0.7576,
+      "ci_lower": 0.6779,
+      "ci_upper": 0.8227,
+      "ci_level": 0.95
+    },
+    "strata": [
+      {
+        "stratum": "no-OpenCL single-file",
+        "opencl": false,
+        "structure": "single",
+        "rodinia": {
+          "n": 30,
+          "passes": 13,
+          "value": 0.4333,
+          "ci_lower": 0.2738,
+          "ci_upper": 0.608,
+          "ci_level": 0.95
+        },
+        "others": {
+          "n": 96,
+          "passes": 85,
+          "value": 0.8854,
+          "ci_lower": 0.8064,
+          "ci_upper": 0.9348,
+          "ci_level": 0.95
+        }
+      },
+      {
+        "stratum": "no-OpenCL multi-file",
+        "opencl": false,
+        "structure": "multi",
+        "rodinia": {
+          "n": 66,
+          "passes": 29,
+          "value": 0.4394,
+          "ci_lower": 0.3263,
+          "ci_upper": 0.5592,
+          "ci_level": 0.95
+        },
+        "others": {
+          "n": 12,
+          "passes": 4,
+          "value": 0.3333,
+          "ci_lower": 0.1381,
+          "ci_upper": 0.6094,
+          "ci_level": 0.95
+        }
+      },
+      {
+        "stratum": "OpenCL single-file",
+        "opencl": true,
+        "structure": "single",
+        "rodinia": {
+          "n": 90,
+          "passes": 16,
+          "value": 0.1778,
+          "ci_lower": 0.1125,
+          "ci_upper": 0.2694,
+          "ci_level": 0.95
+        },
+        "others": {
+          "n": 6,
+          "passes": 2,
+          "value": 0.3333,
+          "ci_lower": 0.0968,
+          "ci_upper": 0.7,
+          "ci_level": 0.95
+        }
+      },
+      {
+        "stratum": "OpenCL multi-file",
+        "opencl": true,
+        "structure": "multi",
+        "rodinia": {
+          "n": 90,
+          "passes": 18,
+          "value": 0.2,
+          "ci_lower": 0.1304,
+          "ci_upper": 0.2941,
+          "ci_level": 0.95
+        },
+        "others": {
+          "n": 18,
+          "passes": 9,
+          "value": 0.5,
+          "ci_lower": 0.2903,
+          "ci_upper": 0.7097,
+          "ci_level": 0.95
+        }
+      }
+    ],
+    "standardized_rate": 0.4476902173913043,
+    "gap_points": 48.22134387351779,
+    "composition_points": 30.988554018445324,
+    "residual_points": 17.23278985507246,
+    "wilson_bound_restandardization": {
+      "method": "direct standardization of the non-Rodinia pool to Rodinia's direction x structure mix, with every non-Rodinia stratum at its Wilson 95% lower (upper) bound; residual = standardized bound minus Rodinia's observed rate, in percentage points",
+      "descriptive": true,
+      "sparse_threshold_n": 100,
+      "standardized_point": 0.4476902173913043,
+      "standardized_low": 0.24690434782608697,
+      "standardized_high": 0.7070195652173914,
+      "standardized_low_pct": 24.690434782608698,
+      "standardized_high_pct": 70.70195652173913,
+      "residual_low_points": -2.845797101449274,
+      "residual_high_points": 43.165724637681166,
+      "composition_low_points": 5.055619235836617,
+      "composition_high_points": 51.06714097496706,
+      "per_stratum": [
+        {
+          "stratum": "no-OpenCL single-file",
+          "rodinia_n": 30,
+          "rodinia_passes": 13,
+          "weight": 0.108696,
+          "others_n": 96,
+          "others_passes": 85,
+          "others_ci_lower": 0.8064,
+          "others_ci_upper": 0.9348,
+          "sparse": true,
+          "residual_low_points": 16.37391304347826,
+          "residual_high_points": 17.769565217391303
+        },
+        {
+          "stratum": "no-OpenCL multi-file",
+          "rodinia_n": 66,
+          "rodinia_passes": 29,
+          "weight": 0.23913,
+          "others_n": 12,
+          "others_passes": 4,
+          "others_ci_lower": 0.1381,
+          "others_ci_upper": 0.6094,
+          "sparse": true,
+          "residual_low_points": 12.564166666666665,
+          "residual_high_points": 23.834384057971015
+        },
+        {
+          "stratum": "OpenCL single-file",
+          "rodinia_n": 90,
+          "rodinia_passes": 16,
+          "weight": 0.326087,
+          "others_n": 6,
+          "others_passes": 2,
+          "others_ci_lower": 0.0968,
+          "others_ci_upper": 0.7,
+          "sparse": true,
+          "residual_low_points": 9.519746376811595,
+          "residual_high_points": 29.189311594202895
+        },
+        {
+          "stratum": "OpenCL multi-file",
+          "rodinia_n": 90,
+          "rodinia_passes": 18,
+          "weight": 0.326087,
+          "others_n": 18,
+          "others_passes": 9,
+          "others_ci_lower": 0.2903,
+          "others_ci_upper": 0.7097,
+          "sparse": true,
+          "residual_low_points": 10.394746376811593,
+          "residual_high_points": 24.07083333333333
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,9 @@
+results/response_2026/source_baselines.json filter=lfs diff=lfs merge=lfs -text
+results/response_2026/reverification_merged.jsonl filter=lfs diff=lfs merge=lfs -text
+results/response_2026/reverification_flagged_rerun.jsonl filter=lfs diff=lfs merge=lfs -text
+results/response_2026/target_baselines.json filter=lfs diff=lfs merge=lfs -text
+
+# Preserve the submitted-paper archive byte-for-byte, including its original
+# trailing whitespace. These files are immutable source artifacts, not active
+# repository code.
+parbench_paper_neurips_final_submitted/** -whitespace

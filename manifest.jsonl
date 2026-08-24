@@ -1,0 +1,211 @@
+{"kernel_name": "nn", "parallel_api": "cuda", "source_suite": "hecbench", "category": "graph", "spec_file": "specs/hecbench-nn-cuda.json", "source_dir": "HeCBench-master/src/nn-cuda"}
+{"kernel_name": "nn", "parallel_api": "omp", "source_suite": "hecbench", "category": "graph", "spec_file": "specs/hecbench-nn-omp.json", "source_dir": "HeCBench-master/src/nn-omp"}
+{"kernel_name": "scan", "parallel_api": "cuda", "source_suite": "hecbench", "category": "reduction", "spec_file": "specs/hecbench-scan-cuda.json", "source_dir": "HeCBench-master/src/scan-cuda"}
+{"kernel_name": "scan", "parallel_api": "omp", "source_suite": "hecbench", "category": "reduction", "spec_file": "specs/hecbench-scan-omp.json", "source_dir": "HeCBench-master/src/scan-omp"}
+{"kernel_name": "particle-diffusion", "parallel_api": "cuda", "source_suite": "hecbench", "category": "physics", "spec_file": "specs/hecbench-particle-diffusion-cuda.json", "source_dir": "HeCBench-master/src/particle-diffusion-cuda"}
+{"kernel_name": "particle-diffusion", "parallel_api": "omp", "source_suite": "hecbench", "category": "physics", "spec_file": "specs/hecbench-particle-diffusion-omp.json", "source_dir": "HeCBench-master/src/particle-diffusion-omp"}
+{"kernel_name": "binomial", "parallel_api": "cuda", "source_suite": "hecbench", "category": "financial", "spec_file": "specs/hecbench-binomial-cuda.json", "source_dir": "HeCBench-master/src/binomial-cuda"}
+{"kernel_name": "binomial", "parallel_api": "omp", "source_suite": "hecbench", "category": "financial", "spec_file": "specs/hecbench-binomial-omp.json", "source_dir": "HeCBench-master/src/binomial-omp"}
+{"kernel_name": "radixsort", "parallel_api": "cuda", "source_suite": "hecbench", "category": "sort", "spec_file": "specs/hecbench-radixsort-cuda.json", "source_dir": "HeCBench-master/src/radixsort-cuda"}
+{"kernel_name": "radixsort", "parallel_api": "omp", "source_suite": "hecbench", "category": "sort", "spec_file": "specs/hecbench-radixsort-omp.json", "source_dir": "HeCBench-master/src/radixsort-omp"}
+{"kernel_name": "aes", "parallel_api": "cuda", "source_suite": "hecbench", "category": "crypto", "spec_file": "specs/hecbench-aes-cuda.json", "source_dir": "HeCBench-master/src/aes-cuda"}
+{"kernel_name": "aes", "parallel_api": "omp", "source_suite": "hecbench", "category": "crypto", "spec_file": "specs/hecbench-aes-omp.json", "source_dir": "HeCBench-master/src/aes-omp"}
+{"kernel_name": "chacha20", "parallel_api": "cuda", "source_suite": "hecbench", "category": "crypto", "spec_file": "specs/hecbench-chacha20-cuda.json", "source_dir": "HeCBench-master/src/chacha20-cuda"}
+{"kernel_name": "chacha20", "parallel_api": "omp", "source_suite": "hecbench", "category": "crypto", "spec_file": "specs/hecbench-chacha20-omp.json", "source_dir": "HeCBench-master/src/chacha20-omp"}
+{"kernel_name": "lud", "parallel_api": "cuda", "source_suite": "hecbench", "category": "linear_algebra", "spec_file": "specs/hecbench-lud-cuda.json", "source_dir": "HeCBench-master/src/lud-cuda"}
+{"kernel_name": "lud", "parallel_api": "omp", "source_suite": "hecbench", "category": "linear_algebra", "spec_file": "specs/hecbench-lud-omp.json", "source_dir": "HeCBench-master/src/lud-omp"}
+{"kernel_name": "eigenvalue", "parallel_api": "cuda", "source_suite": "hecbench", "category": "linear_algebra", "spec_file": "specs/hecbench-eigenvalue-cuda.json", "source_dir": "HeCBench-master/src/eigenvalue-cuda"}
+{"kernel_name": "eigenvalue", "parallel_api": "omp", "source_suite": "hecbench", "category": "linear_algebra", "spec_file": "specs/hecbench-eigenvalue-omp.json", "source_dir": "HeCBench-master/src/eigenvalue-omp"}
+{"kernel_name": "nbody", "parallel_api": "cuda", "source_suite": "hecbench", "category": "physics", "spec_file": "specs/hecbench-nbody-cuda.json", "source_dir": "HeCBench-master/src/nbody-cuda"}
+{"kernel_name": "nbody", "parallel_api": "omp", "source_suite": "hecbench", "category": "physics", "spec_file": "specs/hecbench-nbody-omp.json", "source_dir": "HeCBench-master/src/nbody-omp"}
+{"kernel_name": "simplespmv", "parallel_api": "cuda", "source_suite": "hecbench", "category": "linear_algebra", "spec_file": "specs/hecbench-simplespmv-cuda.json", "source_dir": "HeCBench-master/src/simpleSpmv-cuda"}
+{"kernel_name": "simplespmv", "parallel_api": "omp", "source_suite": "hecbench", "category": "linear_algebra", "spec_file": "specs/hecbench-simplespmv-omp.json", "source_dir": "HeCBench-master/src/simpleSpmv-omp"}
+{"kernel_name": "sobel", "parallel_api": "cuda", "source_suite": "hecbench", "category": "image", "spec_file": "specs/hecbench-sobel-cuda.json", "source_dir": "HeCBench-master/src/sobel-cuda"}
+{"kernel_name": "sobel", "parallel_api": "omp", "source_suite": "hecbench", "category": "image", "spec_file": "specs/hecbench-sobel-omp.json", "source_dir": "HeCBench-master/src/sobel-omp"}
+{"kernel_name": "dct8x8", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-dct8x8-cuda.json", "source_dir": "HeCBench-master/src/dct8x8-cuda"}
+{"kernel_name": "dct8x8", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-dct8x8-omp.json", "source_dir": "HeCBench-master/src/dct8x8-omp"}
+{"kernel_name": "convolutionseparable", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-convolutionseparable-cuda.json", "source_dir": "HeCBench-master/src/convolutionSeparable-cuda"}
+{"kernel_name": "convolutionseparable", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-convolutionseparable-omp.json", "source_dir": "HeCBench-master/src/convolutionSeparable-omp"}
+{"kernel_name": "fft", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-fft-cuda.json", "source_dir": "HeCBench-master/src/fft-cuda"}
+{"kernel_name": "fft", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-fft-omp.json", "source_dir": "HeCBench-master/src/fft-omp"}
+{"kernel_name": "ising", "parallel_api": "cuda", "source_suite": "hecbench", "category": "physics", "spec_file": "specs/hecbench-ising-cuda.json", "source_dir": "HeCBench-master/src/ising-cuda"}
+{"kernel_name": "ising", "parallel_api": "omp", "source_suite": "hecbench", "category": "physics", "spec_file": "specs/hecbench-ising-omp.json", "source_dir": "HeCBench-master/src/ising-omp"}
+{"kernel_name": "merge", "parallel_api": "cuda", "source_suite": "hecbench", "category": "sort", "spec_file": "specs/hecbench-merge-cuda.json", "source_dir": "HeCBench-master/src/merge-cuda"}
+{"kernel_name": "merge", "parallel_api": "omp", "source_suite": "hecbench", "category": "sort", "spec_file": "specs/hecbench-merge-omp.json", "source_dir": "HeCBench-master/src/merge-omp"}
+{"kernel_name": "fwt", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-fwt-cuda.json", "source_dir": "HeCBench-master/src/fwt-cuda"}
+{"kernel_name": "fwt", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-fwt-omp.json", "source_dir": "HeCBench-master/src/fwt-omp"}
+{"kernel_name": "chi2", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-chi2-cuda.json", "source_dir": "HeCBench-master/src/chi2-cuda"}
+{"kernel_name": "chi2", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-chi2-omp.json", "source_dir": "HeCBench-master/src/chi2-omp"}
+{"kernel_name": "bilateral", "parallel_api": "cuda", "source_suite": "hecbench", "category": "image", "spec_file": "specs/hecbench-bilateral-cuda.json", "source_dir": "HeCBench-master/src/bilateral-cuda"}
+{"kernel_name": "bilateral", "parallel_api": "omp", "source_suite": "hecbench", "category": "image", "spec_file": "specs/hecbench-bilateral-omp.json", "source_dir": "HeCBench-master/src/bilateral-omp"}
+{"kernel_name": "floydwarshall", "parallel_api": "cuda", "source_suite": "hecbench", "category": "graph", "spec_file": "specs/hecbench-floydwarshall-cuda.json", "source_dir": "HeCBench-master/src/floydwarshall-cuda"}
+{"kernel_name": "floydwarshall", "parallel_api": "omp", "source_suite": "hecbench", "category": "graph", "spec_file": "specs/hecbench-floydwarshall-omp.json", "source_dir": "HeCBench-master/src/floydwarshall-omp"}
+{"kernel_name": "nw", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-nw-cuda.json", "source_dir": "HeCBench-master/src/nw-cuda"}
+{"kernel_name": "nw", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-nw-omp.json", "source_dir": "HeCBench-master/src/nw-omp"}
+{"kernel_name": "myocyte", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-myocyte-cuda.json", "source_dir": "HeCBench-master/src/myocyte-cuda"}
+{"kernel_name": "myocyte", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-myocyte-omp.json", "source_dir": "HeCBench-master/src/myocyte-omp"}
+{"kernel_name": "geglu", "parallel_api": "cuda", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-geglu-cuda.json", "source_dir": "HeCBench-master/src/geglu-cuda"}
+{"kernel_name": "geglu", "parallel_api": "omp", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-geglu-omp.json", "source_dir": "HeCBench-master/src/geglu-omp"}
+{"kernel_name": "perplexity", "parallel_api": "cuda", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-perplexity-cuda.json", "source_dir": "HeCBench-master/src/perplexity-cuda"}
+{"kernel_name": "perplexity", "parallel_api": "omp", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-perplexity-omp.json", "source_dir": "HeCBench-master/src/perplexity-omp"}
+{"kernel_name": "knn", "parallel_api": "cuda", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-knn-cuda.json", "source_dir": "HeCBench-master/src/knn-cuda"}
+{"kernel_name": "knn", "parallel_api": "omp", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-knn-omp.json", "source_dir": "HeCBench-master/src/knn-omp"}
+{"kernel_name": "iso2dfd", "parallel_api": "cuda", "source_suite": "hecbench", "category": "stencil", "spec_file": "specs/hecbench-iso2dfd-cuda.json", "source_dir": "HeCBench-master/src/iso2dfd-cuda"}
+{"kernel_name": "iso2dfd", "parallel_api": "omp", "source_suite": "hecbench", "category": "stencil", "spec_file": "specs/hecbench-iso2dfd-omp.json", "source_dir": "HeCBench-master/src/iso2dfd-omp"}
+{"kernel_name": "heat2d", "parallel_api": "cuda", "source_suite": "hecbench", "category": "stencil", "spec_file": "specs/hecbench-heat2d-cuda.json", "source_dir": "HeCBench-master/src/heat2d-cuda"}
+{"kernel_name": "heat2d", "parallel_api": "omp", "source_suite": "hecbench", "category": "stencil", "spec_file": "specs/hecbench-heat2d-omp.json", "source_dir": "HeCBench-master/src/heat2d-omp"}
+{"kernel_name": "stencil1d", "parallel_api": "cuda", "source_suite": "hecbench", "category": "stencil", "spec_file": "specs/hecbench-stencil1d-cuda.json", "source_dir": "HeCBench-master/src/stencil1d-cuda"}
+{"kernel_name": "stencil1d", "parallel_api": "omp", "source_suite": "hecbench", "category": "stencil", "spec_file": "specs/hecbench-stencil1d-omp.json", "source_dir": "HeCBench-master/src/stencil1d-omp"}
+{"kernel_name": "murmurhash3", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-murmurhash3-cuda.json", "source_dir": "HeCBench-master/src/murmurhash3-cuda"}
+{"kernel_name": "murmurhash3", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-murmurhash3-omp.json", "source_dir": "HeCBench-master/src/murmurhash3-omp"}
+{"kernel_name": "crc64", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-crc64-cuda.json", "source_dir": "HeCBench-master/src/crc64-cuda"}
+{"kernel_name": "crc64", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-crc64-omp.json", "source_dir": "HeCBench-master/src/crc64-omp"}
+{"kernel_name": "jenkins-hash", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-jenkins-hash-cuda.json", "source_dir": "HeCBench-master/src/jenkins-hash-cuda"}
+{"kernel_name": "jenkins-hash", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-jenkins-hash-omp.json", "source_dir": "HeCBench-master/src/jenkins-hash-omp"}
+{"kernel_name": "gaussian", "parallel_api": "cuda", "source_suite": "hecbench", "category": "linear_algebra", "spec_file": "specs/hecbench-gaussian-cuda.json", "source_dir": "HeCBench-master/src/gaussian-cuda"}
+{"kernel_name": "gaussian", "parallel_api": "omp", "source_suite": "hecbench", "category": "linear_algebra", "spec_file": "specs/hecbench-gaussian-omp.json", "source_dir": "HeCBench-master/src/gaussian-omp"}
+{"kernel_name": "triad", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-triad-cuda.json", "source_dir": "HeCBench-master/src/triad-cuda"}
+{"kernel_name": "triad", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-triad-omp.json", "source_dir": "HeCBench-master/src/triad-omp"}
+{"kernel_name": "popcount", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-popcount-cuda.json", "source_dir": "HeCBench-master/src/popcount-cuda"}
+{"kernel_name": "popcount", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-popcount-omp.json", "source_dir": "HeCBench-master/src/popcount-omp"}
+{"kernel_name": "sobol", "parallel_api": "cuda", "source_suite": "hecbench", "category": "financial", "spec_file": "specs/hecbench-sobol-cuda.json", "source_dir": "HeCBench-master/src/sobol-cuda"}
+{"kernel_name": "sobol", "parallel_api": "omp", "source_suite": "hecbench", "category": "financial", "spec_file": "specs/hecbench-sobol-omp.json", "source_dir": "HeCBench-master/src/sobol-omp"}
+{"kernel_name": "convolution3d", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-convolution3d-cuda.json", "source_dir": "HeCBench-master/src/convolution3D-cuda"}
+{"kernel_name": "convolution3d", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-convolution3d-omp.json", "source_dir": "HeCBench-master/src/convolution3D-omp"}
+{"kernel_name": "mandelbrot", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-mandelbrot-cuda.json", "source_dir": "HeCBench-master/src/mandelbrot-cuda"}
+{"kernel_name": "mandelbrot", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-mandelbrot-omp.json", "source_dir": "HeCBench-master/src/mandelbrot-omp"}
+{"kernel_name": "mis", "parallel_api": "cuda", "source_suite": "hecbench", "category": "graph", "spec_file": "specs/hecbench-mis-cuda.json", "source_dir": "HeCBench-master/src/mis-cuda"}
+{"kernel_name": "mis", "parallel_api": "omp", "source_suite": "hecbench", "category": "graph", "spec_file": "specs/hecbench-mis-omp.json", "source_dir": "HeCBench-master/src/mis-omp"}
+{"kernel_name": "bezier-surface", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-bezier-surface-cuda.json", "source_dir": "HeCBench-master/src/bezier-surface-cuda"}
+{"kernel_name": "bezier-surface", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-bezier-surface-omp.json", "source_dir": "HeCBench-master/src/bezier-surface-omp"}
+{"kernel_name": "pathfinder", "parallel_api": "cuda", "source_suite": "hecbench", "category": "graph", "spec_file": "specs/hecbench-pathfinder-cuda.json", "source_dir": "HeCBench-master/src/pathfinder-cuda"}
+{"kernel_name": "pathfinder", "parallel_api": "omp", "source_suite": "hecbench", "category": "graph", "spec_file": "specs/hecbench-pathfinder-omp.json", "source_dir": "HeCBench-master/src/pathfinder-omp"}
+{"kernel_name": "deredundancy", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-deredundancy-cuda.json", "source_dir": "HeCBench-master/src/deredundancy-cuda"}
+{"kernel_name": "deredundancy", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-deredundancy-omp.json", "source_dir": "HeCBench-master/src/deredundancy-omp"}
+{"kernel_name": "softmax-online", "parallel_api": "cuda", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-softmax-online-cuda.json", "source_dir": "HeCBench-master/src/softmax-online-cuda"}
+{"kernel_name": "softmax-online", "parallel_api": "omp", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-softmax-online-omp.json", "source_dir": "HeCBench-master/src/softmax-online-omp"}
+{"kernel_name": "backprop", "parallel_api": "cuda", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-backprop-cuda.json", "source_dir": "HeCBench-master/src/backprop-cuda"}
+{"kernel_name": "backprop", "parallel_api": "omp", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-backprop-omp.json", "source_dir": "HeCBench-master/src/backprop-omp"}
+{"kernel_name": "rmsnorm", "parallel_api": "cuda", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-rmsnorm-cuda.json", "source_dir": "HeCBench-master/src/rmsnorm-cuda"}
+{"kernel_name": "rmsnorm", "parallel_api": "omp", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-rmsnorm-omp.json", "source_dir": "HeCBench-master/src/rmsnorm-omp"}
+{"kernel_name": "laplace3d", "parallel_api": "cuda", "source_suite": "hecbench", "category": "stencil", "spec_file": "specs/hecbench-laplace3d-cuda.json", "source_dir": "HeCBench-master/src/laplace3d-cuda"}
+{"kernel_name": "laplace3d", "parallel_api": "omp", "source_suite": "hecbench", "category": "stencil", "spec_file": "specs/hecbench-laplace3d-omp.json", "source_dir": "HeCBench-master/src/laplace3d-omp"}
+{"kernel_name": "tissue", "parallel_api": "cuda", "source_suite": "hecbench", "category": "physics", "spec_file": "specs/hecbench-tissue-cuda.json", "source_dir": "HeCBench-master/src/tissue-cuda"}
+{"kernel_name": "tissue", "parallel_api": "omp", "source_suite": "hecbench", "category": "physics", "spec_file": "specs/hecbench-tissue-omp.json", "source_dir": "HeCBench-master/src/tissue-omp"}
+{"kernel_name": "lulesh", "parallel_api": "cuda", "source_suite": "hecbench", "category": "physics", "spec_file": "specs/hecbench-lulesh-cuda.json", "source_dir": "HeCBench-master/src/lulesh-cuda"}
+{"kernel_name": "lulesh", "parallel_api": "omp", "source_suite": "hecbench", "category": "physics", "spec_file": "specs/hecbench-lulesh-omp.json", "source_dir": "HeCBench-master/src/lulesh-omp"}
+{"kernel_name": "thomas", "parallel_api": "cuda", "source_suite": "hecbench", "category": "linear_algebra", "spec_file": "specs/hecbench-thomas-cuda.json", "source_dir": "HeCBench-master/src/thomas-cuda"}
+{"kernel_name": "thomas", "parallel_api": "omp", "source_suite": "hecbench", "category": "linear_algebra", "spec_file": "specs/hecbench-thomas-omp.json", "source_dir": "HeCBench-master/src/thomas-omp"}
+{"kernel_name": "keccaktreehash", "parallel_api": "cuda", "source_suite": "hecbench", "category": "crypto", "spec_file": "specs/hecbench-keccaktreehash-cuda.json", "source_dir": "HeCBench-master/src/keccaktreehash-cuda"}
+{"kernel_name": "keccaktreehash", "parallel_api": "omp", "source_suite": "hecbench", "category": "crypto", "spec_file": "specs/hecbench-keccaktreehash-omp.json", "source_dir": "HeCBench-master/src/keccaktreehash-omp"}
+{"kernel_name": "md5hash", "parallel_api": "cuda", "source_suite": "hecbench", "category": "crypto", "spec_file": "specs/hecbench-md5hash-cuda.json", "source_dir": "HeCBench-master/src/md5hash-cuda"}
+{"kernel_name": "md5hash", "parallel_api": "omp", "source_suite": "hecbench", "category": "crypto", "spec_file": "specs/hecbench-md5hash-omp.json", "source_dir": "HeCBench-master/src/md5hash-omp"}
+{"kernel_name": "ccsd-trpdrv", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-ccsd-trpdrv-cuda.json", "source_dir": "HeCBench-master/src/ccsd-trpdrv-cuda"}
+{"kernel_name": "ccsd-trpdrv", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-ccsd-trpdrv-omp.json", "source_dir": "HeCBench-master/src/ccsd-trpdrv-omp"}
+{"kernel_name": "babelstream", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-babelstream-cuda.json", "source_dir": "HeCBench-master/src/babelstream-cuda"}
+{"kernel_name": "babelstream", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-babelstream-omp.json", "source_dir": "HeCBench-master/src/babelstream-omp"}
+{"kernel_name": "fpc", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-fpc-cuda.json", "source_dir": "HeCBench-master/src/fpc-cuda"}
+{"kernel_name": "fpc", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-fpc-omp.json", "source_dir": "HeCBench-master/src/fpc-omp"}
+{"kernel_name": "feynman-kac", "parallel_api": "cuda", "source_suite": "hecbench", "category": "physics", "spec_file": "specs/hecbench-feynman-kac-cuda.json", "source_dir": "HeCBench-master/src/feynman-kac-cuda"}
+{"kernel_name": "feynman-kac", "parallel_api": "omp", "source_suite": "hecbench", "category": "physics", "spec_file": "specs/hecbench-feynman-kac-omp.json", "source_dir": "HeCBench-master/src/feynman-kac-omp"}
+{"kernel_name": "maxpool3d", "parallel_api": "cuda", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-maxpool3d-cuda.json", "source_dir": "HeCBench-master/src/maxpool3d-cuda"}
+{"kernel_name": "maxpool3d", "parallel_api": "omp", "source_suite": "hecbench", "category": "ml", "spec_file": "specs/hecbench-maxpool3d-omp.json", "source_dir": "HeCBench-master/src/maxpool3d-omp"}
+{"kernel_name": "secp256k1", "parallel_api": "cuda", "source_suite": "hecbench", "category": "crypto", "spec_file": "specs/hecbench-secp256k1-cuda.json", "source_dir": "HeCBench-master/src/secp256k1-cuda"}
+{"kernel_name": "secp256k1", "parallel_api": "omp", "source_suite": "hecbench", "category": "crypto", "spec_file": "specs/hecbench-secp256k1-omp.json", "source_dir": "HeCBench-master/src/secp256k1-omp"}
+{"kernel_name": "tsp", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-tsp-cuda.json", "source_dir": "HeCBench-master/src/tsp-cuda"}
+{"kernel_name": "tsp", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-tsp-omp.json", "source_dir": "HeCBench-master/src/tsp-omp"}
+{"kernel_name": "pso", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-pso-cuda.json", "source_dir": "HeCBench-master/src/pso-cuda"}
+{"kernel_name": "pso", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-pso-omp.json", "source_dir": "HeCBench-master/src/pso-omp"}
+{"kernel_name": "ga", "parallel_api": "cuda", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-ga-cuda.json", "source_dir": "HeCBench-master/src/ga-cuda"}
+{"kernel_name": "ga", "parallel_api": "omp", "source_suite": "hecbench", "category": "other", "spec_file": "specs/hecbench-ga-omp.json", "source_dir": "HeCBench-master/src/ga-omp"}
+{"kernel_name": "bptree", "parallel_api": "cuda", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-bptree-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/b+tree"}
+{"kernel_name": "bptree", "parallel_api": "opencl", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-bptree-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/b+tree"}
+{"kernel_name": "bptree", "parallel_api": "omp", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-bptree-omp.json", "source_dir": "rodinia/rodinia-src/openmp/b+tree"}
+{"kernel_name": "backprop", "parallel_api": "cuda", "source_suite": "rodinia", "category": "ml", "spec_file": "specs/rodinia-backprop-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/backprop"}
+{"kernel_name": "backprop", "parallel_api": "opencl", "source_suite": "rodinia", "category": "ml", "spec_file": "specs/rodinia-backprop-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/backprop"}
+{"kernel_name": "backprop", "parallel_api": "omp", "source_suite": "rodinia", "category": "ml", "spec_file": "specs/rodinia-backprop-omp.json", "source_dir": "rodinia/rodinia-src/openmp/backprop"}
+{"kernel_name": "bfs", "parallel_api": "cuda", "source_suite": "rodinia", "category": "graph", "spec_file": "specs/rodinia-bfs-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/bfs"}
+{"kernel_name": "bfs", "parallel_api": "opencl", "source_suite": "rodinia", "category": "graph", "spec_file": "specs/rodinia-bfs-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/bfs"}
+{"kernel_name": "bfs", "parallel_api": "omp", "source_suite": "rodinia", "category": "graph", "spec_file": "specs/rodinia-bfs-omp.json", "source_dir": "rodinia/rodinia-src/openmp/bfs"}
+{"kernel_name": "cfd", "parallel_api": "cuda", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-cfd-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/cfd"}
+{"kernel_name": "cfd", "parallel_api": "opencl", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-cfd-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/cfd"}
+{"kernel_name": "cfd", "parallel_api": "omp", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-cfd-omp.json", "source_dir": "rodinia/rodinia-src/openmp/cfd"}
+{"kernel_name": "dwt2d", "parallel_api": "cuda", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-dwt2d-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/dwt2d"}
+{"kernel_name": "dwt2d", "parallel_api": "opencl", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-dwt2d-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/dwt2d"}
+{"kernel_name": "gaussian", "parallel_api": "cuda", "source_suite": "rodinia", "category": "linear_algebra", "spec_file": "specs/rodinia-gaussian-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/gaussian"}
+{"kernel_name": "gaussian", "parallel_api": "opencl", "source_suite": "rodinia", "category": "linear_algebra", "spec_file": "specs/rodinia-gaussian-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/gaussian"}
+{"kernel_name": "heartwall", "parallel_api": "cuda", "source_suite": "rodinia", "category": "image", "spec_file": "specs/rodinia-heartwall-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/heartwall"}
+{"kernel_name": "heartwall", "parallel_api": "opencl", "source_suite": "rodinia", "category": "image", "spec_file": "specs/rodinia-heartwall-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/heartwall"}
+{"kernel_name": "heartwall", "parallel_api": "omp", "source_suite": "rodinia", "category": "image", "spec_file": "specs/rodinia-heartwall-omp.json", "source_dir": "rodinia/rodinia-src/openmp/heartwall"}
+{"kernel_name": "hotspot", "parallel_api": "cuda", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-hotspot-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/hotspot"}
+{"kernel_name": "hotspot", "parallel_api": "opencl", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-hotspot-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/hotspot"}
+{"kernel_name": "hotspot", "parallel_api": "omp", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-hotspot-omp.json", "source_dir": "rodinia/rodinia-src/openmp/hotspot"}
+{"kernel_name": "hotspot3d", "parallel_api": "cuda", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-hotspot3d-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/hotspot3D"}
+{"kernel_name": "hotspot3d", "parallel_api": "opencl", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-hotspot3d-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/hotspot3D"}
+{"kernel_name": "hotspot3d", "parallel_api": "omp", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-hotspot3d-omp.json", "source_dir": "rodinia/rodinia-src/openmp/hotspot3D"}
+{"kernel_name": "huffman", "parallel_api": "cuda", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-huffman-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/huffman"}
+{"kernel_name": "hybridsort", "parallel_api": "cuda", "source_suite": "rodinia", "category": "sort", "spec_file": "specs/rodinia-hybridsort-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/hybridsort"}
+{"kernel_name": "hybridsort", "parallel_api": "opencl", "source_suite": "rodinia", "category": "sort", "spec_file": "specs/rodinia-hybridsort-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/hybridsort"}
+{"kernel_name": "kmeans", "parallel_api": "cuda", "source_suite": "rodinia", "category": "ml", "spec_file": "specs/rodinia-kmeans-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/kmeans"}
+{"kernel_name": "kmeans", "parallel_api": "opencl", "source_suite": "rodinia", "category": "ml", "spec_file": "specs/rodinia-kmeans-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/kmeans"}
+{"kernel_name": "kmeans", "parallel_api": "omp", "source_suite": "rodinia", "category": "ml", "spec_file": "specs/rodinia-kmeans-omp.json", "source_dir": "rodinia/rodinia-src/openmp/kmeans"}
+{"kernel_name": "lavamd", "parallel_api": "cuda", "source_suite": "rodinia", "category": "molecular_dynamics", "spec_file": "specs/rodinia-lavamd-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/lavaMD"}
+{"kernel_name": "lavamd", "parallel_api": "opencl", "source_suite": "rodinia", "category": "molecular_dynamics", "spec_file": "specs/rodinia-lavamd-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/lavaMD"}
+{"kernel_name": "lavamd", "parallel_api": "omp", "source_suite": "rodinia", "category": "molecular_dynamics", "spec_file": "specs/rodinia-lavamd-omp.json", "source_dir": "rodinia/rodinia-src/openmp/lavaMD"}
+{"kernel_name": "lud", "parallel_api": "cuda", "source_suite": "rodinia", "category": "linear_algebra", "spec_file": "specs/rodinia-lud-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/lud"}
+{"kernel_name": "lud", "parallel_api": "opencl", "source_suite": "rodinia", "category": "linear_algebra", "spec_file": "specs/rodinia-lud-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/lud"}
+{"kernel_name": "lud", "parallel_api": "omp", "source_suite": "rodinia", "category": "linear_algebra", "spec_file": "specs/rodinia-lud-omp.json", "source_dir": "rodinia/rodinia-src/openmp/lud"}
+{"kernel_name": "mummergpu", "parallel_api": "cuda", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-mummergpu-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/mummergpu"}
+{"kernel_name": "mummergpu", "parallel_api": "omp", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-mummergpu-omp.json", "source_dir": "rodinia/rodinia-src/openmp/mummergpu"}
+{"kernel_name": "myocyte", "parallel_api": "cuda", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-myocyte-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/myocyte"}
+{"kernel_name": "myocyte", "parallel_api": "opencl", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-myocyte-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/myocyte"}
+{"kernel_name": "myocyte", "parallel_api": "omp", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-myocyte-omp.json", "source_dir": "rodinia/rodinia-src/openmp/myocyte"}
+{"kernel_name": "nn", "parallel_api": "cuda", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-nn-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/nn"}
+{"kernel_name": "nn", "parallel_api": "opencl", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-nn-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/nn"}
+{"kernel_name": "nn", "parallel_api": "omp", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-nn-omp.json", "source_dir": "rodinia/rodinia-src/openmp/nn"}
+{"kernel_name": "nw", "parallel_api": "cuda", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-nw-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/nw"}
+{"kernel_name": "nw", "parallel_api": "opencl", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-nw-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/nw"}
+{"kernel_name": "nw", "parallel_api": "omp", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-nw-omp.json", "source_dir": "rodinia/rodinia-src/openmp/nw"}
+{"kernel_name": "particlefilter", "parallel_api": "cuda", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-particlefilter-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/particlefilter"}
+{"kernel_name": "particlefilter", "parallel_api": "opencl", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-particlefilter-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/particlefilter"}
+{"kernel_name": "particlefilter", "parallel_api": "omp", "source_suite": "rodinia", "category": "physics", "spec_file": "specs/rodinia-particlefilter-omp.json", "source_dir": "rodinia/rodinia-src/openmp/particlefilter"}
+{"kernel_name": "pathfinder", "parallel_api": "cuda", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-pathfinder-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/pathfinder"}
+{"kernel_name": "pathfinder", "parallel_api": "opencl", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-pathfinder-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/pathfinder"}
+{"kernel_name": "pathfinder", "parallel_api": "omp", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-pathfinder-omp.json", "source_dir": "rodinia/rodinia-src/openmp/pathfinder"}
+{"kernel_name": "srad", "parallel_api": "cuda", "source_suite": "rodinia", "category": "image", "spec_file": "specs/rodinia-srad-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/srad/srad_v2"}
+{"kernel_name": "srad", "parallel_api": "opencl", "source_suite": "rodinia", "category": "image", "spec_file": "specs/rodinia-srad-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/srad"}
+{"kernel_name": "srad", "parallel_api": "omp", "source_suite": "rodinia", "category": "image", "spec_file": "specs/rodinia-srad-omp.json", "source_dir": "rodinia/rodinia-src/openmp/srad/srad_v2"}
+{"kernel_name": "streamcluster", "parallel_api": "cuda", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-streamcluster-cuda.json", "source_dir": "rodinia/rodinia-src/cuda/streamcluster"}
+{"kernel_name": "streamcluster", "parallel_api": "opencl", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-streamcluster-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/streamcluster"}
+{"kernel_name": "streamcluster", "parallel_api": "omp", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-streamcluster-omp.json", "source_dir": "rodinia/rodinia-src/openmp/streamcluster"}
+{"kernel_name": "gaussian", "parallel_api": "omp", "source_suite": "rodinia", "category": "linear_algebra", "spec_file": "specs/rodinia-gaussian-omp.json", "source_dir": "rodinia/rodinia-src/openmp/gaussian"}
+{"kernel_name": "huffman", "parallel_api": "opencl", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-huffman-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/huffman"}
+{"kernel_name": "huffman", "parallel_api": "omp", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-huffman-omp.json", "source_dir": "rodinia/rodinia-src/openmp/huffman"}
+{"kernel_name": "hybridsort", "parallel_api": "omp", "source_suite": "rodinia", "category": "sort", "spec_file": "specs/rodinia-hybridsort-omp.json", "source_dir": "rodinia/rodinia-src/openmp/hybridsort"}
+{"kernel_name": "mummergpu", "parallel_api": "opencl", "source_suite": "rodinia", "category": "other", "spec_file": "specs/rodinia-mummergpu-opencl.json", "source_dir": "rodinia/rodinia-src/opencl/mummergpu"}
+{"kernel_name":"xsbench","parallel_api":"omp","source_suite":"xsbench","spec_file":"specs/xsbench-xsbench-omp.json","source_dir":"xsbench/xsbench-src/openmp-threading","category":"physics"}
+{"kernel_name":"xsbench","parallel_api":"cuda","source_suite":"xsbench","spec_file":"specs/xsbench-xsbench-cuda.json","source_dir":"xsbench/xsbench-src/cuda","category":"physics"}
+{"kernel_name":"xsbench","parallel_api":"opencl","source_suite":"xsbench","spec_file":"specs/xsbench-xsbench-opencl.json","source_dir":"xsbench/xsbench-src/opencl","category":"physics"}
+{"kernel_name":"xsbench","parallel_api":"omp_target","source_suite":"xsbench","spec_file":"specs/xsbench-xsbench-omp_target.json","source_dir":"xsbench/xsbench-src/openmp-offload","category":"physics"}
+{"kernel_name":"rsbench","parallel_api":"cuda","source_suite":"rsbench","spec_file":"specs/rsbench-rsbench-cuda.json","source_dir":"rsbench/rsbench-src/cuda","category":"physics"}
+{"kernel_name":"rsbench","parallel_api":"omp","source_suite":"rsbench","spec_file":"specs/rsbench-rsbench-omp.json","source_dir":"rsbench/rsbench-src/openmp-threading","category":"physics"}
+{"kernel_name":"rsbench","parallel_api":"opencl","source_suite":"rsbench","spec_file":"specs/rsbench-rsbench-opencl.json","source_dir":"rsbench/rsbench-src/opencl","category":"physics"}
+{"kernel_name":"rsbench","parallel_api":"omp_target","source_suite":"rsbench","spec_file":"specs/rsbench-rsbench-omp_target.json","source_dir":"rsbench/rsbench-src/openmp-offload","category":"physics"}
+{"kernel_name":"mixbench","parallel_api":"cuda","source_suite":"mixbench","spec_file":"specs/mixbench-mixbench-cuda.json","source_dir":"mixbench/mixbench-src/mixbench-cuda","category":"other"}
+{"kernel_name":"mixbench","parallel_api":"opencl","source_suite":"mixbench","spec_file":"specs/mixbench-mixbench-opencl.json","source_dir":"mixbench/mixbench-src/mixbench-opencl","category":"other"}
+{"kernel_name":"mixbench","parallel_api":"omp","source_suite":"mixbench","spec_file":"specs/mixbench-mixbench-omp.json","source_dir":"mixbench/mixbench-src/mixbench-cpu","category":"other"}
+{"kernel_name":"jacobi","parallel_api":"cuda","source_suite":"hecbench","spec_file":"specs/hecbench-jacobi-cuda.json","source_dir":"HeCBench-master/src/jacobi-cuda","category":"stencil"}
+{"kernel_name":"jacobi","parallel_api":"omp_target","source_suite":"hecbench","spec_file":"specs/hecbench-jacobi-omp_target.json","source_dir":"HeCBench-master/src/jacobi-omp","category":"stencil"}
+{"kernel_name":"nqueen","parallel_api":"cuda","source_suite":"hecbench","spec_file":"specs/hecbench-nqueen-cuda.json","source_dir":"HeCBench-master/src/nqueen-cuda","category":"other"}
+{"kernel_name":"nqueen","parallel_api":"omp_target","source_suite":"hecbench","spec_file":"specs/hecbench-nqueen-omp_target.json","source_dir":"HeCBench-master/src/nqueen-omp","category":"other"}
+{"kernel_name":"md","parallel_api":"cuda","source_suite":"hecbench","spec_file":"specs/hecbench-md-cuda.json","source_dir":"HeCBench-master/src/md-cuda","category":"molecular_dynamics"}
+{"kernel_name":"md","parallel_api":"omp_target","source_suite":"hecbench","spec_file":"specs/hecbench-md-omp_target.json","source_dir":"HeCBench-master/src/md-omp","category":"molecular_dynamics"}
+{"kernel_name":"convolution1d","parallel_api":"cuda","source_suite":"hecbench","spec_file":"specs/hecbench-convolution1d-cuda.json","source_dir":"HeCBench-master/src/convolution1D-cuda","category":"stencil"}
+{"kernel_name":"convolution1d","parallel_api":"omp_target","source_suite":"hecbench","spec_file":"specs/hecbench-convolution1d-omp_target.json","source_dir":"HeCBench-master/src/convolution1D-omp","category":"stencil"}
+{"kernel_name":"iso2dfd","parallel_api":"omp_target","source_suite":"hecbench","spec_file":"specs/hecbench-iso2dfd-omp_target.json","source_dir":"HeCBench-master/src/iso2dfd-omp","category":"physics"}
+{"kernel_name":"page-rank","parallel_api":"cuda","source_suite":"hecbench","spec_file":"specs/hecbench-page-rank-cuda.json","source_dir":"HeCBench-master/src/page-rank-cuda","category":"graph"}
+{"kernel_name":"stencil1d","parallel_api":"omp_target","source_suite":"hecbench","spec_file":"specs/hecbench-stencil1d-omp_target.json","source_dir":"HeCBench-master/src/stencil1d-omp","category":"stencil"}
+{"kernel_name":"heat2d","parallel_api":"omp_target","source_suite":"hecbench","spec_file":"specs/hecbench-heat2d-omp_target.json","source_dir":"HeCBench-master/src/heat2d-omp","category":"stencil"}
+{"kernel_name":"floydwarshall","parallel_api":"omp_target","source_suite":"hecbench","spec_file":"specs/hecbench-floydwarshall-omp_target.json","source_dir":"HeCBench-master/src/floydwarshall-omp","category":"graph"}
+{"kernel_name":"page-rank","parallel_api":"omp_target","source_suite":"hecbench","spec_file":"specs/hecbench-page-rank-omp_target.json","source_dir":"HeCBench-master/src/page-rank-omp","category":"graph"}
+{"kernel_name":"scan","parallel_api":"omp_target","source_suite":"hecbench","spec_file":"specs/hecbench-scan-omp_target.json","source_dir":"HeCBench-master/src/scan-omp","category":"reduction"}

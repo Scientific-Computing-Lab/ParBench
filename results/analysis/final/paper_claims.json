@@ -1,0 +1,1607 @@
+{
+  "generated_at": "2026-08-17T17:34:35.336748+00:00",
+  "model": "together-qwen-3.5-397b-a17b",
+  "models": [
+    "together-qwen-3.5-397b-a17b",
+    "azure-gpt-5.3-codex",
+    "azure-gpt-5.4"
+  ],
+  "terminology_note": "All json_path values use 'canonical' as the top-level key in the source analysis JSONs.",
+  "claims": [
+    {
+      "claim_id": "overall_pass_at_1_together-qwen-3.5-397b-a17b",
+      "section": "Abstract, S6.1",
+      "claim_text": "Qwen 3.5 397B achieves pass@1 of 20.3% [14.3%, 26.4%] across 136 tasks",
+      "value": 0.2034,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.pass_at_k.pass_at_1",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['pass_at_k']['pass_at_1'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.1428,
+          "json_path": "canonical.pass_at_k.pass_at_1.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.2641,
+          "json_path": "canonical.pass_at_k.pass_at_1.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 136,
+          "json_path": "canonical.pass_at_k.pass_at_1.n"
+        }
+      ],
+      "ci_lower": 0.1428,
+      "ci_upper": 0.2641,
+      "ci_level": 0.95,
+      "n": 136,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "overall_pass_at_3_together-qwen-3.5-397b-a17b",
+      "section": "S6.1",
+      "claim_text": "pass@3 of 27.9% [20.4%, 35.5%]",
+      "value": 0.2794,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.pass_at_k.pass_at_3",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['pass_at_k']['pass_at_3'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.2037,
+          "json_path": "canonical.pass_at_k.pass_at_3.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.3551,
+          "json_path": "canonical.pass_at_k.pass_at_3.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 136,
+          "json_path": "canonical.pass_at_k.pass_at_3.n"
+        }
+      ],
+      "ci_lower": 0.2037,
+      "ci_upper": 0.3551,
+      "ci_level": 0.95,
+      "n": 136,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "aggregate_pass_rate_together-qwen-3.5-397b-a17b",
+      "section": "S6.1",
+      "claim_text": "Sample-level pass rate 31.6% [28.0%, 35.4%] (n=604)",
+      "value": 0.3162,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.aggregate_pass_rates.overall",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['aggregate_pass_rates']['overall'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.2804,
+          "json_path": "canonical.aggregate_pass_rates.overall.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.3544,
+          "json_path": "canonical.aggregate_pass_rates.overall.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 604,
+          "json_path": "canonical.aggregate_pass_rates.overall.n"
+        }
+      ],
+      "ci_lower": 0.2804,
+      "ci_upper": 0.3544,
+      "ci_level": 0.95,
+      "n": 604,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_cuda_to_omp_together-qwen-3.5-397b-a17b",
+      "section": "S6.2",
+      "claim_text": "cuda-to-omp pass rate: 40.6% [29.8%, 52.4%] (n=69)",
+      "value": 0.4058,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.direction_pass_rates.standard.cuda-to-omp",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['direction_pass_rates']['standard']['cuda-to-omp'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.2979,
+          "json_path": "canonical.direction_pass_rates.standard.cuda-to-omp.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.5236,
+          "json_path": "canonical.direction_pass_rates.standard.cuda-to-omp.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 69,
+          "json_path": "canonical.direction_pass_rates.standard.cuda-to-omp.n"
+        }
+      ],
+      "ci_lower": 0.2979,
+      "ci_upper": 0.5236,
+      "ci_level": 0.95,
+      "n": 69,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_omp_to_cuda_together-qwen-3.5-397b-a17b",
+      "section": "S6.2",
+      "claim_text": "omp-to-cuda pass rate: 24.6% [16.0%, 36.0%] (n=69)",
+      "value": 0.2464,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.direction_pass_rates.standard.omp-to-cuda",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['direction_pass_rates']['standard']['omp-to-cuda'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.1599,
+          "json_path": "canonical.direction_pass_rates.standard.omp-to-cuda.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.3596,
+          "json_path": "canonical.direction_pass_rates.standard.omp-to-cuda.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 69,
+          "json_path": "canonical.direction_pass_rates.standard.omp-to-cuda.n"
+        }
+      ],
+      "ci_lower": 0.1599,
+      "ci_upper": 0.3596,
+      "ci_level": 0.95,
+      "n": 69,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_cuda_to_opencl_together-qwen-3.5-397b-a17b",
+      "section": "S6.2",
+      "claim_text": "cuda-to-opencl pass rate: 3.7% [1.0%, 12.5%] (n=54)",
+      "value": 0.037,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.direction_pass_rates.standard.cuda-to-opencl",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['direction_pass_rates']['standard']['cuda-to-opencl'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.0102,
+          "json_path": "canonical.direction_pass_rates.standard.cuda-to-opencl.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.1254,
+          "json_path": "canonical.direction_pass_rates.standard.cuda-to-opencl.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 54,
+          "json_path": "canonical.direction_pass_rates.standard.cuda-to-opencl.n"
+        }
+      ],
+      "ci_lower": 0.0102,
+      "ci_upper": 0.1254,
+      "ci_level": 0.95,
+      "n": 54,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_opencl_to_cuda_together-qwen-3.5-397b-a17b",
+      "section": "S6.2",
+      "claim_text": "opencl-to-cuda pass rate: 0.0% [0.0%, 6.6%] (n=54)",
+      "value": 0.0,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.direction_pass_rates.standard.opencl-to-cuda",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['direction_pass_rates']['standard']['opencl-to-cuda'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.0,
+          "json_path": "canonical.direction_pass_rates.standard.opencl-to-cuda.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.0664,
+          "json_path": "canonical.direction_pass_rates.standard.opencl-to-cuda.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 54,
+          "json_path": "canonical.direction_pass_rates.standard.opencl-to-cuda.n"
+        }
+      ],
+      "ci_lower": 0.0,
+      "ci_upper": 0.0664,
+      "ci_level": 0.95,
+      "n": 54,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_omp_to_opencl_together-qwen-3.5-397b-a17b",
+      "section": "S6.2",
+      "claim_text": "omp-to-opencl pass rate: 6.2% [2.1%, 16.8%] (n=48)",
+      "value": 0.0625,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.direction_pass_rates.standard.omp-to-opencl",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['direction_pass_rates']['standard']['omp-to-opencl'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.0215,
+          "json_path": "canonical.direction_pass_rates.standard.omp-to-opencl.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.1684,
+          "json_path": "canonical.direction_pass_rates.standard.omp-to-opencl.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 48,
+          "json_path": "canonical.direction_pass_rates.standard.omp-to-opencl.n"
+        }
+      ],
+      "ci_lower": 0.0215,
+      "ci_upper": 0.1684,
+      "ci_level": 0.95,
+      "n": 48,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_opencl_to_omp_together-qwen-3.5-397b-a17b",
+      "section": "S6.2",
+      "claim_text": "opencl-to-omp pass rate: 10.4% [4.5%, 22.2%] (n=48)",
+      "value": 0.1042,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.direction_pass_rates.standard.opencl-to-omp",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['direction_pass_rates']['standard']['opencl-to-omp'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.0453,
+          "json_path": "canonical.direction_pass_rates.standard.opencl-to-omp.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.2217,
+          "json_path": "canonical.direction_pass_rates.standard.opencl-to-omp.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 48,
+          "json_path": "canonical.direction_pass_rates.standard.opencl-to-omp.n"
+        }
+      ],
+      "ci_lower": 0.0453,
+      "ci_upper": 0.2217,
+      "ci_level": 0.95,
+      "n": 48,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "suite_pass_hecbench_together-qwen-3.5-397b-a17b",
+      "section": "S6.3",
+      "claim_text": "hecbench pass@1: 51.0% [36.1%, 66.0%] (n=32)",
+      "value": 0.5104,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.pass_at_k.per_suite.pass_at_1.hecbench",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['pass_at_k']['per_suite']['pass_at_1']['hecbench'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.3609,
+          "json_path": "canonical.pass_at_k.per_suite.pass_at_1.hecbench.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.66,
+          "json_path": "canonical.pass_at_k.per_suite.pass_at_1.hecbench.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 32,
+          "json_path": "canonical.pass_at_k.per_suite.pass_at_1.hecbench.n"
+        }
+      ],
+      "ci_lower": 0.3609,
+      "ci_upper": 0.66,
+      "ci_level": 0.95,
+      "n": 32,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "suite_pass_rodinia_together-qwen-3.5-397b-a17b",
+      "section": "S6.3",
+      "claim_text": "rodinia pass@1: 12.3% [6.4%, 18.3%] (n=92)",
+      "value": 0.1232,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.pass_at_k.per_suite.pass_at_1.rodinia",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['pass_at_k']['per_suite']['pass_at_1']['rodinia'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.0637,
+          "json_path": "canonical.pass_at_k.per_suite.pass_at_1.rodinia.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.1827,
+          "json_path": "canonical.pass_at_k.per_suite.pass_at_1.rodinia.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 92,
+          "json_path": "canonical.pass_at_k.per_suite.pass_at_1.rodinia.n"
+        }
+      ],
+      "ci_lower": 0.0637,
+      "ci_upper": 0.1827,
+      "ci_level": 0.95,
+      "n": 92,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "suite_pass_rsbench_together-qwen-3.5-397b-a17b",
+      "section": "S6.3",
+      "claim_text": "rsbench pass@1: 0.0% [0.0%, 0.0%] (n=6)",
+      "value": 0.0,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.pass_at_k.per_suite.pass_at_1.rsbench",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['pass_at_k']['per_suite']['pass_at_1']['rsbench'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.0,
+          "json_path": "canonical.pass_at_k.per_suite.pass_at_1.rsbench.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.0,
+          "json_path": "canonical.pass_at_k.per_suite.pass_at_1.rsbench.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 6,
+          "json_path": "canonical.pass_at_k.per_suite.pass_at_1.rsbench.n"
+        }
+      ],
+      "ci_lower": 0.0,
+      "ci_upper": 0.0,
+      "ci_level": 0.95,
+      "n": 6,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "suite_pass_xsbench_together-qwen-3.5-397b-a17b",
+      "section": "S6.3",
+      "claim_text": "xsbench pass@1: 0.0% [0.0%, 0.0%] (n=6)",
+      "value": 0.0,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.pass_at_k.per_suite.pass_at_1.xsbench",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['pass_at_k']['per_suite']['pass_at_1']['xsbench'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.0,
+          "json_path": "canonical.pass_at_k.per_suite.pass_at_1.xsbench.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.0,
+          "json_path": "canonical.pass_at_k.per_suite.pass_at_1.xsbench.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 6,
+          "json_path": "canonical.pass_at_k.per_suite.pass_at_1.xsbench.n"
+        }
+      ],
+      "ci_lower": 0.0,
+      "ci_upper": 0.0,
+      "ci_level": 0.95,
+      "n": 6,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_asymmetry",
+      "section": "S6.2",
+      "claim_text": "Largest asymmetry: omp_target-to-cuda vs cuda-to-omp_target (forward=95.8%, reverse=66.7%, p=0.0156)",
+      "value": 0.2916000000000001,
+      "source_files": [
+        "results/analysis/final/statistical_analysis.json"
+      ],
+      "json_path": "direction_asymmetry",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/statistical_analysis.json')); print(d['direction_asymmetry'])\"",
+      "model": "pooled",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "forward_pass_rate",
+          "value": 0.9583,
+          "derivation": {
+            "op": "max_abs_gap",
+            "path": "direction_asymmetry",
+            "forward": "forward_pass_rate",
+            "reverse": "reverse_pass_rate",
+            "field": "forward_pass_rate"
+          }
+        },
+        {
+          "name": "reverse_pass_rate",
+          "value": 0.6667,
+          "derivation": {
+            "op": "max_abs_gap",
+            "path": "direction_asymmetry",
+            "forward": "forward_pass_rate",
+            "reverse": "reverse_pass_rate",
+            "field": "reverse_pass_rate"
+          }
+        },
+        {
+          "name": "p_value",
+          "value": 0.015625,
+          "derivation": {
+            "op": "max_abs_gap",
+            "path": "direction_asymmetry",
+            "forward": "forward_pass_rate",
+            "reverse": "reverse_pass_rate",
+            "field": "p_value"
+          }
+        }
+      ],
+      "derivation": {
+        "op": "max_abs_gap",
+        "path": "direction_asymmetry",
+        "forward": "forward_pass_rate",
+        "reverse": "reverse_pass_rate"
+      },
+      "notes": "Value is forward-reverse gap; sign indicates direction of asymmetry"
+    },
+    {
+      "claim_id": "build_fail_count_together-qwen-3.5-397b-a17b",
+      "section": "S6.4",
+      "claim_text": "BUILD_FAIL: 235/604 (38.9%)",
+      "value": 235,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.failure_taxonomy.status_counts.BUILD_FAIL",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['failure_taxonomy']['status_counts']['BUILD_FAIL'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "run_fail_count_together-qwen-3.5-397b-a17b",
+      "section": "S6.4",
+      "claim_text": "RUN_FAIL: 111/604 (18.4%)",
+      "value": 111,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.failure_taxonomy.status_counts.RUN_FAIL",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['failure_taxonomy']['status_counts']['RUN_FAIL'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "verify_fail_count_together-qwen-3.5-397b-a17b",
+      "section": "S6.4",
+      "claim_text": "VERIFY_FAIL: 67/604 (11.1%)",
+      "value": 67,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.failure_taxonomy.status_counts.VERIFY_FAIL",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['failure_taxonomy']['status_counts']['VERIFY_FAIL'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "build_fail_subcategories_together-qwen-3.5-397b-a17b",
+      "section": "S6.4",
+      "claim_text": "Top BUILD_FAIL subcategories: undeclared_identifier(61), missing_header(56), other_build(55)",
+      "value": [
+        [
+          "undeclared_identifier",
+          61
+        ],
+        [
+          "missing_header",
+          56
+        ],
+        [
+          "other_build",
+          55
+        ]
+      ],
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.failure_taxonomy.by_status.BUILD_FAIL.subcategories",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['failure_taxonomy']['by_status']['BUILD_FAIL']['subcategories'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [],
+      "derivation": {
+        "op": "top_n_items",
+        "path": "canonical.failure_taxonomy.by_status.BUILD_FAIL.subcategories",
+        "n": 3
+      },
+      "unit": "ordered_top_subcategories"
+    },
+    {
+      "claim_id": "spec_counts",
+      "section": "S4",
+      "claim_text": "10 KNOWN_FAIL specs excluded; 206 total specs; 708 result files on disk",
+      "value": 10,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "metadata.excluded_specs_count",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['metadata']['excluded_specs_count'])\"",
+      "model": "pooled",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "total_specs_count",
+      "section": "S4",
+      "claim_text": "206 total specs",
+      "value": 206,
+      "source_files": [
+        "results/analysis/final/benchmark_characterization.json"
+      ],
+      "json_path": "summary.total_specs",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/benchmark_characterization.json')); print(d['summary']['total_specs'])\"",
+      "model": "pooled",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "suite_composition",
+      "section": "S4",
+      "claim_text": "35 kernels across 5 suites, 206 specs",
+      "value": 35,
+      "source_files": [
+        "results/analysis/final/benchmark_characterization.json"
+      ],
+      "json_path": "summary.total_kernels",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/benchmark_characterization.json')); print(d['summary']['total_kernels'])\"",
+      "model": "pooled",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "total_suites_count",
+      "section": "S4",
+      "claim_text": "5 suites",
+      "value": 5,
+      "source_files": [
+        "results/analysis/final/benchmark_characterization.json"
+      ],
+      "json_path": "summary.total_suites",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/benchmark_characterization.json')); print(d['summary']['total_suites'])\"",
+      "model": "pooled",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "multi_file_fraction",
+      "section": "S4",
+      "claim_text": "51.4% of kernels require multi-file translation",
+      "value": 51.4,
+      "source_files": [
+        "results/analysis/final/benchmark_characterization.json"
+      ],
+      "json_path": "summary.multi_file_pct",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/benchmark_characterization.json')); print(d['summary']['multi_file_pct'])\"",
+      "model": "pooled",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "percentage"
+    },
+    {
+      "claim_id": "token_cost_total",
+      "section": "S5",
+      "claim_text": "Total API cost: not reported (a complete pooled cost across all evaluated models is unavailable because azure-gpt-5.3-codex lack verified pricing).",
+      "value": null,
+      "source_files": [],
+      "json_path": "",
+      "verification_cmd": "",
+      "model": "pooled",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "usd"
+    },
+    {
+      "claim_id": "augmentation_degradation_together-qwen-3.5-397b-a17b",
+      "section": "S6.5",
+      "claim_text": "Augmentation degradation L0\u2192L4: 75.5% \u2192 46.9%",
+      "value": -0.2857,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.augmentation_trends.aggregate.per_level",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['augmentation_trends']['aggregate']['per_level'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "l0_rate",
+          "value": 0.7551,
+          "json_path": "canonical.augmentation_trends.aggregate.per_level.L0.value"
+        },
+        {
+          "name": "l4_rate",
+          "value": 0.4694,
+          "json_path": "canonical.augmentation_trends.aggregate.per_level.L4.value"
+        }
+      ],
+      "derivation": {
+        "op": "diff",
+        "minuend": "canonical.augmentation_trends.aggregate.per_level.L4.value",
+        "subtrahend": "canonical.augmentation_trends.aggregate.per_level.L0.value"
+      },
+      "notes": "Value is L4-L0 difference (negative = degradation)",
+      "unit": "fraction_difference"
+    },
+    {
+      "claim_id": "chi2_augmentation_trend_together-qwen-3.5-397b-a17b",
+      "section": "S6.5",
+      "claim_text": "Chi-squared augmentation trend: chi2=1.6667, p=0.7968",
+      "value": 1.6667,
+      "source_files": [
+        "results/analysis/final/statistical_analysis.json"
+      ],
+      "json_path": "chi2_augmentation_by_model",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/statistical_analysis.json')); print(d['chi2_augmentation_by_model'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "p_value",
+          "value": 0.796763,
+          "derivation": {
+            "op": "index_field",
+            "path": "chi2_augmentation_by_model",
+            "index": 2,
+            "field": "p_value",
+            "selected_by": "group == together-qwen-3.5-397b-a17b"
+          }
+        }
+      ],
+      "derivation": {
+        "op": "index_field",
+        "path": "chi2_augmentation_by_model",
+        "index": 2,
+        "field": "chi2",
+        "selected_by": "group == together-qwen-3.5-397b-a17b"
+      },
+      "notes": "chi2 test for augmentation level vs pass/fail across levels",
+      "unit": "chi2_statistic"
+    },
+    {
+      "claim_id": "sloc_correlation",
+      "section": "S6.6",
+      "claim_text": "SLoC vs pass-rate Spearman rho = -0.5754",
+      "value": -0.5754,
+      "source_files": [
+        "results/analysis/final/sloc_analysis.json"
+      ],
+      "json_path": "summary.sloc_vs_pass_rate_spearman",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/sloc_analysis.json')); print(d['summary']['sloc_vs_pass_rate_spearman'])\"",
+      "model": "pooled",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "correlation_coefficient"
+    },
+    {
+      "claim_id": "total_eval_files_together-qwen-3.5-397b-a17b",
+      "section": "S5",
+      "claim_text": "708 result files on disk, 604 valid after KNOWN_FAIL and performance-only exclusion",
+      "value": 708,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "metadata.file_counts.total_on_disk",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['metadata']['file_counts']['total_on_disk'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "valid_eval_files_count_together-qwen-3.5-397b-a17b",
+      "section": "S5",
+      "claim_text": "604 result files valid after KNOWN_FAIL and performance-only exclusion",
+      "value": 604,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "metadata.file_counts.valid_after_exclusion",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['metadata']['file_counts']['valid_after_exclusion'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "excluded_eval_files_count_together-qwen-3.5-397b-a17b",
+      "section": "S5",
+      "claim_text": "104 result files excluded (KNOWN_FAIL and performance-only)",
+      "value": 104,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "metadata.file_counts.excluded_known_fail",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['metadata']['file_counts']['excluded_known_fail'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "best_direction_together-qwen-3.5-397b-a17b",
+      "section": "S6.2",
+      "claim_text": "Best direction: cuda-to-omp (40.6%)",
+      "value": 0.4058,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.direction_pass_rates.standard.cuda-to-omp",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['direction_pass_rates']['standard']['cuda-to-omp'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [],
+      "notes": "Derived: highest pass rate among 6 standard directions",
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "worst_direction_together-qwen-3.5-397b-a17b",
+      "section": "S6.2",
+      "claim_text": "Worst direction: opencl-to-cuda (0.0%)",
+      "value": 0.0,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json"
+      ],
+      "json_path": "canonical.direction_pass_rates.standard.opencl-to-cuda",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_together-qwen-3.5-397b-a17b.json')); print(d['canonical']['direction_pass_rates']['standard']['opencl-to-cuda'])\"",
+      "model": "together-qwen-3.5-397b-a17b",
+      "terminology": "canonical",
+      "components": [],
+      "notes": "Derived: lowest pass rate among 6 standard directions",
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "overall_pass_at_1_azure-gpt-5.3-codex",
+      "section": "Abstract, S6.1",
+      "claim_text": "azure-gpt-5.3-codex achieves pass@1 of 45.1% across 136 tasks",
+      "value": 0.451,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.aggregate_passk.pass@1_macro_avg",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['aggregate_passk']['pass@1_macro_avg'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [],
+      "n": 136,
+      "unit": "fraction",
+      "notes": "Macro-averaged pass@1 over tasks; paper_data stores no CI for it"
+    },
+    {
+      "claim_id": "overall_pass_at_3_azure-gpt-5.3-codex",
+      "section": "S6.1",
+      "claim_text": "azure-gpt-5.3-codex pass@3 of 49.3%",
+      "value": 0.4926,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.aggregate_passk.pass@3_macro_avg",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['aggregate_passk']['pass@3_macro_avg'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [],
+      "n": 136,
+      "unit": "fraction",
+      "notes": "Macro-averaged pass@3 over tasks; paper_data stores no CI for it"
+    },
+    {
+      "claim_id": "aggregate_pass_rate_azure-gpt-5.3-codex",
+      "section": "S6.1",
+      "claim_text": "azure-gpt-5.3-codex sample-level pass rate 45.1% [40.3%, 50.0%] (n=408)",
+      "value": 0.451,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.overall.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['overall']['pass_rate'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.4034,
+          "json_path": "passk_campaign.overall.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.4995,
+          "json_path": "passk_campaign.overall.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 408,
+          "json_path": "passk_campaign.overall.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_cuda_to_omp_azure-gpt-5.3-codex",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.3-codex cuda-to-omp pass rate: 62.3% [50.5%, 72.8%] (n=69)",
+      "value": 0.6232,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.by_direction.cuda-to-omp.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['by_direction']['cuda-to-omp']['pass_rate'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.5052,
+          "json_path": "passk_campaign.by_direction.cuda-to-omp.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.7282,
+          "json_path": "passk_campaign.by_direction.cuda-to-omp.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 69,
+          "json_path": "passk_campaign.by_direction.cuda-to-omp.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_omp_to_cuda_azure-gpt-5.3-codex",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.3-codex omp-to-cuda pass rate: 40.6% [29.8%, 52.4%] (n=69)",
+      "value": 0.4058,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.by_direction.omp-to-cuda.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['by_direction']['omp-to-cuda']['pass_rate'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.2979,
+          "json_path": "passk_campaign.by_direction.omp-to-cuda.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.5236,
+          "json_path": "passk_campaign.by_direction.omp-to-cuda.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 69,
+          "json_path": "passk_campaign.by_direction.omp-to-cuda.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_cuda_to_opencl_azure-gpt-5.3-codex",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.3-codex cuda-to-opencl pass rate: 31.5% [20.7%, 44.7%] (n=54)",
+      "value": 0.3148,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.by_direction.cuda-to-opencl.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['by_direction']['cuda-to-opencl']['pass_rate'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.2068,
+          "json_path": "passk_campaign.by_direction.cuda-to-opencl.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.4474,
+          "json_path": "passk_campaign.by_direction.cuda-to-opencl.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 54,
+          "json_path": "passk_campaign.by_direction.cuda-to-opencl.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_opencl_to_cuda_azure-gpt-5.3-codex",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.3-codex opencl-to-cuda pass rate: 18.5% [10.4%, 30.8%] (n=54)",
+      "value": 0.1852,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.by_direction.opencl-to-cuda.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['by_direction']['opencl-to-cuda']['pass_rate'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.1038,
+          "json_path": "passk_campaign.by_direction.opencl-to-cuda.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.3084,
+          "json_path": "passk_campaign.by_direction.opencl-to-cuda.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 54,
+          "json_path": "passk_campaign.by_direction.opencl-to-cuda.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_omp_to_opencl_azure-gpt-5.3-codex",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.3-codex omp-to-opencl pass rate: 18.8% [10.2%, 31.9%] (n=48)",
+      "value": 0.1875,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.by_direction.omp-to-opencl.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['by_direction']['omp-to-opencl']['pass_rate'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.1019,
+          "json_path": "passk_campaign.by_direction.omp-to-opencl.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.3194,
+          "json_path": "passk_campaign.by_direction.omp-to-opencl.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 48,
+          "json_path": "passk_campaign.by_direction.omp-to-opencl.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_opencl_to_omp_azure-gpt-5.3-codex",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.3-codex opencl-to-omp pass rate: 25.0% [14.9%, 38.8%] (n=48)",
+      "value": 0.25,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.by_direction.opencl-to-omp.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['by_direction']['opencl-to-omp']['pass_rate'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.1492,
+          "json_path": "passk_campaign.by_direction.opencl-to-omp.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.3878,
+          "json_path": "passk_campaign.by_direction.opencl-to-omp.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 48,
+          "json_path": "passk_campaign.by_direction.opencl-to-omp.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "build_fail_count_azure-gpt-5.3-codex",
+      "section": "S6.4",
+      "claim_text": "azure-gpt-5.3-codex BUILD_FAIL: 103/408 (25.2%)",
+      "value": 103,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.overall.by_status.BUILD_FAIL",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['overall']['by_status']['BUILD_FAIL'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "run_fail_count_azure-gpt-5.3-codex",
+      "section": "S6.4",
+      "claim_text": "azure-gpt-5.3-codex RUN_FAIL: 48/408 (11.8%)",
+      "value": 48,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.overall.by_status.RUN_FAIL",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['overall']['by_status']['RUN_FAIL'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "verify_fail_count_azure-gpt-5.3-codex",
+      "section": "S6.4",
+      "claim_text": "azure-gpt-5.3-codex VERIFY_FAIL: 73/408 (17.9%)",
+      "value": 73,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.overall.by_status.VERIFY_FAIL",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['overall']['by_status']['VERIFY_FAIL'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "best_direction_azure-gpt-5.3-codex",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.3-codex best direction: cuda-to-omp (62.3%)",
+      "value": 0.6232,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.by_direction.cuda-to-omp.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['by_direction']['cuda-to-omp']['pass_rate'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "fraction",
+      "notes": "Derived: highest pass rate among 6 standard directions"
+    },
+    {
+      "claim_id": "worst_direction_azure-gpt-5.3-codex",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.3-codex worst direction: opencl-to-cuda (18.5%)",
+      "value": 0.1852,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "passk_campaign.by_direction.opencl-to-cuda.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.3-codex.json')); print(d['passk_campaign']['by_direction']['opencl-to-cuda']['pass_rate'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "fraction",
+      "notes": "Derived: lowest pass rate among 6 standard directions"
+    },
+    {
+      "claim_id": "total_eval_files_azure-gpt-5.3-codex",
+      "section": "S5",
+      "claim_text": "814 result files on disk, 772 valid after KNOWN_FAIL and performance-only exclusion",
+      "value": 814,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "metadata.file_counts.total_on_disk",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_azure-gpt-5.3-codex.json')); print(d['metadata']['file_counts']['total_on_disk'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "valid_eval_files_count_azure-gpt-5.3-codex",
+      "section": "S5",
+      "claim_text": "772 result files valid after KNOWN_FAIL and performance-only exclusion",
+      "value": 772,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "metadata.file_counts.valid_after_exclusion",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_azure-gpt-5.3-codex.json')); print(d['metadata']['file_counts']['valid_after_exclusion'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "excluded_eval_files_count_azure-gpt-5.3-codex",
+      "section": "S5",
+      "claim_text": "42 result files excluded (KNOWN_FAIL and performance-only)",
+      "value": 42,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_azure-gpt-5.3-codex.json"
+      ],
+      "json_path": "metadata.file_counts.excluded_known_fail",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_azure-gpt-5.3-codex.json')); print(d['metadata']['file_counts']['excluded_known_fail'])\"",
+      "model": "azure-gpt-5.3-codex",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "overall_pass_at_1_azure-gpt-5.4",
+      "section": "Abstract, S6.1",
+      "claim_text": "azure-gpt-5.4 achieves pass@1 of 46.3% across 136 tasks",
+      "value": 0.4632,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.aggregate_passk.pass@1_macro_avg",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['aggregate_passk']['pass@1_macro_avg'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [],
+      "n": 136,
+      "unit": "fraction",
+      "notes": "Macro-averaged pass@1 over tasks; paper_data stores no CI for it"
+    },
+    {
+      "claim_id": "overall_pass_at_3_azure-gpt-5.4",
+      "section": "S6.1",
+      "claim_text": "azure-gpt-5.4 pass@3 of 52.2%",
+      "value": 0.5221,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.aggregate_passk.pass@3_macro_avg",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['aggregate_passk']['pass@3_macro_avg'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [],
+      "n": 136,
+      "unit": "fraction",
+      "notes": "Macro-averaged pass@3 over tasks; paper_data stores no CI for it"
+    },
+    {
+      "claim_id": "aggregate_pass_rate_azure-gpt-5.4",
+      "section": "S6.1",
+      "claim_text": "azure-gpt-5.4 sample-level pass rate 46.3% [41.5%, 51.2%] (n=408)",
+      "value": 0.4632,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.overall.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['overall']['pass_rate'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.4154,
+          "json_path": "passk_campaign.overall.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.5117,
+          "json_path": "passk_campaign.overall.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 408,
+          "json_path": "passk_campaign.overall.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_cuda_to_omp_azure-gpt-5.4",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.4 cuda-to-omp pass rate: 69.6% [57.9%, 79.1%] (n=69)",
+      "value": 0.6957,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.by_direction.cuda-to-omp.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['by_direction']['cuda-to-omp']['pass_rate'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.5792,
+          "json_path": "passk_campaign.by_direction.cuda-to-omp.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.7915,
+          "json_path": "passk_campaign.by_direction.cuda-to-omp.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 69,
+          "json_path": "passk_campaign.by_direction.cuda-to-omp.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_omp_to_cuda_azure-gpt-5.4",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.4 omp-to-cuda pass rate: 40.6% [29.8%, 52.4%] (n=69)",
+      "value": 0.4058,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.by_direction.omp-to-cuda.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['by_direction']['omp-to-cuda']['pass_rate'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.2979,
+          "json_path": "passk_campaign.by_direction.omp-to-cuda.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.5236,
+          "json_path": "passk_campaign.by_direction.omp-to-cuda.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 69,
+          "json_path": "passk_campaign.by_direction.omp-to-cuda.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_cuda_to_opencl_azure-gpt-5.4",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.4 cuda-to-opencl pass rate: 35.2% [23.8%, 48.5%] (n=54)",
+      "value": 0.3519,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.by_direction.cuda-to-opencl.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['by_direction']['cuda-to-opencl']['pass_rate'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.2382,
+          "json_path": "passk_campaign.by_direction.cuda-to-opencl.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.4852,
+          "json_path": "passk_campaign.by_direction.cuda-to-opencl.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 54,
+          "json_path": "passk_campaign.by_direction.cuda-to-opencl.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_opencl_to_cuda_azure-gpt-5.4",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.4 opencl-to-cuda pass rate: 13.0% [6.4%, 24.4%] (n=54)",
+      "value": 0.1296,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.by_direction.opencl-to-cuda.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['by_direction']['opencl-to-cuda']['pass_rate'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.0642,
+          "json_path": "passk_campaign.by_direction.opencl-to-cuda.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.2442,
+          "json_path": "passk_campaign.by_direction.opencl-to-cuda.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 54,
+          "json_path": "passk_campaign.by_direction.opencl-to-cuda.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_omp_to_opencl_azure-gpt-5.4",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.4 omp-to-opencl pass rate: 14.6% [7.2%, 27.2%] (n=48)",
+      "value": 0.1458,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.by_direction.omp-to-opencl.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['by_direction']['omp-to-opencl']['pass_rate'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.0725,
+          "json_path": "passk_campaign.by_direction.omp-to-opencl.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.2717,
+          "json_path": "passk_campaign.by_direction.omp-to-opencl.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 48,
+          "json_path": "passk_campaign.by_direction.omp-to-opencl.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "direction_pass_opencl_to_omp_azure-gpt-5.4",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.4 opencl-to-omp pass rate: 35.4% [23.4%, 49.6%] (n=48)",
+      "value": 0.3542,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.by_direction.opencl-to-omp.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['by_direction']['opencl-to-omp']['pass_rate'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [
+        {
+          "name": "ci_lower",
+          "value": 0.2343,
+          "json_path": "passk_campaign.by_direction.opencl-to-omp.ci_lower"
+        },
+        {
+          "name": "ci_upper",
+          "value": 0.4956,
+          "json_path": "passk_campaign.by_direction.opencl-to-omp.ci_upper"
+        },
+        {
+          "name": "n",
+          "value": 48,
+          "json_path": "passk_campaign.by_direction.opencl-to-omp.total"
+        }
+      ],
+      "ci_level": 0.95,
+      "unit": "fraction"
+    },
+    {
+      "claim_id": "build_fail_count_azure-gpt-5.4",
+      "section": "S6.4",
+      "claim_text": "azure-gpt-5.4 BUILD_FAIL: 93/408 (22.8%)",
+      "value": 93,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.overall.by_status.BUILD_FAIL",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['overall']['by_status']['BUILD_FAIL'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "run_fail_count_azure-gpt-5.4",
+      "section": "S6.4",
+      "claim_text": "azure-gpt-5.4 RUN_FAIL: 52/408 (12.7%)",
+      "value": 52,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.overall.by_status.RUN_FAIL",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['overall']['by_status']['RUN_FAIL'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "verify_fail_count_azure-gpt-5.4",
+      "section": "S6.4",
+      "claim_text": "azure-gpt-5.4 VERIFY_FAIL: 71/408 (17.4%)",
+      "value": 71,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.overall.by_status.VERIFY_FAIL",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['overall']['by_status']['VERIFY_FAIL'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "best_direction_azure-gpt-5.4",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.4 best direction: cuda-to-omp (69.6%)",
+      "value": 0.6957,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.by_direction.cuda-to-omp.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['by_direction']['cuda-to-omp']['pass_rate'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "fraction",
+      "notes": "Derived: highest pass rate among 6 standard directions"
+    },
+    {
+      "claim_id": "worst_direction_azure-gpt-5.4",
+      "section": "S6.2",
+      "claim_text": "azure-gpt-5.4 worst direction: opencl-to-cuda (13.0%)",
+      "value": 0.1296,
+      "source_files": [
+        "results/analysis/final/paper_data_azure-gpt-5.4.json"
+      ],
+      "json_path": "passk_campaign.by_direction.opencl-to-cuda.pass_rate",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/paper_data_azure-gpt-5.4.json')); print(d['passk_campaign']['by_direction']['opencl-to-cuda']['pass_rate'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "fraction",
+      "notes": "Derived: lowest pass rate among 6 standard directions"
+    },
+    {
+      "claim_id": "total_eval_files_azure-gpt-5.4",
+      "section": "S5",
+      "claim_text": "822 result files on disk, 784 valid after KNOWN_FAIL and performance-only exclusion",
+      "value": 822,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_azure-gpt-5.4.json"
+      ],
+      "json_path": "metadata.file_counts.total_on_disk",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_azure-gpt-5.4.json')); print(d['metadata']['file_counts']['total_on_disk'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "valid_eval_files_count_azure-gpt-5.4",
+      "section": "S5",
+      "claim_text": "784 result files valid after KNOWN_FAIL and performance-only exclusion",
+      "value": 784,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_azure-gpt-5.4.json"
+      ],
+      "json_path": "metadata.file_counts.valid_after_exclusion",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_azure-gpt-5.4.json')); print(d['metadata']['file_counts']['valid_after_exclusion'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    },
+    {
+      "claim_id": "excluded_eval_files_count_azure-gpt-5.4",
+      "section": "S5",
+      "claim_text": "38 result files excluded (KNOWN_FAIL and performance-only)",
+      "value": 38,
+      "source_files": [
+        "results/analysis/final/quantitative_findings_azure-gpt-5.4.json"
+      ],
+      "json_path": "metadata.file_counts.excluded_known_fail",
+      "verification_cmd": "python3 -c \"import json; d=json.load(open('results/analysis/final/quantitative_findings_azure-gpt-5.4.json')); print(d['metadata']['file_counts']['excluded_known_fail'])\"",
+      "model": "azure-gpt-5.4",
+      "terminology": "canonical",
+      "components": [],
+      "unit": "count"
+    }
+  ]
+}

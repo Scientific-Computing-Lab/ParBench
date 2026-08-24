@@ -1,0 +1,326 @@
+% Per-kernel translation status heatmap (GPT-5.4).
+% Styled to match aug_heatmap / Figure 16.
+\begingroup
+\newcommand{\TranslationStatusCell}[3]{%
+  \ifstrequal{#3}{P}{\fill[pbPass!85] (axis cs:#1-0.5,#2-0.5) rectangle (axis cs:#1+0.5,#2+0.5);\node[font=\tiny\bfseries,text=white] at (axis cs:#1,#2) {P};}{}%
+  \ifstrequal{#3}{BF}{\fill[pbBuildFail!85] (axis cs:#1-0.5,#2-0.5) rectangle (axis cs:#1+0.5,#2+0.5);\node[font=\tiny\bfseries,text=white] at (axis cs:#1,#2) {BF};}{}%
+  \ifstrequal{#3}{RF}{\fill[pbRunFail!85] (axis cs:#1-0.5,#2-0.5) rectangle (axis cs:#1+0.5,#2+0.5);\node[font=\tiny\bfseries,text=black] at (axis cs:#1,#2) {RF};}{}%
+  \ifstrequal{#3}{VF}{\fill[pbVerifyFail!85] (axis cs:#1-0.5,#2-0.5) rectangle (axis cs:#1+0.5,#2+0.5);\node[font=\tiny\bfseries,text=white] at (axis cs:#1,#2) {VF};}{}%
+  \ifstrequal{#3}{EF}{\fill[pbExtractionFail!85] (axis cs:#1-0.5,#2-0.5) rectangle (axis cs:#1+0.5,#2+0.5);\node[font=\tiny\bfseries,text=white] at (axis cs:#1,#2) {EF};}{}%
+  \ifstrequal{#3}{--}{\fill[pbNA!55] (axis cs:#1-0.5,#2-0.5) rectangle (axis cs:#1+0.5,#2+0.5);\node[font=\tiny\bfseries,text=black] at (axis cs:#1,#2) {--};}{}%
+}
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.92\columnwidth,
+  height=10.2cm,
+  enlargelimits=false,
+  axis on top,
+  xmin=-0.5, xmax=7.5,
+  ymin=-0.5, ymax=34.5,
+  y dir=reverse,
+  xtick={0,1,2,3,4,5,6,7},
+  xticklabels={{CUDA--OMP}, {OMP--CUDA}, {CUDA--OCL}, {OCL--CUDA}, {OMP--OCL}, {OCL--OMP}, {CUDA--OMP-T}, {OMP-T--CUDA}},
+  x tick label style={font=\tiny\bfseries, rotate=45, anchor=east},
+  ytick={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34},
+  yticklabels={backprop, bfs, bptree, cfd, dwt2d, gaussian, heartwall, hotspot, hotspot3d, huffman, hybridsort, kmeans, lavamd, lud, mummergpu, myocyte, nn, nw, particlefilter, pathfinder, srad, streamcluster, xsbench, rsbench, mixbench, convolution1d, floydwarshall, heat2d, iso2dfd, jacobi, md, nqueen, page-rank, scan, stencil1d},
+  y tick label style={font=\tiny, anchor=east},
+  title style={font=\small\bfseries, align=center},
+  title={Per-Kernel Translation Status (GPT-5.4)},
+  legend style={
+    at={(0.5,-0.13)}, anchor=north,
+    font=\tiny, draw=gray!50,
+    legend columns=5, column sep=4pt,
+  },
+  clip=false,
+]
+\TranslationStatusCell{0}{0}{P}
+\TranslationStatusCell{1}{0}{BF}
+\TranslationStatusCell{2}{0}{--}
+\TranslationStatusCell{3}{0}{--}
+\TranslationStatusCell{4}{0}{--}
+\TranslationStatusCell{5}{0}{--}
+\TranslationStatusCell{6}{0}{--}
+\TranslationStatusCell{7}{0}{--}
+\TranslationStatusCell{0}{1}{P}
+\TranslationStatusCell{1}{1}{P}
+\TranslationStatusCell{2}{1}{P}
+\TranslationStatusCell{3}{1}{BF}
+\TranslationStatusCell{4}{1}{P}
+\TranslationStatusCell{5}{1}{P}
+\TranslationStatusCell{6}{1}{--}
+\TranslationStatusCell{7}{1}{--}
+\TranslationStatusCell{0}{2}{BF}
+\TranslationStatusCell{1}{2}{BF}
+\TranslationStatusCell{2}{2}{P}
+\TranslationStatusCell{3}{2}{BF}
+\TranslationStatusCell{4}{2}{P}
+\TranslationStatusCell{5}{2}{BF}
+\TranslationStatusCell{6}{2}{--}
+\TranslationStatusCell{7}{2}{--}
+\TranslationStatusCell{0}{3}{P}
+\TranslationStatusCell{1}{3}{P}
+\TranslationStatusCell{2}{3}{VF}
+\TranslationStatusCell{3}{3}{P}
+\TranslationStatusCell{4}{3}{VF}
+\TranslationStatusCell{5}{3}{P}
+\TranslationStatusCell{6}{3}{--}
+\TranslationStatusCell{7}{3}{--}
+\TranslationStatusCell{0}{4}{--}
+\TranslationStatusCell{1}{4}{--}
+\TranslationStatusCell{2}{4}{P}
+\TranslationStatusCell{3}{4}{BF}
+\TranslationStatusCell{4}{4}{--}
+\TranslationStatusCell{5}{4}{--}
+\TranslationStatusCell{6}{4}{--}
+\TranslationStatusCell{7}{4}{--}
+\TranslationStatusCell{0}{5}{--}
+\TranslationStatusCell{1}{5}{--}
+\TranslationStatusCell{2}{5}{RF}
+\TranslationStatusCell{3}{5}{VF}
+\TranslationStatusCell{4}{5}{--}
+\TranslationStatusCell{5}{5}{--}
+\TranslationStatusCell{6}{5}{--}
+\TranslationStatusCell{7}{5}{--}
+\TranslationStatusCell{0}{6}{P}
+\TranslationStatusCell{1}{6}{BF}
+\TranslationStatusCell{2}{6}{RF}
+\TranslationStatusCell{3}{6}{BF}
+\TranslationStatusCell{4}{6}{RF}
+\TranslationStatusCell{5}{6}{BF}
+\TranslationStatusCell{6}{6}{--}
+\TranslationStatusCell{7}{6}{--}
+\TranslationStatusCell{0}{7}{P}
+\TranslationStatusCell{1}{7}{P}
+\TranslationStatusCell{2}{7}{P}
+\TranslationStatusCell{3}{7}{VF}
+\TranslationStatusCell{4}{7}{P}
+\TranslationStatusCell{5}{7}{VF}
+\TranslationStatusCell{6}{7}{--}
+\TranslationStatusCell{7}{7}{--}
+\TranslationStatusCell{0}{8}{P}
+\TranslationStatusCell{1}{8}{P}
+\TranslationStatusCell{2}{8}{P}
+\TranslationStatusCell{3}{8}{BF}
+\TranslationStatusCell{4}{8}{P}
+\TranslationStatusCell{5}{8}{P}
+\TranslationStatusCell{6}{8}{--}
+\TranslationStatusCell{7}{8}{--}
+\TranslationStatusCell{0}{9}{--}
+\TranslationStatusCell{1}{9}{--}
+\TranslationStatusCell{2}{9}{--}
+\TranslationStatusCell{3}{9}{--}
+\TranslationStatusCell{4}{9}{--}
+\TranslationStatusCell{5}{9}{--}
+\TranslationStatusCell{6}{9}{--}
+\TranslationStatusCell{7}{9}{--}
+\TranslationStatusCell{0}{10}{--}
+\TranslationStatusCell{1}{10}{--}
+\TranslationStatusCell{2}{10}{--}
+\TranslationStatusCell{3}{10}{--}
+\TranslationStatusCell{4}{10}{--}
+\TranslationStatusCell{5}{10}{--}
+\TranslationStatusCell{6}{10}{--}
+\TranslationStatusCell{7}{10}{--}
+\TranslationStatusCell{0}{11}{--}
+\TranslationStatusCell{1}{11}{--}
+\TranslationStatusCell{2}{11}{--}
+\TranslationStatusCell{3}{11}{--}
+\TranslationStatusCell{4}{11}{--}
+\TranslationStatusCell{5}{11}{--}
+\TranslationStatusCell{6}{11}{--}
+\TranslationStatusCell{7}{11}{--}
+\TranslationStatusCell{0}{12}{P}
+\TranslationStatusCell{1}{12}{BF}
+\TranslationStatusCell{2}{12}{RF}
+\TranslationStatusCell{3}{12}{BF}
+\TranslationStatusCell{4}{12}{P}
+\TranslationStatusCell{5}{12}{BF}
+\TranslationStatusCell{6}{12}{--}
+\TranslationStatusCell{7}{12}{--}
+\TranslationStatusCell{0}{13}{P}
+\TranslationStatusCell{1}{13}{BF}
+\TranslationStatusCell{2}{13}{P}
+\TranslationStatusCell{3}{13}{BF}
+\TranslationStatusCell{4}{13}{P}
+\TranslationStatusCell{5}{13}{P}
+\TranslationStatusCell{6}{13}{--}
+\TranslationStatusCell{7}{13}{--}
+\TranslationStatusCell{0}{14}{--}
+\TranslationStatusCell{1}{14}{--}
+\TranslationStatusCell{2}{14}{--}
+\TranslationStatusCell{3}{14}{--}
+\TranslationStatusCell{4}{14}{--}
+\TranslationStatusCell{5}{14}{--}
+\TranslationStatusCell{6}{14}{--}
+\TranslationStatusCell{7}{14}{--}
+\TranslationStatusCell{0}{15}{EF}
+\TranslationStatusCell{1}{15}{BF}
+\TranslationStatusCell{2}{15}{RF}
+\TranslationStatusCell{3}{15}{BF}
+\TranslationStatusCell{4}{15}{P}
+\TranslationStatusCell{5}{15}{BF}
+\TranslationStatusCell{6}{15}{--}
+\TranslationStatusCell{7}{15}{--}
+\TranslationStatusCell{0}{16}{P}
+\TranslationStatusCell{1}{16}{P}
+\TranslationStatusCell{2}{16}{--}
+\TranslationStatusCell{3}{16}{--}
+\TranslationStatusCell{4}{16}{--}
+\TranslationStatusCell{5}{16}{--}
+\TranslationStatusCell{6}{16}{--}
+\TranslationStatusCell{7}{16}{--}
+\TranslationStatusCell{0}{17}{P}
+\TranslationStatusCell{1}{17}{P}
+\TranslationStatusCell{2}{17}{P}
+\TranslationStatusCell{3}{17}{BF}
+\TranslationStatusCell{4}{17}{P}
+\TranslationStatusCell{5}{17}{RF}
+\TranslationStatusCell{6}{17}{--}
+\TranslationStatusCell{7}{17}{--}
+\TranslationStatusCell{0}{18}{P}
+\TranslationStatusCell{1}{18}{P}
+\TranslationStatusCell{2}{18}{P}
+\TranslationStatusCell{3}{18}{P}
+\TranslationStatusCell{4}{18}{P}
+\TranslationStatusCell{5}{18}{P}
+\TranslationStatusCell{6}{18}{--}
+\TranslationStatusCell{7}{18}{--}
+\TranslationStatusCell{0}{19}{P}
+\TranslationStatusCell{1}{19}{P}
+\TranslationStatusCell{2}{19}{P}
+\TranslationStatusCell{3}{19}{BF}
+\TranslationStatusCell{4}{19}{P}
+\TranslationStatusCell{5}{19}{BF}
+\TranslationStatusCell{6}{19}{--}
+\TranslationStatusCell{7}{19}{--}
+\TranslationStatusCell{0}{20}{P}
+\TranslationStatusCell{1}{20}{P}
+\TranslationStatusCell{2}{20}{P}
+\TranslationStatusCell{3}{20}{BF}
+\TranslationStatusCell{4}{20}{P}
+\TranslationStatusCell{5}{20}{P}
+\TranslationStatusCell{6}{20}{--}
+\TranslationStatusCell{7}{20}{--}
+\TranslationStatusCell{0}{21}{P}
+\TranslationStatusCell{1}{21}{BF}
+\TranslationStatusCell{2}{21}{RF}
+\TranslationStatusCell{3}{21}{BF}
+\TranslationStatusCell{4}{21}{RF}
+\TranslationStatusCell{5}{21}{VF}
+\TranslationStatusCell{6}{21}{--}
+\TranslationStatusCell{7}{21}{--}
+\TranslationStatusCell{0}{22}{P}
+\TranslationStatusCell{1}{22}{RF}
+\TranslationStatusCell{2}{22}{P}
+\TranslationStatusCell{3}{22}{P}
+\TranslationStatusCell{4}{22}{P}
+\TranslationStatusCell{5}{22}{P}
+\TranslationStatusCell{6}{22}{--}
+\TranslationStatusCell{7}{22}{--}
+\TranslationStatusCell{0}{23}{P}
+\TranslationStatusCell{1}{23}{RF}
+\TranslationStatusCell{2}{23}{P}
+\TranslationStatusCell{3}{23}{P}
+\TranslationStatusCell{4}{23}{P}
+\TranslationStatusCell{5}{23}{P}
+\TranslationStatusCell{6}{23}{--}
+\TranslationStatusCell{7}{23}{--}
+\TranslationStatusCell{0}{24}{P}
+\TranslationStatusCell{1}{24}{P}
+\TranslationStatusCell{2}{24}{P}
+\TranslationStatusCell{3}{24}{P}
+\TranslationStatusCell{4}{24}{P}
+\TranslationStatusCell{5}{24}{BF}
+\TranslationStatusCell{6}{24}{--}
+\TranslationStatusCell{7}{24}{--}
+\TranslationStatusCell{0}{25}{--}
+\TranslationStatusCell{1}{25}{--}
+\TranslationStatusCell{2}{25}{--}
+\TranslationStatusCell{3}{25}{--}
+\TranslationStatusCell{4}{25}{--}
+\TranslationStatusCell{5}{25}{--}
+\TranslationStatusCell{6}{25}{P}
+\TranslationStatusCell{7}{25}{P}
+\TranslationStatusCell{0}{26}{P}
+\TranslationStatusCell{1}{26}{P}
+\TranslationStatusCell{2}{26}{--}
+\TranslationStatusCell{3}{26}{--}
+\TranslationStatusCell{4}{26}{--}
+\TranslationStatusCell{5}{26}{--}
+\TranslationStatusCell{6}{26}{P}
+\TranslationStatusCell{7}{26}{P}
+\TranslationStatusCell{0}{27}{P}
+\TranslationStatusCell{1}{27}{P}
+\TranslationStatusCell{2}{27}{--}
+\TranslationStatusCell{3}{27}{--}
+\TranslationStatusCell{4}{27}{--}
+\TranslationStatusCell{5}{27}{--}
+\TranslationStatusCell{6}{27}{P}
+\TranslationStatusCell{7}{27}{P}
+\TranslationStatusCell{0}{28}{P}
+\TranslationStatusCell{1}{28}{P}
+\TranslationStatusCell{2}{28}{--}
+\TranslationStatusCell{3}{28}{--}
+\TranslationStatusCell{4}{28}{--}
+\TranslationStatusCell{5}{28}{--}
+\TranslationStatusCell{6}{28}{P}
+\TranslationStatusCell{7}{28}{P}
+\TranslationStatusCell{0}{29}{--}
+\TranslationStatusCell{1}{29}{--}
+\TranslationStatusCell{2}{29}{--}
+\TranslationStatusCell{3}{29}{--}
+\TranslationStatusCell{4}{29}{--}
+\TranslationStatusCell{5}{29}{--}
+\TranslationStatusCell{6}{29}{P}
+\TranslationStatusCell{7}{29}{P}
+\TranslationStatusCell{0}{30}{--}
+\TranslationStatusCell{1}{30}{--}
+\TranslationStatusCell{2}{30}{--}
+\TranslationStatusCell{3}{30}{--}
+\TranslationStatusCell{4}{30}{--}
+\TranslationStatusCell{5}{30}{--}
+\TranslationStatusCell{6}{30}{P}
+\TranslationStatusCell{7}{30}{P}
+\TranslationStatusCell{0}{31}{--}
+\TranslationStatusCell{1}{31}{--}
+\TranslationStatusCell{2}{31}{--}
+\TranslationStatusCell{3}{31}{--}
+\TranslationStatusCell{4}{31}{--}
+\TranslationStatusCell{5}{31}{--}
+\TranslationStatusCell{6}{31}{P}
+\TranslationStatusCell{7}{31}{P}
+\TranslationStatusCell{0}{32}{--}
+\TranslationStatusCell{1}{32}{--}
+\TranslationStatusCell{2}{32}{--}
+\TranslationStatusCell{3}{32}{--}
+\TranslationStatusCell{4}{32}{--}
+\TranslationStatusCell{5}{32}{--}
+\TranslationStatusCell{6}{32}{P}
+\TranslationStatusCell{7}{32}{P}
+\TranslationStatusCell{0}{33}{P}
+\TranslationStatusCell{1}{33}{P}
+\TranslationStatusCell{2}{33}{--}
+\TranslationStatusCell{3}{33}{--}
+\TranslationStatusCell{4}{33}{--}
+\TranslationStatusCell{5}{33}{--}
+\TranslationStatusCell{6}{33}{--}
+\TranslationStatusCell{7}{33}{--}
+\TranslationStatusCell{0}{34}{P}
+\TranslationStatusCell{1}{34}{P}
+\TranslationStatusCell{2}{34}{--}
+\TranslationStatusCell{3}{34}{--}
+\TranslationStatusCell{4}{34}{--}
+\TranslationStatusCell{5}{34}{--}
+\TranslationStatusCell{6}{34}{--}
+\TranslationStatusCell{7}{34}{--}
+\draw[white, line width=0.45pt] (axis cs:-0.5,-0.5) grid[xstep=1, ystep=1] (axis cs:7.5,34.5);
+\draw[black, line width=1.0pt] (axis cs:-0.5,22.5) -- (axis cs:7.5,22.5);
+\draw[black, line width=1.0pt] (axis cs:-0.5,24.5) -- (axis cs:7.5,24.5);
+\addlegendimage{area legend, fill=pbPass!85, draw=none} \addlegendentry{PASS}
+\addlegendimage{area legend, fill=pbBuildFail!85, draw=none} \addlegendentry{BUILD FAIL}
+\addlegendimage{area legend, fill=pbRunFail!85, draw=none} \addlegendentry{RUN FAIL}
+\addlegendimage{area legend, fill=pbVerifyFail!85, draw=none} \addlegendentry{VERIFY FAIL}
+\addlegendimage{area legend, fill=pbNA!55, draw=none} \addlegendentry{NO EVAL}
+\end{axis}
+\end{tikzpicture}
+\endgroup

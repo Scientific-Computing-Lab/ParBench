@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-08-17T17:58:41.958054+00:00",
+  "git_hash": "ee36fe7a",
+  "source": {
+    "translations_namespace": "results/evaluation",
+    "release_result_namespace": "results/evaluation_final/parbench-final-v1",
+    "counts_method": "re-derived by scripts/rebuttal/export_translations.py over the immutable corpus"
+  },
+  "records_with_source": 2341,
+  "records_without_source": 3,
+  "generated_files": 2938,
+  "zip_sha256_recorded": "2297a3de350554e2a63ef2702213e4d0c7d2e59c2b6dd1ba1e448cad1228de2e",
+  "source_commits": [
+    "c9c1e64e",
+    "bf645a5c",
+    "8d2de381"
+  ],
+  "note": "records_* and generated_files are re-derived from the immutable corpus by export_translations; zip_sha256_recorded is a recorded hash of the on-demand release zip build artifact, NOT recomputed here."
+}

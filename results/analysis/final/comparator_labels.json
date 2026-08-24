@@ -1,0 +1,1463 @@
+{
+ "artifact": "comparator_labels",
+ "generated_by": "scripts/rebuttal/generate_comparator_labels.py",
+ "note": "Honest per-pair comparator labels, a pure passthrough of the oracle report's dispositions for each frozen pair's target oracle. Supersedes, for reporting, the frozen registry's uniform comparator.type='declared-strategy', which recorded that a declared strategy exists but did not classify it. The frozen registry itself is immutable (its hash is bound into the contract manifest and every sealed replay record).",
+ "inputs": {
+  "pair_registry": {
+   "path": "config/final_pair_contracts.json",
+   "sha256": "98faf7e642d43e02ef57bfa9e511d7f4f8fa735cd74f33deb0f811d59b619901"
+  },
+  "oracle_report": {
+   "path": "results/analysis/oracle_contract_report.json",
+   "sha256": "7a7e90679c06f5d3b98c860636858608d4b31dc66f5a761efc7ccd068ea38e50"
+  },
+  "contract_manifest": {
+   "path": "config/final_contract_manifest.json",
+   "sha256": "2e616c83bd826db9257c3ac13daf549ba8688e30ff228c2213ba526ff35a05da"
+  }
+ },
+ "pair_count": 204,
+ "disposition_counts": {
+  "completion_banner_weak": 85,
+  "exit_code_only": 2,
+  "independent_comparator": 7,
+  "program_reported_numeric": 8,
+  "self_check_proven": 63,
+  "self_check_unproven": 39
+ },
+ "strength_counts": {
+  "medium": 8,
+  "strong": 7,
+  "weak": 189
+ },
+ "pairs": [
+  {
+   "source_spec": "hecbench-babelstream-cuda",
+   "target_spec": "hecbench-babelstream-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-babelstream-omp",
+   "target_spec": "hecbench-babelstream-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-bezier-surface-cuda",
+   "target_spec": "hecbench-bezier-surface-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-bezier-surface-omp",
+   "target_spec": "hecbench-bezier-surface-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-bilateral-cuda",
+   "target_spec": "hecbench-bilateral-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-bilateral-omp",
+   "target_spec": "hecbench-bilateral-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-ccsd-trpdrv-cuda",
+   "target_spec": "hecbench-ccsd-trpdrv-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-ccsd-trpdrv-omp",
+   "target_spec": "hecbench-ccsd-trpdrv-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-chacha20-cuda",
+   "target_spec": "hecbench-chacha20-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-chacha20-omp",
+   "target_spec": "hecbench-chacha20-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-chi2-cuda",
+   "target_spec": "hecbench-chi2-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-chi2-omp",
+   "target_spec": "hecbench-chi2-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-convolution1d-cuda",
+   "target_spec": "hecbench-convolution1d-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-convolution1d-omp_target",
+   "target_spec": "hecbench-convolution1d-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-crc64-cuda",
+   "target_spec": "hecbench-crc64-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-crc64-omp",
+   "target_spec": "hecbench-crc64-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-eigenvalue-cuda",
+   "target_spec": "hecbench-eigenvalue-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-eigenvalue-omp",
+   "target_spec": "hecbench-eigenvalue-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-feynman-kac-cuda",
+   "target_spec": "hecbench-feynman-kac-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-feynman-kac-omp",
+   "target_spec": "hecbench-feynman-kac-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-floydwarshall-cuda",
+   "target_spec": "hecbench-floydwarshall-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-floydwarshall-cuda",
+   "target_spec": "hecbench-floydwarshall-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-floydwarshall-omp",
+   "target_spec": "hecbench-floydwarshall-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-floydwarshall-omp",
+   "target_spec": "hecbench-floydwarshall-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-floydwarshall-omp_target",
+   "target_spec": "hecbench-floydwarshall-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-floydwarshall-omp_target",
+   "target_spec": "hecbench-floydwarshall-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-ga-cuda",
+   "target_spec": "hecbench-ga-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-ga-omp",
+   "target_spec": "hecbench-ga-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-gaussian-cuda",
+   "target_spec": "hecbench-gaussian-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-gaussian-omp",
+   "target_spec": "hecbench-gaussian-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-geglu-cuda",
+   "target_spec": "hecbench-geglu-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-geglu-omp",
+   "target_spec": "hecbench-geglu-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-heat2d-cuda",
+   "target_spec": "hecbench-heat2d-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-heat2d-cuda",
+   "target_spec": "hecbench-heat2d-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-heat2d-omp",
+   "target_spec": "hecbench-heat2d-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-heat2d-omp",
+   "target_spec": "hecbench-heat2d-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-heat2d-omp_target",
+   "target_spec": "hecbench-heat2d-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-heat2d-omp_target",
+   "target_spec": "hecbench-heat2d-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-ising-cuda",
+   "target_spec": "hecbench-ising-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-ising-omp",
+   "target_spec": "hecbench-ising-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-iso2dfd-cuda",
+   "target_spec": "hecbench-iso2dfd-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-iso2dfd-cuda",
+   "target_spec": "hecbench-iso2dfd-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-iso2dfd-omp",
+   "target_spec": "hecbench-iso2dfd-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-iso2dfd-omp",
+   "target_spec": "hecbench-iso2dfd-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-iso2dfd-omp_target",
+   "target_spec": "hecbench-iso2dfd-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-iso2dfd-omp_target",
+   "target_spec": "hecbench-iso2dfd-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-jacobi-cuda",
+   "target_spec": "hecbench-jacobi-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-jacobi-omp_target",
+   "target_spec": "hecbench-jacobi-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-jenkins-hash-cuda",
+   "target_spec": "hecbench-jenkins-hash-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-jenkins-hash-omp",
+   "target_spec": "hecbench-jenkins-hash-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-keccaktreehash-cuda",
+   "target_spec": "hecbench-keccaktreehash-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-keccaktreehash-omp",
+   "target_spec": "hecbench-keccaktreehash-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-lulesh-cuda",
+   "target_spec": "hecbench-lulesh-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-lulesh-omp",
+   "target_spec": "hecbench-lulesh-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-mandelbrot-cuda",
+   "target_spec": "hecbench-mandelbrot-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-mandelbrot-omp",
+   "target_spec": "hecbench-mandelbrot-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-maxpool3d-cuda",
+   "target_spec": "hecbench-maxpool3d-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-maxpool3d-omp",
+   "target_spec": "hecbench-maxpool3d-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-md-cuda",
+   "target_spec": "hecbench-md-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "program_reported_numeric",
+   "generated_oracle_strength": "medium"
+  },
+  {
+   "source_spec": "hecbench-md-omp_target",
+   "target_spec": "hecbench-md-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "program_reported_numeric",
+   "generated_oracle_strength": "medium"
+  },
+  {
+   "source_spec": "hecbench-md5hash-cuda",
+   "target_spec": "hecbench-md5hash-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-md5hash-omp",
+   "target_spec": "hecbench-md5hash-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-murmurhash3-cuda",
+   "target_spec": "hecbench-murmurhash3-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-murmurhash3-omp",
+   "target_spec": "hecbench-murmurhash3-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-nbody-cuda",
+   "target_spec": "hecbench-nbody-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-nbody-omp",
+   "target_spec": "hecbench-nbody-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-nqueen-cuda",
+   "target_spec": "hecbench-nqueen-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-nqueen-omp_target",
+   "target_spec": "hecbench-nqueen-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-page-rank-cuda",
+   "target_spec": "hecbench-page-rank-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-page-rank-omp_target",
+   "target_spec": "hecbench-page-rank-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-pathfinder-cuda",
+   "target_spec": "hecbench-pathfinder-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-pathfinder-omp",
+   "target_spec": "hecbench-pathfinder-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-perplexity-cuda",
+   "target_spec": "hecbench-perplexity-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-perplexity-omp",
+   "target_spec": "hecbench-perplexity-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-popcount-cuda",
+   "target_spec": "hecbench-popcount-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "exit_code_only",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-popcount-omp",
+   "target_spec": "hecbench-popcount-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "exit_code_only",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-rmsnorm-cuda",
+   "target_spec": "hecbench-rmsnorm-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-rmsnorm-omp",
+   "target_spec": "hecbench-rmsnorm-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-scan-cuda",
+   "target_spec": "hecbench-scan-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-scan-omp",
+   "target_spec": "hecbench-scan-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-secp256k1-cuda",
+   "target_spec": "hecbench-secp256k1-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-secp256k1-omp",
+   "target_spec": "hecbench-secp256k1-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-stencil1d-cuda",
+   "target_spec": "hecbench-stencil1d-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-stencil1d-omp",
+   "target_spec": "hecbench-stencil1d-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-triad-cuda",
+   "target_spec": "hecbench-triad-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-triad-omp",
+   "target_spec": "hecbench-triad-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_unproven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-tsp-cuda",
+   "target_spec": "hecbench-tsp-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "hecbench-tsp-omp",
+   "target_spec": "hecbench-tsp-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-backprop-cuda",
+   "target_spec": "rodinia-backprop-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-backprop-omp",
+   "target_spec": "rodinia-backprop-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-bfs-cuda",
+   "target_spec": "rodinia-bfs-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-bfs-cuda",
+   "target_spec": "rodinia-bfs-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-bfs-omp",
+   "target_spec": "rodinia-bfs-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-bfs-omp",
+   "target_spec": "rodinia-bfs-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-bfs-opencl",
+   "target_spec": "rodinia-bfs-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-bfs-opencl",
+   "target_spec": "rodinia-bfs-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-bptree-cuda",
+   "target_spec": "rodinia-bptree-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "independent_comparator",
+   "generated_oracle_strength": "strong"
+  },
+  {
+   "source_spec": "rodinia-bptree-cuda",
+   "target_spec": "rodinia-bptree-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-bptree-omp",
+   "target_spec": "rodinia-bptree-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "independent_comparator",
+   "generated_oracle_strength": "strong"
+  },
+  {
+   "source_spec": "rodinia-bptree-omp",
+   "target_spec": "rodinia-bptree-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-bptree-opencl",
+   "target_spec": "rodinia-bptree-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "independent_comparator",
+   "generated_oracle_strength": "strong"
+  },
+  {
+   "source_spec": "rodinia-bptree-opencl",
+   "target_spec": "rodinia-bptree-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "independent_comparator",
+   "generated_oracle_strength": "strong"
+  },
+  {
+   "source_spec": "rodinia-cfd-cuda",
+   "target_spec": "rodinia-cfd-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-cfd-cuda",
+   "target_spec": "rodinia-cfd-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-cfd-omp",
+   "target_spec": "rodinia-cfd-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-cfd-omp",
+   "target_spec": "rodinia-cfd-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-cfd-opencl",
+   "target_spec": "rodinia-cfd-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-cfd-opencl",
+   "target_spec": "rodinia-cfd-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-dwt2d-cuda",
+   "target_spec": "rodinia-dwt2d-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-dwt2d-opencl",
+   "target_spec": "rodinia-dwt2d-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "independent_comparator",
+   "generated_oracle_strength": "strong"
+  },
+  {
+   "source_spec": "rodinia-gaussian-cuda",
+   "target_spec": "rodinia-gaussian-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-gaussian-opencl",
+   "target_spec": "rodinia-gaussian-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-heartwall-cuda",
+   "target_spec": "rodinia-heartwall-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-heartwall-cuda",
+   "target_spec": "rodinia-heartwall-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-heartwall-omp",
+   "target_spec": "rodinia-heartwall-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-heartwall-omp",
+   "target_spec": "rodinia-heartwall-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-heartwall-opencl",
+   "target_spec": "rodinia-heartwall-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-heartwall-opencl",
+   "target_spec": "rodinia-heartwall-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-hotspot-cuda",
+   "target_spec": "rodinia-hotspot-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-hotspot-cuda",
+   "target_spec": "rodinia-hotspot-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-hotspot-omp",
+   "target_spec": "rodinia-hotspot-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-hotspot-omp",
+   "target_spec": "rodinia-hotspot-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-hotspot-opencl",
+   "target_spec": "rodinia-hotspot-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-hotspot-opencl",
+   "target_spec": "rodinia-hotspot-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-hotspot3d-cuda",
+   "target_spec": "rodinia-hotspot3d-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "program_reported_numeric",
+   "generated_oracle_strength": "medium"
+  },
+  {
+   "source_spec": "rodinia-hotspot3d-cuda",
+   "target_spec": "rodinia-hotspot3d-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "program_reported_numeric",
+   "generated_oracle_strength": "medium"
+  },
+  {
+   "source_spec": "rodinia-hotspot3d-omp",
+   "target_spec": "rodinia-hotspot3d-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "program_reported_numeric",
+   "generated_oracle_strength": "medium"
+  },
+  {
+   "source_spec": "rodinia-hotspot3d-omp",
+   "target_spec": "rodinia-hotspot3d-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "program_reported_numeric",
+   "generated_oracle_strength": "medium"
+  },
+  {
+   "source_spec": "rodinia-hotspot3d-opencl",
+   "target_spec": "rodinia-hotspot3d-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "program_reported_numeric",
+   "generated_oracle_strength": "medium"
+  },
+  {
+   "source_spec": "rodinia-hotspot3d-opencl",
+   "target_spec": "rodinia-hotspot3d-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "program_reported_numeric",
+   "generated_oracle_strength": "medium"
+  },
+  {
+   "source_spec": "rodinia-lavamd-cuda",
+   "target_spec": "rodinia-lavamd-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-lavamd-cuda",
+   "target_spec": "rodinia-lavamd-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-lavamd-omp",
+   "target_spec": "rodinia-lavamd-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-lavamd-omp",
+   "target_spec": "rodinia-lavamd-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-lavamd-opencl",
+   "target_spec": "rodinia-lavamd-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-lavamd-opencl",
+   "target_spec": "rodinia-lavamd-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-lud-cuda",
+   "target_spec": "rodinia-lud-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-lud-cuda",
+   "target_spec": "rodinia-lud-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-lud-omp",
+   "target_spec": "rodinia-lud-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-lud-omp",
+   "target_spec": "rodinia-lud-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-lud-opencl",
+   "target_spec": "rodinia-lud-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-lud-opencl",
+   "target_spec": "rodinia-lud-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-myocyte-cuda",
+   "target_spec": "rodinia-myocyte-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-myocyte-cuda",
+   "target_spec": "rodinia-myocyte-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-myocyte-omp",
+   "target_spec": "rodinia-myocyte-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-myocyte-omp",
+   "target_spec": "rodinia-myocyte-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-myocyte-opencl",
+   "target_spec": "rodinia-myocyte-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-myocyte-opencl",
+   "target_spec": "rodinia-myocyte-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-nn-cuda",
+   "target_spec": "rodinia-nn-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-nn-omp",
+   "target_spec": "rodinia-nn-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-nw-cuda",
+   "target_spec": "rodinia-nw-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-nw-cuda",
+   "target_spec": "rodinia-nw-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-nw-omp",
+   "target_spec": "rodinia-nw-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-nw-omp",
+   "target_spec": "rodinia-nw-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-nw-opencl",
+   "target_spec": "rodinia-nw-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-nw-opencl",
+   "target_spec": "rodinia-nw-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-particlefilter-cuda",
+   "target_spec": "rodinia-particlefilter-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-particlefilter-cuda",
+   "target_spec": "rodinia-particlefilter-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-particlefilter-omp",
+   "target_spec": "rodinia-particlefilter-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-particlefilter-omp",
+   "target_spec": "rodinia-particlefilter-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-particlefilter-opencl",
+   "target_spec": "rodinia-particlefilter-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-particlefilter-opencl",
+   "target_spec": "rodinia-particlefilter-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-pathfinder-cuda",
+   "target_spec": "rodinia-pathfinder-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-pathfinder-cuda",
+   "target_spec": "rodinia-pathfinder-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-pathfinder-omp",
+   "target_spec": "rodinia-pathfinder-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-pathfinder-omp",
+   "target_spec": "rodinia-pathfinder-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-pathfinder-opencl",
+   "target_spec": "rodinia-pathfinder-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-pathfinder-opencl",
+   "target_spec": "rodinia-pathfinder-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-srad-cuda",
+   "target_spec": "rodinia-srad-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-srad-cuda",
+   "target_spec": "rodinia-srad-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "independent_comparator",
+   "generated_oracle_strength": "strong"
+  },
+  {
+   "source_spec": "rodinia-srad-omp",
+   "target_spec": "rodinia-srad-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-srad-omp",
+   "target_spec": "rodinia-srad-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "independent_comparator",
+   "generated_oracle_strength": "strong"
+  },
+  {
+   "source_spec": "rodinia-srad-opencl",
+   "target_spec": "rodinia-srad-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-srad-opencl",
+   "target_spec": "rodinia-srad-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-streamcluster-cuda",
+   "target_spec": "rodinia-streamcluster-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-streamcluster-cuda",
+   "target_spec": "rodinia-streamcluster-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-streamcluster-omp",
+   "target_spec": "rodinia-streamcluster-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-streamcluster-omp",
+   "target_spec": "rodinia-streamcluster-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-streamcluster-opencl",
+   "target_spec": "rodinia-streamcluster-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rodinia-streamcluster-opencl",
+   "target_spec": "rodinia-streamcluster-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "completion_banner_weak",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rsbench-rsbench-cuda",
+   "target_spec": "rsbench-rsbench-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rsbench-rsbench-cuda",
+   "target_spec": "rsbench-rsbench-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rsbench-rsbench-cuda",
+   "target_spec": "rsbench-rsbench-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rsbench-rsbench-omp",
+   "target_spec": "rsbench-rsbench-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rsbench-rsbench-omp",
+   "target_spec": "rsbench-rsbench-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rsbench-rsbench-omp",
+   "target_spec": "rsbench-rsbench-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rsbench-rsbench-omp_target",
+   "target_spec": "rsbench-rsbench-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rsbench-rsbench-omp_target",
+   "target_spec": "rsbench-rsbench-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rsbench-rsbench-omp_target",
+   "target_spec": "rsbench-rsbench-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rsbench-rsbench-opencl",
+   "target_spec": "rsbench-rsbench-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rsbench-rsbench-opencl",
+   "target_spec": "rsbench-rsbench-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "rsbench-rsbench-opencl",
+   "target_spec": "rsbench-rsbench-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "xsbench-xsbench-cuda",
+   "target_spec": "xsbench-xsbench-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "xsbench-xsbench-cuda",
+   "target_spec": "xsbench-xsbench-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "xsbench-xsbench-cuda",
+   "target_spec": "xsbench-xsbench-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "xsbench-xsbench-omp",
+   "target_spec": "xsbench-xsbench-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "xsbench-xsbench-omp",
+   "target_spec": "xsbench-xsbench-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "xsbench-xsbench-omp",
+   "target_spec": "xsbench-xsbench-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "xsbench-xsbench-omp_target",
+   "target_spec": "xsbench-xsbench-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "xsbench-xsbench-omp_target",
+   "target_spec": "xsbench-xsbench-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "xsbench-xsbench-omp_target",
+   "target_spec": "xsbench-xsbench-opencl",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "xsbench-xsbench-opencl",
+   "target_spec": "xsbench-xsbench-cuda",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "xsbench-xsbench-opencl",
+   "target_spec": "xsbench-xsbench-omp",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  },
+  {
+   "source_spec": "xsbench-xsbench-opencl",
+   "target_spec": "xsbench-xsbench-omp_target",
+   "frozen_comparator_type": "declared-strategy",
+   "oracle_disposition": "self_check_proven",
+   "generated_oracle_strength": "weak"
+  }
+ ]
+}

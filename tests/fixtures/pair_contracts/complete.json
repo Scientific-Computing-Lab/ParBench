@@ -1,0 +1,101 @@
+{
+  "contract_version": "parbench-final-v1",
+  "pairs": [
+    {
+      "source_spec": "demo-alpha-cuda",
+      "target_spec": "demo-alpha-omp",
+      "shared_input": {
+        "source_args": [
+          "16",
+          "alpha.dat"
+        ],
+        "target_args": [
+          "16",
+          "alpha.dat",
+          "4"
+        ]
+      },
+      "translated_run": {
+        "args": [
+          "16",
+          "alpha.dat",
+          "4"
+        ],
+        "environment": {
+          "OMP_NUM_THREADS": "4"
+        }
+      },
+      "target_oracle": {
+        "strategies": [
+          {
+            "type": "stdout_pattern",
+            "pattern": "OMP OK"
+          },
+          {
+            "type": "exit_code",
+            "expected": 0
+          }
+        ]
+      },
+      "negative_checks": [
+        {
+          "type": "stdout_exclude_pattern",
+          "pattern": "(?i)mismatch at"
+        }
+      ],
+      "comparator": {
+        "type": "declared-strategy",
+        "evidence": "tests/fixtures/pair_contracts/complete.json"
+      },
+      "baseline_witness": {
+        "status": "pass",
+        "evidence": "tests/fixtures/pair_contracts/complete.json"
+      },
+      "comparability": "eligible"
+    },
+    {
+      "source_spec": "demo-alpha-omp",
+      "target_spec": "demo-alpha-cuda",
+      "shared_input": {
+        "source_args": [
+          "16",
+          "alpha.dat",
+          "4"
+        ],
+        "target_args": [
+          "16",
+          "alpha.dat"
+        ]
+      },
+      "translated_run": {
+        "args": [
+          "16",
+          "alpha.dat"
+        ],
+        "environment": {}
+      },
+      "target_oracle": {
+        "strategies": [
+          {
+            "type": "stdout_pattern",
+            "pattern": "CUDA OK"
+          },
+          {
+            "type": "exit_code",
+            "expected": 0
+          }
+        ]
+      },
+      "negative_checks": [],
+      "comparator": {
+        "type": "declared-strategy",
+        "evidence": "tests/fixtures/pair_contracts/complete.json"
+      },
+      "baseline_witness": {
+        "status": "pass",
+        "evidence": "tests/fixtures/pair_contracts/complete.json"
+      },
+      "comparability": "eligible"
+    }
+  ]
+}

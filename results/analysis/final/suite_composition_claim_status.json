@@ -1,0 +1,13 @@
+{
+  "gate": "E-19",
+  "claim": "W-12 Rodinia suite-composition Wilson-bound residual range",
+  "bound_supported": true,
+  "unit": "record",
+  "generated_by": "scripts/rebuttal/suite_composition.py",
+  "supporting_output": "/parbench/results/analysis/final/suite_composition.json",
+  "supporting_output_sha256": "ae736d48126796e027bf038a17b0ef620233e974281e91d40233e5c35f740922",
+  "residual_low_points": -2.2151207729468574,
+  "residual_high_points": 22.890314009661843,
+  "composition_low_points": 21.334543258673687,
+  "composition_high_points": 46.43997804128239
+}

@@ -1,0 +1,176 @@
+{
+    "spec_version": "1.0.0",
+    "identity": {
+        "kernel_name": "mixbench",
+        "parallel_api": "omp",
+        "unique_id": "mixbench-mixbench-omp",
+        "source_suite": "mixbench"
+    },
+    "provenance": {
+        "repository": {
+            "url": "https://github.com/ekondis/mixbench",
+            "commit": "32edeca98bdd63b32769e3c7460676b9fd567f06",
+            "branch": "master"
+        },
+        "repo_root": "mixbench/mixbench-src",
+        "source_path": "mixbench-cpu",
+        "license": "GPL-2.0"
+    },
+    "files": {
+        "prompt_payload": [
+            "main.cpp",
+            "mix_kernels_cpu.cpp",
+            "mix_kernels_cpu.h"
+        ],
+        "support_files": [
+            "CMakeLists.txt"
+        ],
+        "verification_only": [],
+        "translation_targets": [
+            "mix_kernels_cpu.cpp"
+        ]
+    },
+    "implementation": {
+        "api": "omp",
+        "api_version": null,
+        "language": "C++",
+        "language_standard": "C++17"
+    },
+    "build": {
+        "environment": {
+            "preferred": "system",
+            "conda": null,
+            "system": {
+                "dependencies": [
+                    "cmake>=3.10",
+                    "gcc>=9.0"
+                ]
+            }
+        },
+        "build_system": "cmake",
+        "working_directory": "mixbench-cpu",
+        "commands": {
+            "configure": "cmake -B build",
+            "build": "cmake --build build",
+            "clean": "rm -rf build"
+        },
+        "variables": null,
+        "outputs": {
+            "executable": "./build/mixbench-cpu"
+        }
+    },
+    "run": {
+        "executable": "./build/mixbench-cpu",
+        "default_arguments": [],
+        "timeout_seconds": 600,
+        "environment_variables": null,
+        "input_configurations": {
+            "correctness": {
+                "arguments": [
+                    "32"
+                ],
+                "description": "Small array size (32MB) for correctness verification of mixbench (OpenMP CPU)",
+                "input_files": [],
+                "expected_results": {
+                    "stdout_pattern": "CSV data"
+                }
+            },
+            "performance": {
+                "arguments": [],
+                "description": "Default run for performance measurement of mixbench (OpenMP CPU)",
+                "input_files": [],
+                "expected_results": {
+                    "stdout_pattern": "CSV data"
+                }
+            }
+        }
+    },
+    "verification": {
+        "method": "self_checking",
+        "strategies": [
+            {
+                "type": "stdout_pattern",
+                "pattern": "CSV data",
+                "description": "Mixbench outputs CSV data header when benchmark completes successfully"
+            },
+            {
+                "type": "exit_code",
+                "expected": 0,
+                "description": "Process exits with code 0 on successful completion"
+            }
+        ],
+        "floating_point": null,
+        "oracle_strength": "weak",
+        "scope": "performance_only",
+        "scope_reason": "Task 4 (E-04) deterministic mixbench decision: no computed value is extractable by the harness without editing mixbench source (the kernel accumulator is discarded behind a guard designed never to execute at mix_kernels_cpu.cpp:162-164 ('Designed so it never executes' guard class); the host allocates, passes, and frees the output buffer without reading it at main.cpp), so no independent comparator exists and step 2 of the retention rule cannot be satisfied; a seeded wrong-kernel/do-nothing control PASSes the declared oracle (results/analysis/negative_controls/). Verdict: performance_only - retained in the artifact and performance measurements, removed from correctness denominators. Evidence: results/analysis/source_baseline_dispositions/mixbench.json."
+    },
+    "performance": {
+        "metrics": [
+            {
+                "name": "single_precision_gflops",
+                "extraction": {
+                    "type": "regex",
+                    "pattern": "\\s+0,\\s+\\d+\\.\\d+,\\s+\\d+\\.\\d+,\\s+([\\d.]+),\\s+[\\d.]+,",
+                    "capture_group": 1
+                },
+                "unit": "GFLOPS"
+            }
+        ],
+        "warmup_runs": 0,
+        "measurement_runs": 1
+    },
+    "hardware": {
+        "target": "cpu",
+        "requirements": {},
+        "reference_platform": {
+            "platform_id": "rtx4070-linux-x86_64",
+            "gpu": {
+                "model": "NVIDIA GeForce RTX 4070",
+                "architecture": "Ada Lovelace",
+                "compute_capability": "sm_89",
+                "vram_gb": 12,
+                "memory_bandwidth_gbps": 504,
+                "cuda_cores": 5888
+            },
+            "cpu": {
+                "model": "AMD Ryzen 9 7900X",
+                "cores": 12,
+                "threads": 24,
+                "base_clock_ghz": 4.7
+            },
+            "software": {
+                "os": "Ubuntu 22.04 LTS",
+                "cuda_toolkit": "12.x",
+                "gcc": "11+",
+                "driver": "525.x+"
+            }
+        }
+    },
+    "baseline_results": {
+        "reference_platform": "rtx4070-linux-x86_64",
+        "timestamp": "2026-03-28T20:00:00+00:00",
+        "configurations": {
+            "correctness": {
+                "status": "pass",
+                "exit_code": 0,
+                "stdout_snippet": "mixbench-cpu (v0.04-17-g32edeca)\nWorking memory size: 768MB\nTotal threads: 24\n---------------------------------------------------------- CSV data ----------------------------------------------------------\n",
+                "wall_time_seconds": 120.0,
+                "metrics": {}
+            }
+        }
+    },
+    "metadata": {
+        "description": "CPU compute-memory trade-off microbenchmark (mixbench)",
+        "domain": "performance analysis",
+        "complexity": "Parameterized compute-to-memory ratio benchmark for roofline analysis",
+        "tags": [
+            "omp",
+            "microbenchmark",
+            "roofline",
+            "performance",
+            "mixbench"
+        ],
+        "multi_file": true,
+        "translation_complexity": null
+    }
+}

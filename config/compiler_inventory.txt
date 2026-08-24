@@ -1,0 +1,41 @@
+=== CUDA ===
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Fri_Nov__3_17:16:49_PDT_2023
+Cuda compilation tools, release 12.3, V12.3.103
+Build cuda_12.3.r12.3/compiler.33492891_0
+=== NVC++ ===
+
+nvc++ 24.3-0 64-bit target on x86-64 Linux -tp znver4 
+NVIDIA Compilers and Tools
+Copyright (c) 2024, NVIDIA CORPORATION & AFFILIATES.  All rights reserved.
+=== GCC ===
+gcc (Ubuntu 12.4.0-2ubuntu1~24.04) 12.4.0
+=== G++ ===
+g++ (Ubuntu 12.4.0-2ubuntu1~24.04) 12.4.0
+=== OpenMP ===
+OpenMP: YES (g++ -fopenmp compiles and links successfully)
+=== HIP ===
+Command 'hipcc' not found, but can be installed with:
+sudo apt install hipcc
+NOT FOUND
+=== SYCL (Intel oneAPI) ===
+Intel(R) oneAPI DPC++/C++ Compiler 2025.3.2 (2025.3.2.20260112)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/intel/oneapi/compiler/2025.3/bin/compiler
+SYCL target: CPU (host device, no GPU backend)
+Installation: apt install intel-oneapi-compiler-dpcpp-cpp (via Intel oneAPI repo)
+Environment: source /opt/intel/oneapi/setvars.sh
+=== SYCL (DPC++) ===
+(dpcpp is deprecated; use icpx -fsycl instead)
+=== GPU ===
+NVIDIA GeForce RTX 4070, 8.9, 12282 MiB
+=== ARCH ===
+sm_89
+
+=== PHASE 4 NOTES (2026-02-13) ===
+HIP install: SKIPPED (user choice for this run)
+HIP verification: NOT RUN in Phase 4 (compiler unavailable on host)
+SYCL verification: RE-RUN in Phase 4 with `python -m harness --json -v verify ...`
+Important CLI note: in this harness, global flags (`--json`, `-v`) must appear before the subcommand.
