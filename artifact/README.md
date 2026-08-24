@@ -2,10 +2,21 @@
 
 Self-contained artifact for reproducing all tables and figures in the NeurIPS 2026 paper "ParBench: A Kernel-Centric Benchmark for Evaluating LLM-Based Parallel Code Translation."
 
+## Where the artifact lives
+
+The artifact is a single release asset, `parbench-artifact-neurips2026.zip` (43,070,656 bytes,
+SHA-256 `e7fce335ab60ba7273e9cb6449f4563823b397af4af77954d2acd1d35e31fd66`), attached to the
+[neurips2026-artifact release](https://github.com/Scientific-Computing-Lab/ParBench/releases/tag/neurips2026-artifact).
+It is not tracked in the repository, because it carries the raw per-task evaluation records
+that the repository itself does not ship.
+
 ## Quick Start
 
 ```bash
-tar xf parbench-artifact-v1.tar.gz
+curl -L -O https://github.com/Scientific-Computing-Lab/ParBench/releases/download/neurips2026-artifact/parbench-artifact-neurips2026.zip
+sha256sum parbench-artifact-neurips2026.zip   # macOS: shasum -a 256
+# expect e7fce335ab60ba7273e9cb6449f4563823b397af4af77954d2acd1d35e31fd66
+unzip parbench-artifact-neurips2026.zip
 cd parbench-artifact
 docker build -t parbench .
 docker run --rm -v $(pwd)/output:/app/output parbench ./reproduce.sh
@@ -15,28 +26,63 @@ docker run --rm -v $(pwd)/output:/app/output parbench ./reproduce.sh
 
 ## Without Docker
 
-If you prefer running without Docker (or are reviewing from a cloned repository):
+Same archive, no container. Run from the unpacked `parbench-artifact/` directory:
 
 ```bash
-# 1. Enter the project root
-cd <repo-directory>
-
-# 2. Create and activate a Python 3.12+ virtual environment
+# 1. Create and activate a Python 3.12+ virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
-# 3. Install pinned dependencies and the project package
+# 2. Install pinned dependencies and the project package
 pip install -r requirements-lock.txt
 pip install -e .
 
-# 4. Run reproduction (~10-15 minutes)
+# 3. Run reproduction (about a minute on a modern laptop; longer on first pip install)
 bash artifact/reproduce.sh
 
-# 5. Check output
+# 4. Check output
 ls output/   # expect 35 files: 5 .tex tables + 15 figures × (PNG + PDF)
 ```
 
 **Note:** Table values (`.tex` files) are deterministic across platforms. Figure appearance may vary slightly due to font availability and matplotlib backend differences.
+
+## From a cloned repository
+
+A clone of the public repository is **not** enough to run `reproduce.sh`. The script rebuilds
+every table and figure from the raw per-task records under `results/evaluation/`, and those
+records are not tracked in the repository - they exist only inside the release archive above.
+Running `bash artifact/reproduce.sh` in a clone exits 1 during Step 1 with
+`ERROR: Results directory not found: .../results/evaluation/together-qwen-3.5-397b-a17b`.
+
+What a clone alone does give you:
+
+- `results/analysis/final/` - the committed canonical aggregates of the 2026-08-13 build
+  (2,344 records, 184 excluded by the pre-registered eligibility rules, 2,160 valid). Every
+  number printed in the paper comes from these JSON, CSV and Markdown files, so they can be
+  read and cross-checked directly without running anything.
+- `expected_outputs/` - the reference `.tex` tables and `.pdf` figures, for diffing against a
+  reproduction run made from the archive.
+- The benchmark itself: `specs/`, `manifest.jsonl`, `schema/`, `harness/`, and the analysis
+  scripts.
+
+To reproduce end to end from a clone, download the archive and copy its `results/evaluation/`
+tree into the clone, then run the script from the clone:
+
+```bash
+git clone https://github.com/Scientific-Computing-Lab/ParBench.git
+curl -L -O https://github.com/Scientific-Computing-Lab/ParBench/releases/download/neurips2026-artifact/parbench-artifact-neurips2026.zip
+unzip parbench-artifact-neurips2026.zip
+cp -r parbench-artifact/results/evaluation ParBench/results/evaluation
+cd ParBench
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements-lock.txt && pip install -e .
+bash artifact/reproduce.sh
+```
+
+This path is verified: it exits 0 and writes 35 files to `output/` (5 `.tex` tables and 15
+figures as both PDF and PNG), plus 14 regenerated aggregates under `output/analysis/`.
+The script resolves its project root from the location of `manifest.jsonl`, so it does not
+matter whether you run it from the clone or from the unpacked archive.
 
 ## What This Reproduces
 
@@ -101,7 +147,7 @@ parbench-artifact/
 ## What's Included
 
 - **Raw evaluation results** (~97 MB): 2,344 per-task JSON files from 3 models (Qwen 3.5 397B-A17B, GPT-5.4, GPT-5.3-codex) across 6 translation directions and 5 augmentation levels (2,160 valid records after excluding the 13 correctness-ineligible specs: 10 KNOWN_FAIL plus 3 mixbench performance-only)
-- **Generated translation source**: each result JSON carries the model's output in its `translated_files` field, a mapping of `{filename: source-code-string}` for every file the model was asked to translate. 2,341 of the 2,344 records contain generated source (the 3 omissions are GPT-5.4 extraction failures on the myocyte kernel family; in the shipped replay records they carry top-level `overall_status: "NOT_REPLAYABLE"` with the original verdict preserved as `parent.overall_status: "EXTRACTION_FAIL"`, and Table T1 reports them in the Extract column). To flatten these into a browsable tree plus a `translations_manifest.jsonl` (one line per record, keyed by `namespace` and `model`, with a SHA-256 per file), run `python3 scripts/rebuttal/export_translations.py --project-root . --out-dir <dir>`.
+- **Generated translation source**: each result JSON carries the model's output in its `translated_files` field, a mapping of `{filename: source-code-string}` for every file the model was asked to translate. 2,341 of the 2,344 records contain generated source (the 3 omissions are GPT-5.4 extraction failures on the myocyte kernel family; in the shipped replay records they carry top-level `overall_status: "NOT_REPLAYABLE"` with the original verdict preserved as `parent.overall_status: "EXTRACTION_FAIL"`, and Table T1 reports them in the Extract column). The records are plain JSON, so the field can be read directly with any JSON tool; the internal helper that flattens it into a browsable tree is not part of this distribution.
 - **Analysis scripts**: Full pipeline from raw results to paper tables/figures
 - **Kernel specs**: 206 JSON spec files defining the benchmark's translation tasks
 - **Docker environment**: Exact Python dependency pins for bit-for-bit table reproduction
@@ -123,10 +169,25 @@ parbench-artifact/
 ## Verifying Outputs
 
 **Tables (deterministic):** Diff the generated `.tex` files against `expected_outputs/`.
-Equality holds for the evaluation corpus the artifact builders stage under
-`results/evaluation/` (the sealed replay namespace with corrected verdicts, the same
-records behind the paper's canonical `results/analysis/final/` build); a reproduction
-over the superseded pre-replay records will differ.
+
+Equality is conditional on the evaluation corpus you ran over. `expected_outputs/` was built
+from the sealed replay namespace, the corrected-verdict records behind the paper's canonical
+`results/analysis/final/` aggregates. A reproduction over the superseded pre-replay records
+runs to completion but produces different pass rates. To tell which corpus you have, compare
+this run's regenerated aggregates against the committed canonical ones, which every table in
+the paper is printed from. Run this from a repository clone, which is where
+`results/analysis/final/` lives:
+
+```bash
+python3 -c "
+import json
+for d in ('output/analysis', 'results/analysis/final'):
+    p = f'{d}/quantitative_findings_azure-gpt-5.4.json'
+    print(d, json.load(open(p))['canonical']['aggregate_pass_rates']['overall']['value'])
+"
+```
+
+Matching values mean you are on the sealed corpus and the `.tex` diffs below should be empty.
 
 ```bash
 diff output/t1_overall_pass.tex expected_outputs/t1_overall_pass.tex

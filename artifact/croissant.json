@@ -5,10 +5,19 @@
     "column": "cr:column",
     "conformsTo": "dct:conformsTo",
     "cr": "http://mlcommons.org/croissant/",
-    "data": {"@id": "cr:data", "@type": "@json"},
-    "dataType": {"@id": "cr:dataType", "@type": "@vocab"},
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
     "dct": "http://purl.org/dc/terms/",
-    "examples": {"@id": "cr:examples", "@type": "@json"},
+    "examples": {
+      "@id": "cr:examples",
+      "@type": "@json"
+    },
     "extract": "cr:extract",
     "field": "cr:field",
     "fileObject": "cr:FileObject",
@@ -41,20 +50,64 @@
   "name": "ParBench Kernel Specifications",
   "description": "206 JSON specification files defining parallel code translation tasks across CUDA, OpenMP, OpenCL, and OpenMP target offload APIs, sourced from 5 HPC benchmark suites (Rodinia, HeCBench, XSBench, RSBench, mixbench).",
   "license": "https://opensource.org/licenses/MIT",
-  "url": "https://anonymous.4open.science/r/parbench_artifact_neurips/",
+  "url": "https://github.com/Scientific-Computing-Lab/ParBench",
   "version": "1.0.0",
-  "keywords": ["parallel computing", "code translation", "CUDA", "OpenMP", "OpenCL", "benchmark", "LLM evaluation"],
+  "keywords": [
+    "parallel computing",
+    "code translation",
+    "CUDA",
+    "OpenMP",
+    "OpenCL",
+    "benchmark",
+    "LLM evaluation"
+  ],
   "datePublished": "2026-05-06",
   "conformsTo": "http://mlcommons.org/croissant/1.1",
-  "citeAs": "Anonymous. ParBench: A Meta-Benchmark for LLM-Based Parallel Code Translation. NeurIPS 2026 Evaluations & Datasets Track (under review).",
+  "citeAs": "Samyak Jhaveri, Erel Kaplan, Tom Yotam, Le Chen, Tomer Bitan, Niranjan Hasabnis, and Gal Oren. ParBench: A Benchmark for Reliable Evaluation of LLM Parallel Code Translation. NeurIPS 2026.",
+  "creator": [
+    {
+      "@type": "sc:Person",
+      "name": "Samyak Jhaveri",
+      "affiliation": "University of California, Irvine"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Erel Kaplan",
+      "affiliation": "Technion"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Tom Yotam",
+      "affiliation": "Code Metal"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Le Chen",
+      "affiliation": "Argonne National Laboratory"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Tomer Bitan",
+      "affiliation": "Technion"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Niranjan Hasabnis",
+      "affiliation": "Code Metal"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Gal Oren",
+      "affiliation": "Stanford University, Technion"
+    }
+  ],
   "distribution": [
     {
       "@type": "cr:FileSet",
       "name": "kernel-specs",
       "description": "206 JSON specification files, one per kernel-API variant, defining build, run, and verification configurations for parallel code translation tasks",
       "includes": "specs/*.json",
-      "encodingFormat": "application/json",
-      "sha256": "7548c3677b45e45158b879c5c3fc132b81219e7129e8874fcf0b56b785bf5a25"
+      "encodingFormat": "application/json"
     },
     {
       "@type": "cr:FileObject",
@@ -62,14 +115,14 @@
       "description": "JSON Schema (draft-07) defining the spec file structure",
       "contentUrl": "schema/spec_schema.json",
       "encodingFormat": "application/schema+json",
-      "sha256": "d69539482601409889b87fae36e44d565e79a7f1950efbe6262d4fa42fa05cfa"
+      "sha256": "418bc1f16d15b1c98edf9f4abe72493b418938f1869cb8a2529fe513cd39382d"
     }
   ],
   "rai:dataCollection": "Specifications curated from existing open-source HPC benchmark suites (Rodinia, HeCBench, XSBench, RSBench, mixbench). Each spec is manually authored by the benchmark developers to define build, run, and verification configurations. No crowdsourcing, scraping, or automated data collection was used.",
   "rai:dataCollectionType": "Curated from existing sources",
   "rai:dataUseCases": "Evaluating the correctness of LLM-generated parallel code translations (e.g., CUDA to OpenMP). The specs define ground-truth build and verification pipelines against which translated code is tested. Not intended for training language models.",
-  "rai:dataLimitations": "Covers only four parallel APIs (CUDA, OpenMP, OpenCL, OpenMP target offload). Does not include SYCL, HIP, Kokkos, or other parallel frameworks. Benchmark kernels are drawn from scientific computing workloads and may not represent all parallel programming patterns. Verification oracles vary in strength (2 strong, 5 medium, 46 weak, remainder untagged).",
-  "rai:dataBiases": "Kernel selection is biased toward scientific computing and numerical simulation workloads from established HPC benchmark suites. Rodinia contributes the majority of specs (60/206). Underrepresented domains include graph analytics, machine learning training kernels, and I/O-bound workloads.",
+  "rai:dataLimitations": "Covers only four parallel APIs (CUDA, OpenMP, OpenCL, OpenMP target offload). Does not include SYCL, HIP, Kokkos, or other parallel frameworks. Benchmark kernels are drawn from scientific computing workloads and may not represent all parallel programming patterns. Verification oracles vary in strength: of the 206 specs, 2 declare a strong oracle, 5 medium, and 48 weak, while 151 carry no oracle_strength tag.",
+  "rai:dataBiases": "Kernel selection is biased toward scientific computing and numerical simulation workloads from established HPC benchmark suites. HeCBench contributes the largest share of specs (135 of 206) and Rodinia the second largest (60 of 206). Underrepresented domains include graph analytics, machine learning training kernels, and I/O-bound workloads.",
   "rai:personalSensitiveInformation": "No personal or sensitive data. All specs describe computational kernels operating on synthetic or public scientific datasets. No human subjects, demographic data, or personally identifiable information is present.",
   "rai:dataSocialImpact": "ParBench enables evaluation of automated code translation tools, which could accelerate software portability across GPU and CPU platforms. Potential positive impact: reducing the cost of maintaining parallel codebases. No known negative social impacts from the benchmark data itself.",
   "rai:dataPreprocessingProtocol": "Kernel source files are used as-is from upstream repositories at pinned commits. No preprocessing, filtering, or transformation is applied to the source code. Spec JSON files are authored manually following a JSON Schema (draft-07) contract.",

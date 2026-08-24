@@ -23,7 +23,8 @@ The five bundled suites below are a starting corpus, not a boundary. Any paralle
 can join the harness by writing one spec file per kernel variant against
 `schema/spec_schema.json` and appending one line to `manifest.jsonl`. Translation pairs,
 prompt payloads, and verification then work for the new suite exactly as they do for the
-bundled ones. See **[docs/adding-a-suite.md](docs/adding-a-suite.md)** for the full path.
+bundled ones. See **[docs/adding-a-suite.md](docs/adding-a-suite.md)** for the full path and
+**[CONTRIBUTING.md](CONTRIBUTING.md)** for how to propose one.
 
 ## Benchmark corpus
 
@@ -50,17 +51,21 @@ enables automatic discovery of translation pairs across APIs.
 Python 3.12 or later is required.
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Scientific-Computing-Lab/ParBench.git
 cd ParBench
 
-python3 -m venv env_parbench
-source env_parbench/bin/activate
+python3 -m venv venv
+source venv/bin/activate
 
-# Core dependencies (harness, schema validation, augmentation)
+# Exact pinned versions (the reproducible environment; recommended)
+python3 -m pip install -r requirements-lock.txt
+
+# Or unpinned core dependencies (harness, schema validation, augmentation)
 python3 -m pip install -r requirements.txt
 
-# Or for exact pinned versions (reproducible environment)
-python3 -m pip install -r requirements-lock.txt
+# Install the project itself, so `python3 -m harness` and the analysis
+# scripts resolve from any directory
+python3 -m pip install -e .
 ```
 
 Optional dependency groups from `pyproject.toml`:
@@ -73,19 +78,24 @@ python3 -m pip install ".[all]"       # Everything
 ```
 
 Building and running kernels additionally requires compilers for the target APIs (`nvcc` for
-CUDA, `g++` with `-fopenmp` for OpenMP, OpenCL headers and runtime for OpenCL). Tested
+CUDA, `g++` with `-fopenmp` for OpenMP, OpenCL headers and runtime for OpenCL). On Ubuntu,
+the OpenMP path needs only `sudo apt-get install build-essential` (`g++` and `make`). Tested
 versions are listed in `config/compiler_inventory.txt`.
 
 ## Quick start
 
+Run these from the repository root, with the virtual environment from **Installation** above
+active.
+
 ```bash
-source env_parbench/bin/activate
+source venv/bin/activate
 
 # 1. Fetch the Rodinia sources (the only submodule; ~101 MB)
 git submodule update --init rodinia
+ln -s . rodinia/rodinia-src   # the specs address the tree as rodinia/rodinia-src
 
-# 2. Validate the manifest and all specs
-python3 scripts/validate_schema.py --all
+# 2. Validate one spec against the schema (exits 0 on a fresh clone)
+python3 scripts/validate_schema.py --spec specs/rodinia-nw-omp.json
 
 # 3. Build, run, and verify one kernel (OpenMP — needs only a multi-core CPU;
 #    nw generates its own input matrix, so no data download is required)
@@ -95,8 +105,23 @@ python3 -m harness verify specs/rodinia-nw-omp.json
 python3 -m harness pairs
 ```
 
+Step 1's symlink is required, not optional: the submodule checks out at `rodinia/`, while
+every Rodinia spec declares its `repo_root` as `rodinia/rodinia-src`. Without the link,
+validation reports a missing source directory for every Rodinia spec, and `harness verify`
+stops with "Working directory does not exist".
+
+`python3 scripts/validate_schema.py --all` is the full-corpus check, and it is **expected to
+exit nonzero on a fresh clone**: it reports missing source files for every benchmark tree you
+have not fetched yet, plus three errors for each of the five retired manifest entries
+described under [Validation](#validation). Run it once the trees you care about are in place, and read its
+error list rather than its exit code.
+
 Two platform notes. (1) OpenMP kernels need a compiler with `-fopenmp` (GNU g++; Apple's
-clang on macOS does not support it — use Linux, the tested platform). (2) Rodinia kernels
+clang on macOS does not support it — use Linux, the tested platform). The bundled OpenMP
+Makefiles hardcode `CC = g++` and the harness passes no compiler override, so whatever is
+named `g++` on your PATH must be a real GNU g++; on macOS that means putting Homebrew's gcc
+ahead of Apple's clang shim, and there is no flag that points the harness at a differently
+named compiler. (2) Rodinia kernels
 that read input files (bfs, hotspot, srad, ...) additionally need the separate
 [Rodinia data package](https://rodinia.cs.virginia.edu/), unpacked to
 `rodinia/rodinia-src/data/`; kernels with self-generated inputs (nw, lud, pathfinder,
@@ -113,10 +138,12 @@ pre-registered eligibility rules, leaving 2,160 valid records over 136 translati
 three models). These JSON and CSV files carry every number in the paper: pass@k tables,
 direction asymmetry, augmentation trends, the failure taxonomy, and per-suite results.
 
-Raw per-task records are not tracked in this repository. The self-contained reproducibility
-artifact (Docker image recipe, raw records, and `reproduce.sh`) is published as a release
-asset; **[docs/reproducing-paper.md](docs/reproducing-paper.md)** explains both reproduction
-paths.
+Raw per-task records are not tracked in this repository. They ship instead inside the
+self-contained reproducibility artifact (Docker image recipe, raw records, and
+`reproduce.sh`), published as the asset `parbench-artifact-neurips2026.zip` on the
+[neurips2026-artifact release](https://github.com/Scientific-Computing-Lab/ParBench/releases/tag/neurips2026-artifact).
+**[artifact/README.md](artifact/README.md)** documents that archive and
+**[docs/reproducing-paper.md](docs/reproducing-paper.md)** explains both reproduction paths.
 
 ## Project structure
 
@@ -134,7 +161,7 @@ ParBench/
 ├── results/analysis/final/         # Canonical aggregate results (the paper's numbers)
 ├── expected_outputs/               # Reference outputs for bit-exact table verification
 ├── artifact/                       # Reproducibility artifact (Dockerfile, reproduce.sh)
-└── config/                         # Machine-specific config (git-ignored paths.json)
+└── config/                         # Pair contracts and paths.json (tracked, sanitized defaults)
 ```
 
 ## Spec anatomy
@@ -169,11 +196,13 @@ python3 scripts/validate_schema.py --all                       # everything
 ```
 
 The validator checks schema conformance, `unique_id` naming and format, API consistency, that
-every listed file exists on disk, and the prompt/verification separation above. Two classes
-of errors are expected and explained by the validator: (1) specs whose benchmark tree you
-have not fetched yet report missing source files (fetch the tree, per the table above, and
-they clear); (2) five phantom manifest entries remain permanently (the manifest is
-append-only and retains entries whose spec files were deleted).
+every listed file exists on disk, and the prompt/verification separation above. A single-spec
+run exits 0. The `--all` run does not, because two classes of errors are expected and are
+explained in its output: (1) specs whose benchmark tree you have not fetched yet report
+missing source files (fetch the tree, per the table above, and they clear); (2) five retired
+manifest entries remain permanently, contributing three errors each (the manifest is append-only, so
+it retains entries whose spec files were deleted). Judge `--all` by its error list, not by its
+exit status.
 
 ## Requirements
 
@@ -185,9 +214,13 @@ append-only and retains entries whose spec files were deleted).
 ## Testing
 
 ```bash
+bash scripts/run_public_tests.sh                         # unit suite minus tests whose subjects are not in this release
+python3 -m pytest tests/                                 # full suite (some tests need files outside this release)
 python3 -m pytest c_augmentation/test_transforms.py -v   # augmentation transform tests
-python3 scripts/validate_schema.py --all                 # schema validation
+python3 scripts/validate_schema.py --all                 # schema validation (see above on its exit status)
 ```
+
+`pytest` comes from the `[dev]` dependency group.
 
 ## License
 
@@ -196,7 +229,9 @@ repositories and keep their own upstream licenses; ParBench does not vendor them
 
 ## Citation
 
-The ParBench paper — "ParBench: A Kernel-Centric Benchmark for Evaluating LLM-Based Parallel
-Code Translation" (NeurIPS 2026) — describes the benchmark design and the evaluation results.
-We will add the citation entry and the arXiv link to this section when the camera-ready
-version is published.
+To cite the software, use `CITATION.cff` in the repository root; GitHub renders it as a
+ready-to-paste BibTeX or APA entry under "Cite this repository". It also carries the
+preferred citation for the paper, "ParBench: A Kernel-Centric Benchmark for Evaluating
+LLM-Based Parallel Code Translation" (NeurIPS 2026), which describes the benchmark design and
+the evaluation results. The arXiv link and DOI will be added to `CITATION.cff` when the
+camera-ready version is published.

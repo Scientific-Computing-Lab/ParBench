@@ -21,6 +21,8 @@ eval = [
 analysis = [
     "matplotlib>=3.9",
     "numpy>=1.26",
+    "scipy>=1.14",
+    "scienceplots>=2.2",
 ]
 dev = [
     "pytest>=8.0",

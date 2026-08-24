@@ -1,0 +1,50 @@
+name: CI
+
+# CPU-only sanity gate for the public repo: the spec schema validates, the
+# harness package imports, and the unit suite passes on a clean clone with no
+# benchmark trees fetched and no GPU. It deliberately does NOT build or run a
+# kernel - every suite tree (rodinia, HeCBench, mixbench, xsbench, rsbench) is
+# fetched separately, see docs/benchmark-tree-pins.md.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The rodinia submodule (~101 MB) buys exactly one extra passing test,
+          # and only after a local layout fixup, so CI skips it. Measured on a
+          # clean clone of the public repo: 589 passed either way.
+          submodules: false
+
+      - uses: actions/setup-python@v5
+        with:
+          # pyproject requires >=3.12; requirements-lock.txt was pinned on
+          # Ubuntu 24.04 / Python 3.12.3.
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+
+      - name: Install
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements-lock.txt
+          python3 -m pip install -e .
+
+      - name: Validate a spec against the schema
+        run: python3 scripts/validate_schema.py --spec specs/rodinia-nw-omp.json
+
+      - name: Import the harness package
+        run: python3 -c "import harness"
+
+      - name: Unit tests
+        # The exclusion list lives in scripts/run_public_tests.sh, the same
+        # runner CONTRIBUTING.md and the PR template tell contributors to use.
+        # Measured on a clean public clone: without the exclusions the suite is
+        # 43 failed / 589 passed / 112 skipped; with them it exits 0.
+        run: bash scripts/run_public_tests.sh

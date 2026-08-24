@@ -1,0 +1,77 @@
+name: Bug report
+description: Report a spec, build, run, or verification failure
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Build and verify failures are usually toolchain-specific, so the compiler and OS
+        versions matter as much as the error text. Please fill in every field.
+
+        Some specs are known to fail and are excluded from evaluation batches by code
+        (`EXCLUDED_SPECS` in `harness/constants.py`). Please check that list first.
+
+  - type: input
+    id: spec
+    attributes:
+      label: Spec
+      description: The spec's unique_id, or the spec file path.
+      placeholder: rodinia-nw-omp
+    validations:
+      required: true
+
+  - type: input
+    id: platform
+    attributes:
+      label: Platform and OS
+      description: CPU or GPU, distribution, and kernel or OS version.
+      placeholder: Ubuntu 24.04, x86_64, NVIDIA RTX 4070
+    validations:
+      required: true
+
+  - type: input
+    id: compiler
+    attributes:
+      label: Compiler and toolchain versions
+      description: Output of `g++ --version`, `nvcc --version`, or the OpenCL runtime version.
+      placeholder: g++ 13.2.0, nvcc 12.4
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Exact command
+      description: The command you ran, verbatim, including the working directory.
+      render: shell
+      placeholder: |
+        cd ParBench
+        python3 -m harness verify specs/rodinia-nw-omp.json
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Full output
+      description: The complete output, not an excerpt. Attach a file if it is very long.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected versus actual
+      description: What you expected to happen, and what happened instead.
+    validations:
+      required: true
+
+  - type: input
+    id: commit
+    attributes:
+      label: ParBench commit
+      description: Output of `git rev-parse --short HEAD`.
+    validations:
+      required: false
