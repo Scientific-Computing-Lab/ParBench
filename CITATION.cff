@@ -1,0 +1,76 @@
+cff-version: 1.2.0
+message: "If you use ParBench, please cite both the software and the paper below."
+title: "ParBench"
+abstract: >-
+  An evaluation harness for LLM-based parallel code translation. ParBench
+  describes each benchmark kernel in a machine-readable spec and then builds,
+  runs, and verifies every LLM-produced translation, so that results are
+  comparable across models, benchmark suites, and translation directions
+  (CUDA, OpenMP, OpenCL, and OpenMP target offload).
+type: software
+version: "0.1.0"
+date-released: "2026-08-24"
+license: MIT
+repository-code: "https://github.com/Scientific-Computing-Lab/ParBench"
+url: "https://github.com/Scientific-Computing-Lab/ParBench"
+keywords:
+  - benchmark
+  - llm-evaluation
+  - parallel-computing
+  - code-translation
+  - cuda
+  - openmp
+  - opencl
+authors:
+  - given-names: "Samyak"
+    family-names: "Jhaveri"
+    affiliation: "University of California, Irvine"
+  - given-names: "Erel"
+    family-names: "Kaplan"
+    affiliation: "Technion"
+  - given-names: "Tom"
+    family-names: "Yotam"
+    affiliation: "Code Metal"
+  - given-names: "Le"
+    family-names: "Chen"
+    affiliation: "Argonne National Laboratory"
+  - given-names: "Tomer"
+    family-names: "Bitan"
+    affiliation: "Technion"
+  - given-names: "Niranjan"
+    family-names: "Hasabnis"
+    affiliation: "Code Metal"
+  - given-names: "Gal"
+    family-names: "Oren"
+    affiliation: "Stanford University, Technion"
+preferred-citation:
+  type: conference-paper
+  title: >-
+    ParBench: A Benchmark for Reliable Evaluation of LLM Parallel Code
+    Translation
+  year: 2026
+  collection-title: "Proceedings of the Conference on Neural Information Processing Systems (NeurIPS 2026)"
+  conference:
+    name: "Conference on Neural Information Processing Systems (NeurIPS 2026)"
+  authors:
+    - given-names: "Samyak"
+      family-names: "Jhaveri"
+      affiliation: "University of California, Irvine"
+    - given-names: "Erel"
+      family-names: "Kaplan"
+      affiliation: "Technion"
+    - given-names: "Tom"
+      family-names: "Yotam"
+      affiliation: "Code Metal"
+    - given-names: "Le"
+      family-names: "Chen"
+      affiliation: "Argonne National Laboratory"
+    - given-names: "Tomer"
+      family-names: "Bitan"
+      affiliation: "Technion"
+    - given-names: "Niranjan"
+      family-names: "Hasabnis"
+      affiliation: "Code Metal"
+    - given-names: "Gal"
+      family-names: "Oren"
+      affiliation: "Stanford University, Technion"

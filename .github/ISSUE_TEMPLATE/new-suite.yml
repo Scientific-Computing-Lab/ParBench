@@ -1,0 +1,91 @@
+name: New benchmark suite
+description: Propose adding a benchmark suite to ParBench
+title: "[suite] "
+labels: ["new-suite"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please read [docs/adding-a-suite.md](https://github.com/Scientific-Computing-Lab/ParBench/blob/main/docs/adding-a-suite.md)
+        and [CONTRIBUTING.md](https://github.com/Scientific-Computing-Lab/ParBench/blob/main/CONTRIBUTING.md)
+        before filing. Open this issue before
+        writing specs, so the pinning and licensing questions are settled first.
+
+  - type: input
+    id: suite
+    attributes:
+      label: Suite name
+      description: The slug that will prefix every unique_id, lowercase.
+      placeholder: mysuite
+    validations:
+      required: true
+
+  - type: input
+    id: upstream
+    attributes:
+      label: Upstream repository URL
+    validations:
+      required: true
+
+  - type: input
+    id: license
+    attributes:
+      label: Upstream license
+      description: ParBench does not vendor benchmark source, so the suite keeps its own license.
+      placeholder: BSD-3-Clause
+    validations:
+      required: true
+
+  - type: input
+    id: commit
+    attributes:
+      label: Pinned commit SHA
+      description: The full upstream commit the specs will be written against.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: apis
+    attributes:
+      label: APIs covered
+      options:
+        - label: CUDA
+        - label: OpenMP
+        - label: OpenCL
+        - label: OpenMP target offload
+    validations:
+      required: true
+
+  - type: textarea
+    id: kernels
+    attributes:
+      label: Proposed kernels
+      description: One line per kernel, with the API variants you intend to write specs for.
+      placeholder: |
+        stencil - CUDA, OpenMP
+        spmv - CUDA, OpenMP, OpenCL
+    validations:
+      required: true
+
+  - type: textarea
+    id: oracle
+    attributes:
+      label: Oracle plan
+      description: >-
+        For each kernel, the correctness oracle you intend to declare and its strength:
+        strong (file_hash or file_diff on a computed output), medium (numeric_comparison
+        against a tolerance), or weak (stdout_pattern plus exit_code). If a kernel can only
+        carry a weak oracle, say why - for example, the upstream references disagree across
+        APIs.
+    validations:
+      required: true
+
+  - type: textarea
+    id: build
+    attributes:
+      label: Build and run requirements
+      description: >-
+        Compilers, external data downloads, GPU requirements, and expected runtime per
+        kernel. Note anything that cannot run on a CPU-only machine.
+    validations:
+      required: false

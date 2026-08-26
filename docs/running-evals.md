@@ -52,7 +52,7 @@ rather than by convention:
 
 - `EXCLUDED_SPECS` (10 specs): kernels whose baseline is broken in the current toolchain
   (KNOWN_FAIL). The batch runner's `resolve_excluded_specs`
-  (`scripts/evaluation/run_eval_batch.py:78`) removes them from every batch on entry;
+  (`scripts/evaluation/run_eval_batch.py:118`) removes them from every batch on entry;
   the CLI flag `--excluded-specs` can add exclusions but never remove one. Rationale:
   source-side, an unverified baseline makes a PASS meaningless; target-side, broken
   infrastructure makes the evaluation unfair.
